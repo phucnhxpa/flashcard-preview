@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>S2 Ch2 — Poisson Distribution — Flashcards v3</title>
+<title>S2 Ch2 Poisson — Flashcards v3</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -68,7 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Ne
 @media(max-width:600px){.ctr{padding:16px 12px 60px}.hdr h1{font-size:26px}.cd{padding:14px}.ctrl{padding:10px}.mp{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body><div class="ctr">
-<div class="hdr"><h1>S2 Ch2 — Poisson Distribution</h1>
+<div class="hdr"><h1>S2 Ch2 Poisson</h1>
 <div class="sub">v3 · 9 models · €9.70</div>
 <div class="bdg-row"><span class="bdg pp">✨ 128 judge picks</span><span class="bdg">420 gen</span><span class="bdg gr">v3</span></div></div>
 <div class="tabs" id="tabs"></div>
@@ -181,12 +181,34 @@ function cpTbl(){
   myCards.forEach(c=>{md+='| '+c.question.replace(/\|/g,'\\|').replace(/\n/g,' ')+' | '+c.answer.replace(/\|/g,'\\|').replace(/\n/g,' ')+' |\n'});
   navigator.clipboard.writeText(md).then(()=>toast(myCards.length+' copied!')).catch(()=>toast('Failed'))
 }
+function _ntbCopy(){
+  // Build Notion-paste-ready markdown table from myCards and copy to clipboard.
+  let md='| Question | Answer |\n| --- | --- |\n';
+  myCards.forEach(c=>{md+='| '+c.question.replace(/\|/g,'\\|').replace(/\n/g,' ')+' | '+c.answer.replace(/\|/g,'\\|').replace(/\n/g,' ')+' |\n'});
+  return navigator.clipboard.writeText(md).then(()=>{toast('📋 '+myCards.length+' cards copied — paste into Notion (auto-formats as table)')}).catch(()=>{toast('Clipboard failed')})
+}
 function expN(){
   if(!myCards.length){toast('Empty!');return}
   toast('Exporting '+myCards.length+' to Notion...');
-  fetch('/api/notion',{method:'POST',headers:{'Content-Type':'application/json'},
+  // Try backend first (Flask/Vercel). If unavailable (GH Pages, file://, etc.), fall back to clipboard.
+  // Use AbortController to bail fast if there's no server.
+  const ctrl=new AbortController();const tmo=setTimeout(()=>ctrl.abort(),3500);
+  fetch('/api/notion',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},
     body:JSON.stringify({cards:myCards,title:document.title.split('—')[0].trim()})
-  }).then(r=>r.json()).then(d=>{if(d.url){toast('Done!');window.open(d.url)}else toast('Error: '+(d.error||'?'))}).catch(e=>toast('Error: '+e.message))
+  }).then(r=>{
+    clearTimeout(tmo);
+    if(!r.ok)throw new Error('http '+r.status);
+    const ct=r.headers.get('content-type')||'';
+    if(!ct.includes('application/json'))throw new Error('non-json');
+    return r.json();
+  }).then(d=>{
+    if(d.url){toast('Notion page created!');window.open(d.url,'_blank')}
+    else throw new Error(d.error||'unknown')
+  }).catch(e=>{
+    clearTimeout(tmo);
+    // No backend or backend error → clipboard fallback
+    return _ntbCopy();
+  })
 }
 
 initMySet();
