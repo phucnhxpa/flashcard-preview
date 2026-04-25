@@ -101,6 +101,57 @@ section .note{color:var(--muted);font-size:15px;margin:0 0 24px;line-height:1.55
 .summary-band .stat .v small{font-size:14px;color:var(--muted-2);font-weight:500;margin-left:4px;}
 .summary-band .stat .sub{font-size:13px;color:var(--muted);margin-top:2px;}
 
+/* magic combo banner */
+.magic-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;
+  border-radius:var(--r-md);
+  padding:18px 22px 16px;
+  margin:0 0 14px;
+  box-shadow:0 1px 2px rgba(255,149,0,.06);
+}
+.magic-banner .magic-eyebrow{
+  font-size:12px;color:#915d10;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  margin-bottom:4px;
+}
+.magic-banner .magic-eyebrow b{color:#1d1d1f;font-size:13px;}
+.magic-banner .magic-claim{
+  font-size:18px;color:var(--ink);font-weight:500;letter-spacing:-0.005em;line-height:1.4;
+  margin-bottom:14px;
+}
+.magic-banner .magic-claim b{font-weight:700;}
+.magic-banner .dim{color:var(--muted-2);font-weight:500;}
+.combo-chips{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.combo-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#fff;
+  border:1px solid #fbd9a0;
+  color:#1d1d1f;
+  padding:6px 12px 6px 8px;
+  border-radius:99px;
+  font-size:13px;
+  font-weight:500;
+}
+.combo-chip .cn{
+  font-family:"SF Mono",Menlo,monospace;
+  font-size:11px;color:#915d10;font-weight:700;
+  background:rgba(255,149,0,.12);
+  padding:2px 7px;border-radius:99px;
+}
+
+/* trade-off curve */
+.trade-curve{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 18px 4px;
+  margin:0 0 22px;
+}
+.trade-curve .tc-title{
+  font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+
 /* legend */
 .legend{
   display:flex;flex-wrap:wrap;gap:14px 20px;
@@ -323,6 +374,68 @@ footer{
     `;
     pane.appendChild(band);
 
+    // ── MAGIC COMBO BANNER ──
+    if (u.magic_combo){
+      const mc = u.magic_combo;
+      const chips = mc.combo.map(c => {
+        const info = u.chapter_lookup[c];
+        return `<span class="combo-chip"><span class="cn">ch${c}</span> ${info.name}</span>`;
+      }).join("");
+      const banner = document.createElement("div");
+      banner.className = "magic-banner";
+      banner.innerHTML = `
+        <div class="magic-head">
+          <div class="magic-eyebrow">If you master only these <b>${mc.k}</b> chapters</div>
+          <div class="magic-claim">You'd clear <b>≥70%</b> on <b>${mc.papers_hit_70pct}/${mc.papers_total}</b> papers <span class="dim">(${mc.hit_pct}%)</span> · avg coverage <b>${mc.avg_coverage_pct}%</b> per paper</div>
+        </div>
+        <div class="combo-chips">${chips}</div>
+      `;
+      pane.appendChild(banner);
+
+      // Trade-off curve — small inline SVG line showing how coverage % grows with k
+      if (u.trade_off){
+        const ks = Object.keys(u.trade_off).map(Number).sort((a,b) => a-b);
+        const points = ks.map(k => ({k, hit: u.trade_off[k].hit_pct, avg: u.trade_off[k].avg_coverage_pct}));
+        const W = 700, H = 110, padL = 50, padR = 80, padT = 18, padB = 28;
+        const xS = k => padL + (k - 1) / (ks[ks.length-1] - 1) * (W - padL - padR);
+        const yS = pct => H - padB - (pct/100) * (H - padT - padB);
+        const polyHit = points.map(p => `${xS(p.k)},${yS(p.hit)}`).join(" ");
+        const polyAvg = points.map(p => `${xS(p.k)},${yS(p.avg)}`).join(" ");
+        const xLbls = ks.map(k => `<text x="${xS(k)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#86868b" font-family="SF Mono,Menlo,monospace">${k}</text>`).join("");
+        const yLbls = [0, 50, 100].map(pct =>
+          `<text x="${padL-8}" y="${yS(pct)+3}" text-anchor="end" font-size="10" fill="#86868b" font-family="SF Mono,Menlo,monospace">${pct}%</text>` +
+          `<line x1="${padL}" y1="${yS(pct)}" x2="${W-padR}" y2="${yS(pct)}" stroke="#e5e5ea" stroke-width="1" stroke-dasharray="${pct === 100 ? '0' : '2 3'}"/>`
+        ).join("");
+        const dots = points.map(p =>
+          `<circle cx="${xS(p.k)}" cy="${yS(p.hit)}" r="3.5" fill="#ff9500"><title>k=${p.k}: hits 70% on ${p.hit}% of papers</title></circle>` +
+          `<circle cx="${xS(p.k)}" cy="${yS(p.avg)}" r="3" fill="#0071e3"><title>k=${p.k}: avg coverage ${p.avg}% per paper</title></circle>`
+        ).join("");
+        const magicMark = `<line x1="${xS(mc.k)}" y1="${padT}" x2="${xS(mc.k)}" y2="${H-padB}" stroke="#34c759" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="${xS(mc.k)}" y="${padT-4}" text-anchor="middle" font-size="10" font-weight="600" fill="#0f7a32">k=${mc.k}</text>`;
+        // x-axis label
+        const xAxis = `<text x="${(padL + W - padR)/2}" y="${H+12}" text-anchor="middle" font-size="10.5" fill="#86868b" font-weight="600" letter-spacing=".05em" font-family="SF Mono,Menlo,monospace">CHAPTERS MASTERED</text>`;
+        // legend
+        const legend = `
+          <g transform="translate(${W-padR+10}, ${padT})">
+            <circle cx="6" cy="6" r="3.5" fill="#ff9500"/><text x="14" y="9" font-size="10" fill="#1d1d1f">% papers hit 70%</text>
+            <circle cx="6" cy="22" r="3" fill="#0071e3"/><text x="14" y="25" font-size="10" fill="#1d1d1f">avg coverage</text>
+          </g>
+        `;
+        const svg = `<svg viewBox="0 0 ${W} ${H+18}" width="100%" height="${H+18}" preserveAspectRatio="xMidYMid meet">
+          ${yLbls}${xLbls}${magicMark}
+          <polyline points="${polyHit}" fill="none" stroke="#ff9500" stroke-width="1.6"/>
+          <polyline points="${polyAvg}" fill="none" stroke="#0071e3" stroke-width="1.6" stroke-dasharray="0"/>
+          ${dots}
+          ${xAxis}
+          ${legend}
+        </svg>`;
+        const curveBox = document.createElement("div");
+        curveBox.className = "trade-curve";
+        curveBox.innerHTML = `<div class="tc-title">Trade-off: how coverage grows with chapters mastered</div>${svg}`;
+        pane.appendChild(curveBox);
+      }
+    }
+
     // legend
     const legend = document.createElement("div");
     legend.className = "legend";
@@ -355,22 +468,20 @@ footer{
     const sorted = sortSessions(u.papers);
     sorted.forEach(p => {
       const row = document.createElement("tr");
-      const inSet = new Set(p.chapters.slice(0, p.n70).map(c => c.n));
 
-      // map ch_num -> {marks, pct}
+      // map ch_num -> {marks, pct, in70}
       const byCh = {};
       p.chapters.forEach(c => byCh[c.n] = c);
 
       const cells = chKeys.map(c => {
         const cell = byCh[c];
-        if (!cell) {
-          // chapter not on the paper at all (or wasn't in the top top-N+2)
-          // We need to check actual marks. If the chapter is missing from the list, it's likely 0 marks.
-          return `<td><span class="cmark tnone">—</span></td>`;
+        if (!cell || cell.marks === 0) {
+          // chapter not on this paper
+          return `<td><span class="cmark tnone" title="not assessed on this paper">—</span></td>`;
         }
         const cls = tierClass(cell.pct);
-        const inOutline = inSet.has(c) ? " in70" : "";
-        return `<td><span class="cmark ${cls}${inOutline}" title="${cell.marks}m, ${cell.pct}% of paper, cum ${cell.cum}%">${cell.marks}</span></td>`;
+        const inOutline = cell.in70 ? " in70" : "";
+        return `<td><span class="cmark ${cls}${inOutline}" title="${cell.marks}m, ${cell.pct}% of paper${cell.in70 ? ' · in 70% set' : ''}">${cell.marks}</span></td>`;
       }).join("");
 
       row.innerHTML = `<td class="session">${fmtSess(p.session)}</td>
