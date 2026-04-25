@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>M1 · ch4 Dynamics: forces & Newton's laws</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.qtype-card .qt-examples a{font-family:"SF Mono",Menlo,monospace;font-size:12px;background:var(--blue-soft);color:var(--blue-deep);padding:3px 10px;border-radius:99px;font-weight:600;}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">M1</a><span class="sep">/</span>ch4 Dynamics: forces & Newton's laws</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 M1 · ch4</div>
+  <h1>Dynamics: forces & Newton's laws</h1>
+  <p class="lede">Every M1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 30 questions.</p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">30</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">284<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">9<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">14</div></div>
+  </div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 30 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Connected Particles (Pulleys)</div>
+                <div class="qt-stats">
+                    <div><span class="freq">11</span><small>×</small></div>
+                    <div class="marks">7-18m</div>
+                </div>
+            </div>
+            <p class="qt-look">Two particles, A and B, are connected by a 'light inextensible string' passing over a 'smooth light pulley'. One particle is typically hanging freely while the other is on a horizontal or inclined plane. Friction is often involved. The system is released from rest and you need to find acceleration, tension, or subsequent motion.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. **Draw Big, Clear Diagrams:** Sketch a separate free-body diagram for EACH particle. Label ALL forces: Weight ($W=mg$) acting vertically down, Tension ($T$) acting along the string away from the particle, Normal Reaction ($R$) acting perpendicular to a surface, and Friction ($F_f$) opposing motion.</li><li>2. **Resolve Forces:** For any particle on an inclined plane, resolve its weight into components parallel ($mg \sin \theta$) and perpendicular ($mg \cos \theta$) to the plane.</li><li>3. **Set Up Equations Perpendicular to Motion:** For any particle on a surface, apply Newton's laws perpendicular to the direction of acceleration. The resultant force is zero. This step is almost always used to find the normal reaction, R.</li><li>4. **Set Up Equations Parallel to Motion:** Define a single direction of acceleration 'a' for the whole system. Apply $F_{net} = ma$ to each particle separately, parallel to the direction of motion. Be meticulously consistent with signs: forces in the direction of 'a' are positive, forces opposing it are negative.</li><li>5. **Incorporate Friction:** If the surface is rough, calculate the maximum friction using $F_f = \mu R$ once you have found R.</li><li>6. **Solve Simultaneously:** You will have a pair of linear equations with 'a' and 'T' as unknowns. Solve them simultaneously.</li><li>7. **Handle Post-Motion Scenarios:** If the string breaks or a particle hits the ground, the system changes. Recalculate the new acceleration (which might be just 'g' or a new value based on remaining forces) for the subsequent phase of motion and use SUVAT.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">Newton's Second Law: $F_{net} = ma$ (MEMORIZE)</div><div class="item">Weight: $W = mg$ (MEMORIZE)</div><div class="item">Friction model: $F_f \le \mu R$ (formula booklet)</div><div class="item">Equations of constant acceleration (SUVAT) (formula booklet)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Incorrectly resolving weight on an incline (mixing up $\sin \theta$ and $\cos \theta$).</li><li>Getting the direction of friction wrong – it ALWAYS opposes motion or the tendency of motion.</li><li>Sign errors in the $F=ma$ equations. Choose a positive direction for acceleration and stick to it for the entire system.</li><li>Forgetting to recalculate acceleration if the system changes (e.g., string snaps).</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2019-Q7.html">Jan 2019 Q7</a><a href="q-Jan_2021-Q8.html">Jan 2021 Q8</a><a href="q-Oct_2023-Q7.html">Oct 2023 Q7</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Collisions: Momentum & Impulse</div>
+                <div class="qt-stats">
+                    <div><span class="freq">14</span><small>×</small></div>
+                    <div class="marks">4-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Keywords: 'collides directly', 'impulse', 'momentum', 'coalesce'. Two particles P and Q are moving along the same straight line and collide. You are given initial speeds and masses, and asked to find final velocities or the impulse.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. **Draw 'Before' and 'After' Diagrams:** Sketch the situation immediately before and immediately after the collision. This helps visualize directions.</li><li>2. **Define a Positive Direction:** State your sign convention explicitly on your page (e.g., arrow pointing right with a '+' sign). This is the single most important step to avoid errors.</li><li>3. **Assign Signs to Velocities:** Write down the initial velocities ($u_1, u_2$) with the correct signs according to your chosen direction. A velocity in the opposite direction is negative.</li><li>4. **Apply Conservation of Linear Momentum (CLM):** Write down the equation $m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$. Substitute your known values carefully, including the negative signs.</li><li>5. **Apply Impulse-Momentum Principle (if needed):** If asked for the impulse on a particle, use $J = \Delta p = mv - mu$ for THAT particle. Remember impulse is a vector, so its sign indicates direction.</li><li>6. **Apply Newton's Law of Restitution (if 'e' is given):** Use the formula $v_2 - v_1 = -e(u_2 - u_1)$ if the coefficient of restitution is known or asked for.</li><li>7. **Solve and Interpret:** Solve the resulting equation(s). The sign of your final answer for a velocity or impulse indicates its direction. If the question asks for 'speed', give the positive magnitude.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">Momentum: $p = mv$ (MEMORIZE)</div><div class="item">Conservation of Linear Momentum: $m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$ (MEMORIZE)</div><div class="item">Impulse-Momentum Principle: $J = mv - mu$ (MEMORIZE)</div><div class="item">Newton's Law of Restitution: $v_2 - v_1 = -e(u_2 - u_1)$ (formula booklet)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>**Sign Errors:** The most common mistake. Forgetting to assign negative signs to velocities in the opposite direction to the one you defined as positive.</li><li>Confusing 'speed' (a scalar) with 'velocity' (a vector) in the equations.</li><li>Calculating impulse on the wrong particle, or getting the sign wrong. The impulse on P is equal and opposite to the impulse on Q ($J_{on P} = -J_{on Q}$).</li><li>Arithmetic errors when solving simultaneous equations from CLM and NLR.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2020-Q1.html">Jan 2020 Q1</a><a href="q-Jun_2023-Q1.html">Jun 2023 Q1</a><a href="q-Oct_2024-Q1.html">Oct 2024 Q1</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Single Particle on an Inclined Plane</div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">6-15m</div>
+                </div>
+            </div>
+            <p class="qt-look">A single block, box, or particle is on a 'rough' or 'smooth' plane inclined at an angle. It may be held in equilibrium, be on the point of slipping (limiting equilibrium), or accelerating up/down the plane due to an applied force.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. **Draw a Large, Clear Diagram:** Label all forces: Weight ($mg$) acting vertically downwards, Normal Reaction ($R$) acting perpendicular outwards from the plane, Friction ($F_f$) acting parallel to the plane opposing motion/tendency of motion, and any other applied forces.</li><li>2. **Set Up Perpendicular & Parallel Axes:** Align your coordinate system with the plane itself.</li><li>3. **Resolve Weight:** Resolve the weight vector into its components: $mg \sin \theta$ acting parallel down the plane, and $mg \cos \theta$ acting perpendicular into the plane.</li><li>4. **Find Normal Reaction:** Sum the forces perpendicular to the plane and set the resultant to zero (as there's no acceleration in this direction). This will give you the value of R.</li><li>5. **Apply $F_{net}=ma$ Parallel to the Plane:** Identify the direction of actual or potential motion. Sum the forces in this direction to find the net force, and set it equal to $ma$. If in equilibrium, $a=0$.</li><li>6. **Use the Friction Model:** If the object is moving or in limiting equilibrium, use the formula $F_f = \mu R$.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">Newton's Second Law: $F_{net} = ma$ (MEMORIZE)</div><div class="item">Friction model: $F_f \le \mu R$ (formula booklet)</div><div class="item">Weight components on incline: $mg \sin \theta$ (parallel), $mg \cos \theta$ (perpendicular) (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Mixing up $\sin \theta$ and $\cos \theta$ for the weight components. Remember: $\sin$ 'slides' (parallel), $\cos$ 'compresses' (perpendicular).</li><li>Drawing the Normal Reaction or Weight in the wrong direction. Weight is ALWAYS vertically down.</li><li>Incorrectly identifying the direction of friction. If an object is pushed up the slope, friction acts down the slope.</li><li>Assuming friction is at its maximum ($F_f = \mu R$) when it is not (i.e., when in non-limiting equilibrium).</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a href="q-Jan_2023-Q8.html">Jan 2023 Q8</a><a href="q-Jun_2024-Q3.html">Jun 2024 Q3</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Newton's 2nd Law in a Lift (Apparent Weight)</div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">6-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">A person or a parcel of mass m is inside a lift which is accelerating upwards or downwards. You are asked to find the reaction force from the floor of the lift, or the tension in the supporting cable.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. **Isolate the Body:** Draw a free-body diagram for the object OF INTEREST (e.g., just the person, or just the parcel, or the entire lift system).</li><li>2. **Label Vertical Forces:** Identify the two main forces: Weight ($mg$) acting downwards, and the contact/support force (Normal Reaction $R$, or Tension $T$) acting upwards.</li><li>3. **Identify Acceleration:** Read the question carefully to determine the direction and magnitude of the acceleration, 'a'. Constant velocity means $a=0$.</li><li>4. **Apply $F_{net} = ma$ Vertically:** Choose a positive direction (it's easiest to choose the direction of acceleration as positive). Write down the equation of motion.</li><li>   - **Accelerating UP:** Upwards force is bigger. $R - mg = ma$.</li><li>   - **Accelerating DOWN:** Downwards force is bigger. $mg - R = ma$.</li><li>5. **Solve for the Unknown:** Rearrange the equation to find the required force (R or T).</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">Newton's Second Law: $F_{net} = ma$ (MEMORIZE)</div><div class="item">Weight: $W = mg$ (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Sign errors in the $F=ma$ equation. Remember: Resultant Force = Mass x Acceleration.</li><li>Confusing mass with weight. The reaction force is the 'apparent weight', not the actual weight $mg$.</li><li>Using $a = 9.8$ m/s² when the lift is accelerating. 'g' is the acceleration due to gravity, not the acceleration of the lift.</li><li>Incorrectly identifying the system. If asked for tension in the cable holding the lift, the 'mass' must be the total mass of the lift and its contents.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Oct_2022-Q4.html">Oct 2022 Q4</a><a href="q-Jan_2023-Q7.html">Jan 2023 Q7</a></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>**Newton's Second Law: $F_{net} = ma$**. The single most important equation in the chapter. It is not in the formula booklet.</li><li>**Weight: $W = mg$**. The force due to gravity. Use $g = 9.8$ m/s² unless told otherwise. Not in the booklet.</li><li>**Conservation of Linear Momentum:** The principle that 'total momentum before collision = total momentum after collision'. The formula $m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$ is the application of this and must be memorized.</li><li>**Impulse-Momentum Principle: $J = mv - mu$**. The definition of impulse as the change in momentum. Not in the booklet.</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>**Always Draw a Diagram:** For any forces question, your first step must be to draw a large, clear, well-labelled free-body diagram. This is where most marks are gained or lost.</li><li>**Be Consistent With Signs:** In any problem involving vectors (velocity, force, acceleration, impulse), define a positive direction at the start and apply it consistently to all quantities.</li><li>**Isolate the System:** When applying $F=ma$, be clear about which object or system of objects you are applying it to. Draw a conceptual 'bubble' around it to identify internal vs. external forces.</li><li>**Units, Units, Units:** Always convert all quantities to standard SI units before starting calculations: mass in kg, distance in m, time in s, speed in m/s. Watch out for tonnes and grams.</li><li>**Resolve, Don't Rotate:** For inclined plane problems, always resolve forces into components parallel and perpendicular to the slope. Do not try to resolve perpendicular to gravity.</li><li>**Show Your Working:** Structure your work clearly. State the principle you are using (e.g., 'CLM:', 'For particle A:') before writing the equation. This helps you think clearly and helps the examiner award method marks.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>For the long, high-mark connected particle questions, work methodically and don't rush the setup. The marks are awarded for the correct force diagrams and equations of motion, so get those right first.</li><li>In collision questions, state your positive direction with an arrow on the page before you even write an equation. It takes 2 seconds and prevents the most common error.</li><li>If a question has multiple parts (e.g., find acceleration, then find time), and you get stuck on part (a), read part (b). You can often use a 'show that' value or assume a reasonable value for the acceleration to attempt part (b) and get follow-through marks.</li><li>When a question asks for a 'force exerted by particle A on particle B', this is an action-reaction pair. The force on B is equal in magnitude and opposite in direction to the force on A.</li><li>Always give your final answers to an appropriate degree of accuracy, typically 2 or 3 significant figures, and don't forget units (N for force, Ns for impulse).</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Collision & Impulse">Collision & Impulse</option><option value="Collision dynamics with momentum & impulse">Collision dynamics with momentum & impulse</option><option value="Collision with conservation of momentum">Collision with conservation of momentum</option><option value="Conservation of Momentum & Impulse in Collision">Conservation of Momentum & Impulse in Collision</option><option value="Direct collision & impulse">Direct collision & impulse</option><option value="Direct collision impulse and momentum">Direct collision impulse and momentum</option><option value="Direct collision impulse-momentum">Direct collision impulse-momentum</option><option value="Impulse-momentum in direct collision">Impulse-momentum in direct collision</option><option value="Inelastic collision, impulse, and resistive force">Inelastic collision, impulse, and resistive force</option><option value="Newton's 2nd Law connected particles on incline">Newton's 2nd Law connected particles on incline</option><option value="Newton's 2nd law collision friction">Newton's 2nd law collision friction</option><option value="Newton's 2nd law connected particles">Newton's 2nd law connected particles</option><option value="Newton's 2nd law connected particles & pulley resultant force">Newton's 2nd law connected particles & pulley resultant force</option><option value="Newton's 2nd law connected particles with friction">Newton's 2nd law connected particles with friction</option><option value="Newton's 2nd law in accelerating frame">Newton's 2nd law in accelerating frame</option><option value="Newton's 2nd law inclined plane">Newton's 2nd law inclined plane</option><option value="Newton's 2nd law inclined plane friction">Newton's 2nd law inclined plane friction</option><option value="Newton's 2nd law lift problem">Newton's 2nd law lift problem</option><option value="Newton's Laws of Restitution & Impulse">Newton's Laws of Restitution & Impulse</option><option value="collision of particles">collision of particles</option><option value="inelastic collision common velocity & impulse">inelastic collision common velocity & impulse</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Collision & Impulse">
+            <td class="session">Jan 2019</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">Collision & Impulse</td>
+            <td><a class="qlink" href="q-Jan_2019-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Jan 2019</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Jan_2019-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles with friction">
+            <td class="session">Jan 2019</td>
+            <td class="r">Q7</td>
+            <td class="r">16m</td>
+            <td class="qtype">Newton's 2nd law connected particles with friction</td>
+            <td><a class="qlink" href="q-Jan_2019-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Direct collision impulse and momentum">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q1</td>
+            <td class="r">8m</td>
+            <td class="qtype">Direct collision impulse and momentum</td>
+            <td><a class="qlink" href="q-Jan_2020-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q7</td>
+            <td class="r">18m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Jan_2020-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Direct collision impulse-momentum">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype">Direct collision impulse-momentum</td>
+            <td><a class="qlink" href="q-Jan_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q8</td>
+            <td class="r">17m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Jan_2021-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Collision with conservation of momentum">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype">Collision with conservation of momentum</td>
+            <td><a class="qlink" href="q-Jun_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law inclined plane">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">13m</td>
+            <td class="qtype">Newton's 2nd law inclined plane</td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law collision friction">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">10m</td>
+            <td class="qtype">Newton's 2nd law collision friction</td>
+            <td><a class="qlink" href="q-Oct_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">14m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Oct_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Collision & Impulse">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">7m</td>
+            <td class="qtype">Collision & Impulse</td>
+            <td><a class="qlink" href="q-Jan_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">13m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Jan_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Impulse-momentum in direct collision">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">4m</td>
+            <td class="qtype">Impulse-momentum in direct collision</td>
+            <td><a class="qlink" href="q-Jun_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Jun_2022-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Conservation of Momentum & Impulse in Collision">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype">Conservation of Momentum & Impulse in Collision</td>
+            <td><a class="qlink" href="q-Oct_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law lift problem">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">6m</td>
+            <td class="qtype">Newton's 2nd law lift problem</td>
+            <td><a class="qlink" href="q-Oct_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">13m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Oct_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Collision dynamics with momentum & impulse">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q2</td>
+            <td class="r">8m</td>
+            <td class="qtype">Collision dynamics with momentum & impulse</td>
+            <td><a class="qlink" href="q-Jan_2023-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law in accelerating frame">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">7m</td>
+            <td class="qtype">Newton's 2nd law in accelerating frame</td>
+            <td><a class="qlink" href="q-Jan_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law inclined plane friction">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">15m</td>
+            <td class="qtype">Newton's 2nd law inclined plane friction</td>
+            <td><a class="qlink" href="q-Jan_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Direct collision & impulse">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype">Direct collision & impulse</td>
+            <td><a class="qlink" href="q-Jun_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd Law connected particles on incline">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">11m</td>
+            <td class="qtype">Newton's 2nd Law connected particles on incline</td>
+            <td><a class="qlink" href="q-Jun_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Inelastic collision, impulse, and resistive force">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">10m</td>
+            <td class="qtype">Inelastic collision, impulse, and resistive force</td>
+            <td><a class="qlink" href="q-Oct_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles & pulley resultant force">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">13m</td>
+            <td class="qtype">Newton's 2nd law connected particles & pulley resultant force</td>
+            <td><a class="qlink" href="q-Oct_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="inelastic collision common velocity & impulse">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype">inelastic collision common velocity & impulse</td>
+            <td><a class="qlink" href="q-Jan_2024-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's Laws of Restitution & Impulse">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype">Newton's Laws of Restitution & Impulse</td>
+            <td><a class="qlink" href="q-Jun_2024-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law inclined plane">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype">Newton's 2nd law inclined plane</td>
+            <td><a class="qlink" href="q-Jun_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="collision of particles">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">collision of particles</td>
+            <td><a class="qlink" href="q-Oct_2024-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd law connected particles">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q5</td>
+            <td class="r">13m</td>
+            <td class="qtype">Newton's 2nd law connected particles</td>
+            <td><a class="qlink" href="q-Oct_2024-Q5.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

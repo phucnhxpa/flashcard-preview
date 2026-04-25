@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P1 · ch4 Differentiation</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.qtype-card .qt-examples a{font-family:"SF Mono",Menlo,monospace;font-size:12px;background:var(--blue-soft);color:var(--blue-deep);padding:3px 10px;border-radius:99px;font-weight:600;}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">P1</a><span class="sep">/</span>ch4 Differentiation</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 P1 · ch4</div>
+  <h1>Differentiation</h1>
+  <p class="lede">Every P1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 29 questions.</p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">29</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">231<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">8<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">18</div></div>
+  </div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 29 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Equations of Tangents and Normals</div>
+                <div class="qt-stats">
+                    <div><span class="freq">8</span><small>×</small></div>
+                    <div class="marks">6-11m</div>
+                </div>
+            </div>
+            <p class="qt-look">The question asks to 'find the equation of the tangent' or 'find the equation of the normal' to a given curve at a specific point or x-value.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Identify the point $(x_1, y_1)$. If you are only given $x_1$, substitute it into the original curve equation $y=f(x)$ to find $y_1$.</li><li>2. Rewrite the curve's equation $y=f(x)$ into differentiable form, with each term as $ax^n$. Pay close attention to roots and fractions (e.g., $\frac{k}{x^p} = kx^{-p}$).</li><li>3. Differentiate to find the gradient function, $\frac{dy}{dx} = f'(x)$, using the power rule.</li><li>4. Calculate the gradient of the tangent, $m_T$, by substituting the x-coordinate $x_1$ into your expression for $\frac{dy}{dx}$.</li><li>5. Determine the required gradient. For a TANGENT, use $m = m_T$. For a NORMAL, you must calculate the perpendicular gradient $m = m_N = -1/m_T$.</li><li>6. Substitute the point $(x_1, y_1)$ and your calculated gradient $m$ into the equation of a line, $y - y_1 = m(x - x_1)$.</li><li>7. Rearrange the resulting equation into the specific format requested by the question (e.g., $ax+by+c=0$ or $y=mx+c$).</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$y - y_1 = m(x - x_1)$ (formula booklet)</div><div class="item">For a normal, the gradient is $m_N = -\frac{1}{m_T}$ (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Incorrectly calculating the normal's gradient (e.g., forgetting the negative sign, or not taking the reciprocal).</li><li>Substituting the x-coordinate into the original function $y$ to find the gradient, instead of into the derivative $\frac{dy}{dx}$.</li><li>Errors converting terms like $\frac{1}{\sqrt{x}}$ into index form, leading to an incorrect derivative.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2021-Q1.html">Jan 2021 Q1</a><a href="q-Jun_2021-Q1.html">Jun 2021 Q1</a><a href="q-Specimen_2018-Q9.html">Specimen 2018 Q9</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Stationary Points and Gradients</div>
+                <div class="qt-stats">
+                    <div><span class="freq">7</span><small>×</small></div>
+                    <div class="marks">5-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">Key phrases are 'find the coordinates of the stationary points', 'turning points', 'local maximum/minimum', or 'find the points where the gradient is k'.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Rewrite the curve's equation $y=f(x)$ into differentiable $ax^n$ terms.</li><li>2. Differentiate to find the gradient function, $\frac{dy}{dx} = f'(x)$.</li><li>3. Set up the correct equation based on the question. For stationary points, set $\frac{dy}{dx} = 0$. For a specific gradient $k$, set $\frac{dy}{dx} = k$.</li><li>4. Solve the resulting equation to find the x-coordinate(s). This is often a quadratic or an equation with fractional/negative powers that can be simplified.</li><li>5. For each x-value found, substitute it back into the ORIGINAL equation $y=f(x)$ to find the corresponding y-coordinate.</li><li>6. (If asked to determine the nature) Find the second derivative, $\frac{d^2y}{dx^2}$. Substitute the x-coordinate of the stationary point. If $\frac{d^2y}{dx^2} > 0$, it's a local minimum. If $\frac{d^2y}{dx^2} < 0$, it's a local maximum.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">For stationary points, $\frac{dy}{dx} = 0$ (MEMORIZE)</div><div class="item">For a local minimum, $\frac{d^2y}{dx^2} > 0$ (MEMORIZE)</div><div class="item">For a local maximum, $\frac{d^2y}{dx^2} < 0$ (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Solving for x but then forgetting to substitute back into the original equation to find the y-coordinates.</li><li>Algebraic errors solving the equation, particularly with fractional powers (e.g., treating $x^{1/2}=4$ as $x=2$ instead of $x=16$).</li><li>Differentiating incorrectly, especially negative or fractional powers (e.g., $\frac{d}{dx}(x^{-1}) = -x^{-2}$, not $x^{-2}$ or $-x^0$).</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2019-Q6.html">Jan 2019 Q6</a><a href="q-Jan_2020-Q9.html">Jan 2020 Q9</a><a href="q-Jan_2023-Q1.html">Jan 2023 Q1</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Curve Analysis and Applications</div>
+                <div class="qt-stats">
+                    <div><span class="freq">5</span><small>×</small></div>
+                    <div class="marks">10-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">A multi-part question, usually on a cubic function, that combines differentiation with other topics like sketching, roots, inequalities, or transformations.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Prepare the function: Expand any brackets to get the polynomial in the form $y = ax^3+bx^2+cx+d$.</li><li>2. Find key features for sketching: Find the y-intercept by setting $x=0$. Find the x-intercepts (roots) by setting $y=0$. Note that a repeated root means the curve touches, not crosses, the x-axis.</li><li>3. Differentiate to find $\frac{dy}{dx}$.</li><li>4. Find stationary points by setting $\frac{dy}{dx} = 0$, solving for x, and finding the corresponding y-values. Use these to accurately place turning points on your sketch.</li><li>5. Synthesize and sketch: Use the roots, y-intercept, and turning points to draw a smooth curve. Check the overall shape (e.g., a positive cubic starts low, ends high).</li><li>6. Address the specific question parts, which might involve finding a tangent at a point, solving an inequality $f(x)>0$ by looking at your sketch, or describing a transformation.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">A repeated root (e.g. from a factor $(x-a)^2$) corresponds to a point where the curve touches the x-axis.</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Algebraic errors when expanding brackets, which then lead to an incorrect derivative and wrong stationary points.</li><li>Confusing a 'touch' (repeated root) with a 'cut' (single root) when sketching.</li><li>Sign errors with horizontal translations, commonly thinking $f(x+a)$ is a shift to the right instead of to the left.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2022-Q7.html">Jan 2022 Q7</a><a href="q-Jun_2019-Q10.html">Jun 2019 Q10</a><a href="q-Jan_2023-Q10.html">Jan 2023 Q10</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Differentiation and Integration</div>
+                <div class="qt-stats">
+                    <div><span class="freq">5</span><small>×</small></div>
+                    <div class="marks">6-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">A question asking you to both differentiate and integrate a function, or one that provides the derivative $f'(x)$ and asks you to find the original function $f(x)$ given a point on the curve.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Rewrite the given function(s) into $ax^n$ form, ready for calculus.</li><li>2. Identify the process: Differentiating is finding $\frac{dy}{dx}$ from $y$. Integrating is finding $y$ from $\frac{dy}{dx}$.</li><li>3. Apply the correct power rule: For differentiation, multiply by the power, then subtract one from the power. For integration, add one to the power, then divide by the new power.</li><li>4. When integrating to find $y = f(x)$, ALWAYS include the constant of integration: '`+ C`'.</li><li>5. If a point $(x_1, y_1)$ on the curve is provided, substitute these values into your integrated equation to form an equation in C.</li><li>6. Solve for C and write down the final, complete equation for the curve.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$\frac{d}{dx}(ax^n) = anx^{n-1}$ (MEMORIZE)</div><div class="item">$\int ax^n dx = \frac{ax^{n+1}}{n+1} + C$ (for $n \neq -1$) (formula booklet)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Forgetting the constant of integration '+C' is the most common and easily avoided error.</li><li>Mixing up the rules for differentiation and integration (e.g., adding 1 to the power when differentiating).</li><li>Arithmetic errors with fractions or negative indices, e.g., $-2+1 = -1$, not $-3$.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jun_2023-Q8.html">Jun 2023 Q8</a><a href="q-Specimen_2018-Q1.html">Specimen 2018 Q1</a><a href="q-Oct_2024-Q3.html">Oct 2024 Q3</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Differentiation from First Principles</div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">6m</div>
+                </div>
+            </div>
+            <p class="qt-look">The question will explicitly use the phrase 'from first principles' to find the derivative of a simple polynomial, usually a quadratic.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Write down the definition of the derivative: $f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$.</li><li>2. Find the expression for $f(x+h)$ by carefully replacing every $x$ in $f(x)$ with $(x+h)$.</li><li>3. Expand any brackets in your $f(x+h)$ expression. Be very careful with terms like $(x+h)^2 = x^2 + 2xh + h^2$.</li><li>4. Substitute your expanded $f(x+h)$ and the original $f(x)$ into the numerator of the formula. All terms that don't contain $h$ must cancel out. If they don't, you have made a mistake.</li><li>5. Factor out $h$ from every term remaining in the numerator.</li><li>6. Cancel the $h$ in the numerator with the $h$ in the denominator.</li><li>7. Evaluate the limit by substituting $h=0$ into the simplified expression to get the final derivative, $f'(x)$.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$ (formula booklet)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Errors expanding $(x+h)^2$, typically by forgetting the middle $2xh$ term.</li><li>Sign errors when subtracting $f(x)$, especially if $f(x)$ itself contains negative terms (e.g., $-(x^2 - 5x) = -x^2 + 5x$).</li><li>Trying to cancel $h$ before all non-h terms in the numerator have cancelled out.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2020-Q3.html">Jan 2020 Q3</a><a href="q-Oct_2019-Q7.html">Oct 2019 Q7</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Finding Unknown Constants in the Function</div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">5-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">The curve's equation contains an unknown constant (e.g., $y = x^2 + kx + 3$). You are given information about the gradient at a specific point (e.g., 'the tangent at $x=4$ is parallel to the line $y=2x$').</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Write down the function $y=f(x)$ which includes the unknown constant, say 'k'.</li><li>2. Differentiate the function term-by-term to find $\frac{dy}{dx}$. Remember to treat 'k' as a coefficient (e.g., the derivative of $kx$ is $k$).</li><li>3. Translate the given information into a mathematical statement about the derivative. For example, 'the gradient at $x=a$ is $m$' means $\frac{dy}{dx} = m$ when $x=a$.</li><li>4. Substitute the given x-value into your expression for $\frac{dy}{dx}$ and set the result equal to the given gradient.</li><li>5. Solve the resulting equation, which is usually linear, to find the value of the unknown constant 'k'.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">The derivative of a constant term is zero, e.g., $\frac{d}{dx}(k) = 0$.</div><div class="item">The derivative of a term with a constant coefficient is $\frac{d}{dx}(kf(x)) = k f'(x)$.</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Incorrectly differentiating the term with the constant, for example differentiating $kx$ to $0$ instead of $k$.</li><li>Substituting the given x-value into the original function $y=f(x)$ instead of the derivative $\frac{dy}{dx}$.</li><li>Arithmetic errors when solving the final equation for the constant.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Specimen_2018-Q4.html">Specimen 2018 Q4</a><a href="q-Oct_2024-Q8.html">Oct 2024 Q8</a></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>The Power Rule: $\frac{d}{dx}(ax^n) = anx^{n-1}$</li><li>Condition for Stationary Points: $\frac{dy}{dx} = 0$</li><li>Gradient of a Normal: $m_N = -\frac{1}{m_T}$</li><li>Second Derivative Test: For a stationary point, if $\frac{d^2y}{dx^2} > 0$ it is a local minimum; if $\frac{d^2y}{dx^2} < 0$ it is a local maximum.</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>1. **Rewrite First, Differentiate Second.** Your first step in almost every question should be to rewrite the function into a 'calculus-ready' form where every term is $ax^n$. This single habit prevents the most common errors.</li><li>2. **Master the Power Rule.** The rule $\frac{d}{dx}(ax^n) = anx^{n-1}$ is the foundation of this chapter. Be fluent in applying it to positive, negative, and fractional powers without hesitation.</li><li>3. **Remember: $\frac{dy}{dx}$ IS the Gradient.** The central concept is that the derivative gives you a formula for the gradient of the tangent at any point on the curve. All tangent, normal, and stationary point problems rely on this fact.</li><li>4. **Stationary Points mean $\frac{dy}{dx} = 0$.** This is a non-negotiable trigger. The moment you see 'stationary point', 'turning point', 'maximum', or 'minimum', your first thought should be 'find the derivative and set it to zero'.</li><li>5. **Distinguish $y$ from $\frac{dy}{dx}$.** To find a coordinate on the curve, use the original equation $y=f(x)$. To find the gradient at that point, use the derivative $\frac{dy}{dx}=f'(x)$. Mixing these up is a frequent source of lost marks.</li><li>6. **Check Your Algebra.** Calculus steps are often simple, but they are embedded in algebra. Errors in expanding brackets, solving equations with indices, or working with fractions are the main reason students lose marks.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>For tangent/normal questions, create a mini-checklist on your paper: Point $(x_1, y_1)$? Gradient $m$? This ensures you find both the y-coordinate and the correct gradient before writing the line equation.</li><li>If a question has a 'Show that...' part for a derivative or equation, you MUST use that given result for the following parts, even if you couldn't derive it yourself. This firewalls your working and allows you to score marks on the rest of the question.</li><li>Always rewrite the function in a clean, differentiable format on a new line ($y = ...$) before you write $\frac{dy}{dx} = ...$. This separation reduces careless errors.</li><li>In 'First Principles' questions, remember the goal is to cancel an 'h' from the denominator. If your algebra doesn't lead to a state where you can factor out 'h' from the numerator, re-check your expansion of $f(x+h)$ immediately.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Calculus with rational powers">Calculus with rational powers</option><option value="Cubic Functions & Differentiation">Cubic Functions & Differentiation</option><option value="Cubic function analysis">Cubic function analysis</option><option value="Differentiate & find gradient">Differentiate & find gradient</option><option value="Differentiate and evaluate derivative">Differentiate and evaluate derivative</option><option value="Differentiate and integrate power functions">Differentiate and integrate power functions</option><option value="Differentiation & Curve Transformations">Differentiation & Curve Transformations</option><option value="Differentiation and solving equations">Differentiation and solving equations</option><option value="Equation of Normal & Intersections">Equation of Normal & Intersections</option><option value="Find x-coords for given gradient">Find x-coords for given gradient</option><option value="Function transformations and differentiation">Function transformations and differentiation</option><option value="Gradient from first principles">Gradient from first principles</option><option value="Normal and tangent properties of curves">Normal and tangent properties of curves</option><option value="Polynomial differentiation & equation">Polynomial differentiation & equation</option><option value="Polynomial differentiation to second order">Polynomial differentiation to second order</option><option value="Tangent to curve and parallel lines">Tangent to curve and parallel lines</option><option value="differentiation and solving equations">differentiation and solving equations</option><option value="differentiation, equation of normal">differentiation, equation of normal</option><option value="equation of normal to curve">equation of normal to curve</option><option value="equation of tangent">equation of tangent</option><option value="equation of tangent & indefinite integration">equation of tangent & indefinite integration</option><option value="find constant for tangent">find constant for tangent</option><option value="find equation of normal">find equation of normal</option><option value="find equation of tangent">find equation of tangent</option><option value="find stationary point x-coordinate">find stationary point x-coordinate</option><option value="find stationary points">find stationary points</option><option value="find unknown coefficient & integrate function">find unknown coefficient & integrate function</option><option value="gradient of tangent and chord">gradient of tangent and chord</option><option value="polynomial differentiation & tangents">polynomial differentiation & tangents</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Differentiate and integrate power functions">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">Differentiate and integrate power functions</td>
+            <td><a class="qlink" href="q-Specimen_2018-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="find constant for tangent">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q4</td>
+            <td class="r">5m</td>
+            <td class="qtype">find constant for tangent</td>
+            <td><a class="qlink" href="q-Specimen_2018-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Equation of Normal & Intersections">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q9</td>
+            <td class="r">11m</td>
+            <td class="qtype">Equation of Normal & Intersections</td>
+            <td><a class="qlink" href="q-Specimen_2018-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiation and solving equations">
+            <td class="session">Jan 2019</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype">Differentiation and solving equations</td>
+            <td><a class="qlink" href="q-Jan_2019-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="find equation of tangent">
+            <td class="session">Jun 2019</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">find equation of tangent</td>
+            <td><a class="qlink" href="q-Jun_2019-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiation & Curve Transformations">
+            <td class="session">Jun 2019</td>
+            <td class="r">Q10</td>
+            <td class="r">10m</td>
+            <td class="qtype">Differentiation & Curve Transformations</td>
+            <td><a class="qlink" href="q-Jun_2019-Q10.html">walkthrough →</a></td>
+        </tr><tr data-type="differentiation, equation of normal">
+            <td class="session">Oct 2019</td>
+            <td class="r">Q5</td>
+            <td class="r">7m</td>
+            <td class="qtype">differentiation, equation of normal</td>
+            <td><a class="qlink" href="q-Oct_2019-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Gradient from first principles">
+            <td class="session">Oct 2019</td>
+            <td class="r">Q7</td>
+            <td class="r">6m</td>
+            <td class="qtype">Gradient from first principles</td>
+            <td><a class="qlink" href="q-Oct_2019-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="gradient of tangent and chord">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype">gradient of tangent and chord</td>
+            <td><a class="qlink" href="q-Jan_2020-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="find stationary point x-coordinate">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q9</td>
+            <td class="r">6m</td>
+            <td class="qtype">find stationary point x-coordinate</td>
+            <td><a class="qlink" href="q-Jan_2020-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangent to curve and parallel lines">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q8</td>
+            <td class="r">11m</td>
+            <td class="qtype">Tangent to curve and parallel lines</td>
+            <td><a class="qlink" href="q-Oct_2020-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="equation of normal to curve">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">8m</td>
+            <td class="qtype">equation of normal to curve</td>
+            <td><a class="qlink" href="q-Jan_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="differentiation and solving equations">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">9m</td>
+            <td class="qtype">differentiation and solving equations</td>
+            <td><a class="qlink" href="q-Jan_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="find equation of normal">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">8m</td>
+            <td class="qtype">find equation of normal</td>
+            <td><a class="qlink" href="q-Jun_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Find x-coords for given gradient">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">5m</td>
+            <td class="qtype">Find x-coords for given gradient</td>
+            <td><a class="qlink" href="q-Oct_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Cubic Functions & Differentiation">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">10m</td>
+            <td class="qtype">Cubic Functions & Differentiation</td>
+            <td><a class="qlink" href="q-Oct_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Function transformations and differentiation">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">11m</td>
+            <td class="qtype">Function transformations and differentiation</td>
+            <td><a class="qlink" href="q-Jan_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Normal and tangent properties of curves">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q10</td>
+            <td class="r">12m</td>
+            <td class="qtype">Normal and tangent properties of curves</td>
+            <td><a class="qlink" href="q-Jun_2022-Q10.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiate and evaluate derivative">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">Differentiate and evaluate derivative</td>
+            <td><a class="qlink" href="q-Oct_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="find stationary points">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype">find stationary points</td>
+            <td><a class="qlink" href="q-Jan_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Cubic function analysis">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q10</td>
+            <td class="r">10m</td>
+            <td class="qtype">Cubic function analysis</td>
+            <td><a class="qlink" href="q-Jan_2023-Q10.html">walkthrough →</a></td>
+        </tr><tr data-type="equation of tangent & indefinite integration">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">10m</td>
+            <td class="qtype">equation of tangent & indefinite integration</td>
+            <td><a class="qlink" href="q-Jun_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiate & find gradient">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype">Differentiate & find gradient</td>
+            <td><a class="qlink" href="q-Oct_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Polynomial differentiation to second order">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">10m</td>
+            <td class="qtype">Polynomial differentiation to second order</td>
+            <td><a class="qlink" href="q-Oct_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="equation of tangent">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype">equation of tangent</td>
+            <td><a class="qlink" href="q-Jan_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Polynomial differentiation & equation">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype">Polynomial differentiation & equation</td>
+            <td><a class="qlink" href="q-Jun_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Calculus with rational powers">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">9m</td>
+            <td class="qtype">Calculus with rational powers</td>
+            <td><a class="qlink" href="q-Oct_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="find unknown coefficient & integrate function">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q8</td>
+            <td class="r">7m</td>
+            <td class="qtype">find unknown coefficient & integrate function</td>
+            <td><a class="qlink" href="q-Oct_2024-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="polynomial differentiation & tangents">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q9</td>
+            <td class="r">10m</td>
+            <td class="qtype">polynomial differentiation & tangents</td>
+            <td><a class="qlink" href="q-Oct_2024-Q9.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

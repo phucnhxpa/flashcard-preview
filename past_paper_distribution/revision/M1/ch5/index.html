@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>M1 · ch5 Statics of a particle</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.qtype-card .qt-examples a{font-family:"SF Mono",Menlo,monospace;font-size:12px;background:var(--blue-soft);color:var(--blue-deep);padding:3px 10px;border-radius:99px;font-weight:600;}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">M1</a><span class="sep">/</span>ch5 Statics of a particle</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 M1 · ch5</div>
+  <h1>Statics of a particle</h1>
+  <p class="lede">Every M1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 17 questions.</p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">17</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">164<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">10<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">13</div></div>
+  </div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 17 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Equilibrium on a Rough Horizontal Surface</div>
+                <div class="qt-stats">
+                    <div><span class="freq">5</span><small>×</small></div>
+                    <div class="marks">9-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">A particle is on a 'rough horizontal' surface, pulled or pushed by a force at an angle. The question will involve 'equilibrium', 'limiting equilibrium', or being 'on the point of moving'.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Draw a large, clear free-body diagram showing all forces: Weight (W=mg) down, Normal Reaction (R) up, Applied Force (P) at its angle, and Friction (F) opposing the horizontal component of P.</li><li>2. Resolve the angled force P into horizontal ($P \cos \theta$) and vertical ($P \sin \theta$) components.</li><li>3. Apply Newton's First Law ($"\sum F = 0"$) in two directions.</li><li>4. Vertically ($\uparrow$): Sum of upward forces equals sum of downward forces. This gives an equation for R. e.g., $R + P \sin \theta - mg = 0$. Note: R is rarely just mg.</li><li>5. Horizontally ($\rightarrow$): Sum of forces to the right equals sum of forces to the left. e.g., $P \cos \theta - F = 0$.</li><li>6. Check if friction is limiting. If the particle is 'on the point of moving', 'in limiting equilibrium', or you're finding a max/min force, apply the formula $F = \mu R$.</li><li>7. Substitute your expressions for F and R into $F = \mu R$ and solve the resulting equation.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$\sum \mathbf{F} = \mathbf{0}$ (MEMORIZE)</div><div class="item">$F \le \mu R$ (General friction law) (MEMORIZE)</div><div class="item">$F_{max} = \mu R$ (Used for limiting equilibrium) (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Assuming R = mg. If the applied force has a vertical component, R will be different. R is the 'result' of the vertical equilibrium equation.</li><li>Using $F = \mu R$ when not in limiting equilibrium. If the particle is just in equilibrium, F is simply the force required to balance other horizontal forces.</li><li>Incorrectly resolving the applied force, for example using sine for the horizontal component instead of cosine.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2020-Q4.html">Jan 2020 Q4</a><a href="q-Jan_2021-Q3.html">Jan 2021 Q3</a><a href="q-Jun_2022-Q4.html">Jun 2022 Q4</a><a href="q-Oct_2021-Q5.html">Oct 2021 Q5</a><a href="q-Oct_2023-Q5.html">Oct 2023 Q5</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Equilibrium on a Rough Inclined Plane</div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">8-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">A particle on a 'rough' slope (inclined plane), held in equilibrium by a force. The question often asks for the 'range of values', or the 'greatest and least' value of a force, which hints at two scenarios for friction.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Draw a large, clear free-body diagram. Label: Weight (mg) acting vertically down, Normal Reaction (R) perpendicular to the plane, the applied Force (P), and Friction (F) parallel to the plane.</li><li>2. Determine the direction of impending motion to set the friction direction. For a 'greatest' pulling force, motion is imminent UP the slope, so friction acts DOWN. For a 'least' force, motion is imminent DOWN the slope, so friction acts UP.</li><li>3. Resolve all forces PARALLEL (//) and PERPENDICULAR (⊥) to the plane. This is much easier than horizontal/vertical.</li><li>4. Weight (mg) resolves into $mg \sin \theta$ (parallel, down the slope) and $mg \cos \theta$ (perpendicular, into the slope).</li><li>5. Apply equilibrium ($"\sum F = 0"$). Resolve ⊥ to the plane to find R. Resolve // to the plane to create an equation involving F.</li><li>6. Use the limiting friction formula $F = \mu R$.</li><li>7. Substitute the expression for R (from step 5) into $F = \mu R$, then substitute this F into your parallel equation to solve.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$F_{max} = \mu R$ (MEMORIZE)</div><div class="item">Weight components on slope: $W_\parallel = mg \sin\theta$, $W_\perp = mg \cos\theta$ (MEMORIZE or derive quickly)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Incorrect direction for friction. It MUST oppose impending motion. Read the question carefully for 'greatest' or 'least' force clues.</li><li>Mixing up $\sin\theta$ and $\cos\theta$ for weight components. Remember 'sin slides' (the parallel component makes it slide), 'cos crushes' (the perpendicular component crushes it into the plane).</li><li>Incorrectly resolving a horizontal force on an inclined plane. A horizontal force P has components $P \cos \theta$ parallel and $P \sin \theta$ perpendicular to the plane.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2022-Q5.html">Jan 2022 Q5</a><a href="q-Oct_2022-Q3.html">Oct 2022 Q3</a><a href="q-Oct_2024-Q6.html">Oct 2024 Q6</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Equilibrium of a Particle (No Friction)</div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">6-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">A particle (like a ring or knot) held in equilibrium by several forces, typically from strings or light rods. There is no mention of 'rough' surfaces or friction.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Draw a free-body diagram of the particle, with all force arrows originating from a single point.</li><li>2. Use the geometry of the setup (e.g., Z-angles, F-angles, SOH CAH TOA) to find the angles each force makes with the horizontal or vertical.</li><li>3. Set up a standard horizontal (x) and vertical (y) coordinate system.</li><li>4. Resolve every force into its x and y components. A force T at angle $\theta$ to the horizontal is $T \cos \theta$ in x-direction and $T \sin \theta$ in y-direction.</li><li>5. Apply the equilibrium conditions: $\sum F_x = 0$ (all forces right = all forces left) and $\sum F_y = 0$ (all forces up = all forces down).</li><li>6. This creates a pair of simultaneous equations. Solve them to find the two unknown quantities (e.g., two tensions, or a tension and an angle).</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$\sum F_x = 0$ and $\sum F_y = 0$ (MEMORIZE)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Incorrectly calculating angles from the diagram, especially mixing up angles to the horizontal with angles to the vertical.</li><li>Sign errors when setting up equilibrium equations. Be consistent with a positive direction (e.g., right is positive, up is positive).</li><li>Algebraic errors when solving the simultaneous equations.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jan_2019-Q5.html">Jan 2019 Q5</a><a href="q-Jan_2022-Q1.html">Jan 2022 Q1</a><a href="q-Jan_2024-Q1.html">Jan 2024 Q1</a></div>
+        </div><div class="qtype-card">
+            <div class="qt-head">
+                <div class="qt-title">Equilibrium with Forces as Vectors</div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Forces are explicitly given in i-j notation or as column vectors. The word 'equilibrium' is used.</p>
+            <div class="qt-section-h">Core strategy</div>
+            <div class="qt-strategy"><ol><li>1. Identify all force vectors acting on the particle: $\mathbf{F}_1, \mathbf{F}_2, ...$</li><li>2. The condition for equilibrium is that the resultant force is the zero vector: $\sum \mathbf{F} = \mathbf{0}$.</li><li>3. Add all the given force vectors together and set the sum equal to the zero vector, $0\mathbf{i} + 0\mathbf{j}$.</li><li>4. Separate this single vector equation into two scalar equations by equating the $\mathbf{i}$ components and the $\mathbf{j}$ components to zero independently.</li><li>5. Solve the resulting simple simultaneous equations for any unknowns.</li><li>6. If asked for the magnitude of a force $\mathbf{F} = a\mathbf{i} + b\mathbf{j}$, calculate $|\mathbf{F}| = \sqrt{a^2 + b^2}$.</li><li>7. If asked for direction, calculate the angle using $\tan\theta = |b/a|$ and use a sketch to find the correct bearing or angle with an axis.</li></ol></div>
+            <div class="qt-section-h">Must-know formulas</div><div class="qt-formula-list"><div class="item">$\sum \mathbf{F} = \mathbf{0}$ (MEMORIZE)</div><div class="item">Magnitude: $|a\mathbf{i} + b\mathbf{j}| = \sqrt{a^2 + b^2}$ (formula booklet)</div></div>
+            <div class="qt-section-h">Common pitfalls</div><ul class="qt-pitfalls"><li>Forgetting that equilibrium means the *sum* of forces is zero, not that individual forces are equal.</li><li>Making sign errors when adding or subtracting vector components.</li><li>Providing only the magnitude of a vector when a full vector answer is required, or vice versa.</li></ul>
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><a href="q-Jun_2023-Q2.html">Jun 2023 Q2</a></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>The condition for equilibrium: The resultant force is zero. $\sum \mathbf{F} = \mathbf{0}$. This can be split into components: $\sum F_x = 0$ and $\sum F_y = 0$. (MEMORIZE)</li><li>The law of friction: The friction force $F$ opposes impending motion and satisfies $F \le \mu R$. In limiting equilibrium (on the point of moving), $F = \mu R$. (MEMORIZE)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Always start with a large, clear, fully-labelled free-body diagram. This is the single most important step and helps prevent most common errors.</li><li>The core principle is Newton's First Law: If a particle is in equilibrium, the net force is zero ($"\sum F = 0"$). This always splits into two independent equations by resolving forces in two perpendicular directions.</li><li>For inclined planes, ALMOST ALWAYS resolve parallel and perpendicular to the plane, not horizontally and vertically. It simplifies the equations immensely.</li><li>Understand the friction law deeply. $F \le \mu R$ is the general rule. The equality $F = \mu R$ ONLY applies when the object is on the verge of sliding (limiting equilibrium).</li><li>The Normal Reaction force, R, is not a fixed formula. It is the result of applying $"\sum F = 0"$ perpendicular to the surface of contact. It is not always equal to mg.</li><li>Be meticulous with your signs. Choose a positive direction for each of your resolution axes and stick to it throughout the problem.</li><li>Use geometry and trigonometry confidently to find angles before you start resolving forces.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>In any question involving friction, explicitly write down $F \le \mu R$ or $F = \mu R$ to show the examiner you know the principle you are applying. This is often required for a method mark.</li><li>For 'greatest' and 'least' force questions on a rough slope, this means you must solve the problem twice: once with friction acting down the slope (for the greatest force) and once with friction acting up the slope (for the least force).</li><li>Unless specified, use $g = 9.8 \, \text{m s}^{-2}$. Do not round intermediate calculations. Keep values in the calculator or use exact fractions/surds to maintain precision.</li><li>Read the question carefully to distinguish between a particle on a 'smooth' plane (no friction) and a 'rough' plane (friction must be included).</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Equilibrium on rough inclined plane">Equilibrium on rough inclined plane</option><option value="Newton's 2nd Law & Vector Forces">Newton's 2nd Law & Vector Forces</option><option value="Newton's Laws with friction">Newton's Laws with friction</option><option value="Newton's laws equilibrium friction">Newton's laws equilibrium friction</option><option value="Particle equilibrium multiple forces">Particle equilibrium multiple forces</option><option value="Particle equilibrium with vector forces">Particle equilibrium with vector forces</option><option value="Particle in equilibrium">Particle in equilibrium</option><option value="Question content missing">Question content missing</option><option value="Statics & Kinematics on Rough Plane">Statics & Kinematics on Rough Plane</option><option value="Statics of a particle with friction">Statics of a particle with friction</option><option value="Statics on rough inclined plane">Statics on rough inclined plane</option><option value="Uniform beam equilibrium">Uniform beam equilibrium</option><option value="equilibrium on rough surface">equilibrium on rough surface</option><option value="equilibrium rough inclined plane">equilibrium rough inclined plane</option><option value="inclined plane dynamics with friction">inclined plane dynamics with friction</option><option value="particle equilibrium under three forces">particle equilibrium under three forces</option><option value="statics of a particle (friction)">statics of a particle (friction)</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Particle in equilibrium">
+            <td class="session">Jan 2019</td>
+            <td class="r">Q5</td>
+            <td class="r">10m</td>
+            <td class="qtype">Particle in equilibrium</td>
+            <td><a class="qlink" href="q-Jan_2019-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Statics of a particle with friction">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q4</td>
+            <td class="r">10m</td>
+            <td class="qtype">Statics of a particle with friction</td>
+            <td><a class="qlink" href="q-Jan_2020-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="equilibrium on rough surface">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q3</td>
+            <td class="r">9m</td>
+            <td class="qtype">equilibrium on rough surface</td>
+            <td><a class="qlink" href="q-Jan_2021-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="statics of a particle (friction)">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">10m</td>
+            <td class="qtype">statics of a particle (friction)</td>
+            <td><a class="qlink" href="q-Oct_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="particle equilibrium under three forces">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">particle equilibrium under three forces</td>
+            <td><a class="qlink" href="q-Jan_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Equilibrium on rough inclined plane">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype">Equilibrium on rough inclined plane</td>
+            <td><a class="qlink" href="q-Jan_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's Laws with friction">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">12m</td>
+            <td class="qtype">Newton's Laws with friction</td>
+            <td><a class="qlink" href="q-Jun_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="equilibrium rough inclined plane">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q3</td>
+            <td class="r">11m</td>
+            <td class="qtype">equilibrium rough inclined plane</td>
+            <td><a class="qlink" href="q-Oct_2022-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's 2nd Law & Vector Forces">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q6</td>
+            <td class="r">9m</td>
+            <td class="qtype">Newton's 2nd Law & Vector Forces</td>
+            <td><a class="qlink" href="q-Oct_2022-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Question content missing">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype">Question content missing</td>
+            <td><a class="qlink" href="q-Jan_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Particle equilibrium with vector forces">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q2</td>
+            <td class="r">10m</td>
+            <td class="qtype">Particle equilibrium with vector forces</td>
+            <td><a class="qlink" href="q-Jun_2023-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Uniform beam equilibrium">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype">Uniform beam equilibrium</td>
+            <td><a class="qlink" href="q-Jun_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Newton's laws equilibrium friction">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q5</td>
+            <td class="r">12m</td>
+            <td class="qtype">Newton's laws equilibrium friction</td>
+            <td><a class="qlink" href="q-Oct_2023-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Particle equilibrium multiple forces">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype">Particle equilibrium multiple forces</td>
+            <td><a class="qlink" href="q-Jan_2024-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="inclined plane dynamics with friction">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q8</td>
+            <td class="r">12m</td>
+            <td class="qtype">inclined plane dynamics with friction</td>
+            <td><a class="qlink" href="q-Jan_2024-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Statics & Kinematics on Rough Plane">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q6</td>
+            <td class="r">12m</td>
+            <td class="qtype">Statics & Kinematics on Rough Plane</td>
+            <td><a class="qlink" href="q-Jun_2024-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Statics on rough inclined plane">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q6</td>
+            <td class="r">12m</td>
+            <td class="qtype">Statics on rough inclined plane</td>
+            <td><a class="qlink" href="q-Oct_2024-Q6.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>
