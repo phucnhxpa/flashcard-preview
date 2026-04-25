@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Must-Memorize — IAL 10 units</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  background: #fafafa;
+  color: #1d1d1f;
+  margin: 0;
+  line-height: 1.5;
+  font-size: 15px;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid #e5e5e7;
+  padding: 24px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(255,255,255,0.85);
+}
+h1 { font-size: 28px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.02em; }
+.subtitle { color: #86868b; font-size: 14px; margin: 0 0 16px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.stat {
+  background: #f5f5f7;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: left;
+}
+.stat .num { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.stat .lbl { font-size: 11px; color: #86868b; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+main { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+
+.unit-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e5e7;
+  padding-bottom: 12px;
+  overflow-x: auto;
+}
+.unit-tab {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #e5e5e7;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.unit-tab:hover { background: #f5f5f7; }
+.unit-tab.active { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+.unit-tab .date { color: inherit; opacity: 0.6; margin-left: 4px; font-size: 11px; }
+.unit-tab.soon { border-color: #ff3b30; color: #ff3b30; }
+.unit-tab.soon.active { background: #ff3b30; color: #fff; border-color: #ff3b30; }
+
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e5e5e7;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.filter-chip.active[data-p="P0"] { background: #ff3b30; color: #fff; border-color: #ff3b30; }
+.filter-chip.active[data-p="P1"] { background: #ff9500; color: #fff; border-color: #ff9500; }
+.filter-chip.active[data-p="P2"] { background: #007aff; color: #fff; border-color: #007aff; }
+.filter-chip.active[data-p="P3"] { background: #8e8e93; color: #fff; border-color: #8e8e93; }
+.filter-chip.active[data-p="ALL"] { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+.filter-chip.active[data-p="TOP10"] { background: #34c759; color: #fff; border-color: #34c759; }
+.filter-chip.active[data-p="MEMORIZED"] { background: #34c759; color: #fff; border-color: #34c759; }
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  padding: 7px 14px;
+  border-radius: 16px;
+  border: 1px solid #e5e5e7;
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.search-box:focus { border-color: #007aff; }
+
+.unit-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e5e7;
+}
+.unit-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+.unit-meta { color: #86868b; font-size: 13px; }
+
+.headline-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e5e7;
+  font-size: 13px;
+  color: #424245;
+}
+.headline-card pre {
+  margin: 0;
+  font-family: inherit;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+.headline-card strong { color: #1d1d1f; font-weight: 600; }
+
+.chapter {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 26px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e5e7;
+}
+.chapter-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: -0.01em;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f2;
+}
+.chapter-count {
+  font-size: 12px;
+  color: #86868b;
+  font-weight: 500;
+  background: #f5f5f7;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.formula-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 36px;
+  gap: 16px;
+  padding: 18px 14px;
+  border: 1px solid #f0f0f2;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  align-items: start;
+  transition: background 0.15s, border-color 0.15s;
+}
+.formula-row:hover { background: #fff; border-color: #d2d2d7; }
+.formula-row.hidden { display: none; }
+.formula-row.memorized-row { background: #f2faf4; border-color: #d1edda; }
+
+.f-meta-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.f-id {
+  color: #86868b;
+  font-size: 11px;
+  font-family: "SF Mono", Menlo, monospace;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.f-priority {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+.f-priority.P0 { background: #ff3b30; }
+.f-priority.P1 { background: #ff9500; }
+.f-priority.P2 { background: #007aff; }
+.f-priority.P3 { background: #8e8e93; }
+
+.f-body { min-width: 0; }
+.f-formula {
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-x: auto;
+  color: #1d1d1f;
+  padding-bottom: 2px;
+}
+.f-formula code { background: #f0f0f2; padding: 2px 5px; border-radius: 4px; font-size: 14px; }
+.f-formula mjx-container { text-align: left !important; }
+
+.f-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6e6e73;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.f-why { line-height: 1.4; }
+.f-hits {
+  background: #f0f0f2;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #6e6e73;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.f-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #d2d2d7;
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+  position: relative;
+  flex-shrink: 0;
+}
+.f-check:hover { border-color: #34c759; }
+.f-check.memorized { border-color: #34c759; background: #34c759; }
+.f-check.memorized::after {
+  content: "✓";
+  color: #fff;
+  font-size: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 700;
+}
+
+.in-booklet {
+  background: #f5f5f7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #424245;
+}
+.in-booklet-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #86868b;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.top10-card {
+  background: #1d1d1f;
+  color: #f5f5f7;
+  border-radius: 14px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+}
+.top10-card h3 { margin: 0 0 18px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.top10-card .top10-body {
+  font-size: 14px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+.top10-card .top10-body mjx-container { color: #f5f5f7 !important; }
+.top10-card strong { color: #fff; font-weight: 600; }
+
+.progress-bar {
+  height: 6px;
+  background: #f5f5f7;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: #34c759;
+  transition: width 0.3s;
+}
+.progress-label { font-size: 11px; color: #86868b; margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .formula-row {
+    grid-template-columns: 40px 1fr 30px;
+    gap: 10px;
+    padding: 14px 12px;
+  }
+  .f-formula { font-size: 14px; }
+  .f-footer { font-size: 11px; }
+  header { padding: 18px; }
+  main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Must-Memorize — IAL 10 units</h1>
+  <p class="subtitle">Formulas NOT in the Edexcel booklet. Phuc, this is what you need in your head on exam day.</p>
+  <div class="stats-grid" id="global-stats"></div>
+</header>
+
+<main>
+
+<div class="unit-tabs" id="unit-tabs"></div>
+
+<div class="filters">
+  <button class="filter-chip active" data-p="ALL">All</button>
+  <button class="filter-chip" data-p="TOP10">Top 10 only</button>
+  <button class="filter-chip" data-p="P0">P0</button>
+  <button class="filter-chip" data-p="P1">P1</button>
+  <button class="filter-chip" data-p="P2">P2</button>
+  <button class="filter-chip" data-p="P3">P3</button>
+  <button class="filter-chip" data-p="MEMORIZED">Hide ✓</button>
+  <input class="search-box" id="search" placeholder="Search formula or chapter…">
+</div>
+
+<div id="unit-body"></div>
+
+</main>
+
+<script>
+const STORAGE_KEY = "mustMemorize_v1";
+let state = {
+  selectedUnit: "P1",
+  filter: "ALL",
+  hideChecked: false,
+  search: "",
+  memorized: JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"),
+};
+
+let DATA = null;
+
+function saveMemorized() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.memorized));
+}
+
+function rowKey(unit, chapterIdx, rowId) {
+  return `${unit}__${chapterIdx}__${rowId}`;
+}
+
+function daysUntil(dateStr) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const d = new Date(dateStr + "T00:00:00");
+  return Math.round((d - today) / 86400000);
+}
+
+function fmt(s) {
+  // Preserve LaTeX inside $...$; convert **bold**/*italic*/`code`/backticks
+  if (!s) return "";
+  // Protect math spans
+  const mathSpans = [];
+  s = s.replace(/(\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/g, (m) => {
+    mathSpans.push(m);
+    return `@@MATH${mathSpans.length-1}@@`;
+  });
+  // Markdown-ish
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Restore math
+  s = s.replace(/@@MATH(\d+)@@/g, (_, i) => mathSpans[i]);
+  return s;
+}
+
+function fmtBlock(s) {
+  // For top10 and headline blocks — also convert bullets and linebreaks
+  if (!s) return "";
+  const mathSpans = [];
+  s = s.replace(/(\$\$[\s\S]*?\$\$|\$[^$\n]+\$)/g, (m) => {
+    mathSpans.push(m);
+    return `@@MATH${mathSpans.length-1}@@`;
+  });
+  // Lines starting with "- " → bullet
+  const lines = s.split("\n");
+  const out = [];
+  let inUl = false;
+  for (const line of lines) {
+    const m = line.match(/^\s*-\s+(.+)$/);
+    if (m) {
+      if (!inUl) { out.push("<ul>"); inUl = true; }
+      out.push(`<li>${m[1]}</li>`);
+    } else {
+      if (inUl) { out.push("</ul>"); inUl = false; }
+      out.push(line);
+    }
+  }
+  if (inUl) out.push("</ul>");
+  let html = out.join("\n");
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/@@MATH(\d+)@@/g, (_, i) => mathSpans[i]);
+  return html;
+}
+
+function renderGlobalStats() {
+  const total = DATA.units.reduce((acc, u) => acc + u.chapters.reduce((a,c) => a + c.rows.length, 0), 0);
+  let p0 = 0, memCount = 0;
+  DATA.units.forEach(u => u.chapters.forEach((c, ci) => c.rows.forEach(r => {
+    if (r.priority === "P0") p0++;
+    if (state.memorized[rowKey(u.unit, ci, r.id)]) memCount++;
+  })));
+  const pct = total ? Math.round(100 * memCount / total) : 0;
+  const nextExam = DATA.units.slice().sort((a,b) => new Date(a.date) - new Date(b.date)).find(u => daysUntil(u.date) >= 0);
+  const days = nextExam ? daysUntil(nextExam.date) : "?";
+
+  document.getElementById("global-stats").innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">total formulas</div></div>
+    <div class="stat"><div class="num">${p0}</div><div class="lbl">P0 critical</div></div>
+    <div class="stat"><div class="num">${pct}%</div><div class="lbl">${memCount} of ${total} memorized</div>
+      <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+    </div>
+    <div class="stat"><div class="num">${days}</div><div class="lbl">days to ${nextExam ? nextExam.unit : '?'}</div></div>
+    <div class="stat"><div class="num">10</div><div class="lbl">papers</div></div>
+  `;
+}
+
+function renderTabs() {
+  const tabs = DATA.units.map(u => {
+    const days = daysUntil(u.date);
+    const soon = days >= 0 && days <= 14;
+    const active = u.unit === state.selectedUnit;
+    const rowCount = u.chapters.reduce((a,c) => a + c.rows.length, 0);
+    const memCount = u.chapters.reduce((a,c,ci) => a + c.rows.filter(r => state.memorized[rowKey(u.unit, ci, r.id)]).length, 0);
+    return `<button class="unit-tab ${active ? 'active' : ''} ${soon ? 'soon' : ''}" data-u="${u.unit}">
+      ${u.unit} <span class="date">${u.date.slice(5)} · ${memCount}/${rowCount}</span>
+    </button>`;
+  });
+  document.getElementById("unit-tabs").innerHTML = tabs.join("");
+  document.querySelectorAll(".unit-tab").forEach(el => {
+    el.onclick = () => {
+      state.selectedUnit = el.dataset.u;
+      render();
+    };
+  });
+}
+
+function renderUnit() {
+  const u = DATA.units.find(x => x.unit === state.selectedUnit);
+  if (!u) return;
+
+  const totalRows = u.chapters.reduce((a,c) => a + c.rows.length, 0);
+  const memRows = u.chapters.reduce((a,c,ci) => a + c.rows.filter(r => state.memorized[rowKey(u.unit, ci, r.id)]).length, 0);
+  const pct = totalRows ? Math.round(100 * memRows / totalRows) : 0;
+
+  let html = `
+    <div class="unit-header">
+      <h2 class="unit-title">${u.unit} — ${u.name}</h2>
+      <div class="unit-meta">
+        <strong>${u.code}</strong> · Exam: <strong>${u.date}</strong> · ${daysUntil(u.date)} days away · ${totalRows} formulas (${memRows} memorized)
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+    </div>
+
+    <div class="headline-card">${fmtBlock(u.headline)}</div>
+
+    <div class="top10-card">
+      <h3>Top 10 to commit first</h3>
+      <div class="top10-body">${fmtBlock(u.top10)}</div>
+    </div>
+  `;
+
+  u.chapters.forEach((c, ci) => {
+    if (c.rows.length === 0 && !c.in_booklet) return;
+    html += `<div class="chapter">
+      <div class="chapter-title">
+        <span>Ch ${c.title}</span>
+        <span class="chapter-count">${c.rows.length} to memorize</span>
+      </div>`;
+    c.rows.forEach(r => {
+      const key = rowKey(u.unit, ci, r.id);
+      const memorized = state.memorized[key];
+      const hitsHtml = r.hits ? `<span class="f-hits">${fmt(r.hits)}</span>` : '';
+      html += `<div class="formula-row ${memorized ? 'memorized-row' : ''}" data-priority="${r.priority}" data-id="${r.id}" data-memorized="${memorized ? '1' : '0'}">
+        <div class="f-meta-left">
+          <div class="f-id">${r.id}</div>
+          <span class="f-priority ${r.priority}">${r.priority}</span>
+        </div>
+        <div class="f-body">
+          <div class="f-formula">${fmt(r.formula)}</div>
+          <div class="f-footer">
+            <span class="f-why">${fmt(r.why)}</span>
+            ${hitsHtml}
+          </div>
+        </div>
+        <button class="f-check ${memorized ? 'memorized' : ''}" data-key="${key}" title="Mark as memorized"></button>
+      </div>`;
+    });
+    if (c.in_booklet) {
+      html += `<div class="in-booklet">
+        <div class="in-booklet-title">In booklet — don't memorize</div>
+        <div>${fmtBlock(c.in_booklet)}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  });
+
+  document.getElementById("unit-body").innerHTML = html;
+
+  // Attach checkbox handlers
+  document.querySelectorAll(".f-check").forEach(btn => {
+    btn.onclick = () => {
+      const k = btn.dataset.key;
+      state.memorized[k] = !state.memorized[k];
+      saveMemorized();
+      render();
+    };
+  });
+
+  // Apply filters
+  applyFilters();
+
+  // Re-typeset math
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([document.getElementById("unit-body")]);
+  }
+}
+
+function applyFilters() {
+  const rows = document.querySelectorAll(".formula-row");
+  const search = state.search.toLowerCase();
+  rows.forEach(r => {
+    let show = true;
+    const p = r.dataset.priority;
+    const mem = r.dataset.memorized === "1";
+    const txt = r.textContent.toLowerCase();
+
+    if (state.filter === "P0" && p !== "P0") show = false;
+    if (state.filter === "P1" && p !== "P1") show = false;
+    if (state.filter === "P2" && p !== "P2") show = false;
+    if (state.filter === "P3" && p !== "P3") show = false;
+    if (state.filter === "TOP10") {
+      // Only top 10: show rows whose id starts with "X.1" through "X.10" where we know from priority order
+      // Simpler: just show P0 items (rough proxy) — user can override with ALL
+      if (p !== "P0") show = false;
+    }
+    if (state.hideChecked && mem) show = false;
+    if (search && !txt.includes(search)) show = false;
+
+    r.classList.toggle("hidden", !show);
+  });
+}
+
+function renderFilters() {
+  document.querySelectorAll(".filter-chip").forEach(el => {
+    const p = el.dataset.p;
+    if (p === "MEMORIZED") {
+      el.classList.toggle("active", state.hideChecked);
+      el.onclick = () => { state.hideChecked = !state.hideChecked; renderFilters(); applyFilters(); };
+    } else {
+      el.classList.toggle("active", state.filter === p);
+      el.onclick = () => { state.filter = p; renderFilters(); applyFilters(); };
+    }
+  });
+}
+
+function render() {
+  renderGlobalStats();
+  renderTabs();
+  renderUnit();
+  renderFilters();
+}
+
+document.getElementById("search").oninput = (e) => {
+  state.search = e.target.value;
+  applyFilters();
+};
+
+fetch("data.json")
+  .then(r => r.json())
+  .then(d => { DATA = d; render(); })
+  .catch(e => {
+    document.getElementById("unit-body").innerHTML = "<p>Failed to load data.json — open from a local server (e.g., <code>python3 -m http.server</code>)</p>";
+  });
+</script>
+</body>
+</html>
