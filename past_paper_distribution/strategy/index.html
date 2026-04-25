@@ -376,25 +376,39 @@ table.cmp .pill.anc{background:var(--blue-soft);color:var(--blue-deep);}
   background:#fff;
   border:1px solid var(--line-strong);
   border-radius:var(--r-lg);
-  padding:30px 30px 26px;
+  padding:32px 32px 28px;
   position:relative;
+  box-shadow:0 1px 2px rgba(0,0,0,.03), 0 4px 24px rgba(0,0,0,.04);
+  transition:box-shadow .2s ease, transform .2s ease;
 }
+.rec:hover{box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 32px rgba(0,0,0,.06);}
 .rec.lev{border-color:#cfe1f9;}
-.rec h3{font-size:22px;}
+.rec h3{font-size:24px; letter-spacing:-0.012em; margin-top:2px;}
 .rec .badge{
-  display:inline-flex;
-  font-family:"SF Mono",Menlo,Consolas,monospace;
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
   font-size:11.5px;
-  letter-spacing:.06em;
+  letter-spacing:.04em;
+  font-weight:600;
   background:var(--bg-tint);
   border:1px solid var(--line);
-  color:var(--muted-2);
-  padding:3px 10px;
+  color:var(--muted);
+  padding:5px 12px 5px 10px;
   border-radius:99px;
-  margin-bottom:12px;
+  margin-bottom:14px;
   text-transform:uppercase;
 }
+.rec .badge::before{
+  content:"";
+  display:inline-block;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--muted-2);
+}
 .rec.lev .badge{background:var(--blue-soft);border-color:#cfe1f9;color:var(--blue-deep);}
+.rec.lev .badge::before{background:var(--blue);}
+.rec:not(.lev) .badge{background:#fff5e6;border-color:#fbd9a0;color:#9a5d10;}
+.rec:not(.lev) .badge::before{background:var(--orange);}
+.rec .top-list .name .ch-name{font-weight:500;}
 .rec ol{padding-left:22px;margin:14px 0 0;color:var(--ink-2);}
 .rec ol li{margin:7px 0;font-size:15.5px;}
 .rec .top-list{
@@ -3497,8 +3511,11 @@ function drawCumulativeChart(svgId, unitData, opts){
   svgEl('line', { x1: padL, x2: padL, y1: padT, y2: H - padB, class:'svg-axis' }, svg);
 
   if (big){
-    svgEl('text', { x: padL - 50, y: padT + 6, 'font-size':12, fill:'#6e6e73', 'font-weight':600, transform:`rotate(-90 ${padL - 50} ${padT + 6})` }, svg).textContent = 'CUMULATIVE % OF PAPER MARKS';
-    svgEl('text', { x: (W)/2, y: H - 6, 'text-anchor':'middle', 'font-size':12, fill:'#6e6e73', 'font-weight':600 }, svg).textContent = 'TOP-N CHAPTERS (BY MARK SHARE)';
+    // Y-axis label: rotate -90° around the vertical CENTER of the chart's plot area, so it doesn't get clipped above the SVG
+    const yLblCx = padL - 38;
+    const yLblCy = (padT + (H - padB)) / 2;
+    svgEl('text', { x: yLblCx, y: yLblCy, 'text-anchor':'middle', 'font-size':11, fill:'#6e6e73', 'font-weight':600, 'letter-spacing':'0.5', transform:`rotate(-90 ${yLblCx} ${yLblCy})` }, svg).textContent = 'CUMULATIVE % OF PAPER MARKS';
+    svgEl('text', { x: (padL + W - padR)/2, y: H - 8, 'text-anchor':'middle', 'font-size':11, fill:'#6e6e73', 'font-weight':600, 'letter-spacing':'0.5' }, svg).textContent = 'TOP-N CHAPTERS (BY MARK SHARE)';
   }
 }
 
@@ -3694,10 +3711,18 @@ function fillRecommendations(){
     const ul = document.getElementById(g === 'GoalA' ? 'topA' : 'topB');
     if (!ul) return;
     const top5 = D.top15[g].slice(0, 5);
+    // Trim long parenthetical detail to keep row heights uniform across both cards
+    const trim = (n) => {
+      const m = n.match(/^([^(]+?)\s*\(.*\)\s*$/);
+      const base = m ? m[1].trim() : n;
+      return base.length > 32 ? base.slice(0, 30) + '…' : base;
+    };
     top5.forEach(c => {
       const li = document.createElement('li');
-      const star = c.is_lever ? '<span class="lever-star">★</span>' : '';
-      li.innerHTML = `<span class="name"><span class="u">${c.unit}·ch${c.chapter_num}</span>${c.name}${star}</span>
+      const star = c.is_lever ? '<span class="lever-star" title="A* lever — 90 UMS target">★</span>' : '';
+      const shortName = trim(c.name);
+      const fullName = c.name.replace(/"/g, '&quot;');
+      li.innerHTML = `<span class="name"><span class="u">${c.unit}·ch${c.chapter_num}</span><span class="ch-name" title="${fullName}">${shortName}</span>${star}</span>
         <span class="hours">${c.hours}h · ${c.priority.toFixed(2)}</span>`;
       ul.appendChild(li);
     });
