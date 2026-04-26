@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P2 · ch3 Coordinate geometry in the (x, y) plane</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">P2</a><span class="sep">/</span>ch3 Coordinate geometry in the (x, y) plane</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 P2 · ch3</div>
+  <h1>Coordinate geometry in the (x, y) plane</h1>
+  <p class="lede">Every P2 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 14 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 P2 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">14</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">111<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">8<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">14</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">16 questions · 133 marks across 17 papers · <b>11.1%</b> of all unit marks · <b>10.1%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 1 q · 10/75 marks (13.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">13.3%</div>
+            </div><div class="year-bar" title="2019: 1 q · 7/75 marks (9.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:70%"></div>
+                <div class="bar-lbl">'19</div>
+                <div class="bar-val">9.3%</div>
+            </div><div class="year-bar" title="2020: 2 q · 17/150 marks (11.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:85%"></div>
+                <div class="bar-lbl">'20</div>
+                <div class="bar-val">11.3%</div>
+            </div><div class="year-bar" title="2021: 3 q · 25/225 marks (11.1% of paper)">
+                <div class="bar-fill ch-bar" style="height:83%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">11.1%</div>
+            </div><div class="year-bar" title="2022: 3 q · 27/225 marks (12.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:90%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">12.0%</div>
+            </div><div class="year-bar" title="2023: 3 q · 25/225 marks (11.1% of paper)">
+                <div class="bar-fill ch-bar" style="height:83%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">11.1%</div>
+            </div><div class="year-bar" title="2024: 3 q · 22/225 marks (9.8% of paper)">
+                <div class="bar-fill ch-bar" style="height:74%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">9.8%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 14 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-finding-and-using-the-equation-of-a-circle">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Finding and Using the Equation of a Circle</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given the equation of a circle in the general form $x^2 + y^2 + 2gx + 2fy + c = 0$ and asked to find its centre and radius. The question might also involve geometric properties like chords, diameters, or points on the circumference.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">32</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">24.1%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2019: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'19</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 2 q · 17 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">17</div>
+                </div><div class="year-bar" title="2021: 2 q · 15 marks">
+                    <div class="bar-fill" style="height:88%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">circle</span><span class="chip-trigger">centre</span><span class="chip-trigger">radius</span><span class="chip-trigger">diameter</span><span class="chip-trigger">chord</span><span class="chip-trigger">equation of the circle</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The equation given represents a valid circle, which implies the radius squared term ($r^2$) will be positive.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Completing the Square</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When given the general form of the circle's equation ($x^2 + y^2 + 2gx + 2fy + c = 0$).</div>
+                <ol class='cs-steps'><li>Group x-terms and y-terms: $(x^2 + 2gx) + (y^2 + 2fy) + c = 0$.</li><li>Complete the square for x: $(x+g)^2 - g^2$.</li><li>Complete the square for y: $(y+f)^2 - f^2$.</li><li>Rewrite the equation: $(x+g)^2 - g^2 + (y+f)^2 - f^2 + c = 0$.</li><li>Rearrange to standard form: $(x+g)^2 + (y+f)^2 = g^2 + f^2 - c$.</li><li>Identify Centre $(-g, -f)$ and Radius $r = \sqrt{g^2 + f^2 - c}$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and always works. Directly provides the centre and radius.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Prone to sign errors, especially when identifying the centre coordinates from the brackets.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Using Midpoint and Distance Formulae</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When given the coordinates of two points that form a diameter.</div>
+                <ol class='cs-steps'><li>Find the midpoint of the diameter using $M = \left(\frac{x_1+x_2}{2}, \frac{y_1+y_2}{2}\right)$. This gives the circle's centre $(a, b)$.</li><li>Find the radius by calculating the distance from the centre to one of the endpoints using $r = \sqrt{(x_1-a)^2 + (y_1-b)^2}$.</li><li>Substitute the centre $(a, b)$ and radius $r$ into the standard equation $(x-a)^2 + (y-b)^2 = r^2$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> More direct than completing the square if diameter endpoints are known.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only applicable in the specific scenario where diameter endpoints are given.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Standard form: $(x-a)^2 + (y-b)^2 = r^2$ for centre $(a, b)$ and radius $r$. (formula booklet)</div><div class="cs-formula">General form: $x^2 + y^2 + 2gx + 2fy + c = 0$ for centre $(-g, -f)$ and radius $\sqrt{g^2+f^2-c}$. (MEMORIZE)</div><div class="cs-formula">Midpoint: $M = \left(\frac{x_1+x_2}{2}, \frac{y_1+y_2}{2}\right)$ (formula booklet)</div><div class="cs-formula">Distance: $d = \sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Sign errors identifying the centre, e.g., centre of $(x+3)^2 + (y-2)^2 = 16$ is $(-3, 2)$, not $(3, -2)$.</li><li>Forgetting to square the radius for the equation, or forgetting to square root the constant term to find the radius.</li><li>Arithmetic errors when completing the square, especially with the constant terms.</li><li>Forgetting that $r^2$ must be positive for a real circle to exist.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2020-Q6.html">Jan 2020 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2020-Q4.html">Oct 2020 Q4</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-tangents-and-normals-to-circles">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Tangents and Normals to Circles</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">8-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">A circle and a point on its circumference are given. You are asked to find the equation of the tangent or normal at that point.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">25</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.8%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.8%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2019: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:70%"></div>
+                    <div class="bar-lbl">'19</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:80%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2023: 1 q · 10 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">10</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">tangent</span><span class="chip-trigger">normal</span><span class="chip-trigger">touches the circle</span><span class="chip-trigger">at the point P</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>A tangent touches the circle at exactly one point.</li><li>The radius to the point of tangency is perpendicular to the tangent line.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Geometric Property (Perpendicular Radius)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> This is the most direct and reliable method for circles.</div>
+                <ol class='cs-steps'><li>Find the coordinates of the circle's centre, C.</li><li>Calculate the gradient of the radius from the centre C to the point of tangency P. Let this be $m_{radius}$.</li><li>The gradient of the tangent is the negative reciprocal: $m_{tangent} = -1/m_{radius}$.</li><li>The gradient of the normal is the same as the radius: $m_{normal} = m_{radius}$.</li><li>Use the point-gradient form $y - y_1 = m(x - x_1)$ with point P and the appropriate gradient.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Conceptually straightforward, relying on core coordinate geometry rules.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires finding the circle's centre first, which may be an extra step.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Implicit Differentiation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> A powerful calculus-based alternative, and good practice for general curves.</div>
+                <ol class='cs-steps'><li>Differentiate the circle's equation with respect to x, using the chain rule for y-terms: e.g., $\frac{d}{dx}((y-b)^2) = 2(y-b)\frac{dy}{dx}$.</li><li>Rearrange the resulting equation to find an expression for the gradient, $\frac{dy}{dx}$.</li><li>Substitute the coordinates of the point of tangency P $(x_1, y_1)$ into the expression for $\frac{dy}{dx}$ to find the numerical gradient of the tangent.</li><li>Use the point-gradient form $y - y_1 = m(x - x_1)$ to find the tangent's equation.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> A general method that works for any differentiable curve, not just circles.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires knowledge of implicit differentiation and can be more prone to algebraic errors.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Perpendicular gradients: $m_1 m_2 = -1$ (MEMORIZE)</div><div class="cs-formula">Point-gradient form: $y - y_1 = m(x - x_1)$ (formula booklet)</div><div class="cs-formula">Implicit Differentiation of $y^n$: $\frac{d}{dx}(y^n) = ny^{n-1}\frac{dy}{dx}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Mixing up the tangent and normal gradients. Remember: Normal = Radius.</li><li>Errors in calculating the negative reciprocal (e.g., forgetting the sign change or inverting incorrectly).</li><li>Mistakes applying the chain rule during implicit differentiation.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q6.html">Jan 2022 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2019-Q6.html">Oct 2019 Q6</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2019_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2019_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-tangents-and-normals-to-curves-using-differentiation">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Tangents and Normals to Curves using Differentiation</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">6-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given a function, typically a polynomial $y=f(x)$, and a point on the curve. You are asked for the equation of the tangent or normal, and may need to find intercepts or areas.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">24</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.8%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 10 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">10</div>
+                </div><div class="year-bar" title="2019: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'19</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:80%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2024: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:60%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">6</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">curve</span><span class="chip-trigger">equation of the tangent</span><span class="chip-trigger">equation of the normal</span><span class="chip-trigger">gradient</span><span class="chip-trigger">stationary point</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The curve is differentiable at the point of interest.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Standard Differentiation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always for non-circular curves defined by an explicit function $y=f(x)$.</div>
+                <ol class='cs-steps'><li>Differentiate the function to find the gradient function, $\frac{dy}{dx} = f'(x)$.</li><li>Substitute the x-coordinate of the given point into $f'(x)$ to find the gradient of the tangent, $m_{tangent}$.</li><li>If required, find the gradient of the normal: $m_{normal} = -1/m_{tangent}$.</li><li>Use the given point and the calculated gradient in the point-gradient form $y - y_1 = m(x - x_1)$.</li><li>If asked for intercepts, set x=0 or y=0 in the line's equation and solve.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Universal method for finding gradients of any explicit function.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Entirely dependent on correct application of differentiation rules.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Power rule: $\frac{d}{dx}(ax^n) = anx^{n-1}$ (formula booklet)</div><div class="cs-formula">Perpendicular gradients: $m_1 m_2 = -1$ (MEMORIZE)</div><div class="cs-formula">Point-gradient form: $y - y_1 = m(x - x_1)$ (formula booklet)</div><div class="cs-formula">Area of a triangle: $Area = \frac{1}{2} \times base \times height$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Arithmetic errors when substituting the x-coordinate to find the y-coordinate or the gradient.</li><li>Confusing the gradient of the normal with the tangent (i.e., forgetting the negative reciprocal step).</li><li>Errors in differentiation, such as with negative or fractional powers.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q3.html">Jan 2024 Q3</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q7.html">Oct 2023 Q7</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q7.html">Specimen 2018 Q7</a><a class="pdf-mini" href="../../pdfs/P2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-properties-of-straight-lines-perpendicular-bisectors-intersections-area">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">7-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given coordinates or line equations, you're asked to find the perpendicular bisector of a segment, the intersection point of two lines, or the area of a triangle formed by these elements.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">24</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.8%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2019: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'19</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:70%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2023: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:70%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2024: 1 q · 10 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">10</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">perpendicular bisector</span><span class="chip-trigger">midpoint</span><span class="chip-trigger">gradient</span><span class="chip-trigger">intersection</span><span class="chip-trigger">area of triangle</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Lines are straight and extend infinitely.</li><li>Standard Euclidean geometry rules apply.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Step-by-step Formula Application</span>
+                </div>
+                <div class="approach-when"><b>When:</b> This is the standard procedure for all problems of this type.</div>
+                <ol class='cs-steps'><li>For a Perpendicular Bisector: 1. Find the midpoint of the segment. 2. Find the gradient of the segment. 3. Calculate the negative reciprocal gradient. 4. Use the midpoint and perpendicular gradient in $y-y_1 = m(x-x_1)$.</li><li>For Intersection: 1. Set up the two line equations as a simultaneous system. 2. Use substitution or elimination to solve for one variable. 3. Substitute the result back into an original equation to find the second variable.</li><li>For Area of a Triangle: 1. Find the coordinates of all three vertices. 2. Use the 'base and height' method or the Shoelace formula: $Area = \frac{1}{2} |x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2)|$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Follows a clear, logical sequence of applying basic, well-known formulas.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Multiple steps can increase the chance of a single calculation error derailing the whole question.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Gradient: $m = \frac{y_2-y_1}{x_2-x_1}$ (formula booklet)</div><div class="cs-formula">Midpoint: $M = \left(\frac{x_1+x_2}{2}, \frac{y_1+y_2}{2}\right)$ (formula booklet)</div><div class="cs-formula">Perpendicular gradients: $m_1 m_2 = -1$ (MEMORIZE)</div><div class="cs-formula">Area of Triangle (Shoelace): $Area = \frac{1}{2} |x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2)|$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Calculation errors with midpoint or gradient formulas, especially with negative coordinates.</li><li>Incorrectly finding the perpendicular gradient (e.g., using the reciprocal but not changing the sign).</li><li>Algebraic errors when solving simultaneous equations for intersection points.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2023-Q3.html">Jun 2023 Q3</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2024-Q10.html">Oct 2024 Q10</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Oct_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q3.html">Jun 2022 Q3</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-intersection-of-a-line-and-a-circle">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Intersection of a Line and a Circle</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">6-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given the equation of a line (e.g., $y=x+3$) and a circle (e.g., $x^2 + y^2 = 25$) and asked to find their point(s) of intersection.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.2%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">4.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2019: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'19</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">6</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">intersect</span><span class="chip-trigger">meet</span><span class="chip-trigger">points of intersection</span><span class="chip-trigger">line</span><span class="chip-trigger">circle</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The discriminant of the resulting quadratic determines the nature of the intersection: $b^2-4ac > 0$ for 2 points, $b^2-4ac = 0$ for a tangent (1 point), $b^2-4ac < 0$ for no intersection.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Substitution and Solving a Quadratic</span>
+                </div>
+                <div class="approach-when"><b>When:</b> This is the only standard algebraic method for this problem.</div>
+                <ol class='cs-steps'><li>Rearrange the linear equation to make y or x the subject (e.g., $y = mx+c$).</li><li>Substitute this expression into the equation of the circle.</li><li>Expand all brackets and simplify the equation into the standard quadratic form $ax^2 + bx + c = 0$.</li><li>Solve the quadratic equation for the first variable (e.g., x) by factorising or using the formula.</li><li>Substitute the x-value(s) back into the original *linear* equation to find the corresponding y-value(s).</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> A guaranteed algebraic method to find the exact points of intersection.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can lead to messy algebra and arithmetic, especially when expanding brackets or using the quadratic formula.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Quadratic Formula: $x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$ (formula booklet)</div><div class="cs-formula">Discriminant for nature of roots: $b^2 - 4ac$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Errors when expanding squared brackets, for example $(x-2)^2 \neq x^2 - 4$.</li><li>Forgetting to find the corresponding y-coordinates after solving for x.</li><li>Arithmetic errors when simplifying the quadratic or using the quadratic formula.</li><li>Substituting the x-values back into the more complex circle equation instead of the simpler linear one.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2024-Q7.html">Jun 2024 Q7</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>Perpendicular Gradients: $m_1 m_2 = -1$. This is not explicitly in the formula booklet and is absolutely essential. (MEMORIZE)</li><li>General Circle Equation: $x^2 + y^2 + 2gx + 2fy + c = 0$ has Centre $(-g, -f)$ and Radius $\sqrt{g^2+f^2-c}$. Memorizing this saves time over completing the square, but be careful with signs. (MEMORIZE)</li><li>Point-gradient form: $y - y_1 = m(x - x_1)$. The fastest way to write a line's equation. (formula booklet, but memorize for speed)</li><li>Midpoint Formula: $M = \left(\frac{x_1+x_2}{2}, \frac{y_1+y_2}{2}\right)$. (formula booklet, but memorize for speed)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Always draw a quick sketch. Visualising the problem helps to spot geometric relationships (like perpendicular lines) and prevent errors.</li><li>Master the circle equation. Be flawless at converting from the general form to the standard $(x-a)^2 + (y-b)^2 = r^2$ form by completing the square. Watch for sign flips in the centre coordinates.</li><li>The rule $m_1 m_2 = -1$ for perpendicular gradients is the most important concept in this chapter. It's the key to tangents on circles and perpendicular bisectors.</li><li>Use geometry for circles, calculus for curves. For tangents to circles, the perpendicular radius property is usually faster. For any other curve, differentiation is the way.</li><li>For any intersection problem, the method is always simultaneous equations. For a line and a circle, this means substituting the linear equation into the circular one.</li><li>Read the question carefully for the required format of the final answer (e.g., $ax+by+c=0$ vs $y=mx+c$).</li><li>When asked for 'coordinates' or a 'point', always give both the x and y values in your final answer.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>For 'Show that...' questions, you must demonstrate every logical step. If showing a point lies on a line, substitute the coordinates and show that LHS = RHS.</li><li>When finding a perpendicular bisector, explicitly state that you are finding the 'midpoint' and the 'perpendicular gradient'. This signals to the examiner that you know the method.</li><li>If you solve a quadratic and get a complex surd, quickly double-check your algebraic manipulation. While possible, it's often a sign of an earlier mistake.</li><li>Be extra careful with signs when completing the square. $x^2 - 8x$ becomes $(x-4)^2 - 16$, and the x-coordinate of the centre is $+4$.</li><li>Always use the simpler (linear) equation to find the second coordinate after solving a system of simultaneous equations to reduce the chance of errors.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Finding and Using the Equation of a Circle">Finding and Using the Equation of a Circle</option><option value="Intersection of a Line and a Circle">Intersection of a Line and a Circle</option><option value="Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)">Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)</option><option value="Tangents and Normals to Circles">Tangents and Normals to Circles</option><option value="Tangents and Normals to Curves using Differentiation">Tangents and Normals to Curves using Differentiation</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Tangents and Normals to Curves using Differentiation">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q7</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-curves-using-differentiation">Tangents and Normals to Curves using Differentiation</a><div class="qtype-freeform">Differentiation; Normal & Stationary Points</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangents and Normals to Circles">
+            <td class="session">Oct 2019</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-circles">Tangents and Normals to Circles</a><div class="qtype-freeform">Circle properties with tangent</div></td>
+            <td><a class="qlink" href="q-Oct_2019-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding and Using the Equation of a Circle">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-and-using-the-equation-of-a-circle">Finding and Using the Equation of a Circle</a><div class="qtype-freeform">Circle properties & chords</div></td>
+            <td><a class="qlink" href="q-Jan_2020-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding and Using the Equation of a Circle">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q4</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-and-using-the-equation-of-a-circle">Finding and Using the Equation of a Circle</a><div class="qtype-freeform">circle properties & tangent</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding and Using the Equation of a Circle">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-and-using-the-equation-of-a-circle">Finding and Using the Equation of a Circle</a><div class="qtype-freeform">circle properties & area</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding and Using the Equation of a Circle">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-and-using-the-equation-of-a-circle">Finding and Using the Equation of a Circle</a><div class="qtype-freeform">Circle properties and equations</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangents and Normals to Circles">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-circles">Tangents and Normals to Circles</a><div class="qtype-freeform">Circle properties and tangents</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-properties-of-straight-lines-perpendicular-bisectors-intersections-area">Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)</a><div class="qtype-freeform">Proof by counterexample & Coordinate geometry proof</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangents and Normals to Circles">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-circles">Tangents and Normals to Circles</a><div class="qtype-freeform">Equation of tangent to circle</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-properties-of-straight-lines-perpendicular-bisectors-intersections-area">Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)</a><div class="qtype-freeform">equation of perpendicular bisector</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangents and Normals to Curves using Differentiation">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-curves-using-differentiation">Tangents and Normals to Curves using Differentiation</a><div class="qtype-freeform">Equation of Tangent & Area</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangents and Normals to Curves using Differentiation">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangents-and-normals-to-curves-using-differentiation">Tangents and Normals to Curves using Differentiation</a><div class="qtype-freeform">Find equation of tangent</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Intersection of a Line and a Circle">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-intersection-of-a-line-and-a-circle">Intersection of a Line and a Circle</a><div class="qtype-freeform">find intersection of line and circle</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q10</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-properties-of-straight-lines-perpendicular-bisectors-intersections-area">Properties of Straight Lines (Perpendicular Bisectors, Intersections, Area)</a><div class="qtype-freeform">Lines & Area of Triangle</div></td>
+            <td><a class="qlink" href="q-Oct_2024-Q10.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

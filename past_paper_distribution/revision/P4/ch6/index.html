@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P4 · ch6 Integration</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">P4</a><span class="sep">/</span>ch6 Integration</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 P4 · ch6</div>
+  <h1>Integration</h1>
+  <p class="lede">Every P4 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 39 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 P4 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">39</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">355<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">9<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">13</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">43 questions · 393 marks across 13 papers · <b>40.3%</b> of all unit marks · <b>36.1%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 2 q · 19/75 marks (25.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:55%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">25.3%</div>
+            </div><div class="year-bar" title="2020: 4 q · 34/75 marks (45.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:99%"></div>
+                <div class="bar-lbl">'20</div>
+                <div class="bar-val">45.3%</div>
+            </div><div class="year-bar" title="2021: 11 q · 93/225 marks (41.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:90%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">41.3%</div>
+            </div><div class="year-bar" title="2022: 10 q · 89/225 marks (39.6% of paper)">
+                <div class="bar-fill ch-bar" style="height:86%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">39.6%</div>
+            </div><div class="year-bar" title="2023: 10 q · 103/225 marks (45.8% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">45.8%</div>
+            </div><div class="year-bar" title="2024: 6 q · 55/150 marks (36.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:80%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">36.7%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 39 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-definite-integral-by-algebraic-substitution">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Definite integral by algebraic substitution</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">11</span><small>×</small></div>
+                    <div class="marks">5-13m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a definite integral with a complicated integrand, the substitution u=f(x) is either given or must be identified. You must convert the entire integrand to u, change limits, integrate, and evaluate.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">9</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">91</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">20.9%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">23.2%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.1</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 2 q · 15 marks">
+                    <div class="bar-fill" style="height:24%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 6 q · 63 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">63</div>
+                </div><div class="year-bar" title="2024: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:21%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">13</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">use the substitution</span><span class="chip-trigger">by means of the substitution</span><span class="chip-trigger">show that</span><span class="chip-trigger">evaluate</span><span class="chip-trigger">exact value</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The substitution is usually provided — use it exactly as given, do not invent your own.</li><li>All parts of the integrand (including dx) must be expressed in terms of u and du before integrating.</li><li>Limits must be converted from x-values to u-values using the substitution equation.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct substitution (standard method)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the expected method when a substitution is given.</div>
+                <ol class='cs-steps'><li>Write u = f(x) and differentiate to find du/dx.</li><li>Rearrange to express dx in terms of du: dx = du / f'(x).</li><li>If the integrand contains x terms that don't cancel, rearrange u = f(x) to express x in terms of u.</li><li>Substitute everything into the integral so no x or dx remains — only u and du.</li><li>Change the limits: substitute the original x-limits into u = f(x) to get new u-limits.</li><li>Simplify the integrand algebraically (expand, cancel, split fractions).</li><li>Integrate with respect to u.</li><li>Evaluate using the new limits.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and reliable; follows directly from given substitution.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Heavy algebra when expressing x in terms of u, especially for rational substitutions like u = (x+a)/(x+b).</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Split the fraction after substitution</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the substituted integrand is an improper or complex rational function in u.</div>
+                <ol class='cs-steps'><li>After substitution, if the integrand is a rational function, perform polynomial long division if the degree of the numerator ≥ degree of denominator.</li><li>Split into simpler terms (e.g., A + B/u + C/u²).</li><li>Integrate each term separately.</li><li>Evaluate at the limits.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Avoids partial fractions when the fraction simplifies by simple division.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only works when the rational function is amenable to splitting.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\int u^n\,du = \frac{u^{n+1}}{n+1} + C$ for $n \neq -1$ (MEMORIZE)</div><div class="cs-formula">$\int \frac{1}{u}\,du = \ln|u| + C$ (MEMORIZE)</div><div class="cs-formula">$\int \frac{1}{(au+b)}\,du = \frac{1}{a}\ln|au+b| + C$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to change the limits of integration from x-values to u-values.</li><li>Leaving x terms in the integrand after substitution — every x must be converted to u.</li><li>Forgetting to replace dx with the expression in du (e.g., leaving dx in the integral).</li><li>Algebraic errors when rearranging u = f(x) to get x = g(u), especially with rational substitutions.</li><li>Sign errors when the substitution reverses the limits (if u decreases when x increases, limits swap).</li><li>Errors in expanding (u-1)² or similar expressions after substitution.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q5.html">Jan 2021 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q4.html">Jan 2023 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q3.html">Jun 2023 Q3</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q5.html">Jun 2023 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q6.html">Jun 2023 Q6</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q7.html">Oct 2023 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q5.html">Jan 2024 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-integration-by-parts-including-repeated-application">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Integration by parts (including repeated application)</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">10</span><small>×</small></div>
+                    <div class="marks">7-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">Integrand is a product of two different types of function, e.g., x²eˣ, x ln x, eˣ sin x, x² cos x. May ask for indefinite integral, definite integral, area, or volume.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">7</div><div class="stat-l">questions in 5 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">64</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.1</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:30%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2021: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:30%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2022: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:35%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2023: 2 q · 23 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">23</div>
+                </div><div class="year-bar" title="2024: 2 q · 19 marks">
+                    <div class="bar-fill" style="height:83%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">19</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">integration by parts</span><span class="chip-trigger">find the exact value</span><span class="chip-trigger">show that</span><span class="chip-trigger">area</span><span class="chip-trigger">∫ x² e</span><span class="chip-trigger">∫ x ln</span><span class="chip-trigger">∫ e sin</span><span class="chip-trigger">∫ e cos</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Use LIATE ordering (Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential) to choose u.</li><li>When the integral recurs (e.g., ∫eˣ sin x dx), set I = the integral and solve the resulting equation for I.</li><li>For definite integrals, apply limits only at the final step after all integration is complete.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Standard integration by parts (LIATE rule)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the integrand is a product of two functions from different categories.</div>
+                <ol class='cs-steps'><li>Identify u and dv/dx using LIATE: u = the function that simplifies when differentiated (e.g., ln x, xⁿ).</li><li>Differentiate u to get du/dx; integrate dv/dx to get v.</li><li>Apply the formula: $\int u \frac{dv}{dx}\,dx = uv - \int v \frac{du}{dx}\,dx$.</li><li>Simplify the resulting integral.</li><li>If the new integral still requires parts, repeat (e.g., x² requires two rounds).</li><li>For definite integrals, apply limits to the [uv] term and the final integral.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Universally applicable; systematic with LIATE.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be lengthy with repeated application; easy to make sign errors.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Tabular method (for repeated parts with polynomial × exponential/trig)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When one factor is a polynomial (differentiates to zero eventually) and the other is easily integrated repeatedly.</div>
+                <ol class='cs-steps'><li>Create a table: Column 1 = successive derivatives of the polynomial; Column 2 = successive integrals of the other function.</li><li>Multiply diagonally with alternating signs: +, -, +, -, ...</li><li>Sum all diagonal products to get the answer.</li><li>Add + C for indefinite integrals.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Much faster and less error-prone for polynomial × exp or polynomial × trig.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Does not work for recurring integrals like ∫eˣ sin x dx.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">C: Recurring integral method</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the original integral reappears after two rounds of parts (e.g., ∫eˣ sin x dx or ∫eˣ cos x dx).</div>
+                <ol class='cs-steps'><li>Let I = ∫f(x)g(x)dx.</li><li>Apply integration by parts once.</li><li>Apply integration by parts a second time to the new integral.</li><li>Recognise that I appears on the right-hand side.</li><li>Collect I terms: 2I = expression, so I = expression/2.</li><li>Add + C.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Elegant solution for exponential × trigonometric products.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Students often forget to solve for I or make sign errors in the two rounds.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\int u\,dv = uv - \int v\,du$ (formula booklet)</div><div class="cs-formula">$\int e^{ax}\,dx = \frac{1}{a}e^{ax} + C$ (MEMORIZE)</div><div class="cs-formula">$\int \ln x\,dx = x\ln x - x + C$ (MEMORIZE — derived by parts with u=ln x, dv=dx)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Choosing u and dv/dx the wrong way round — leads to a harder integral.</li><li>Sign errors, especially the minus sign in the IBP formula and when applying it twice.</li><li>Forgetting the 1/a factor when integrating e^(ax): ∫e^(3x)dx = (1/3)e^(3x), not e^(3x).</li><li>For recurring integrals, inconsistent choice of u and dv in the second application — must keep the same type as u both times.</li><li>Algebraic errors when solving 2I = ... for I.</li><li>Forgetting to evaluate the [uv] boundary term in definite integrals.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q7.html">Jan 2021 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q8.html">Jan 2023 Q8</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q7.html">Jan 2024 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q5.html">Jun 2022 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q8.html">Jun 2023 Q8</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q7.html">Jun 2024 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2020-Q5.html">Oct 2020 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q8.html">Oct 2021 Q8</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-volume-of-revolution-cartesian-and-parametric">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Volume of revolution (Cartesian and parametric)</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">8</span><small>×</small></div>
+                    <div class="marks">5-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Asked to find the exact volume when a region bounded by a curve is rotated 2π radians about the x-axis (or y-axis). May involve exponential, logarithmic, or parametric curves. Sometimes the volume is given and you solve for an unknown limit.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">questions in 4 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">39</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.9%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:43%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2021: 2 q · 14 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2022: 2 q · 14 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2023: 1 q · 5 marks">
+                    <div class="bar-fill" style="height:36%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">5</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">volume of revolution</span><span class="chip-trigger">rotated 2π</span><span class="chip-trigger">rotated through 360°</span><span class="chip-trigger">solid of revolution</span><span class="chip-trigger">exact volume</span><span class="chip-trigger">V = π∫</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Rotation is about the x-axis unless stated otherwise; use $V = \pi\int y^2\,dx$.</li><li>For parametric curves, convert using $V = \pi\int y^2 \frac{dx}{d\theta}\,d\theta$ with θ-limits.</li><li>For regions between two curves (washer method), use $V = \pi\int(y_{\text{outer}}^2 - y_{\text{inner}}^2)\,dx$.</li><li>All volumes are positive — take absolute value if integration gives negative.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct integration of πy²</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When y is given explicitly as a function of x.</div>
+                <ol class='cs-steps'><li>Write V = π∫ₐᵇ y² dx.</li><li>Square y carefully — expand all brackets (do NOT assume (A-B)² = A²-B²).</li><li>Integrate term by term.</li><li>Evaluate at the limits.</li><li>Include the factor of π in the final answer.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward for simple functions.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Squaring can produce complicated expressions, especially with exponentials or surds.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Parametric volume of revolution</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the curve is given parametrically as x(t), y(t).</div>
+                <ol class='cs-steps'><li>Find dx/dt (or dx/dθ).</li><li>Write V = π∫ y² · (dx/dt) dt.</li><li>Convert x-limits to t-limits (or θ-limits) by solving x(t) = boundary values.</li><li>Expand y² and multiply by dx/dt.</li><li>Simplify using trigonometric identities if needed (e.g., double angle formulas).</li><li>Integrate and evaluate.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Avoids the need to convert to Cartesian form.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires careful limit conversion and can involve heavy trig manipulation.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">C: Washer method (region between two curves)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the region is bounded by two curves and both contribute to the volume.</div>
+                <ol class='cs-steps'><li>Identify the outer curve (further from axis) and inner curve.</li><li>Write V = π∫ₐᵇ (y_outer² - y_inner²) dx.</li><li>Determine limits from intersection points.</li><li>Expand, integrate, and evaluate.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Handles hollow solids correctly.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must correctly identify which curve is outer/inner; easy to subtract the wrong way.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$V = \pi\int_a^b y^2\,dx$ — rotation about x-axis (formula booklet)</div><div class="cs-formula">$V = \pi\int_a^b x^2\,dy$ — rotation about y-axis (formula booklet)</div><div class="cs-formula">$V = \pi\int_{t_1}^{t_2} y^2 \frac{dx}{dt}\,dt$ — parametric form (MEMORIZE — derived from above)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the π factor in the volume formula.</li><li>Not squaring y before integrating — integrating y instead of y².</li><li>Incorrectly expanding (e^(x/2) - 2)²: must use (A-B)² = A² - 2AB + B², giving e^x - 4e^(x/2) + 4.</li><li>Incorrectly squaring exponentials: (e^(x/2))² = e^x, NOT e^(x²/4).</li><li>Forgetting to change limits when using parametric form.</li><li>Subtracting curves in the wrong order in washer method.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q9.html">Jan 2021 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q3.html">Jan 2023 Q3</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q2.html">Jun 2021 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2020-Q3.html">Oct 2020 Q3</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q8.html">Oct 2021 Q8</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q5.html">Oct 2022 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-integration-using-partial-fractions-including-irreducible-quadratic-factors">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Integration using partial fractions (including irreducible quadratic factors)</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">7-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">A rational function must be decomposed into partial fractions before integrating. May involve distinct linear factors, repeated linear factors, or irreducible quadratic factors. Often combined with substitution.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">41</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.2</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 12 marks">
+                    <div class="bar-fill" style="height:57%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">12</div>
+                </div><div class="year-bar" title="2021: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:38%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2022: 2 q · 21 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">21</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">partial fractions</span><span class="chip-trigger">express</span><span class="chip-trigger">hence find</span><span class="chip-trigger">irreducible quadratic</span><span class="chip-trigger">repeated factor</span><span class="chip-trigger">∫ rational function</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The degree of the numerator must be less than the degree of the denominator; if not, perform polynomial long division first.</li><li>For repeated linear factor (ax+b)², include both A/(ax+b) and B/(ax+b)² terms.</li><li>For irreducible quadratic factor (x²+a²), use numerator (Bx+C), not just a constant.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Decompose then integrate each term</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Standard approach for all partial fraction integration.</div>
+                <ol class='cs-steps'><li>Factorise the denominator completely.</li><li>Write the correct partial fraction form (A/(linear), A/(linear) + B/(linear)², (Bx+C)/(quadratic)).</li><li>Find constants by substituting convenient values of x or comparing coefficients.</li><li>Integrate each fraction: A/(ax+b) → (A/a)ln|ax+b|; B/(ax+b)² → -B/[a(ax+b)]; (Bx+C)/(x²+a²) → split into Bx/(x²+a²) + C/(x²+a²).</li><li>For Bx/(x²+a²): use ln; for C/(x²+a²): use arctan.</li><li>Combine and simplify using log laws.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and always works for rational functions.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Finding constants can be tedious; easy to forget the Bx+C form for quadratics.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\int \frac{1}{ax+b}\,dx = \frac{1}{a}\ln|ax+b| + C$ (MEMORIZE)</div><div class="cs-formula">$\int \frac{1}{(ax+b)^2}\,dx = -\frac{1}{a(ax+b)} + C$ (MEMORIZE)</div><div class="cs-formula">$\int \frac{1}{x^2+a^2}\,dx = \frac{1}{a}\arctan\frac{x}{a} + C$ (formula booklet)</div><div class="cs-formula">$\int \frac{f'(x)}{f(x)}\,dx = \ln|f(x)| + C$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the Bx+C numerator form for the irreducible quadratic factor — using just B is wrong.</li><li>Not splitting (−2x+2)/(x²+1) into −2x/(x²+1) + 2/(x²+1) before integrating.</li><li>Incorrect number of partial fraction terms for repeated factors.</li><li>Forgetting the 1/a factor in the arctan result.</li><li>Log arithmetic errors when evaluating definite integrals.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2020-Q7.html">Oct 2020 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q7.html">Oct 2022 Q7</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q2.html">Jun 2022 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-separable-differential-equations-with-partial-fractions">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Separable differential equations (with partial fractions)</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">7</span><small>×</small></div>
+                    <div class="marks">6-14m</div>
+                </div>
+            </div>
+            <p class="qt-look">A first-order ODE dy/dx = f(x)g(y) or similar. You must separate variables, integrate both sides (often requiring partial fractions or standard results), apply initial conditions, and sometimes find limiting behaviour as t→∞.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">38</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.7%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:31%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2021: 3 q · 29 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">29</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">differential equation</span><span class="chip-trigger">separation of variables</span><span class="chip-trigger">given that when</span><span class="chip-trigger">initial condition</span><span class="chip-trigger">show that</span><span class="chip-trigger">limiting value</span><span class="chip-trigger">long-term behaviour</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The DE is separable: can be written as h(y) dy = k(x) dx.</li><li>Initial/boundary conditions are used to find the arbitrary constant after integration.</li><li>For limiting behaviour, let t → ∞ and use the fact that exponential decay terms → 0.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Separate, decompose with partial fractions, integrate</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the y-side (or x-side) of the separated equation has a product of linear factors in the denominator.</div>
+                <ol class='cs-steps'><li>Rearrange the DE into the form h(y) dy = k(x) dx.</li><li>If h(y) is a rational function, decompose into partial fractions (check for repeated factors or irreducible quadratics).</li><li>Integrate both sides separately.</li><li>Apply the initial condition to find C.</li><li>Rearrange to express the dependent variable explicitly if required.</li><li>For limiting behaviour, let the independent variable → ∞ and interpret.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Handles a wide variety of DEs; partial fractions always work for rational integrands.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Multi-step process with many places for algebraic errors.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Separate and use standard integral results directly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the integrals on one or both sides are standard forms (e.g., ∫1/y dy, ∫cos²x dx, ∫cosec y dy).</div>
+                <ol class='cs-steps'><li>Separate variables.</li><li>Recognise standard forms: ∫1/y dy = ln|y|, ∫cosec y dy = -ln|cosec y + cot y|, etc.</li><li>Integrate both sides.</li><li>Apply initial conditions.</li><li>Rearrange.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Faster when standard results are applicable.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires memorisation of standard integrals like ∫cosec x dx.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\frac{1}{(y-a)(y-b)} = \frac{1}{a-b}\left(\frac{1}{y-a} - \frac{1}{y-b}\right)$ — partial fractions (MEMORIZE pattern)</div><div class="cs-formula">$\int \frac{1}{ax+b}\,dx = \frac{1}{a}\ln|ax+b| + C$ (MEMORIZE)</div><div class="cs-formula">$\int \cot x\,dx = \ln|\sin x| + C$ (formula booklet)</div><div class="cs-formula">$\int \csc x\,dx = -\ln|\csc x + \cot x| + C$ (formula booklet)</div><div class="cs-formula">$\ln a - \ln b = \ln\frac{a}{b}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Incorrect separation: writing (H-5)(H+3) dH = dt instead of 1/[(H-5)(H+3)] dH = dt.</li><li>Forgetting the negative sign in the DE when separating variables.</li><li>Forgetting the constant of integration C after integrating both sides.</li><li>Sign errors when rearranging expressions like -1/A = -3/(8t⁴) + C.</li><li>Incorrect integration of y² (writing 2y instead of y³/3).</li><li>Forgetting the 1/a factor in ∫1/(ax+b) dx = (1/a)ln|ax+b|.</li><li>Errors in log manipulation when combining ln terms.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q10.html">Jan 2021 Q10</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q8.html">Jun 2021 Q8</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q2.html">Jun 2022 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q9.html">Jan 2022 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2020-Q9.html">Oct 2020 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q2.html">Oct 2021 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-area-under-a-parametric-curve">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Area under a parametric curve</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">8-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">A curve is defined parametrically and you must find the area of a region bounded by the curve and/or axes. May also require converting parametric to Cartesian form or finding the range.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">38</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.7%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:65%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 10 marks">
+                    <div class="bar-fill" style="height:59%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">10</div>
+                </div><div class="year-bar" title="2022: 2 q · 17 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">17</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">parametric</span><span class="chip-trigger">area</span><span class="chip-trigger">x = f(t)</span><span class="chip-trigger">y = g(t)</span><span class="chip-trigger">show that the area</span><span class="chip-trigger">Cartesian equation</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Area formula: $A = \int y \frac{dx}{dt}\,dt$ with appropriate t-limits.</li><li>Limits must correspond to the x-boundaries of the region, converted to t-values.</li><li>If dx/dt is negative over the interval, the integral gives a negative value — take the absolute value or reverse limits.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Parametric area formula directly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the curve is given parametrically and converting to Cartesian is difficult.</div>
+                <ol class='cs-steps'><li>Find dx/dt by differentiating x(t).</li><li>Determine t-limits by solving x(t) = boundary x-values.</li><li>Write A = ∫ y(t) · (dx/dt) dt with the t-limits.</li><li>Simplify the integrand using algebraic or trigonometric identities.</li><li>Integrate and evaluate.</li><li>Ensure the answer is positive (take |A| if needed).</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Avoids messy Cartesian conversion.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be very careful with limit direction and sign of dx/dt.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Convert to Cartesian, then integrate</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the parametric equations are simple enough to eliminate t easily.</div>
+                <ol class='cs-steps'><li>Eliminate the parameter to get y = f(x).</li><li>Determine the x-domain from the parameter range.</li><li>Integrate y with respect to x directly.</li><li>Evaluate the definite integral.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Conceptually simpler if Cartesian form is neat.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Often impossible or very messy for trigonometric parametric equations.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$A = \int_{t_1}^{t_2} y\,\frac{dx}{dt}\,dt$ (MEMORIZE — not always in formula booklet for this form)</div><div class="cs-formula">$\cos 2t = 1 - 2\sin^2 t = 2\cos^2 t - 1$ (MEMORIZE)</div><div class="cs-formula">$\sin 2t = 2\sin t \cos t$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the negative sign from dx/dt, giving the wrong sign for area.</li><li>Incorrect limits: not tracing which t-values correspond to the boundary of R.</li><li>Forgetting to flip integration limits when converting from x to t and the mapping reverses direction.</li><li>Not cancelling terms properly when substituting u = 81 - 16t² or similar.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q5.html">Jan 2022 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q2.html">Oct 2022 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-definite-integral-with-trigonometric-substitution-and-identities">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Definite integral with trigonometric substitution and identities</div>
+                    <span class="rank-pill">#7</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">9-11m</div>
+                </div>
+            </div>
+            <p class="qt-look">A definite integral involving square roots or quadratic expressions where a trigonometric substitution (x = a sin θ, x = a tan θ, etc.) is suggested. Requires heavy use of trig identities to simplify.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">28</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.1%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 10 marks">
+                    <div class="bar-fill" style="height:56%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">10</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 2 q · 18 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">18</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">substitution x = a sinθ</span><span class="chip-trigger">substitution x = a tanθ</span><span class="chip-trigger">trigonometric substitution</span><span class="chip-trigger">sin²θ cos²θ</span><span class="chip-trigger">exact value</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The substitution converts the integrand into a purely trigonometric expression.</li><li>Standard identities (double angle, Pythagorean) will be needed to simplify.</li><li>Limits change from x-values to θ-values.</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Apply given trig substitution</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the question specifies x = a sinθ or x = a tanθ.</div>
+                <ol class='cs-steps'><li>Write x = a sinθ (or tanθ), so dx = a cosθ dθ (or a sec²θ dθ).</li><li>Substitute into the integrand, replacing all x and dx.</li><li>Simplify using Pythagorean identity: 1 - sin²θ = cos²θ or 1 + tan²θ = sec²θ.</li><li>Change limits: solve for θ at each x-boundary.</li><li>Simplify the trigonometric integrand using double angle formulas if needed.</li><li>Integrate and evaluate.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Eliminates square roots and produces tractable trig integrals.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires fluent knowledge of trig identities; limits conversion needs care.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\sin^2\theta = \frac{1 - \cos 2\theta}{2}$ (MEMORIZE)</div><div class="cs-formula">$\cos^2\theta = \frac{1 + \cos 2\theta}{2}$ (MEMORIZE)</div><div class="cs-formula">$\sin 2\theta = 2\sin\theta\cos\theta$ (MEMORIZE)</div><div class="cs-formula">$1 + \tan^2\theta = \sec^2\theta$ (MEMORIZE)</div><div class="cs-formula">$\int \sec^2\theta\,d\theta = \tan\theta + C$ (MEMORIZE)</div><div class="cs-formula">$\int \tan\theta\,d\theta = -\ln|\cos\theta| + C$ or $\ln|\sec\theta| + C$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to change limits from x to θ — evaluating at x-values with a θ-expression.</li><li>Errors in trig identities, especially when simplifying sin²θ cos²θ = (1/4)sin²2θ.</li><li>Forgetting the scalar factor (1/a) when integrating trig functions of (aθ).</li><li>Misreading √3 as 3 from poorly printed questions.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q9.html">Jan 2021 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q5.html">Jan 2024 Q5</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-differentiation-within-integration-context-product-rule-chain-rule-show-that-setup">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Differentiation within integration context (product rule, chain rule, show-that setup)</div>
+                    <span class="rank-pill">#8</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">5-6m</div>
+                </div>
+            </div>
+            <p class="qt-look">A differentiation question that sets up a later integration part, or is tagged within the integration chapter. Involves product rule and chain rule to differentiate complex expressions, then use the result to integrate.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">16</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">4.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">4.1%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 5 marks">
+                    <div class="bar-fill" style="height:45%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">5</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">differentiate</span><span class="chip-trigger">show that</span><span class="chip-trigger">hence integrate</span><span class="chip-trigger">product rule</span><span class="chip-trigger">chain rule</span><span class="chip-trigger">factorise</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The differentiation result is used in a subsequent integration — get it right or the rest fails.</li><li>Exact algebraic form must match what's requested (fully factorised, simplified).</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Product rule + chain rule, then reverse for integration</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked to differentiate a product and then use the result to find an integral.</div>
+                <ol class='cs-steps'><li>Identify the two parts for the product rule: u and v.</li><li>Differentiate each using chain rule where needed.</li><li>Apply product rule: d/dx(uv) = u(dv/dx) + v(du/dx).</li><li>Simplify and factorise to match the required form.</li><li>For the 'hence integrate' part, rearrange the derivative result to isolate the target integral.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Connects differentiation and integration cleanly.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Factorisation can be tricky with fractional powers.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\frac{d}{dx}[uv] = u\frac{dv}{dx} + v\frac{du}{dx}$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[f(g(x))] = f'(g(x)) \cdot g'(x)$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[x^n] = nx^{n-1}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Failing to apply the chain rule correctly when differentiating composite functions with fractional powers.</li><li>Errors in algebraic simplification, especially when factorising terms with fractional exponents.</li><li>Not recognising that d/dx[F(x)] = f(x) implies ∫f(x)dx = F(x) + C.</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2024-Q1.html">Jun 2024 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q9.html">Jan 2022 Q9</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$\int u\,dv = uv - \int v\,du$ — integration by parts formula (formula booklet)</li><li>$V = \pi\int_a^b y^2\,dx$ — volume of revolution about x-axis (formula booklet)</li><li>$A = \int_{t_1}^{t_2} y\,\frac{dx}{dt}\,dt$ — area under parametric curve (MEMORIZE)</li><li>$\int \frac{f'(x)}{f(x)}\,dx = \ln|f(x)| + C$ (MEMORIZE)</li><li>$\int \frac{1}{x^2+a^2}\,dx = \frac{1}{a}\arctan\frac{x}{a} + C$ (formula booklet)</li><li>$\sin^2\theta = \frac{1-\cos 2\theta}{2}$, $\cos^2\theta = \frac{1+\cos 2\theta}{2}$ (MEMORIZE)</li><li>$\int \sec^2 x\,dx = \tan x + C$, $\int \csc x\,dx = -\ln|\csc x + \cot x| + C$ (formula booklet)</li><li>$\int \tan x\,dx = \ln|\sec x| + C$, $\int \cot x\,dx = \ln|\sin x| + C$ (formula booklet)</li><li>Partial fraction forms: $\frac{A}{ax+b}$ for linear, $\frac{A}{ax+b}+\frac{B}{(ax+b)^2}$ for repeated, $\frac{Bx+C}{ax^2+bx+c}$ for irreducible quadratic (MEMORIZE pattern)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Identify the integration technique FIRST: scan for substitution (given or implied), product of two types (→ parts), rational function (→ partial fractions), or parametric setup.</li><li>For substitution problems: immediately write u = ..., find du/dx, convert dx, convert all x terms, and change limits — do this mechanically before attempting to simplify.</li><li>For integration by parts: always use LIATE to choose u. If the integral recurs, call it I and solve algebraically.</li><li>For volume of revolution: always square y first, then integrate. Never forget π. For parametric, replace dx with (dx/dt)dt.</li><li>For differential equations: separate variables completely before integrating. Check the separated form by multiplying back.</li><li>Show-that questions: if your answer doesn't match, check sign errors and algebraic manipulation — work backwards from the given answer if stuck.</li><li>Always simplify logarithmic answers using log laws: ln a − ln b = ln(a/b), n ln a = ln(aⁿ).</li><li>Practice changing limits for substitution — this accounts for the most common mark loss across all sessions.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Read the question for a given substitution before trying to invent your own — if they say 'use u = ...', use it.</li><li>When changing limits for substitution, write old → new limits explicitly in the margin to avoid mix-ups.</li><li>In 'show that' questions, if your algebra doesn't match, try working backwards from the given answer to find where you diverged.</li><li>For integration by parts, write u, du/dx, v, dv/dx in a small table before applying the formula — reduces sign errors dramatically.</li><li>When squaring y for volume of revolution, expand fully and carefully: (A ± B)² = A² ± 2AB + B², never A² ± B².</li><li>Check units/dimensions of your answer: volumes should be positive and contain π; areas should be positive.</li><li>For separable DEs, after separating, sanity-check by mentally multiplying both sides back together — you should recover the original DE.</li><li>Use exact values throughout (ln, π, surds) — do not convert to decimals unless the question specifically asks for a decimal answer.</li><li>If an integral looks impossible, check whether you need a trig identity first (especially double angle formulas to reduce powers).</li><li>Time management: substitution and parts questions average 8-10 minutes each. If stuck after 3 minutes, move on and return later.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Area under a parametric curve">Area under a parametric curve</option><option value="Definite integral by algebraic substitution">Definite integral by algebraic substitution</option><option value="Definite integral with trigonometric substitution and identities">Definite integral with trigonometric substitution and identities</option><option value="Differentiation within integration context (product rule, chain rule, show-that setup)">Differentiation within integration context (product rule, chain rule, show-that setup)</option><option value="Integration by parts (including repeated application)">Integration by parts (including repeated application)</option><option value="Integration using partial fractions (including irreducible quadratic factors)">Integration using partial fractions (including irreducible quadratic factors)</option><option value="Separable differential equations (with partial fractions)">Separable differential equations (with partial fractions)</option><option value="Volume of revolution (Cartesian and parametric)">Volume of revolution (Cartesian and parametric)</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Area under a parametric curve">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q8</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-area-under-a-parametric-curve">Area under a parametric curve</a><div class="qtype-freeform">3D vectors and geometry</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">volume of revolution</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q5</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">integration by parts & area</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration using partial fractions (including irreducible quadratic factors)">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q7</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-using-partial-fractions-including-irreducible-quadratic-factors">Integration using partial fractions (including irreducible quadratic factors)</a><div class="qtype-freeform">Integration by substitution & partial fractions</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Separable differential equations (with partial fractions)">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q9</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-separable-differential-equations-with-partial-fractions">Separable differential equations (with partial fractions)</a><div class="qtype-freeform">solve separable differential equation</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">integration by substitution definite integral</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">Repeated integration by parts, area</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral with trigonometric substitution and identities">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q9</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-with-trigonometric-substitution-and-identities">Definite integral with trigonometric substitution and identities</a><div class="qtype-freeform">volume of revolution parametric</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Separable differential equations (with partial fractions)">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q10</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-separable-differential-equations-with-partial-fractions">Separable differential equations (with partial fractions)</a><div class="qtype-freeform">Solve separable differential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q10.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">volume of revolution by integration</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration using partial fractions (including irreducible quadratic factors)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q4</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-using-partial-fractions-including-irreducible-quadratic-factors">Integration using partial fractions (including irreducible quadratic factors)</a><div class="qtype-freeform">definite integral by substitution</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Area under a parametric curve">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-area-under-a-parametric-curve">Area under a parametric curve</a><div class="qtype-freeform">parametric area & cartesian conversion</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Separable differential equations (with partial fractions)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q8</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-separable-differential-equations-with-partial-fractions">Separable differential equations (with partial fractions)</a><div class="qtype-freeform">solve differential equation</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Separable differential equations (with partial fractions)">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-separable-differential-equations-with-partial-fractions">Separable differential equations (with partial fractions)</a><div class="qtype-freeform">solve separable differential equation</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">definite integration by substitution</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q8</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">volume of revolution & integration by parts</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Area under a parametric curve">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-area-under-a-parametric-curve">Area under a parametric curve</a><div class="qtype-freeform">Area under parametric curve</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">Volume of Revolution with Integration by Parts</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiation within integration context (product rule, chain rule, show-that setup)">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q9</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-differentiation-within-integration-context-product-rule-chain-rule-show-that-setup">Differentiation within integration context (product rule, chain rule, show-that setup)</a><div class="qtype-freeform">separable differential equations</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration using partial fractions (including irreducible quadratic factors)">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-using-partial-fractions-including-irreducible-quadratic-factors">Integration using partial fractions (including irreducible quadratic factors)</a><div class="qtype-freeform">Separable ODE with partial fractions</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">repeated integration by parts</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Area under a parametric curve">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-area-under-a-parametric-curve">Area under a parametric curve</a><div class="qtype-freeform">Parametric to Cartesian & Integrate Algebraic Fraction</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">volume of revolution with unknown limit</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration using partial fractions (including irreducible quadratic factors)">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-using-partial-fractions-including-irreducible-quadratic-factors">Integration using partial fractions (including irreducible quadratic factors)</a><div class="qtype-freeform">integrate using partial fractions</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Volume of revolution (Cartesian and parametric)">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-volume-of-revolution-cartesian-and-parametric">Volume of revolution (Cartesian and parametric)</a><div class="qtype-freeform">Volume of Revolution</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q4</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">Integration by Substitution</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">Definite integral by parts</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">definite integration by substitution</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q5</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">Definite integral by substitution</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">definite integration by substitution</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">Definite & indefinite integration by parts</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">Prove algebraic inequality</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">Integration by substitution</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral with trigonometric substitution and identities">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q5</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-with-trigonometric-substitution-and-identities">Definite integral with trigonometric substitution and identities</a><div class="qtype-freeform">Definite integral by substitution</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">Integration by parts (repeated)</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Differentiation within integration context (product rule, chain rule, show-that setup)">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-differentiation-within-integration-context-product-rule-chain-rule-show-that-setup">Differentiation within integration context (product rule, chain rule, show-that setup)</a><div class="qtype-freeform">differentiate using product rule</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral by algebraic substitution">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q5</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-by-algebraic-substitution">Definite integral by algebraic substitution</a><div class="qtype-freeform">Missing Question Data</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Integration by parts (including repeated application)">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-integration-by-parts-including-repeated-application">Integration by parts (including repeated application)</a><div class="qtype-freeform">definite integration by parts</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Definite integral with trigonometric substitution and identities">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q9</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-definite-integral-with-trigonometric-substitution-and-identities">Definite integral with trigonometric substitution and identities</a><div class="qtype-freeform">definite integral with trigonometry</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q9.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

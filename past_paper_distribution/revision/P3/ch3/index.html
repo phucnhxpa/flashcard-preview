@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P3 · ch3 Exponentials and logarithms</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">P3</a><span class="sep">/</span>ch3 Exponentials and logarithms</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 P3 · ch3</div>
+  <h1>Exponentials and logarithms</h1>
+  <p class="lede">Every P3 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 11 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 P3 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">11</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">68<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">6<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">11</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">12 questions · 75 marks across 15 papers · <b>6.7%</b> of all unit marks · <b>8.5%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 1 q · 7/75 marks (9.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">9.3%</div>
+            </div><div class="year-bar" title="2020: 2 q · 11/150 marks (7.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:78%"></div>
+                <div class="bar-lbl">'20</div>
+                <div class="bar-val">7.3%</div>
+            </div><div class="year-bar" title="2021: 3 q · 20/225 marks (8.9% of paper)">
+                <div class="bar-fill ch-bar" style="height:96%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">8.9%</div>
+            </div><div class="year-bar" title="2022: 1 q · 7/225 marks (3.1% of paper)">
+                <div class="bar-fill ch-bar" style="height:33%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">3.1%</div>
+            </div><div class="year-bar" title="2023: 3 q · 17/225 marks (7.6% of paper)">
+                <div class="bar-fill ch-bar" style="height:82%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">7.6%</div>
+            </div><div class="year-bar" title="2024: 2 q · 13/225 marks (5.8% of paper)">
+                <div class="bar-fill ch-bar" style="height:62%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">5.8%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 11 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-logarithmic-transformation-linearising-an-exponential-model-from-graph">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Logarithmic transformation / linearising an exponential model (from graph)</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">5-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">A graph of $\log y$ against $x$ (or $\log y$ against $\log x$) is given as a straight line. You must find the equation of the line and convert it back to the original model $y = ab^x$ or $y = ax^n$. Two data points may be given.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">19</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 5 marks">
+                    <div class="bar-fill" style="height:71%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">5</div>
+                </div><div class="year-bar" title="2021: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2022: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">straight line</span><span class="chip-trigger">log y</span><span class="chip-trigger">log x</span><span class="chip-trigger">graph</span><span class="chip-trigger">model</span><span class="chip-trigger">gradient</span><span class="chip-trigger">intercept</span><span class="chip-trigger">exponential model</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>$\log$ usually means $\log_{10}$ unless $\ln$ is explicitly stated — check the axis labels</li><li>The straight-line form $\log y = (\log b)x + \log a$ corresponds to $y = ab^x$</li><li>The straight-line form $\log y = n \log x + \log a$ corresponds to $y = ax^n$</li><li>Constants $a$ and $b$ should be found to appropriate accuracy (usually 3 s.f.) unless exact values are clear</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Find line equation then equate coefficients</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When two points on the log graph are given or gradient/intercept can be read off</div>
+                <ol class='cs-steps'><li>Identify the axes: is it $\log y$ vs $x$, or $\log y$ vs $\log x$?</li><li>Find the gradient $m$ using $m = \frac{y_2 - y_1}{x_2 - x_1}$ (using the log-scale coordinates)</li><li>Find the $y$-intercept $c$ using $\log y = mx + c$ and one of the points</li><li>Write the full straight-line equation: $\log y = mx + c$</li><li>Compare with the theoretical form: e.g. for $y = ab^x$, $\log y = x \log b + \log a$</li><li>Equate: gradient $m = \log b \Rightarrow b = 10^m$; intercept $c = \log a \Rightarrow a = 10^c$</li><li>Write the final model $y = ab^x$ with calculated values</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Methodical and clearly shows working for full marks</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires careful identification of which log form corresponds to which model</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Substitute two data points directly into the exponential model</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you prefer to work directly with the original model and solve simultaneous equations</div>
+                <ol class='cs-steps'><li>Write $y = ab^x$ and substitute each data point to get two equations</li><li>Divide one equation by the other to eliminate $a$</li><li>Solve for $b$, then back-substitute to find $a$</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Avoids logarithm manipulation entirely if data points are in original (non-log) form</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> If data is given in log form, you must first convert back, which adds steps</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$y = ab^x \Rightarrow \log y = x\log b + \log a$ — linear in $x$ (MEMORIZE)</div><div class="cs-formula">$y = ax^n \Rightarrow \log y = n\log x + \log a$ — linear in $\log x$ (MEMORIZE)</div><div class="cs-formula">$\log(AB) = \log A + \log B$ (MEMORIZE)</div><div class="cs-formula">$\log(A^n) = n\log A$ (MEMORIZE)</div><div class="cs-formula">Gradient $= \frac{y_2 - y_1}{x_2 - x_1}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Confusing $\log(ab^t)$ with $(\log a)(\log b)^t$ — must use $\log a + t\log b$</li><li>Reading $\log_{10}$ values from the graph but then using $\ln$ in calculations (or vice versa)</li><li>Premature rounding of $a$ and $b$ before using them in subsequent parts of the question</li><li>Writing $\log(a + b)$ instead of $\log a + \log b$ — the addition rule applies to products, not sums</li><li>Forgetting that $4 \neq \log_{10} 4$; a constant on a log axis must be converted: $c = \log a \Rightarrow a = 10^c$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2020-Q3.html">Jan 2020 Q3</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q5.html">Jun 2021 Q5</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q4.html">Jun 2022 Q4</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-solve-exponential-equation-via-hidden-quadratic-substitution">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Solve exponential equation via hidden quadratic substitution</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">5-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">An equation involving terms like $a^{2x}$, $a^x$, and a constant. The exponents suggest a quadratic structure in disguise, e.g. $3^{2x} + 5 \cdot 3^x - 6 = 0$ or $e^{2x} - 7e^x + 12 = 0$.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">17</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">22.7%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">5.7</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 2 q · 11 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2024: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:55%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">6</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">exponential equation</span><span class="chip-trigger">solve</span><span class="chip-trigger">e^{2x}</span><span class="chip-trigger">3^{2x}</span><span class="chip-trigger">quadratic</span><span class="chip-trigger">exact form</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Exponential function $a^x > 0$ for all real $x$, so any substitution variable $y = a^x$ must be positive — reject $y \le 0$ solutions</li><li>If the question says 'exact form', leave answer in terms of $\ln$ or $\log$ — do not use a calculator decimal</li><li>Assume real solutions only unless stated otherwise</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Substitution to form quadratic</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you spot $a^{2x} = (a^x)^2$ and the equation has terms in $a^{2x}$, $a^x$, and constants</div>
+                <ol class='cs-steps'><li>Rewrite all exponential terms in terms of a single base, e.g. recognise $9^x = (3^x)^2$ or $e^{2x} = (e^x)^2$, and rewrite $a^{2x+1} = a \cdot (a^x)^2$</li><li>Let $y = a^x$ (or the appropriate base expression)</li><li>Rewrite the equation as a quadratic in $y$: $Ay^2 + By + C = 0$</li><li>Solve the quadratic by factorisation or the quadratic formula</li><li>Reject any solution where $y \le 0$ (since $a^x > 0$)</li><li>For each valid $y$, solve $a^x = y$ by taking logarithms: $x = \frac{\ln y}{\ln a}$</li><li>Give answer in exact form unless told otherwise</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and reduces to familiar quadratic techniques</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to forget to substitute back or to reject negative $y$ values</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Direct logarithmic manipulation (simple cases only)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the equation simplifies to $a^x = k$ after straightforward algebra without needing a quadratic</div>
+                <ol class='cs-steps'><li>Isolate the exponential term on one side</li><li>Take $\ln$ (or $\log_{10}$) of both sides</li><li>Apply power rule: $\ln(a^x) = x \ln a$</li><li>Solve for $x$</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Faster when no quadratic structure is present</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Not applicable when two different exponential terms are present</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$a^{2x} = (a^x)^2$ (MEMORIZE — index law for substitution)</div><div class="cs-formula">$a^{mx+n} = a^n \cdot (a^x)^m$ (MEMORIZE — splitting exponents)</div><div class="cs-formula">$x = \frac{\ln y}{\ln a}$ when $a^x = y$ (MEMORIZE)</div><div class="cs-formula">Quadratic formula: $y = \frac{-B \pm \sqrt{B^2 - 4AC}}{2A}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that $a^{2x+1} = a \cdot (a^x)^2$, not $(a^x)^{2x+1}$</li><li>Accepting a negative value for $y = a^x$ and getting an extraneous solution</li><li>Forgetting to substitute back from $y$ to $x$ after solving the quadratic</li><li>Giving a decimal answer when 'exact form' involving $\ln$ is required</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q3.html">Jan 2023 Q3</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q3.html">Jun 2024 Q3</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q6.html">Oct 2023 Q6</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-convert-logarithmic-model-to-exponential-form-and-evaluate">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Convert logarithmic model to exponential form and evaluate</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">6m</div>
+                </div>
+            </div>
+            <p class="qt-look">A model is given in logarithmic form, e.g. $\log_{10} P = 0.4t + 2.1$, and you must convert it to $P = ab^t$ form, find constants, and possibly substitute a value.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">12</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2021: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">model</span><span class="chip-trigger">log</span><span class="chip-trigger">show that</span><span class="chip-trigger">find the value of</span><span class="chip-trigger">constants a and b</span><span class="chip-trigger">exponential form</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>$\log_{10} P = mt + c$ converts to $P = 10^{mt+c} = 10^c \cdot (10^m)^t$</li><li>Round constants only at the final step unless exact values are obtainable</li><li>When interpreting constants: the initial value is usually $a = 10^c$ (when $t=0$)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Use definition of logarithm to convert</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the standard approach</div>
+                <ol class='cs-steps'><li>Start from $\log_{10} y = mt + c$</li><li>Rewrite using definition: $y = 10^{mt + c}$</li><li>Split using index law: $y = 10^c \cdot (10^m)^t$</li><li>Identify $a = 10^c$ and $b = 10^m$</li><li>Calculate numerical values of $a$ and $b$</li><li>If asked to substitute, plug in the given value of $t$ (or $y$) and solve</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and efficient</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires confident use of index laws</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\log_a x = y \iff x = a^y$ (MEMORIZE)</div><div class="cs-formula">$a^{m+n} = a^m \cdot a^n$ (MEMORIZE)</div><div class="cs-formula">$a^{mn} = (a^m)^n$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Confusing $10^{a+b}$ with $10^a + 10^b$</li><li>Premature rounding of $10^c$ or $10^m$ — keep full precision until the final answer</li><li>Incorrectly splitting: $10^{0.4t + 2.1} \neq 10^{0.4t} + 10^{2.1}$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2020-Q2.html">Oct 2020 Q2</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q7.html">Oct 2021 Q7</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-solve-exponential-equation-using-logarithms-non-quadratic">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Solve exponential equation using logarithms (non-quadratic)</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">7m</div>
+                </div>
+            </div>
+            <p class="qt-look">An equation like $a^{f(x)} = b^{g(x)}$ where both sides are exponential with different bases. No quadratic substitution needed — instead take logs and rearrange linearly for $x$.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">7</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">7</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">solve</span><span class="chip-trigger">exponential</span><span class="chip-trigger">different bases</span><span class="chip-trigger">give answer to</span><span class="chip-trigger">logarithms</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>You may use $\ln$ or $\log_{10}$ — either is valid unless the question specifies one</li><li>Power rule of logarithms applies: $\log(a^n) = n \log a$</li><li>The exponent expression must be treated as a complete bracket when applying the power rule</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Take logarithms of both sides and solve linearly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the equation has the form $a^{f(x)} = b^{g(x)}$ with linear functions $f$ and $g$</div>
+                <ol class='cs-steps'><li>Take $\ln$ (or $\log_{10}$) of both sides of the equation</li><li>Apply the power rule: $\ln(a^{f(x)}) = f(x) \ln a$, being careful to bracket the entire exponent</li><li>Expand both sides so that terms involving $x$ are visible</li><li>Collect all $x$ terms on one side and constants on the other</li><li>Factor out $x$ and solve: $x = \frac{\text{constants}}{\text{coefficient of } x}$</li><li>Evaluate using a calculator if a decimal is required</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and always works for equations of this type</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Algebraic errors are common when expanding and collecting terms with $\ln$ coefficients</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\log(a^n) = n \log a$ — power rule (formula booklet)</div><div class="cs-formula">$\ln(a^n) = n \ln a$ — power rule with natural log (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting brackets around the full exponent: $\ln(a^{3x-1}) = (3x-1)\ln a$, NOT $3x \ln a - 1$</li><li>Sign errors when collecting $x$ terms, especially when $\ln$ values are decimals</li><li>Using an incorrect log rule such as $\log(a^x) = x + \log a$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q3.html">Jan 2024 Q3</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-differentiation-of-exponential-functions-and-stationary-points">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Differentiation of exponential functions and stationary points</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">7m</div>
+                </div>
+            </div>
+            <p class="qt-look">A function involving products of polynomials and exponentials, e.g. $y = (2x+3)e^{-4x}$. You differentiate using the product rule (and chain rule for $e^{kx}$), set the derivative to zero, and find the stationary point.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">7</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">differentiate</span><span class="chip-trigger">stationary point</span><span class="chip-trigger">product rule</span><span class="chip-trigger">e^{kx}</span><span class="chip-trigger">turning point</span><span class="chip-trigger">maximum</span><span class="chip-trigger">minimum</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>$e^{kx} > 0$ for all real $x$, so $e^{kx} \neq 0$ — it can be cancelled/divided when solving $\frac{dy}{dx} = 0$</li><li>Product rule is required when the function is a product of two distinct functions</li><li>Chain rule: $\frac{d}{dx}[e^{kx}] = ke^{kx}$</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Product rule then set equal to zero</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When $y$ is a product of two functions, one of which involves $e^{kx}$</div>
+                <ol class='cs-steps'><li>Identify $u$ and $v$ in $y = uv$ (e.g., $u = 2x+3$, $v = e^{-4x}$)</li><li>Find $\frac{du}{dx}$ and $\frac{dv}{dx}$ (use chain rule for $e^{kx}$: $\frac{dv}{dx} = ke^{kx}$)</li><li>Apply product rule: $\frac{dy}{dx} = u\frac{dv}{dx} + v\frac{du}{dx}$</li><li>Factor out common terms (usually $e^{kx}$)</li><li>Set $\frac{dy}{dx} = 0$</li><li>Since $e^{kx} \neq 0$, divide it out and solve the remaining algebraic equation</li><li>Find the $y$-coordinate by substituting back into the original equation</li><li>Determine nature (max/min) if required, using second derivative or sign changes</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Standard and reliable method</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Multi-step with many opportunities for sign and coefficient errors</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Logarithmic differentiation (alternative for products)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the function has multiple factors and you want to avoid the product rule directly</div>
+                <ol class='cs-steps'><li>Take $\ln$ of both sides: $\ln y = \ln u + \ln v$</li><li>Differentiate implicitly: $\frac{1}{y}\frac{dy}{dx} = \frac{u'}{u} + \frac{v'}{v}$</li><li>Multiply through by $y$ to get $\frac{dy}{dx}$</li><li>Set equal to zero and solve</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Can simplify complicated products</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Less standard at this level; product rule is expected and more familiar</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\frac{d}{dx}[e^{kx}] = ke^{kx}$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[a^x] = a^x \ln a$ (formula booklet)</div><div class="cs-formula">Product rule: $\frac{d}{dx}[uv] = u\frac{dv}{dx} + v\frac{du}{dx}$ (formula booklet)</div><div class="cs-formula">Chain rule: $\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the factor of $k$ when differentiating $e^{kx}$: the derivative is $ke^{kx}$, not $e^{kx}$</li><li>Misapplying the product rule: $\frac{d}{dx}(uv) \neq u'v'$</li><li>Trying to solve $e^{kx} = 0$ instead of recognising it is never zero</li><li>Sign errors when $k$ is negative, e.g., $\frac{d}{dx}[e^{-4x}] = -4e^{-4x}$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Specimen_2018-Q8.html">Specimen 2018 Q8</a><a class="pdf-mini" href="../../pdfs/P3/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-solve-logarithmic-equation">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Solve logarithmic equation</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">6m</div>
+                </div>
+            </div>
+            <p class="qt-look">An equation involving $\ln$ or $\log$ terms that must be combined using log laws, then solved by exponentiating. E.g. $\ln(2x+1) - \ln(x-3) = 2$.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">ln</span><span class="chip-trigger">log</span><span class="chip-trigger">solve</span><span class="chip-trigger">logarithmic equation</span><span class="chip-trigger">exact</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Arguments of logarithms must be positive — always check domain at the end</li><li>$e^{\ln(A)} = A$ and $10^{\log_{10}(A)} = A$ — inverse operations</li><li>If the question asks for exact answers, leave in terms of $e$ or surds</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Combine logs, then exponentiate</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the equation has multiple log terms that can be combined into a single log equal to a constant</div>
+                <ol class='cs-steps'><li>Use log laws to combine: $\ln A - \ln B = \ln\frac{A}{B}$, $\ln A + \ln B = \ln(AB)$</li><li>Obtain a single logarithm on one side: $\ln(\text{expression}) = k$</li><li>Exponentiate both sides: $\text{expression} = e^k$ (or $10^k$ for $\log_{10}$)</li><li>Solve the resulting algebraic equation for $x$</li><li>CHECK: substitute back to verify all original log arguments are positive — reject extraneous solutions</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Clean and systematic; works for all standard log equations</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Students often forget the domain check, losing the final mark</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Convert each log term to exponential form separately</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the equation has isolated log terms that can be individually converted</div>
+                <ol class='cs-steps'><li>If $\log_a(f(x)) = g(x)$, rewrite as $f(x) = a^{g(x)}$</li><li>Solve the resulting equation</li><li>Check domain</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Simpler when there is only one log term</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Not efficient when multiple log terms need combining first</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\ln A + \ln B = \ln(AB)$ (MEMORIZE)</div><div class="cs-formula">$\ln A - \ln B = \ln\frac{A}{B}$ (MEMORIZE)</div><div class="cs-formula">$n \ln A = \ln(A^n)$ (MEMORIZE)</div><div class="cs-formula">$e^{\ln A} = A$ (MEMORIZE)</div><div class="cs-formula">$\log_a b = c \iff b = a^c$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Misapplying subtraction rule: $\ln(A - B) \neq \ln A - \ln B$</li><li>Exponentiating incorrectly: $e^{\ln A - \ln B} = \frac{A}{B}$, not $A - B$</li><li>Forgetting to check that all arguments of $\ln$ are positive in the final answer</li><li>Confusing $e^{a+b}$ with $e^a + e^b$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2023-Q2.html">Jun 2023 Q2</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P3/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$\log(AB) = \log A + \log B$ — product rule for logarithms</li><li>$\log\frac{A}{B} = \log A - \log B$ — quotient rule for logarithms</li><li>$\log(A^n) = n\log A$ — power rule for logarithms</li><li>$\log_a b = c \iff b = a^c$ — definition of logarithm</li><li>$e^{\ln x} = x$ and $\ln(e^x) = x$ — inverse relationship</li><li>$y = ab^x \Rightarrow \log y = x\log b + \log a$ — linearisation for exponential models</li><li>$y = ax^n \Rightarrow \log y = n\log x + \log a$ — linearisation for power models</li><li>$\frac{d}{dx}[e^{kx}] = ke^{kx}$ — chain rule result for exponentials</li><li>$\frac{d}{dx}[a^x] = a^x \ln a$ — general exponential derivative (formula booklet)</li><li>$a^{m+n} = a^m \cdot a^n$ and $(a^m)^n = a^{mn}$ — index laws</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Identify the question type immediately: is it (1) solving an equation, (2) transforming a model/graph, (3) differentiating? This determines your opening move.</li><li>For any equation with $a^{2x}$ and $a^x$: always think 'hidden quadratic' — write $y = a^x$ and check if a quadratic forms.</li><li>For graph-based questions: read the axis labels carefully to determine if it's $\log y$ vs $x$ (exponential model) or $\log y$ vs $\log x$ (power model).</li><li>Master the three core log laws (product, quotient, power) — they underpin nearly every question in this chapter.</li><li>Never round intermediate values: keep full calculator precision for $a$, $b$, $p$, $q$ etc. until the final answer.</li><li>Always check the domain for logarithmic equations: arguments of $\ln$ or $\log$ must be strictly positive.</li><li>When taking logs of both sides, bracket the entire exponent: $\ln(a^{3x-1}) = (3x-1)\ln a$, not $3x\ln a - 1$.</li><li>For differentiation questions: factor out $e^{kx}$ from the derivative before setting equal to zero — since $e^{kx} > 0$ always, the zero comes from the other factor.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>If a question says 'show that' or 'hence find', you must use the given/derived result — marks are for the method using that result, not an independent approach.</li><li>When the question specifies 'give your answer in the form $p + q\ln r$' or similar, match that exact structure — rearrange before writing your final answer.</li><li>For 'exact answer' questions: do NOT use a calculator to evaluate $\ln 5$ etc. Leave it symbolic.</li><li>In log-graph questions, always state the straight-line equation explicitly ($Y = mX + c$ with the log variables) — this is usually worth a mark.</li><li>Double-check: $\log(A + B) \neq \log A + \log B$. This is the single most common error in the chapter.</li><li>When solving quadratics from substitution, always write both roots and explicitly reject the invalid one with a reason (e.g., '$y = a^x > 0$ so $y = -3$ is rejected').</li><li>Label each step in modelling questions: write 'gradient = ...', 'intercept = ...', '$a = ...$', '$b = ...$' clearly — examiners award method marks for these.</li><li>Use $\ln$ for natural-log-based questions and $\log_{10}$ for common-log-based questions — do not mix them within the same working unless you apply the change-of-base formula.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Convert logarithmic model to exponential form and evaluate">Convert logarithmic model to exponential form and evaluate</option><option value="Differentiation of exponential functions and stationary points">Differentiation of exponential functions and stationary points</option><option value="Logarithmic transformation / linearising an exponential model (from graph)">Logarithmic transformation / linearising an exponential model (from graph)</option><option value="Solve exponential equation using logarithms (non-quadratic)">Solve exponential equation using logarithms (non-quadratic)</option><option value="Solve exponential equation via hidden quadratic substitution">Solve exponential equation via hidden quadratic substitution</option><option value="Solve logarithmic equation">Solve logarithmic equation</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Differentiation of exponential functions and stationary points">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q8</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-differentiation-of-exponential-functions-and-stationary-points">Differentiation of exponential functions and stationary points</a><div class="qtype-freeform">Differentiate and find stationary point</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Logarithmic transformation / linearising an exponential model (from graph)">
+            <td class="session">Jan 2020</td>
+            <td class="r">Q3</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-logarithmic-transformation-linearising-an-exponential-model-from-graph">Logarithmic transformation / linearising an exponential model (from graph)</a><div class="qtype-freeform">Logarithmic transformations</div></td>
+            <td><a class="qlink" href="q-Jan_2020-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Convert logarithmic model to exponential form and evaluate">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-convert-logarithmic-model-to-exponential-form-and-evaluate">Convert logarithmic model to exponential form and evaluate</a><div class="qtype-freeform">Convert log to exponential model</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Logarithmic transformation / linearising an exponential model (from graph)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-logarithmic-transformation-linearising-an-exponential-model-from-graph">Logarithmic transformation / linearising an exponential model (from graph)</a><div class="qtype-freeform">Exponential modelling and rates of change</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Convert logarithmic model to exponential form and evaluate">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-convert-logarithmic-model-to-exponential-form-and-evaluate">Convert logarithmic model to exponential form and evaluate</a><div class="qtype-freeform">Logarithmic modelling equation</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Logarithmic transformation / linearising an exponential model (from graph)">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-logarithmic-transformation-linearising-an-exponential-model-from-graph">Logarithmic transformation / linearising an exponential model (from graph)</a><div class="qtype-freeform">modelling with logarithms</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Solve exponential equation via hidden quadratic substitution">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solve-exponential-equation-via-hidden-quadratic-substitution">Solve exponential equation via hidden quadratic substitution</a><div class="qtype-freeform">Solve exponential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Solve logarithmic equation">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solve-logarithmic-equation">Solve logarithmic equation</a></td>
+            <td><a class="qlink" href="q-Jun_2023-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Solve exponential equation via hidden quadratic substitution">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solve-exponential-equation-via-hidden-quadratic-substitution">Solve exponential equation via hidden quadratic substitution</a><div class="qtype-freeform">solve exponential equation</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Solve exponential equation using logarithms (non-quadratic)">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solve-exponential-equation-using-logarithms-non-quadratic">Solve exponential equation using logarithms (non-quadratic)</a><div class="qtype-freeform">Solve exponential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Solve exponential equation via hidden quadratic substitution">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solve-exponential-equation-via-hidden-quadratic-substitution">Solve exponential equation via hidden quadratic substitution</a><div class="qtype-freeform">Solve exponential equation (quadratic form)</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q3.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

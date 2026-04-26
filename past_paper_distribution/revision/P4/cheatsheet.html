@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P4 · Master Cheatsheet</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --yellow:#ffcc00; --teal:#5ac8fa;
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:13.5px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(10px);z-index:100;}
+.topbar .crumbs{font-size:13px;color:var(--muted);}
+.topbar .crumbs a{color:var(--ink);font-weight:500;} .topbar .crumbs .sep{margin:0 6px;color:var(--muted-2);}
+.topbar nav{display:flex;gap:14px;}
+.topbar nav a{font-size:12.5px;color:var(--muted);}
+
+.hero{padding:32px 24px 18px;border-bottom:1px solid var(--line);}
+.hero .eyebrow{font-size:11px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.hero h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.hero .lede{margin:6px 0 0;color:var(--muted);font-size:15px;}
+.hero .stats{display:flex;gap:22px;margin-top:14px;}
+.hero .stats > div{font-size:12.5px;}
+.hero .stats b{display:block;font-size:18px;color:var(--ink);font-weight:600;}
+
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;line-height:1.45;}
+.chip-default{background:var(--bg-tint);color:var(--ink-2);}
+.chip-trigger{background:#fef3c7;color:#915d10;}
+.chip-formula{background:var(--blue-soft);color:var(--blue-deep);font-family:"SF Mono",Menlo,monospace;font-size:11px;padding:2px 7px;}
+.chip-marks{background:var(--purple);color:#fff;}
+.chip-freq{background:var(--green);color:#fff;}
+
+main{padding:18px 24px 60px;max-width:1700px;margin:0 auto;}
+
+/* Chapter section */
+.chapter-section{margin-bottom:28px;}
+.chapter-section > h2{
+  font-size:15px;font-weight:700;color:var(--ink);
+  margin:0 0 10px;padding:8px 12px;background:var(--bg-tint);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;
+}
+.chapter-section > h2 .ch-stats{font-size:11px;font-weight:500;color:var(--muted);margin-left:10px;}
+
+/* The cheatsheet grid — one row per question type */
+table.master-cs{
+  width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.master-cs th{
+  background:var(--bg-soft);text-align:left;padding:8px 10px;
+  font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  border-bottom:1px solid var(--line);
+  position:sticky;top:60px;z-index:10;
+}
+table.master-cs td{
+  padding:10px 11px;vertical-align:top;border-bottom:1px solid var(--line);line-height:1.45;
+}
+table.master-cs tr:last-child td{border-bottom:none;}
+table.master-cs tr:hover td{background:var(--bg-soft);}
+
+table.master-cs .qt-name{font-weight:600;color:var(--ink);font-size:13px;line-height:1.35;}
+table.master-cs .qt-meta{font-size:10.5px;color:var(--muted);margin-top:3px;}
+table.master-cs .formulas .chip-formula{margin:1px 3px 1px 0;display:inline-block;}
+table.master-cs .formulas .formula-line{
+  margin:3px 0;padding:4px 7px;background:var(--blue-soft);color:var(--blue-deep);
+  border-radius:5px;font-size:11.5px;line-height:1.5;
+  font-family:"SF Mono",Menlo,monospace;
+  word-break:break-word;
+}
+table.master-cs .approaches .appr-line{margin-bottom:7px;line-height:1.5;}
+table.master-cs .examples-row{
+  margin-top:8px;display:flex;flex-wrap:wrap;gap:3px;
+  padding-top:7px;border-top:1px dashed var(--line);
+}
+table.master-cs .ex-chip{
+  display:inline-block;font-size:10.5px;padding:2px 7px;
+  background:var(--bg-tint);color:var(--ink-2);border-radius:99px;
+  text-decoration:none;font-weight:500;border:1px solid var(--line);
+}
+table.master-cs .ex-chip:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+table.master-cs ul{margin:0;padding-left:14px;}
+table.master-cs ul li{margin-bottom:3px;font-size:12px;color:var(--ink-2);}
+table.master-cs .triggers .chip-trigger{margin:1px 3px 1px 0;}
+table.master-cs .approaches{font-size:11.5px;color:var(--ink-2);}
+table.master-cs .approaches .approach-name{display:inline-block;font-weight:600;color:var(--purple);font-size:11.5px;margin-right:5px;}
+
+table.master-cs .col-name{width:22%;}
+table.master-cs .col-triggers{width:13%;}
+table.master-cs .col-approaches{width:24%;}
+table.master-cs .col-formulas{width:21%;}
+table.master-cs .col-pitfalls{width:20%;}
+
+/* TOC at top */
+.toc{
+  background:var(--bg-tint);padding:12px 16px;border-radius:var(--r-md);
+  margin-bottom:24px;border:1px solid var(--line);
+}
+.toc h3{margin:0 0 8px;font-size:12px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;}
+.toc-grid a{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);}
+.toc-grid a:hover{background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;border-color:var(--blue);}
+.toc-grid a .badge{background:var(--blue);color:#fff;padding:1px 6px;border-radius:99px;font-size:10px;font-weight:700;margin-left:auto;}
+
+/* Print styles */
+@media print{
+  body{font-size:10px;}
+  .topbar,.hero{position:static;}
+  .chapter-section{page-break-inside:avoid;}
+  table.master-cs{font-size:9.5px;}
+  table.master-cs th{position:static;}
+}
+
+footer{padding:24px;text-align:center;color:var(--muted-2);font-size:11px;border-top:1px solid var(--line);}
+</style>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs">
+    <a href="../">revision</a><span class="sep">/</span>
+    <a href="./">P4</a><span class="sep">/</span>
+    <span>📋 Master Cheatsheet</span>
+  </div>
+  <nav>
+    <a href="./">unit page</a>
+    <a href="../../">dashboard</a>
+    <a href="javascript:window.print()">🖨 print</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📋 Master Cheatsheet · Edexcel IAL Mathematics</div>
+  <h1>P4 · Pure Mathematics 4</h1>
+  <p class="lede">Single-page global view: every question type identified across past papers, with triggers, approaches, formulas, and pitfalls. Ctrl+F to search. Print-friendly.</p>
+  <div class="stats">
+    <div><b>4</b>chapters covered</div>
+    <div><b>30</b>question types</div>
+    <div><b>89</b>past-paper questions</div>
+  </div>
+</div>
+<main>
+  <div class="toc">
+    <h3>Jump to Chapter</h3>
+    <div class="toc-grid"><a href="#ch4">ch4 Binomial expansion <span class="badge">6 types</span></a><a href="#ch5">ch5 Differentiation <span class="badge">8 types</span></a><a href="#ch6">ch6 Integration <span class="badge">8 types</span></a><a href="#ch7">ch7 Vectors <span class="badge">8 types</span></a></div>
+  </div>
+  <div class="chapter-section" id="ch4">
+            <h2>ch4 · Binomial expansion <span class="ch-stats">— 12 q analysed · 6 types · 8.5% of unit marks</span></h2>
+            <table class="master-cs">
+                <thead>
+                    <tr>
+                        <th class="col-name">Question Type</th>
+                        <th class="col-triggers">Triggers (how to spot)</th>
+                        <th class="col-approaches">Approaches</th>
+                        <th class="col-formulas">Must-know formulas</th>
+                        <th class="col-pitfalls">Pitfalls to avoid</th>
+                    </tr>
+                </thead>
+                <tbody><tr>
+                <td class="col-name">
+                    <div class="qt-name">Binomial expansion of (1+bx)^n for fractional/negative n</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">4×</span>
+                        <span class="chip chip-marks">6-8m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">You are given an expression like $(1+2x)^{1/3}$ or $(1-3x)^{-2}$ and asked to expand up to a certain power of $x$ (typically $x^3$). May also ask for the range of validity.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Specimen_2018-Q1.html">Specimen 2018 Q1</a><a class="ex-chip" href="../ch4/q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="ex-chip" href="../ch4/q-Oct_2022-Q4.html">Oct 2022 Q4</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">expand</span><span class="chip chip-trigger">ascending powers of x</span><span class="chip chip-trigger">first four terms</span><span class="chip chip-trigger">binomial expansion</span><span class="chip chip-trigger">valid for</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Direct application of generalised binomial formula:</span> When the expression is already in the form $(1 + X)^n$</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ where $n \in \mathbb{Q}$, $|X|<1$ (formula booklet)</div><div class="formula-line">Range of validity: $|X| < 1$ where $X$ is the entire expression inside the bracket minus 1 (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to raise the entire term $bx$ to the appropriate power — e.g., $(2x)^2 = 4x^2$, not $2x^2$</li><li>Sign errors when $n$ is negative: $n(n-1) = (-2)(-3) = +6$, not $-6$</li><li>Sign errors when $X$ is negative: $(-3x)^2 = 9x^2$ (positive), $(-3x)^3 = -27x^3$ (negative)</li><li>Not simplifying fractional coefficients fully</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Binomial expansion of (a+bx)^n — factoring out the constant first</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">4×</span>
+                        <span class="chip chip-marks">6-8m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">The expression is $(a + bx)^n$ where $a \neq 1$, e.g., $(4-5x)^{-1/2}$ or $(8+3x)^{1/3}$. You must factor out $a^n$ before applying the binomial formula.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Oct_2020-Q2.html">Oct 2020 Q2</a><a class="ex-chip" href="../ch4/q-Oct_2021-Q4.html">Oct 2021 Q4</a><a class="ex-chip" href="../ch4/q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="ex-chip" href="../ch4/q-Oct_2022-Q4.html">Oct 2022 Q4</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">expand</span><span class="chip chip-trigger">ascending powers</span><span class="chip chip-trigger">first three terms</span><span class="chip chip-trigger">binomial expansion</span><span class="chip chip-trigger">show that</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Factor out constant, then expand (1 + kx)^n:</span> Always use this when $a \neq 1$</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$(a+bx)^n = a^n\left(1 + \frac{b}{a}x\right)^n$ (MEMORIZE — key rearrangement step)</div><div class="formula-line">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to factor out the constant $a$ entirely — applying the formula directly to $(a+bx)^n$ as if it were $(1+bx)^n$</li><li>Forgetting to multiply back by $a^n$ after expanding $(1+X)^n$</li><li>Incorrectly computing $a^n$ for fractional $n$, e.g., $4^{-1/2} = \frac{1}{2}$, $8^{1/3} = 2$</li><li>Getting the sign of $\frac{b}{a}$ wrong when $b$ is negative</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Finding unknowns by comparing coefficients in binomial expansions</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">4×</span>
+                        <span class="chip chip-marks">7-9m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">You are given $(1+ax)^n$ or $(a+bx)^n$ and told that certain coefficients in the expansion equal specific values, or that the coefficient of $x^2$ is some multiple of the coefficient of $x$. You form </div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Jun_2021-Q1.html">Jun 2021 Q1</a><a class="ex-chip" href="../ch4/q-Jan_2023-Q1.html">Jan 2023 Q1</a><a class="ex-chip" href="../ch4/q-Jun_2023-Q1.html">Jun 2023 Q1</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">coefficient of</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">find the values of a and n</span><span class="chip chip-trigger">given that the coefficient</span><span class="chip chip-trigger">comparing coefficients</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Expand and equate coefficients systematically:</span> When you are given numerical values of specific coefficients and need to find parameters</div><div class="appr-line"><span class="approach-name">B: Use ratio of consecutive coefficients:</span> When both $a$ and $n$ are unknown — dividing the $x^2$ coefficient equation by the $x$ coefficient equation often eliminates one unknown cleanly</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Coefficient of $x^r$ in $(1+ax)^n$: $\frac{n(n-1)(n-2)\cdots(n-r+1)}{r!} \cdot a^r$ (MEMORIZE)</div><div class="formula-line">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to include $a^r$ when computing the coefficient of $x^r$ — the coefficient is not just $\binom{n}{r}$ but $\binom{n}{r}a^r$</li><li>Division by zero or losing solutions if $a=0$ is not excluded</li><li>Errors in solving the simultaneous equations, especially with negative and fractional values</li><li>Not checking solutions against all given conditions</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Using binomial expansion for numerical/surd approximation</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">5×</span>
+                        <span class="chip chip-marks">2-4m (usually the final part of a larger question)</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">After expanding, you are told to substitute a specific value of $x$ to approximate a surd or cube root, e.g., 'Hence find an approximation to $\sqrt{3.96}$' or 'show that $\sqrt[3]{7.7} \approx \frac{</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="ex-chip" href="../ch4/q-Oct_2021-Q4.html">Oct 2021 Q4</a><a class="ex-chip" href="../ch4/q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="ex-chip" href="../ch4/q-Jun_2023-Q1.html">Jun 2023 Q1</a><a class="ex-chip" href="../ch4/q-Oct_2022-Q4.html">Oct 2022 Q4</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">hence</span><span class="chip chip-trigger">approximation</span><span class="chip chip-trigger">estimate</span><span class="chip chip-trigger">find an approximate value</span><span class="chip chip-trigger">decimal places</span><span class="chip chip-trigger">show that</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Match the target expression to the expanded function:</span> Always — this is the standard method</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">The truncated binomial expansion from the earlier part of the question (derived, not from booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Choosing the wrong value of $x$ — e.g., for $(4-5x)^{1/2}$ to approximate $\sqrt{3}$, set $4-5x = 3$ giving $x = 0.2$, not $x = 3$</li><li>Substituting $x$ outside the range of validity, leading to a poor or invalid approximation</li><li>Arithmetic errors in the substitution — work with fractions where possible to avoid rounding errors</li><li>Forgetting to multiply by the factored-out constant $a^n$ when substituting</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Product of polynomial and binomial expansion — compound expansion</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">7-9m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">You are given $f(x) = (2+kx)(a+bx)^n$ or similar product of a linear/quadratic factor and a binomial expansion. You expand the binomial part first, then multiply by the polynomial and collect like ter</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Oct_2020-Q2.html">Oct 2020 Q2</a><a class="ex-chip" href="../ch4/q-Jan_2023-Q1.html">Jan 2023 Q1</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">f(x) =</span><span class="chip chip-trigger">coefficient of x^2 is</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">find the value of k</span><span class="chip chip-trigger">product</span><span class="chip chip-trigger">multiply</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Expand binomial first, then multiply and collect terms:</span> Always for these compound expressions</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \ldots$ (formula booklet)</div><div class="formula-line">When multiplying $(p + qx)(1 + Ax + Bx^2 + Cx^3 + \ldots)$: coefficient of $x^r$ is $pC_r + qC_{r-1}$ where $C_r$ is the coefficient of $x^r$ in the expansion (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Only expanding the binomial to the exact required power and then missing the cross-term contribution from the polynomial</li><li>Forgetting that $(2+kx) \times (\text{coeff of } x^2) $ contributes to the $x^2$ term AND the $x^3$ term</li><li>Not factoring out the constant from the binomial before expanding</li><li>Misreading which coefficient is given or needs to be found</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Factorising and solving quadratic equations</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">4-7m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A standard quadratic equation $ax^2 + bx + c = 0$ to factorise and solve. May appear as a sub-step within a binomial expansion problem (e.g., solving for unknowns $a$ and $n$) or as a standalone quest</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch4/q-Jan_2024-Q1.html">Jan 2024 Q1</a><a class="ex-chip" href="../ch4/q-Jun_2022-Q1.html">Jun 2022 Q1</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">factorise</span><span class="chip chip-trigger">solve</span><span class="chip chip-trigger">quadratic</span><span class="chip chip-trigger">roots</span><span class="chip chip-trigger">x =</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Factorisation by inspection:</span> When integer/simple rational roots exist and the quadratic is straightforward</div><div class="appr-line"><span class="approach-name">B: Quadratic formula:</span> When factorisation is not obvious or when asked for exact solutions</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Sign errors when identifying $p$ and $q$ in $(x-p)(x+q)$ — double-check by expanding</li><li>Forgetting to divide by the leading coefficient when solving $(mx + n) = 0 \Rightarrow x = -n/m$</li><li>Not checking factorisation by expanding back</li></ul></td>
+            </tr></tbody>
+            </table>
+        </div><div class="chapter-section" id="ch5">
+            <h2>ch5 · Differentiation <span class="ch-stats">— 25 q analysed · 8 types · 24.2% of unit marks</span></h2>
+            <table class="master-cs">
+                <thead>
+                    <tr>
+                        <th class="col-name">Question Type</th>
+                        <th class="col-triggers">Triggers (how to spot)</th>
+                        <th class="col-approaches">Approaches</th>
+                        <th class="col-formulas">Must-know formulas</th>
+                        <th class="col-pitfalls">Pitfalls to avoid</th>
+                    </tr>
+                </thead>
+                <tbody><tr>
+                <td class="col-name">
+                    <div class="qt-name">Implicit differentiation & equation of tangent</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">7×</span>
+                        <span class="chip chip-marks">6-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">An implicit curve equation (e.g. $x^2 + 3xy + y^3 = 17$) is given along with a point on the curve. You are asked to find $\frac{dy}{dx}$ and then the equation of the tangent at that point.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jan_2022-Q1.html">Jan 2022 Q1</a><a class="ex-chip" href="../ch5/q-Jun_2021-Q5.html">Jun 2021 Q5</a><a class="ex-chip" href="../ch5/q-Jun_2022-Q3.html">Jun 2022 Q3</a><a class="ex-chip" href="../ch5/q-Jun_2024-Q3.html">Jun 2024 Q3</a><a class="ex-chip" href="../ch5/q-Oct_2023-Q5.html">Oct 2023 Q5</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">tangent</span><span class="chip chip-trigger">implicit</span><span class="chip chip-trigger">equation of the curve</span><span class="chip chip-trigger">show that the point lies on</span><span class="chip chip-trigger">gradient</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Standard implicit differentiation:</span> Default approach for any implicit curve</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{d}{dx}[f(y)] = f'(y)\frac{dy}{dx}$ — chain rule for $y$ terms (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[u \cdot v] = u\frac{dv}{dx} + v\frac{du}{dx}$ — product rule (MEMORIZE)</div><div class="formula-line">Equation of tangent: $y - y_1 = m(x - x_1)$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to multiply by $\frac{dy}{dx}$ when differentiating any term involving $y$</li><li>Forgetting to apply the product rule on mixed $xy$ terms — treating $3xy$ as if $y$ is a constant</li><li>Sign errors when collecting $\frac{dy}{dx}$ terms to one side</li><li>Substituting the point coordinates incorrectly or into the wrong expression</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Implicit differentiation & equation of normal</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">8×</span>
+                        <span class="chip chip-marks">7-12m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Similar to tangent questions but asks for the equation of the normal. May also ask for where the normal meets an axis or another curve. Often involves product rule on $xy$ or $x^2y$ terms.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jan_2021-Q6.html">Jan 2021 Q6</a><a class="ex-chip" href="../ch5/q-Jan_2024-Q3.html">Jan 2024 Q3</a><a class="ex-chip" href="../ch5/q-Jan_2024-Q9.html">Jan 2024 Q9</a><a class="ex-chip" href="../ch5/q-Oct_2021-Q1.html">Oct 2021 Q1</a><a class="ex-chip" href="../ch5/q-Oct_2022-Q6.html">Oct 2022 Q6</a><a class="ex-chip" href="../ch5/q-Oct_2022-Q11.html">Oct 2022 Q11</a><a class="ex-chip" href="../ch5/q-Jun_2022-Q4.html">Jun 2022 Q4</a><a class="ex-chip" href="../ch5/q-Specimen_2018-Q4.html">Specimen 2018 Q4</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">normal</span><span class="chip chip-trigger">implicit</span><span class="chip chip-trigger">perpendicular</span><span class="chip chip-trigger">meets the x-axis</span><span class="chip chip-trigger">meets the y-axis</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Implicit differentiation then normal gradient:</span> Default for all implicit-curve normal questions</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$m_{\text{normal}} = -\frac{1}{m_{\text{tangent}}}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[x^2 y] = 2xy + x^2\frac{dy}{dx}$ — product rule example (MEMORIZE pattern)</div><div class="formula-line">$\frac{d}{dx}[\ln y] = \frac{1}{y}\frac{dy}{dx}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[e^{f(x)}] = f'(x)e^{f(x)}$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Using $m_T$ instead of $m_N$ in the line equation — read the question carefully</li><li>Forgetting the negative sign: $m_N = -1/m_T$, not $1/m_T$</li><li>Incorrectly applying the product rule to $x^2\ln(y)$: must differentiate $\ln(y)$ as $\frac{1}{y}\frac{dy}{dx}$</li><li>Arithmetic errors when finding where the normal crosses an axis</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Implicit differentiation & stationary points</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">3×</span>
+                        <span class="chip chip-marks">7-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">An implicit curve is given and you must find stationary points by setting $\frac{dy}{dx} = 0$. Often requires substituting the condition back into the original equation to find coordinates.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jun_2023-Q2.html">Jun 2023 Q2</a><a class="ex-chip" href="../ch5/q-Jun_2024-Q4.html">Jun 2024 Q4</a><a class="ex-chip" href="../ch5/q-Oct_2020-Q6.html">Oct 2020 Q6</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">stationary point</span><span class="chip chip-trigger">dy/dx = 0</span><span class="chip chip-trigger">turning point</span><span class="chip chip-trigger">maximum</span><span class="chip chip-trigger">minimum</span><span class="chip chip-trigger">implicit</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Implicit differentiation then set numerator = 0:</span> Standard approach when the curve is given implicitly</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">If $\frac{dy}{dx} = \frac{N(x,y)}{D(x,y)}$, then stationary points occur where $N(x,y) = 0$ and $D(x,y) \neq 0$ (MEMORIZE)</div><div class="formula-line">Product rule: $\frac{d}{dx}[uv] = u'v + uv'$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Setting the entire $\frac{dy}{dx}$ expression to zero but forgetting that only the numerator needs to be zero</li><li>Forgetting to substitute back into the original equation — finding $y$ in terms of $x$ (or vice versa) is not enough</li><li>Missing solutions when the substitution back produces a quadratic</li><li>Forgetting the product rule on the $xy$ term</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Related rates of change</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">3×</span>
+                        <span class="chip chip-marks">5-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A physical scenario (volume of a container, area of a shape expanding/contracting) where one rate is given and another is required. Uses chain rule to connect rates. Often involves geometric formulas.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jan_2022-Q4.html">Jan 2022 Q4</a><a class="ex-chip" href="../ch5/q-Jun_2021-Q3.html">Jun 2021 Q3</a><a class="ex-chip" href="../ch5/q-Oct_2021-Q9.html">Oct 2021 Q9</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">rate of change</span><span class="chip chip-trigger">increasing at a rate</span><span class="chip chip-trigger">decreasing at a rate</span><span class="chip chip-trigger">cm per second</span><span class="chip chip-trigger">dV/dt</span><span class="chip chip-trigger">dA/dt</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Chain rule linking rates:</span> When you know one rate (e.g. $\frac{dV}{dt}$) and need another (e.g. $\frac{dh}{dt}$)</div><div class="appr-line"><span class="approach-name">B: Differentiate composite expression directly:</span> When volume or area is given as a function of a single variable already</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Chain rule for rates: $\frac{dy}{dt} = \frac{dy}{dx} \cdot \frac{dx}{dt}$ (MEMORIZE)</div><div class="formula-line">Volume of cylinder: $V = \pi r^2 h$ (MEMORIZE)</div><div class="formula-line">Volume of cone: $V = \frac{1}{3}\pi r^2 h$ (MEMORIZE)</div><div class="formula-line">Area of equilateral triangle with side $a$: $A = \frac{\sqrt{3}}{4}a^2$ (MEMORIZE)</div><div class="formula-line">Volume of prism: $V = A_{\text{cross-section}} \times \text{length}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Inverting the chain rule: using $\frac{dV}{dh}$ when you need $\frac{dh}{dV} = \frac{1}{dV/dh}$</li><li>Forgetting to expand before differentiating, leading to incorrect derivatives</li><li>Using the wrong geometric formula (e.g. hemisphere vs sphere, prism vs pyramid)</li><li>Forgetting to substitute the specific value of the variable at the given instant</li><li>Sign errors: a decreasing quantity should give a negative rate</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Horizontal tangents via discriminant (tangency condition)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">7m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">An implicit curve and a horizontal line $y = k$. You must find values of $k$ (or $p$, $q$) where the line is tangent to the curve. The curve is rearranged into a quadratic in $x$ and the discriminant </div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jan_2023-Q5.html">Jan 2023 Q5</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">tangent to the curve</span><span class="chip chip-trigger">horizontal tangent</span><span class="chip chip-trigger">discriminant</span><span class="chip chip-trigger">exactly one point</span><span class="chip chip-trigger">values of p and q</span><span class="chip chip-trigger">touches</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Rearrange to quadratic and use $\Delta = 0$:</span> When substituting $y = k$ into the curve gives a quadratic in $x$ (or vice versa)</div><div class="appr-line"><span class="approach-name">B: Implicit differentiation with $\frac{dy}{dx} = 0$:</span> When the question asks specifically for horizontal tangents and the discriminant approach is not obvious</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Discriminant: $\Delta = b^2 - 4ac$; tangency requires $\Delta = 0$ (MEMORIZE)</div><div class="formula-line">Quadratic formula: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Using $\Delta > 0$ or $\Delta < 0$ instead of $\Delta = 0$ for tangency</li><li>Algebraic errors when identifying $A$, $B$, $C$ from the rearranged quadratic</li><li>Forgetting that $A$, $B$, $C$ depend on $y$ (or $k$) — they are not constants</li><li>Not checking that the resulting quadratic in $k$ has valid (real) solutions</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Logarithmic differentiation</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">7m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A function of the form $y = x^{f(x)}$ or a product/quotient of several terms. You take $\ln$ of both sides, use log laws, then differentiate implicitly.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Oct_2020-Q6.html">Oct 2020 Q6</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">logarithmic differentiation</span><span class="chip chip-trigger">take logarithms</span><span class="chip chip-trigger">$y = x^{x}$</span><span class="chip chip-trigger">$y = (f(x))^{g(x)}$</span><span class="chip chip-trigger">stationary points</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Take ln, differentiate implicitly:</span> When $y = [f(x)]^{g(x)}$ or the function is a complicated product/quotient</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{d}{dx}[\ln y] = \frac{1}{y}\frac{dy}{dx}$ (MEMORIZE)</div><div class="formula-line">$\ln(a^b) = b\ln a$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[\ln f(x)] = \frac{f'(x)}{f(x)}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to multiply by $y$ (or substitute $y$ back) at the end</li><li>Failing to use the product rule when differentiating $g(x)\ln[f(x)]$</li><li>Forgetting the chain rule on $\ln y$: writing $\frac{1}{y}$ instead of $\frac{1}{y}\frac{dy}{dx}$</li><li>For stationary points: since $y \neq 0$ generally, only the other factor needs to be zero</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Parametric differentiation & Cartesian conversion</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">9m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A curve defined parametrically ($x = f(t)$, $y = g(t)$). You find $\frac{dy}{dx}$, possibly evaluate at a point, then eliminate $t$ to find the Cartesian equation. May involve completing the square or</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Oct_2021-Q5.html">Oct 2021 Q5</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">parametric</span><span class="chip chip-trigger">parameter $t$</span><span class="chip chip-trigger">eliminate the parameter</span><span class="chip chip-trigger">Cartesian equation</span><span class="chip chip-trigger">completing the square</span><span class="chip chip-trigger">range</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Chain rule for dy/dx, then eliminate parameter:</span> Standard approach for parametric curves</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{dy}{dx} = \frac{dy/dt}{dx/dt}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dt}[\tan t] = \sec^2 t$ (formula booklet)</div><div class="formula-line">$\frac{d}{dt}[\sec t] = \sec t \tan t$ (formula booklet)</div><div class="formula-line">$\sec^2 t = 1 + \tan^2 t$ (formula booklet)</div><div class="formula-line">Completing the square: $ax^2 + bx + c = a(x + \frac{b}{2a})^2 + c - \frac{b^2}{4a}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting the chain rule when differentiating $\sec^2 t$: $\frac{d}{dt}[\sec^2 t] = 2\sec^2 t \tan t$</li><li>Choosing the wrong value of $t$ (e.g. $t = \frac{3\pi}{4}$ instead of $t = -\frac{\pi}{4}$) when $\tan t = -1$</li><li>Losing track of domain restrictions when converting to Cartesian form</li><li>Errors in completing the square</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Implicit differentiation: finding dy/dx (show that / verify)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">5-6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given an implicit equation, show that $\frac{dy}{dx}$ equals a given expression. Pure differentiation — no tangent/normal/stationary point follow-up in this part.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch5/q-Jan_2024-Q4.html">Jan 2024 Q4</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">verify</span><span class="chip chip-trigger">prove that</span><span class="chip chip-trigger">$\frac{dy}{dx} =$</span><span class="chip chip-trigger">implicit</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Term-by-term implicit differentiation:</span> Always — this is the only approach</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{d}{dx}[y^n] = ny^{n-1}\frac{dy}{dx}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[e^y] = e^y \frac{dy}{dx}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[\sin y] = \cos y \cdot \frac{dy}{dx}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting $\frac{dy}{dx}$ on $y$ terms — the single most common error across all sessions</li><li>Incorrectly applying the product rule — especially when one factor involves $y$</li><li>Algebraic slips when rearranging to match the given form</li><li>Not showing enough working in a 'show that' question — every step must be visible</li></ul></td>
+            </tr></tbody>
+            </table>
+        </div><div class="chapter-section" id="ch6">
+            <h2>ch6 · Integration <span class="ch-stats">— 39 q analysed · 8 types · 32.2% of unit marks</span></h2>
+            <table class="master-cs">
+                <thead>
+                    <tr>
+                        <th class="col-name">Question Type</th>
+                        <th class="col-triggers">Triggers (how to spot)</th>
+                        <th class="col-approaches">Approaches</th>
+                        <th class="col-formulas">Must-know formulas</th>
+                        <th class="col-pitfalls">Pitfalls to avoid</th>
+                    </tr>
+                </thead>
+                <tbody><tr>
+                <td class="col-name">
+                    <div class="qt-name">Definite integral by algebraic substitution</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">11×</span>
+                        <span class="chip chip-marks">5-13m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given a definite integral with a complicated integrand, the substitution u=f(x) is either given or must be identified. You must convert the entire integrand to u, change limits, integrate, and evaluat</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2021-Q5.html">Jan 2021 Q5</a><a class="ex-chip" href="../ch6/q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="ex-chip" href="../ch6/q-Jan_2023-Q4.html">Jan 2023 Q4</a><a class="ex-chip" href="../ch6/q-Jun_2023-Q3.html">Jun 2023 Q3</a><a class="ex-chip" href="../ch6/q-Jun_2023-Q5.html">Jun 2023 Q5</a><a class="ex-chip" href="../ch6/q-Jun_2023-Q6.html">Jun 2023 Q6</a><a class="ex-chip" href="../ch6/q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="ex-chip" href="../ch6/q-Oct_2023-Q7.html">Oct 2023 Q7</a><a class="ex-chip" href="../ch6/q-Jan_2024-Q5.html">Jan 2024 Q5</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">use the substitution</span><span class="chip chip-trigger">by means of the substitution</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">evaluate</span><span class="chip chip-trigger">exact value</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Direct substitution (standard method):</span> Always — this is the expected method when a substitution is given.</div><div class="appr-line"><span class="approach-name">B: Split the fraction after substitution:</span> When the substituted integrand is an improper or complex rational function in u.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\int u^n\,du = \frac{u^{n+1}}{n+1} + C$ for $n \neq -1$ (MEMORIZE)</div><div class="formula-line">$\int \frac{1}{u}\,du = \ln|u| + C$ (MEMORIZE)</div><div class="formula-line">$\int \frac{1}{(au+b)}\,du = \frac{1}{a}\ln|au+b| + C$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to change the limits of integration from x-values to u-values.</li><li>Leaving x terms in the integrand after substitution — every x must be converted to u.</li><li>Forgetting to replace dx with the expression in du (e.g., leaving dx in the integral).</li><li>Algebraic errors when rearranging u = f(x) to get x = g(u), especially with rational substitutions.</li><li>Sign errors when the substitution reverses the limits (if u decreases when x increases, limits swap).</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Integration by parts (including repeated application)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">10×</span>
+                        <span class="chip chip-marks">7-12m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Integrand is a product of two different types of function, e.g., x²eˣ, x ln x, eˣ sin x, x² cos x. May ask for indefinite integral, definite integral, area, or volume.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2021-Q7.html">Jan 2021 Q7</a><a class="ex-chip" href="../ch6/q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="ex-chip" href="../ch6/q-Jan_2023-Q8.html">Jan 2023 Q8</a><a class="ex-chip" href="../ch6/q-Jan_2024-Q7.html">Jan 2024 Q7</a><a class="ex-chip" href="../ch6/q-Jun_2022-Q5.html">Jun 2022 Q5</a><a class="ex-chip" href="../ch6/q-Jun_2023-Q8.html">Jun 2023 Q8</a><a class="ex-chip" href="../ch6/q-Jun_2024-Q7.html">Jun 2024 Q7</a><a class="ex-chip" href="../ch6/q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="ex-chip" href="../ch6/q-Oct_2020-Q5.html">Oct 2020 Q5</a><a class="ex-chip" href="../ch6/q-Oct_2021-Q8.html">Oct 2021 Q8</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">integration by parts</span><span class="chip chip-trigger">find the exact value</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">area</span><span class="chip chip-trigger">∫ x² e</span><span class="chip chip-trigger">∫ x ln</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Standard integration by parts (LIATE rule):</span> When the integrand is a product of two functions from different categories.</div><div class="appr-line"><span class="approach-name">B: Tabular method (for repeated parts with polynomial × exponential/trig):</span> When one factor is a polynomial (differentiates to zero eventually) and the other is easily integrated repeatedly.</div><div class="appr-line"><span class="approach-name">C: Recurring integral method:</span> When the original integral reappears after two rounds of parts (e.g., ∫eˣ sin x dx or ∫eˣ cos x dx).</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\int u\,dv = uv - \int v\,du$ (formula booklet)</div><div class="formula-line">$\int e^{ax}\,dx = \frac{1}{a}e^{ax} + C$ (MEMORIZE)</div><div class="formula-line">$\int \ln x\,dx = x\ln x - x + C$ (MEMORIZE — derived by parts with u=ln x, dv=dx)</div></td>
+                <td class="col-pitfalls"><ul><li>Choosing u and dv/dx the wrong way round — leads to a harder integral.</li><li>Sign errors, especially the minus sign in the IBP formula and when applying it twice.</li><li>Forgetting the 1/a factor when integrating e^(ax): ∫e^(3x)dx = (1/3)e^(3x), not e^(3x).</li><li>For recurring integrals, inconsistent choice of u and dv in the second application — must keep the same type as u both times.</li><li>Algebraic errors when solving 2I = ... for I.</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Volume of revolution (Cartesian and parametric)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">8×</span>
+                        <span class="chip chip-marks">5-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Asked to find the exact volume when a region bounded by a curve is rotated 2π radians about the x-axis (or y-axis). May involve exponential, logarithmic, or parametric curves. Sometimes the volume is </div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2021-Q9.html">Jan 2021 Q9</a><a class="ex-chip" href="../ch6/q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="ex-chip" href="../ch6/q-Jan_2023-Q3.html">Jan 2023 Q3</a><a class="ex-chip" href="../ch6/q-Jun_2021-Q2.html">Jun 2021 Q2</a><a class="ex-chip" href="../ch6/q-Oct_2020-Q3.html">Oct 2020 Q3</a><a class="ex-chip" href="../ch6/q-Oct_2021-Q8.html">Oct 2021 Q8</a><a class="ex-chip" href="../ch6/q-Oct_2022-Q5.html">Oct 2022 Q5</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">volume of revolution</span><span class="chip chip-trigger">rotated 2π</span><span class="chip chip-trigger">rotated through 360°</span><span class="chip chip-trigger">solid of revolution</span><span class="chip chip-trigger">exact volume</span><span class="chip chip-trigger">V = π∫</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Direct integration of πy²:</span> When y is given explicitly as a function of x.</div><div class="appr-line"><span class="approach-name">B: Parametric volume of revolution:</span> When the curve is given parametrically as x(t), y(t).</div><div class="appr-line"><span class="approach-name">C: Washer method (region between two curves):</span> When the region is bounded by two curves and both contribute to the volume.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$V = \pi\int_a^b y^2\,dx$ — rotation about x-axis (formula booklet)</div><div class="formula-line">$V = \pi\int_a^b x^2\,dy$ — rotation about y-axis (formula booklet)</div><div class="formula-line">$V = \pi\int_{t_1}^{t_2} y^2 \frac{dx}{dt}\,dt$ — parametric form (MEMORIZE — derived from above)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting the π factor in the volume formula.</li><li>Not squaring y before integrating — integrating y instead of y².</li><li>Incorrectly expanding (e^(x/2) - 2)²: must use (A-B)² = A² - 2AB + B², giving e^x - 4e^(x/2) + 4.</li><li>Incorrectly squaring exponentials: (e^(x/2))² = e^x, NOT e^(x²/4).</li><li>Forgetting to change limits when using parametric form.</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Separable differential equations (with partial fractions)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">7×</span>
+                        <span class="chip chip-marks">6-14m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A first-order ODE dy/dx = f(x)g(y) or similar. You must separate variables, integrate both sides (often requiring partial fractions or standard results), apply initial conditions, and sometimes find l</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2021-Q10.html">Jan 2021 Q10</a><a class="ex-chip" href="../ch6/q-Jun_2021-Q8.html">Jun 2021 Q8</a><a class="ex-chip" href="../ch6/q-Jun_2022-Q2.html">Jun 2022 Q2</a><a class="ex-chip" href="../ch6/q-Jan_2022-Q9.html">Jan 2022 Q9</a><a class="ex-chip" href="../ch6/q-Oct_2020-Q9.html">Oct 2020 Q9</a><a class="ex-chip" href="../ch6/q-Oct_2021-Q2.html">Oct 2021 Q2</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">differential equation</span><span class="chip chip-trigger">separation of variables</span><span class="chip chip-trigger">given that when</span><span class="chip chip-trigger">initial condition</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">limiting value</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Separate, decompose with partial fractions, integrate:</span> When the y-side (or x-side) of the separated equation has a product of linear factors in the denominator.</div><div class="appr-line"><span class="approach-name">B: Separate and use standard integral results directly:</span> When the integrals on one or both sides are standard forms (e.g., ∫1/y dy, ∫cos²x dx, ∫cosec y dy).</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{1}{(y-a)(y-b)} = \frac{1}{a-b}\left(\frac{1}{y-a} - \frac{1}{y-b}\right)$ — partial fractions (MEMORIZE pattern)</div><div class="formula-line">$\int \frac{1}{ax+b}\,dx = \frac{1}{a}\ln|ax+b| + C$ (MEMORIZE)</div><div class="formula-line">$\int \cot x\,dx = \ln|\sin x| + C$ (formula booklet)</div><div class="formula-line">$\int \csc x\,dx = -\ln|\csc x + \cot x| + C$ (formula booklet)</div><div class="formula-line">$\ln a - \ln b = \ln\frac{a}{b}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Incorrect separation: writing (H-5)(H+3) dH = dt instead of 1/[(H-5)(H+3)] dH = dt.</li><li>Forgetting the negative sign in the DE when separating variables.</li><li>Forgetting the constant of integration C after integrating both sides.</li><li>Sign errors when rearranging expressions like -1/A = -3/(8t⁴) + C.</li><li>Incorrect integration of y² (writing 2y instead of y³/3).</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Area under a parametric curve</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">3×</span>
+                        <span class="chip chip-marks">8-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A curve is defined parametrically and you must find the area of a region bounded by the curve and/or axes. May also require converting parametric to Cartesian form or finding the range.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2022-Q5.html">Jan 2022 Q5</a><a class="ex-chip" href="../ch6/q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="ex-chip" href="../ch6/q-Oct_2022-Q2.html">Oct 2022 Q2</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">parametric</span><span class="chip chip-trigger">area</span><span class="chip chip-trigger">x = f(t)</span><span class="chip chip-trigger">y = g(t)</span><span class="chip chip-trigger">show that the area</span><span class="chip chip-trigger">Cartesian equation</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Parametric area formula directly:</span> When the curve is given parametrically and converting to Cartesian is difficult.</div><div class="appr-line"><span class="approach-name">B: Convert to Cartesian, then integrate:</span> When the parametric equations are simple enough to eliminate t easily.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$A = \int_{t_1}^{t_2} y\,\frac{dx}{dt}\,dt$ (MEMORIZE — not always in formula booklet for this form)</div><div class="formula-line">$\cos 2t = 1 - 2\sin^2 t = 2\cos^2 t - 1$ (MEMORIZE)</div><div class="formula-line">$\sin 2t = 2\sin t \cos t$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting the negative sign from dx/dt, giving the wrong sign for area.</li><li>Incorrect limits: not tracing which t-values correspond to the boundary of R.</li><li>Forgetting to flip integration limits when converting from x to t and the mapping reverses direction.</li><li>Not cancelling terms properly when substituting u = 81 - 16t² or similar.</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Integration using partial fractions (including irreducible quadratic factors)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">4×</span>
+                        <span class="chip chip-marks">7-12m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A rational function must be decomposed into partial fractions before integrating. May involve distinct linear factors, repeated linear factors, or irreducible quadratic factors. Often combined with su</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Oct_2020-Q7.html">Oct 2020 Q7</a><a class="ex-chip" href="../ch6/q-Oct_2022-Q7.html">Oct 2022 Q7</a><a class="ex-chip" href="../ch6/q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="ex-chip" href="../ch6/q-Jun_2022-Q2.html">Jun 2022 Q2</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">partial fractions</span><span class="chip chip-trigger">express</span><span class="chip chip-trigger">hence find</span><span class="chip chip-trigger">irreducible quadratic</span><span class="chip chip-trigger">repeated factor</span><span class="chip chip-trigger">∫ rational function</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Decompose then integrate each term:</span> Standard approach for all partial fraction integration.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\int \frac{1}{ax+b}\,dx = \frac{1}{a}\ln|ax+b| + C$ (MEMORIZE)</div><div class="formula-line">$\int \frac{1}{(ax+b)^2}\,dx = -\frac{1}{a(ax+b)} + C$ (MEMORIZE)</div><div class="formula-line">$\int \frac{1}{x^2+a^2}\,dx = \frac{1}{a}\arctan\frac{x}{a} + C$ (formula booklet)</div><div class="formula-line">$\int \frac{f'(x)}{f(x)}\,dx = \ln|f(x)| + C$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting the Bx+C numerator form for the irreducible quadratic factor — using just B is wrong.</li><li>Not splitting (−2x+2)/(x²+1) into −2x/(x²+1) + 2/(x²+1) before integrating.</li><li>Incorrect number of partial fraction terms for repeated factors.</li><li>Forgetting the 1/a factor in the arctan result.</li><li>Log arithmetic errors when evaluating definite integrals.</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Definite integral with trigonometric substitution and identities</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">3×</span>
+                        <span class="chip chip-marks">9-11m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A definite integral involving square roots or quadratic expressions where a trigonometric substitution (x = a sin θ, x = a tan θ, etc.) is suggested. Requires heavy use of trig identities to simplify.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jan_2021-Q9.html">Jan 2021 Q9</a><a class="ex-chip" href="../ch6/q-Jan_2024-Q5.html">Jan 2024 Q5</a><a class="ex-chip" href="../ch6/q-Jun_2024-Q9.html">Jun 2024 Q9</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">substitution x = a sinθ</span><span class="chip chip-trigger">substitution x = a tanθ</span><span class="chip chip-trigger">trigonometric substitution</span><span class="chip chip-trigger">sin²θ cos²θ</span><span class="chip chip-trigger">exact value</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Apply given trig substitution:</span> When the question specifies x = a sinθ or x = a tanθ.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\sin^2\theta = \frac{1 - \cos 2\theta}{2}$ (MEMORIZE)</div><div class="formula-line">$\cos^2\theta = \frac{1 + \cos 2\theta}{2}$ (MEMORIZE)</div><div class="formula-line">$\sin 2\theta = 2\sin\theta\cos\theta$ (MEMORIZE)</div><div class="formula-line">$1 + \tan^2\theta = \sec^2\theta$ (MEMORIZE)</div><div class="formula-line">$\int \sec^2\theta\,d\theta = \tan\theta + C$ (MEMORIZE)</div><div class="formula-line">$\int \tan\theta\,d\theta = -\ln|\cos\theta| + C$ or $\ln|\sec\theta| + C$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to change limits from x to θ — evaluating at x-values with a θ-expression.</li><li>Errors in trig identities, especially when simplifying sin²θ cos²θ = (1/4)sin²2θ.</li><li>Forgetting the scalar factor (1/a) when integrating trig functions of (aθ).</li><li>Misreading √3 as 3 from poorly printed questions.</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Differentiation within integration context (product rule, chain rule, show-that setup)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">5-6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">A differentiation question that sets up a later integration part, or is tagged within the integration chapter. Involves product rule and chain rule to differentiate complex expressions, then use the r</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch6/q-Jun_2024-Q1.html">Jun 2024 Q1</a><a class="ex-chip" href="../ch6/q-Jan_2022-Q9.html">Jan 2022 Q9</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">differentiate</span><span class="chip chip-trigger">show that</span><span class="chip chip-trigger">hence integrate</span><span class="chip chip-trigger">product rule</span><span class="chip chip-trigger">chain rule</span><span class="chip chip-trigger">factorise</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Product rule + chain rule, then reverse for integration:</span> When asked to differentiate a product and then use the result to find an integral.</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\frac{d}{dx}[uv] = u\frac{dv}{dx} + v\frac{du}{dx}$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[f(g(x))] = f'(g(x)) \cdot g'(x)$ (MEMORIZE)</div><div class="formula-line">$\frac{d}{dx}[x^n] = nx^{n-1}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Failing to apply the chain rule correctly when differentiating composite functions with fractional powers.</li><li>Errors in algebraic simplification, especially when factorising terms with fractional exponents.</li><li>Not recognising that d/dx[F(x)] = f(x) implies ∫f(x)dx = F(x) + C.</li></ul></td>
+            </tr></tbody>
+            </table>
+        </div><div class="chapter-section" id="ch7">
+            <h2>ch7 · Vectors <span class="ch-stats">— 13 q analysed · 8 types · 15.1% of unit marks</span></h2>
+            <table class="master-cs">
+                <thead>
+                    <tr>
+                        <th class="col-name">Question Type</th>
+                        <th class="col-triggers">Triggers (how to spot)</th>
+                        <th class="col-approaches">Approaches</th>
+                        <th class="col-formulas">Must-know formulas</th>
+                        <th class="col-pitfalls">Pitfalls to avoid</th>
+                    </tr>
+                </thead>
+                <tbody><tr>
+                <td class="col-name">
+                    <div class="qt-name">Intersection of two 3D lines</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">6×</span>
+                        <span class="chip chip-marks">8-11m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Two lines given in vector form $\mathbf{r} = \mathbf{a} + \lambda\mathbf{b}$ and $\mathbf{r} = \mathbf{c} + \mu\mathbf{d}$. Asked to determine if they intersect and find the point of intersection. Oft</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jan_2022-Q8.html">Jan 2022 Q8</a><a class="ex-chip" href="../ch7/q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="ex-chip" href="../ch7/q-Jun_2022-Q6.html">Jun 2022 Q6</a><a class="ex-chip" href="../ch7/q-Oct_2020-Q8.html">Oct 2020 Q8</a><a class="ex-chip" href="../ch7/q-Oct_2023-Q6.html">Oct 2023 Q6</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">intersection</span><span class="chip chip-trigger">two lines</span><span class="chip chip-trigger">vector equation</span><span class="chip chip-trigger">point of intersection</span><span class="chip chip-trigger">show that the lines meet</span><span class="chip chip-trigger">find the coordinates</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Equate components and solve simultaneous equations:</span> Standard method; always works for checking intersection</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\mathbf{r} = \mathbf{a} + \lambda\mathbf{b}$ — vector equation of a line through point $\mathbf{a}$ with direction $\mathbf{b}$ (MEMORIZE)</div><div class="formula-line">For intersection: equate $\mathbf{a} + \lambda\mathbf{b} = \mathbf{c} + \mu\mathbf{d}$ component-wise (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Using the same parameter ($\lambda$) for both lines — they are independent parameters</li><li>Solving only two equations and not checking the third for consistency</li><li>Algebraic sign errors when forming the simultaneous equations from equating components</li><li>Substituting the parameter back into the wrong line</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Angle between two vectors or between a vector and a line</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">7×</span>
+                        <span class="chip chip-marks">5-6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given two vectors (or direction vectors of two lines), find the angle between them. May be part of a larger question on line intersection. Sometimes asked to find the angle at a specific vertex of a t</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jan_2021-Q2.html">Jan 2021 Q2</a><a class="ex-chip" href="../ch7/q-Jan_2022-Q8.html">Jan 2022 Q8</a><a class="ex-chip" href="../ch7/q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="ex-chip" href="../ch7/q-Jun_2022-Q6.html">Jun 2022 Q6</a><a class="ex-chip" href="../ch7/q-Oct_2022-Q3.html">Oct 2022 Q3</a><a class="ex-chip" href="../ch7/q-Oct_2023-Q6.html">Oct 2023 Q6</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">angle between</span><span class="chip chip-trigger">scalar product</span><span class="chip chip-trigger">dot product</span><span class="chip chip-trigger">acute angle</span><span class="chip chip-trigger">cos θ</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Scalar (dot) product formula:</span> Standard method for finding angle between any two vectors</div><div class="appr-line"><span class="approach-name">B: Using the correct pair of vectors at a vertex:</span> When finding the angle at a specific point (e.g. angle ABC in a triangle or parallelogram)</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\mathbf{a} \cdot \mathbf{b} = a_1 b_1 + a_2 b_2 + a_3 b_3$ (MEMORIZE)</div><div class="formula-line">$\cos\theta = \frac{\mathbf{a} \cdot \mathbf{b}}{|\mathbf{a}||\mathbf{b}|}$ (formula booklet)</div><div class="formula-line">$|\mathbf{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to take the acute angle when the question asks for the angle between two lines and the dot product is negative</li><li>Using $\vec{AB} \cdot \vec{BC}$ instead of $\vec{BA} \cdot \vec{BC}$ for the angle at vertex B</li><li>Using position vectors instead of direction vectors for angle between lines</li><li>Forgetting to take $\cos^{-1}$ and leaving $\cos\theta$ as the final answer</li><li>Calculation errors in the dot product or magnitudes</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Proving lines are skew</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">5-6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Two lines given in vector form. Must prove that they are skew: i.e. they are not parallel AND do not intersect.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jan_2021-Q8.html">Jan 2021 Q8</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">skew</span><span class="chip chip-trigger">prove</span><span class="chip chip-trigger">do not intersect</span><span class="chip chip-trigger">not parallel</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Two-part proof (non-parallel + non-intersecting):</span> Always — this is the only valid method for proving lines are skew</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Lines are parallel if $\mathbf{b}_1 = k\mathbf{b}_2$ for some scalar $k$ (MEMORIZE)</div><div class="formula-line">Lines are skew if they are not parallel AND do not intersect (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Forgetting to prove the lines are not parallel (only showing non-intersection is not enough for 'skew')</li><li>Using only two equations without checking the third — the inconsistency must be shown via the third equation</li><li>Concluding 'skew' without explicitly stating both conditions have been verified</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Shortest distance from a point to a line (perpendicular foot)</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">5-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given a point P and a line $\mathbf{r} = \mathbf{a} + \lambda\mathbf{b}$, find the foot of the perpendicular from P to the line, or the shortest distance from P to the line.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Oct_2022-Q9.html">Oct 2022 Q9</a><a class="ex-chip" href="../ch7/q-Oct_2020-Q8.html">Oct 2020 Q8</a><a class="ex-chip" href="../ch7/q-Jun_2021-Q7.html">Jun 2021 Q7</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">shortest distance</span><span class="chip chip-trigger">perpendicular</span><span class="chip chip-trigger">foot of perpendicular</span><span class="chip chip-trigger">closest point</span><span class="chip chip-trigger">minimum distance</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Dot product perpendicularity condition:</span> Standard method — always applicable</div><div class="appr-line"><span class="approach-name">B: Using the formula $d = \frac{|\vec{AP} \times \mathbf{b}|}{|\mathbf{b}|}$:</span> When only the distance is needed (not the foot), and cross product is known</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Perpendicularity condition: $\vec{QP} \cdot \mathbf{b} = 0$ (MEMORIZE)</div><div class="formula-line">$|\mathbf{v}| = \sqrt{v_1^2 + v_2^2 + v_3^2}$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Arithmetic errors when substituting fractional $\lambda$ values back into the line equation</li><li>Forgetting to actually compute the magnitude after finding the foot of perpendicular</li><li>Sign errors in forming $\vec{QP}$ (subtracting in wrong order)</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Finding points on a line at a given distance from a point</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given a line and a point (on or off the line), find the point(s) on the line that are a specified distance from the given point. Leads to a quadratic equation in the parameter.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jun_2024-Q6.html">Jun 2024 Q6</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">distance from</span><span class="chip chip-trigger">find the points on the line</span><span class="chip chip-trigger">given distance</span><span class="chip chip-trigger">quadratic</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Set up distance equation and solve quadratic:</span> Always — the standard method for this question type</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$|\vec{PQ}|^2 = (q_1-p_1)^2 + (q_2-p_2)^2 + (q_3-p_3)^2$ (MEMORIZE)</div><div class="formula-line">Quadratic formula: $\lambda = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ (formula booklet)</div></td>
+                <td class="col-pitfalls"><ul><li>Errors in expanding squared terms, especially $(-\lambda - 2)^2$ — must get $\lambda^2 + 4\lambda + 4$</li><li>Algebraic mistakes when simplifying the quadratic equation</li><li>Forgetting to substitute both values of $\lambda$ back to find both points</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Vector equation of a line & unit vectors</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">6-10m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given two points, form the vector equation of the line through them. May also require finding a unit vector in a given direction. Sometimes combined with further parts.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jun_2021-Q7.html">Jun 2021 Q7</a><a class="ex-chip" href="../ch7/q-Jan_2022-Q8.html">Jan 2022 Q8</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">vector equation of the line</span><span class="chip chip-trigger">unit vector</span><span class="chip chip-trigger">direction vector</span><span class="chip chip-trigger">write down</span><span class="chip chip-trigger">equation of line through</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Subtract position vectors for direction, then form line equation:</span> When two points on the line are given</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\mathbf{r} = \mathbf{a} + \lambda(\mathbf{b} - \mathbf{a})$ for line through points $A$ and $B$ (MEMORIZE)</div><div class="formula-line">$\hat{\mathbf{b}} = \frac{\mathbf{b}}{|\mathbf{b}|}$ — unit vector (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Subtracting position vectors in the wrong order (gives opposite direction — acceptable for line but may matter for unit vector sign)</li><li>Forgetting to consider $\pm$ for unit vector when both directions are valid</li><li>Not simplifying direction vector when the question expects integer components</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">Area of a triangle or parallelogram using vectors</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">2×</span>
+                        <span class="chip chip-marks">5-6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given vertices or side vectors, find the area of a parallelogram or triangle. Uses $|\mathbf{a}||\mathbf{b}|\sin\theta$ or cross product.</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jan_2021-Q2.html">Jan 2021 Q2</a><a class="ex-chip" href="../ch7/q-Jun_2021-Q7.html">Jun 2021 Q7</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">area</span><span class="chip chip-trigger">parallelogram</span><span class="chip chip-trigger">triangle</span><span class="chip chip-trigger">cross product</span><span class="chip chip-trigger">sin</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Use $|\mathbf{a}||\mathbf{b}|\sin\theta$ after finding $\theta$ from dot product:</span> When the angle has already been found or is easy to find</div><div class="appr-line"><span class="approach-name">B: Cross product method:</span> When cross product is in the syllabus or you want a direct calculation</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">Area of parallelogram $= |\mathbf{a}||\mathbf{b}|\sin\theta$ (MEMORIZE)</div><div class="formula-line">Area of triangle $= \frac{1}{2}|\mathbf{a}||\mathbf{b}|\sin\theta$ (MEMORIZE)</div><div class="formula-line">$\sin\theta = \sqrt{1 - \cos^2\theta}$ for $0 < \theta < 180°$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Using the wrong pair of vectors (must share a common vertex for the area formula)</li><li>Forgetting to halve for triangle area</li><li>Errors in computing $\sin\theta$ from $\cos\theta$</li></ul></td>
+            </tr><tr>
+                <td class="col-name">
+                    <div class="qt-name">3D vector arithmetic and scalar product operations</div>
+                    <div class="qt-meta">
+                        <span class="chip chip-freq">1×</span>
+                        <span class="chip chip-marks">6m</span>
+                    </div>
+                    <div class="qt-meta" style="color:var(--muted-2);font-size:10.5px;margin-top:5px;line-height:1.4;">Given position vectors of points, find displacement vectors, compute dot products, and possibly solve equations involving dot products (e.g. finding an unknown constant). May involve surds or quadrati</div>
+                    <div class="examples-row"><a class="ex-chip" href="../ch7/q-Jun_2024-Q2.html">Jun 2024 Q2</a></div>
+                </td>
+                <td class="col-triggers triggers"><span class="chip chip-trigger">position vector</span><span class="chip chip-trigger">displacement vector</span><span class="chip chip-trigger">scalar product</span><span class="chip chip-trigger">find the value of</span><span class="chip chip-trigger">perpendicular</span></td>
+                <td class="col-approaches approaches"><div class="appr-line"><span class="approach-name">A: Direct computation:</span> Always — compute vectors then apply dot product</div></td>
+                <td class="col-formulas formulas"><div class="formula-line">$\vec{AB} = \mathbf{b} - \mathbf{a}$ (MEMORIZE)</div><div class="formula-line">$\mathbf{a} \cdot \mathbf{b} = a_1 b_1 + a_2 b_2 + a_3 b_3$ (MEMORIZE)</div><div class="formula-line">$\mathbf{a} \perp \mathbf{b} \iff \mathbf{a} \cdot \mathbf{b} = 0$ (MEMORIZE)</div></td>
+                <td class="col-pitfalls"><ul><li>Incorrect order for vector subtraction: $\vec{BC} = \mathbf{c} - \mathbf{b}$, NOT $\mathbf{b} - \mathbf{c}$</li><li>Errors in calculating the dot product, such as forgetting to sum all three component products</li><li>Sign errors when components are negative or involve surds</li></ul></td>
+            </tr></tbody>
+            </table>
+        </div>
+</main>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution · P4 master cheatsheet
+</footer>
+</body>
+</html>

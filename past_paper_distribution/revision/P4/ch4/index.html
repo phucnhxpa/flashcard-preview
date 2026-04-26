@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>P4 · ch4 Binomial expansion</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">P4</a><span class="sep">/</span>ch4 Binomial expansion</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 P4 · ch4</div>
+  <h1>Binomial expansion</h1>
+  <p class="lede">Every P4 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 12 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 P4 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">12</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">83<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">7<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">12</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">12 questions · 83 marks across 13 papers · <b>8.5%</b> of all unit marks · <b>10.1%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 1 q · 6/75 marks (8.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:75%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">8.0%</div>
+            </div><div class="year-bar" title="2020: 1 q · 8/75 marks (10.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'20</div>
+                <div class="bar-val">10.7%</div>
+            </div><div class="year-bar" title="2021: 3 q · 20/225 marks (8.9% of paper)">
+                <div class="bar-fill ch-bar" style="height:83%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">8.9%</div>
+            </div><div class="year-bar" title="2022: 3 q · 22/225 marks (9.8% of paper)">
+                <div class="bar-fill ch-bar" style="height:92%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">9.8%</div>
+            </div><div class="year-bar" title="2023: 3 q · 23/225 marks (10.2% of paper)">
+                <div class="bar-fill ch-bar" style="height:95%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">10.2%</div>
+            </div><div class="year-bar" title="2024: 1 q · 4/150 marks (2.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:25%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">2.7%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 12 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-using-binomial-expansion-for-numerical-surd-approximation">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Using binomial expansion for numerical/surd approximation</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">5</span><small>×</small></div>
+                    <div class="marks">2-4m (usually the final part of a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">After expanding, you are told to substitute a specific value of $x$ to approximate a surd or cube root, e.g., 'Hence find an approximation to $\sqrt{3.96}$' or 'show that $\sqrt[3]{7.7} \approx \frac{788}{400}$'. You must identify the correct $x$ value.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">5</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">37</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">41.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">44.6%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.4</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 2 q · 13 marks">
+                    <div class="bar-fill" style="height:87%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2022: 2 q · 15 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2023: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:60%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">hence</span><span class="chip-trigger">approximation</span><span class="chip-trigger">estimate</span><span class="chip-trigger">find an approximate value</span><span class="chip-trigger">decimal places</span><span class="chip-trigger">show that</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The value of $x$ substituted must lie within the range of validity of the expansion</li><li>Only the first few terms of the expansion are used (as directed by the question)</li><li>The approximation improves with more terms</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Match the target expression to the expanded function</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the standard method</div>
+                <ol class='cs-steps'><li>Identify what the original function $(a+bx)^n$ becomes for a specific numerical argument.</li><li>Set $a + bx = $ (the number under the root/power) and solve for $x$.</li><li>Check that $x$ is within the range of validity.</li><li>Substitute $x$ into your truncated series expansion.</li><li>Simplify the arithmetic carefully (keep fractions if asked for exact form, or compute to required d.p.).</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and always works if the expansion has been correctly found.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Arithmetic can be tedious; must carefully match the target to the expansion.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">The truncated binomial expansion from the earlier part of the question (derived, not from booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Choosing the wrong value of $x$ — e.g., for $(4-5x)^{1/2}$ to approximate $\sqrt{3}$, set $4-5x = 3$ giving $x = 0.2$, not $x = 3$</li><li>Substituting $x$ outside the range of validity, leading to a poor or invalid approximation</li><li>Arithmetic errors in the substitution — work with fractions where possible to avoid rounding errors</li><li>Forgetting to multiply by the factored-out constant $a^n$ when substituting</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q4.html">Oct 2021 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q1.html">Jun 2023 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q4.html">Oct 2022 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-product-of-polynomial-and-binomial-expansion-compound-expansion">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Product of polynomial and binomial expansion — compound expansion</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given $f(x) = (2+kx)(a+bx)^n$ or similar product of a linear/quadratic factor and a binomial expansion. You expand the binomial part first, then multiply by the polynomial and collect like terms. Often combined with coefficient matching.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">17</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">20.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:89%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">f(x) =</span><span class="chip-trigger">coefficient of x^2 is</span><span class="chip-trigger">show that</span><span class="chip-trigger">find the value of k</span><span class="chip-trigger">product</span><span class="chip-trigger">multiply</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Expand the binomial part first, then multiply by the polynomial factor</li><li>Only terms up to the required power of $x$ need to be kept during multiplication</li><li>The validity condition comes from the binomial part only (the polynomial factor does not affect convergence)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Expand binomial first, then multiply and collect terms</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always for these compound expressions</div>
+                <ol class='cs-steps'><li>Expand $(a+bx)^n$ as a series up to one power higher than required (to be safe when multiplying).</li><li>Multiply each term of the polynomial by each term of the binomial expansion.</li><li>Collect like powers of $x$ and simplify.</li><li>If coefficient matching is required, equate the resulting coefficients to the given values and solve for unknowns.</li><li>State the final expansion clearly.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic; handles any polynomial prefactor.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to miss cross-terms when collecting like powers.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \ldots$ (formula booklet)</div><div class="cs-formula">When multiplying $(p + qx)(1 + Ax + Bx^2 + Cx^3 + \ldots)$: coefficient of $x^r$ is $pC_r + qC_{r-1}$ where $C_r$ is the coefficient of $x^r$ in the expansion (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Only expanding the binomial to the exact required power and then missing the cross-term contribution from the polynomial</li><li>Forgetting that $(2+kx) \times (\text{coeff of } x^2) $ contributes to the $x^2$ term AND the $x^3$ term</li><li>Not factoring out the constant from the binomial before expanding</li><li>Misreading which coefficient is given or needs to be found</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2020-Q2.html">Oct 2020 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q1.html">Jan 2023 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-factorising-and-solving-quadratic-equations">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Factorising and solving quadratic equations</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">4-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">A standard quadratic equation $ax^2 + bx + c = 0$ to factorise and solve. May appear as a sub-step within a binomial expansion problem (e.g., solving for unknowns $a$ and $n$) or as a standalone question in the chapter.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">11</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">5.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 4 marks">
+                    <div class="bar-fill" style="height:57%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">4</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">factorise</span><span class="chip-trigger">solve</span><span class="chip-trigger">quadratic</span><span class="chip-trigger">roots</span><span class="chip-trigger">x =</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The quadratic has rational roots if factorisation is requested</li><li>Both roots should be stated unless context restricts solutions</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Factorisation by inspection</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When integer/simple rational roots exist and the quadratic is straightforward</div>
+                <ol class='cs-steps'><li>For $x^2 + bx + c$: find two numbers that multiply to $c$ and add to $b$.</li><li>For $ax^2 + bx + c$: find factors of $ac$ that add to $b$, split the middle term, and group.</li><li>Write as product of two linear factors.</li><li>Set each factor to zero and solve.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Quick when it works; no formula needed.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Fails if roots are irrational or complex.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Quadratic formula</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When factorisation is not obvious or when asked for exact solutions</div>
+                <ol class='cs-steps'><li>Identify $a$, $b$, $c$ from $ax^2 + bx + c = 0$.</li><li>Compute discriminant $\Delta = b^2 - 4ac$.</li><li>Apply $x = \frac{-b \pm \sqrt{\Delta}}{2a}$.</li><li>Simplify the surd if possible.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Always works for any quadratic.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Slower; more room for arithmetic error.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Sign errors when identifying $p$ and $q$ in $(x-p)(x+q)$ — double-check by expanding</li><li>Forgetting to divide by the leading coefficient when solving $(mx + n) = 0 \Rightarrow x = -n/m$</li><li>Not checking factorisation by expanding back</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q1.html">Jan 2024 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q1.html">Jun 2022 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-finding-unknowns-by-comparing-coefficients-in-binomial-expansions">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Finding unknowns by comparing coefficients in binomial expansions</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given $(1+ax)^n$ or $(a+bx)^n$ and told that certain coefficients in the expansion equal specific values, or that the coefficient of $x^2$ is some multiple of the coefficient of $x$. You form simultaneous equations to find $a$ and $n$.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">7</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">coefficient of</span><span class="chip-trigger">show that</span><span class="chip-trigger">find the values of a and n</span><span class="chip-trigger">given that the coefficient</span><span class="chip-trigger">comparing coefficients</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>$n$ is rational (not necessarily a positive integer)</li><li>Two unknowns require two equations — typically from the $x$ and $x^2$ (or $x^3$) coefficients</li><li>The resulting equations may involve quadratics or simultaneous equations</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Expand and equate coefficients systematically</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you are given numerical values of specific coefficients and need to find parameters</div>
+                <ol class='cs-steps'><li>Write out the general binomial expansion to the required number of terms.</li><li>Express each coefficient in terms of the unknowns ($a$, $n$, etc.).</li><li>Set up equations by equating your expressions to the given coefficient values.</li><li>Solve the simultaneous equations — often divide one equation by another to eliminate a variable.</li><li>Check your values by substituting back into a third coefficient if available.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and works for all configurations of unknowns.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Algebra can become messy; easy to make fraction errors.</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use ratio of consecutive coefficients</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When both $a$ and $n$ are unknown — dividing the $x^2$ coefficient equation by the $x$ coefficient equation often eliminates one unknown cleanly</div>
+                <ol class='cs-steps'><li>Write coefficient of $x$: $C_1 = na$.</li><li>Write coefficient of $x^2$: $C_2 = \frac{n(n-1)}{2}a^2$.</li><li>Form the ratio $\frac{C_2}{C_1} = \frac{(n-1)a}{2}$.</li><li>Use the given information about $C_1$ and $C_2$ to find $a$ in terms of $n$ (or vice versa).</li><li>Substitute back to find both unknowns.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Cleaner algebra; avoids messy simultaneous equations.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only useful when consecutive coefficient values are both known.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Coefficient of $x^r$ in $(1+ax)^n$: $\frac{n(n-1)(n-2)\cdots(n-r+1)}{r!} \cdot a^r$ (MEMORIZE)</div><div class="cs-formula">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to include $a^r$ when computing the coefficient of $x^r$ — the coefficient is not just $\binom{n}{r}$ but $\binom{n}{r}a^r$</li><li>Division by zero or losing solutions if $a=0$ is not excluded</li><li>Errors in solving the simultaneous equations, especially with negative and fractional values</li><li>Not checking solutions against all given conditions</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q1.html">Jun 2021 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q1.html">Jan 2023 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q1.html">Jun 2023 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-binomial-expansion-of-1-bx-n-for-fractional-negative-n">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Binomial expansion of (1+bx)^n for fractional/negative n</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">6-8m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given an expression like $(1+2x)^{1/3}$ or $(1-3x)^{-2}$ and asked to expand up to a certain power of $x$ (typically $x^3$). May also ask for the range of validity.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.2%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">expand</span><span class="chip-trigger">ascending powers of x</span><span class="chip-trigger">first four terms</span><span class="chip-trigger">binomial expansion</span><span class="chip-trigger">valid for</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The expansion is valid only for $|bx| < 1$, i.e., $|x| < \frac{1}{|b|}$</li><li>The exponent $n$ is not a positive integer, so the series is infinite</li><li>Terms beyond the requested power are ignored (truncated series)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct application of generalised binomial formula</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the expression is already in the form $(1 + X)^n$</div>
+                <ol class='cs-steps'><li>Identify $X$ (the 'small' term) and $n$ (the exponent).</li><li>Write out the formula: $(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$</li><li>Substitute $X = bx$ and compute each coefficient carefully, noting that $X^k = (bx)^k = b^k x^k$.</li><li>Simplify each fractional coefficient fully (e.g., $\frac{n(n-1)}{2}$).</li><li>State the range of validity: $|bx| < 1 \Rightarrow |x| < \frac{1}{|b|}$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward when already in $(1+X)^n$ form; minimal algebra.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to make sign/fraction errors in the descending product $n(n-1)(n-2)\ldots$</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ where $n \in \mathbb{Q}$, $|X|<1$ (formula booklet)</div><div class="cs-formula">Range of validity: $|X| < 1$ where $X$ is the entire expression inside the bracket minus 1 (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to raise the entire term $bx$ to the appropriate power — e.g., $(2x)^2 = 4x^2$, not $2x^2$</li><li>Sign errors when $n$ is negative: $n(n-1) = (-2)(-3) = +6$, not $-6$</li><li>Sign errors when $X$ is negative: $(-3x)^2 = 9x^2$ (positive), $(-3x)^3 = -27x^3$ (negative)</li><li>Not simplifying fractional coefficients fully</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Specimen_2018-Q1.html">Specimen 2018 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q4.html">Oct 2022 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-binomial-expansion-of-a-bx-n-factoring-out-the-constant-first">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Binomial expansion of (a+bx)^n — factoring out the constant first</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">6-8m</div>
+                </div>
+            </div>
+            <p class="qt-look">The expression is $(a + bx)^n$ where $a \neq 1$, e.g., $(4-5x)^{-1/2}$ or $(8+3x)^{1/3}$. You must factor out $a^n$ before applying the binomial formula.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">5</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">5.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2020: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'20</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 5 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">5</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">expand</span><span class="chip-trigger">ascending powers</span><span class="chip-trigger">first three terms</span><span class="chip-trigger">binomial expansion</span><span class="chip-trigger">show that</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Must rewrite $(a+bx)^n = a^n\left(1 + \frac{b}{a}x\right)^n$ before expanding</li><li>Validity condition is $\left|\frac{b}{a}x\right| < 1$, i.e., $|x| < \left|\frac{a}{b}\right|$</li><li>The constant factor $a^n$ multiplies every term of the expansion</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Factor out constant, then expand (1 + kx)^n</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always use this when $a \neq 1$</div>
+                <ol class='cs-steps'><li>Rewrite: $(a+bx)^n = a^n\left(1 + \frac{b}{a}x\right)^n$.</li><li>Let $X = \frac{b}{a}x$ and apply the generalised binomial expansion to $(1+X)^n$.</li><li>Expand up to the required power of $x$.</li><li>Multiply every term by $a^n$ (don't forget this!).</li><li>Simplify all coefficients.</li><li>State validity: $|x| < \left|\frac{a}{b}\right|$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and reliable; works for all $(a+bx)^n$ forms.</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Extra step of factoring and multiplying by $a^n$ introduces more places for error.</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$(a+bx)^n = a^n\left(1 + \frac{b}{a}x\right)^n$ (MEMORIZE — key rearrangement step)</div><div class="cs-formula">$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to factor out the constant $a$ entirely — applying the formula directly to $(a+bx)^n$ as if it were $(1+bx)^n$</li><li>Forgetting to multiply back by $a^n$ after expanding $(1+X)^n$</li><li>Incorrectly computing $a^n$ for fractional $n$, e.g., $4^{-1/2} = \frac{1}{2}$, $8^{1/3} = 2$</li><li>Getting the sign of $\frac{b}{a}$ wrong when $b$ is negative</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2020-Q2.html">Oct 2020 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2020_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q4.html">Oct 2021 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q4.html">Oct 2022 Q4</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/P4/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$(1+X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \ldots$ valid for $|X| < 1$, $n \in \mathbb{Q}$ (formula booklet)</li><li>$(a+bx)^n = a^n\left(1 + \frac{b}{a}x\right)^n$ — the essential rearrangement step (MEMORIZE)</li><li>Validity condition: $\left|\frac{b}{a}x\right| < 1 \Rightarrow |x| < \left|\frac{a}{b}\right|$ (MEMORIZE)</li><li>Coefficient of $x^r$: $\frac{n(n-1)(n-2)\cdots(n-r+1)}{r!} \cdot \left(\frac{b}{a}\right)^r \cdot a^n$ (MEMORIZE — derived from the formula)</li><li>Key fractional powers: $4^{1/2}=2$, $4^{-1/2}=\frac{1}{2}$, $8^{1/3}=2$, $8^{-1/3}=\frac{1}{2}$, $27^{1/3}=3$ (MEMORIZE)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>ALWAYS rewrite $(a+bx)^n$ as $a^n(1+\frac{b}{a}x)^n$ before applying the binomial formula — this is the single most common source of errors.</li><li>Be meticulous with signs: when $n$ is negative or fractional, the descending product $n(n-1)(n-2)\ldots$ alternates signs in unexpected ways. Write out each factor explicitly.</li><li>When raising $(kx)$ to a power, remember $(kx)^r = k^r x^r$ — do NOT forget to raise $k$ as well as $x$.</li><li>For coefficient matching problems, write out the general coefficients symbolically before substituting — this prevents errors and makes simultaneous equations clearer.</li><li>Always state the range of validity $|x| < \frac{|a|}{|b|}$ as a final step — it is almost always worth a mark.</li><li>For approximation parts, identify the correct $x$ by setting the expression inside the bracket equal to the target number, then check $x$ is in the valid range.</li><li>In compound expansion problems (polynomial × binomial), expand one more term than you think you need to catch cross-term contributions.</li><li>Simplify fractional coefficients fully at each stage — leaving unsimplified fractions compounds errors in later terms.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Write out the descending product $n(n-1)(n-2)$ EXPLICITLY with brackets — do not try to do it in your head. E.g., $\frac{1}{3}\left(\frac{1}{3}-1\right)\left(\frac{1}{3}-2\right) = \frac{1}{3} \cdot (-\frac{2}{3}) \cdot (-\frac{5}{3})$.</li><li>Circle or underline the 'first 4 terms' instruction — students often expand too few or too many terms.</li><li>For approximation questions, ALWAYS verify your $x$-value is within the valid range before substituting — state this explicitly for the mark.</li><li>If a 'show that' asks you to reach a specific answer, work towards it and present your algebra clearly — if your answer doesn't match, recheck signs and powers.</li><li>Use fractions throughout rather than decimals — this avoids premature rounding and keeps answers exact.</li><li>When multiplying a polynomial by a series, set up a clear grid or table to track which products contribute to each power of $x$.</li><li>Check your expansion by substituting $x = 0$: the result should equal $a^n$ (or 1 if already in $(1+X)^n$ form).</li><li>In coefficient-matching problems, if you get two possible solutions, check which one is consistent with any stated conditions (e.g., $n$ being negative, $a > 0$, etc.).</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Binomial expansion of (1+bx)^n for fractional/negative n">Binomial expansion of (1+bx)^n for fractional/negative n</option><option value="Binomial expansion of (a+bx)^n — factoring out the constant first">Binomial expansion of (a+bx)^n — factoring out the constant first</option><option value="Factorising and solving quadratic equations">Factorising and solving quadratic equations</option><option value="Finding unknowns by comparing coefficients in binomial expansions">Finding unknowns by comparing coefficients in binomial expansions</option><option value="Product of polynomial and binomial expansion — compound expansion">Product of polynomial and binomial expansion — compound expansion</option><option value="Using binomial expansion for numerical/surd approximation">Using binomial expansion for numerical/surd approximation</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Binomial expansion of (1+bx)^n for fractional/negative n">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q1</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-binomial-expansion-of-1-bx-n-for-fractional-negative-n">Binomial expansion of (1+bx)^n for fractional/negative n</a><div class="qtype-freeform">binomial series expansion</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Product of polynomial and binomial expansion — compound expansion">
+            <td class="session">Oct 2020</td>
+            <td class="r">Q2</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-product-of-polynomial-and-binomial-expansion-compound-expansion">Product of polynomial and binomial expansion — compound expansion</a><div class="qtype-freeform">Binomial expansion</div></td>
+            <td><a class="qlink" href="q-Oct_2020-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Using binomial expansion for numerical/surd approximation">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-using-binomial-expansion-for-numerical-surd-approximation">Using binomial expansion for numerical/surd approximation</a><div class="qtype-freeform">Binomial Expansion (Fractional Power)</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding unknowns by comparing coefficients in binomial expansions">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-unknowns-by-comparing-coefficients-in-binomial-expansions">Finding unknowns by comparing coefficients in binomial expansions</a><div class="qtype-freeform">Binomial expansion approximation</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Using binomial expansion for numerical/surd approximation">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q4</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-using-binomial-expansion-for-numerical-surd-approximation">Using binomial expansion for numerical/surd approximation</a><div class="qtype-freeform">Binomial expansion approximation</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Using binomial expansion for numerical/surd approximation">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-using-binomial-expansion-for-numerical-surd-approximation">Using binomial expansion for numerical/surd approximation</a><div class="qtype-freeform">binomial expansion & approximation</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Factorising and solving quadratic equations">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-factorising-and-solving-quadratic-equations">Factorising and solving quadratic equations</a><div class="qtype-freeform">Solving quadratic equations by factorisation</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Using binomial expansion for numerical/surd approximation">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-using-binomial-expansion-for-numerical-surd-approximation">Using binomial expansion for numerical/surd approximation</a><div class="qtype-freeform">Binomial expansion fractional/negative power</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Product of polynomial and binomial expansion — compound expansion">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-product-of-polynomial-and-binomial-expansion-compound-expansion">Product of polynomial and binomial expansion — compound expansion</a><div class="qtype-freeform">Binomial expansion (negative n)</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Using binomial expansion for numerical/surd approximation">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-using-binomial-expansion-for-numerical-surd-approximation">Using binomial expansion for numerical/surd approximation</a><div class="qtype-freeform">Binomial Expansion (non-integer power)</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Binomial expansion of (a+bx)^n — factoring out the constant first">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-binomial-expansion-of-a-bx-n-factoring-out-the-constant-first">Binomial expansion of (a+bx)^n — factoring out the constant first</a><div class="qtype-freeform">Definite integral via substitution</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Factorising and solving quadratic equations">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">4m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-factorising-and-solving-quadratic-equations">Factorising and solving quadratic equations</a><div class="qtype-freeform">Solving quadratic equations by factorisation</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q1.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

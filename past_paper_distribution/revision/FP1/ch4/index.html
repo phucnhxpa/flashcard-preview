@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FP1 · ch4 Coordinate systems</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">FP1</a><span class="sep">/</span>ch4 Coordinate systems</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 FP1 · ch4</div>
+  <h1>Coordinate systems</h1>
+  <p class="lede">Every FP1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 13 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 FP1 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">13</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">124<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">10<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">8</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">15 questions · 147 marks across 10 papers · <b>21.8%</b> of all unit marks · <b>18.5%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 0 q · 0/0 marks (0.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:0%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">0.0%</div>
+            </div><div class="year-bar" title="2021: 5 q · 56/225 marks (24.9% of paper)">
+                <div class="bar-fill ch-bar" style="height:93%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">24.9%</div>
+            </div><div class="year-bar" title="2022: 3 q · 25/150 marks (16.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:63%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">16.7%</div>
+            </div><div class="year-bar" title="2023: 4 q · 40/150 marks (26.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">26.7%</div>
+            </div><div class="year-bar" title="2024: 3 q · 26/150 marks (17.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:65%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">17.3%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 13 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-tangent-line-intersection-with-parabola-and-solving-for-parameter">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Tangent/line intersection with parabola and solving for parameter</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">8-13m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a tangent at one point, find where it meets the parabola or directrix again. May involve substituting the tangent equation into y² = 4ax to find the second parameter.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">31</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">20.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">21.1%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 2 q · 18 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">18</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:72%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">meets the parabola again</span><span class="chip-trigger">intersection</span><span class="chip-trigger">substitute</span><span class="chip-trigger">second point</span><span class="chip-trigger">directrix</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The tangent at parameter t touches the parabola at exactly one point (repeated root at t)</li><li>A line meeting the parabola at two points gives a quadratic in t — use sum/product of roots</li><li>The directrix is x = −a for y² = 4ax</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Substitute line into parabola equation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Finding where a given line meets the parabola</div>
+                <ol class='cs-steps'><li>Write the equation of the line (tangent or normal)</li><li>Substitute y from the line into y² = 4ax (or substitute x = at², y = 2at)</li><li>Rearrange into a quadratic in y (or t)</li><li>One root is known (the point of tangency); find the other root by factoring or sum/product of roots</li><li>Use the second root to find coordinates of the second intersection</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and reliable</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be algebraically heavy; watch for sign errors</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use parametric substitution directly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When working parametrically and seeking the parameter of the second intersection</div>
+                <ol class='cs-steps'><li>Let the second point have parameter s, so it lies at (as², 2as)</li><li>Substitute into the tangent/normal equation</li><li>Solve for s (one solution is the known parameter, factor it out)</li><li>State coordinates using the new parameter</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Keeps everything in terms of parameters; often cleaner</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires comfort with parametric algebra</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Tangent at $t$: $ty = x + at^2$ (MEMORIZE)</div><div class="cs-formula">If tangent at $t_1$ meets the parabola again at $t_2$, useful to substitute $y = 2at_2$ into the tangent equation</div><div class="cs-formula">Sum and product of roots for $At^2 + Bt + C = 0$: $t_1 + t_2 = -B/A$, $t_1 t_2 = C/A$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Incorrectly assuming the tangent meets the parabola at two points — tangent touches, so has a repeated root; normals and other lines intersect at two distinct points</li><li>Errors when substituting parametric coordinates into the line equation</li><li>Forgetting to check which root corresponds to the original point vs the new intersection</li><li>Dropping a factor when simplifying, leading to a lost solution</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q8.html">Jun 2023 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q8.html">Oct 2021 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-parabola-normal-equation-and-intersection-properties">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Parabola normal equation and intersection properties</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">10-16m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given two points P and Q on y²=4ax, find equations of normals, their intersection point N, and prove geometric properties (e.g., perpendicularity, locus of N).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">27</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 16 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">16</div>
+                </div><div class="year-bar" title="2022: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:69%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">normal</span><span class="chip-trigger">parabola</span><span class="chip-trigger">intersection</span><span class="chip-trigger">perpendicular</span><span class="chip-trigger">locus</span><span class="chip-trigger">parameters p and q</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>P and Q are distinct points on the parabola, so p ≠ q</li><li>Normal gradient = −1/(tangent gradient) = −t for parameter t</li><li>When solving simultaneous equations, (p − q) ≠ 0 so can be cancelled</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Derive normal equations then solve simultaneously</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Standard approach for finding intersection of two normals</div>
+                <ol class='cs-steps'><li>Gradient of tangent at parameter t is 1/t, so gradient of normal is −t</li><li>Normal at P(ap², 2ap): y − 2ap = −p(x − ap²)</li><li>Simplify to y = −px + 2ap + ap³</li><li>Write analogous normal at Q(aq², 2aq): y = −qx + 2aq + aq³</li><li>Subtract to eliminate y: 0 = (q − p)x + 2a(p − q) + a(p³ − q³)</li><li>Factor p³ − q³ = (p − q)(p² + pq + q²) and cancel (p − q)</li><li>Solve for x, then back-substitute for y</li><li>Simplify coordinates of intersection N</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and works for any pair of normals; leads naturally to locus results</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Heavy algebra; factorisation of p³ − q³ is essential and easy to miss</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use memorised normal equation and standard results</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When speed is needed and you have memorised the normal form</div>
+                <ol class='cs-steps'><li>Normal at parameter t: $y + tx = 2at + at^3$ (memorised)</li><li>Write both normals and subtract</li><li>Cancel (p − q) factor immediately</li><li>State the known intersection result: $x = a(p^2 + pq + q^2 + 2)$, $y = -apq(p + q)$</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very fast if formulas are memorised correctly</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Risky if formula is misremembered; may not earn method marks if derivation is required</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Normal at parameter $t$: $y + tx = 2at + at^3$ (MEMORIZE)</div><div class="cs-formula">Intersection of normals at $p$ and $q$: $x = a(p^2 + pq + q^2 + 2)$, $y = -apq(p+q)$ (MEMORIZE for speed)</div><div class="cs-formula">Perpendicular lines condition: $m_1 \times m_2 = -1$ (MEMORIZE)</div><div class="cs-formula">Factorisation: $p^3 - q^3 = (p-q)(p^2+pq+q^2)$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to cancel (p − q) when subtracting normal equations — it's non-zero since P ≠ Q</li><li>Sign errors when expanding −p(x − ap²) — watch the double negative</li><li>Sign errors in the y-coordinate of N, especially with −apq(p + q)</li><li>When showing perpendicularity, forgetting that normal gradients are −p and −q, so product must equal −1 giving pq = −1</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q6.html">Jun 2022 Q6</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q8.html">Oct 2021 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-parametric-to-cartesian-conversion-and-tangent-properties">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Parametric to Cartesian conversion and tangent properties</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">8-13m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given parametric equations (not necessarily standard parabola), eliminate the parameter to find a Cartesian equation. Then find tangent, intercepts, or geometric properties.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">21</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:62%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">13</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">Cartesian equation</span><span class="chip-trigger">eliminate</span><span class="chip-trigger">parameter</span><span class="chip-trigger">intercepts</span><span class="chip-trigger">show that</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The parameter t can be eliminated algebraically (often by solving one equation for t and substituting into the other)</li><li>The domain of t may restrict the Cartesian curve</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Eliminate parameter algebraically</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Standard approach for converting parametric to Cartesian</div>
+                <ol class='cs-steps'><li>From x = f(t), solve for t in terms of x (or express t² etc.)</li><li>Substitute into y = g(t) to get y in terms of x only</li><li>Simplify to obtain the Cartesian equation</li><li>For tangent: use dy/dx = (dy/dt)/(dx/dt) at the required parameter value</li><li>Find intercepts by setting x = 0 or y = 0 in the tangent equation</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and universally applicable</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be tricky if the parametric equations are complicated</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use trigonometric/identity substitution</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When parametric equations involve trig functions (e.g., x = a cos θ, y = b sin θ)</div>
+                <ol class='cs-steps'><li>Rearrange to get cos θ = x/a, sin θ = y/b</li><li>Use identity cos²θ + sin²θ = 1</li><li>Simplify to Cartesian form</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Clean when trig parametrisation is used</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only applicable for trig parametric forms</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\frac{dy}{dx} = \frac{dy/dt}{dx/dt}$ (formula booklet)</div><div class="cs-formula">Point-gradient form: $y - y_1 = m(x - x_1)$ (MEMORIZE)</div><div class="cs-formula">$\cos^2\theta + \sin^2\theta = 1$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Failing to find the correct value of t corresponding to a given point before computing the gradient</li><li>Algebraic errors when squaring or cubing to eliminate the parameter</li><li>Forgetting to state the Cartesian equation explicitly after elimination</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-parabola-tangent-via-parametric-differentiation">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Parabola tangent via parametric differentiation</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">5</span><small>×</small></div>
+                    <div class="marks">6-11m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given the parabola y²=4ax with parametric point P(at², 2at). Asked to find the equation of the tangent at P, often as a 'show that' result ty = x + at².</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">13</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.8%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 2 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">13</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">parabola</span><span class="chip-trigger">tangent</span><span class="chip-trigger">parametric</span><span class="chip-trigger">y²=4ax</span><span class="chip-trigger">show that</span><span class="chip-trigger">equation of the tangent</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Parabola is in standard form y² = 4ax with vertex at the origin</li><li>Point P lies on the parabola and has parameter t (so P = (at², 2at))</li><li>t ≠ 0 unless stated otherwise (so gradient is well-defined)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Parametric differentiation (dy/dx = (dy/dt)/(dx/dt))</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the point is given in parametric form (at², 2at) — the default and cleanest method</div>
+                <ol class='cs-steps'><li>Write x = at², y = 2at</li><li>Differentiate: dx/dt = 2at, dy/dt = 2a</li><li>Compute dy/dx = (dy/dt)/(dx/dt) = 2a/(2at) = 1/t</li><li>Use point-gradient form: y − 2at = (1/t)(x − at²)</li><li>Multiply through by t: ty − 2at² = x − at²</li><li>Rearrange to ty = x + at²</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Quick, direct, and matches the standard 'show that' form examiners expect</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must remember to use the chain rule correctly for parametric differentiation</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Implicit differentiation of y² = 4ax</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the point is given in Cartesian form (x₁, y₁) or when the question says 'use calculus'</div>
+                <ol class='cs-steps'><li>Differentiate y² = 4ax implicitly: 2y(dy/dx) = 4a</li><li>Solve: dy/dx = 4a/(2y) = 2a/y</li><li>At point (at², 2at): dy/dx = 2a/(2at) = 1/t</li><li>Use point-gradient form: y − 2at = (1/t)(x − at²)</li><li>Rearrange to ty = x + at²</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Works even when parametric form is not given; satisfies 'use calculus' instructions</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Slightly more work; must remember implicit differentiation of y²</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$y^2 = 4ax$ — standard parabola (MEMORIZE)</div><div class="cs-formula">Parametric form: $x = at^2,\ y = 2at$ (MEMORIZE)</div><div class="cs-formula">Tangent at parameter $t$: $ty = x + at^2$ (MEMORIZE — or derive quickly)</div><div class="cs-formula">$\frac{dy}{dx} = \frac{dy/dt}{dx/dt}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Differentiating at² as a²t instead of 2at (forgetting the chain rule on t²)</li><li>Algebraic errors when rearranging to the 'show that' form, especially distributing 1/t</li><li>When question says 'use calculus', not using differentiation (e.g., using a memorised tangent formula without derivation loses marks)</li><li>Forgetting to multiply both sides by t to clear the fraction</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q3.html">Jan 2024 Q3</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q6.html">Jun 2022 Q6</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q3.html">Jun 2023 Q3</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q8.html">Jun 2023 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-parabola-focus-directrix-and-distance-properties">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Parabola focus, directrix and distance properties</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">5-7m</div>
+                </div>
+            </div>
+            <p class="qt-look">Identify the value of a, state focus and directrix, use the focus-directrix property (distance to focus = distance to directrix) to find lengths or perimeters.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">12</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.2%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 5 marks">
+                    <div class="bar-fill" style="height:71%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">5</div>
+                </div><div class="year-bar" title="2023: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">7</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">focus</span><span class="chip-trigger">directrix</span><span class="chip-trigger">distance</span><span class="chip-trigger">perimeter</span><span class="chip-trigger">y²=4ax</span><span class="chip-trigger">latus rectum</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Parabola is in standard form y² = 4ax</li><li>Focus is at (a, 0) and directrix is x = −a</li><li>Focus-directrix property: for any point P on the parabola, distance from P to focus = distance from P to directrix</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Use focus-directrix (locus) property directly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked for distance from a point on the parabola to the focus — avoids the distance formula</div>
+                <ol class='cs-steps'><li>Identify a from y² = 4ax (e.g., y² = 36x gives 4a = 36, a = 9)</li><li>State focus (a, 0) and directrix x = −a</li><li>For point P(x₁, y₁) on the parabola, distance to focus = x₁ + a (by focus-directrix property)</li><li>Use this to compute required distances or perimeter</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Elegant and fast — avoids messy surds from the distance formula</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Students must remember and trust the property; not always obvious when to use it</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Direct distance formula calculation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When focus-directrix property is not recognised, or when the point is not on the parabola</div>
+                <ol class='cs-steps'><li>Find coordinates of the focus (a, 0)</li><li>Find coordinates of the point P</li><li>Apply distance formula: d = √((x₁ − a)² + y₁²)</li><li>Simplify, using y₁² = 4ax₁ to reduce the expression</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Always works; straightforward</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Often leads to complicated surds; slower than the focus-directrix shortcut</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">For $y^2 = 4ax$: focus at $(a, 0)$, directrix $x = -a$ (MEMORIZE)</div><div class="cs-formula">Focus-directrix property: distance from $P(x_1, y_1)$ on parabola to focus $= x_1 + a$ (MEMORIZE)</div><div class="cs-formula">Distance formula: $d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Getting the directrix wrong: it is x = −a, NOT x = a</li><li>Forgetting the focus-directrix property and computing distances the hard way, leading to surd errors</li><li>Arithmetic errors simplifying surds like √405 — must recognise 405 = 81 × 5, so √405 = 9√5</li><li>Confusing 4a with a: if y² = 12x then a = 3, not 12</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q3.html">Jan 2022 Q3</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q3.html">Jun 2023 Q3</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q8.html">Jun 2023 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-polar-curve-area-and-tangent-polar-coordinates">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Polar curve area and tangent (polar coordinates)</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">11m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a polar curve r = f(θ), find the area enclosed using integration, and/or find dy/dx at a given point by converting to Cartesian derivatives.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">11</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">11.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">polar</span><span class="chip-trigger">area</span><span class="chip-trigger">r =</span><span class="chip-trigger">θ</span><span class="chip-trigger">dy/dx</span><span class="chip-trigger">tangent</span><span class="chip-trigger">half-line</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Area formula uses ½∫r² dθ with correct limits</li><li>For dy/dx, convert using x = r cos θ, y = r sin θ and apply chain rule</li><li>Limits of integration must be chosen to cover the region exactly once</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Polar area formula with trig identities</span>
+                </div>
+                <div class="approach-when"><b>When:</b> For finding enclosed area of a polar curve</div>
+                <ol class='cs-steps'><li>Write area = ½∫[α to β] r² dθ</li><li>Expand r² and simplify using double angle identities (e.g., cos²θ = ½(1 + cos 2θ))</li><li>Integrate term by term</li><li>Evaluate at limits and simplify</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Standard method; works for all polar area problems</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must correctly identify limits and apply trig identities</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Chain rule for polar tangent (dy/dx)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked for gradient of tangent to polar curve</div>
+                <ol class='cs-steps'><li>Write x = r cos θ, y = r sin θ</li><li>Find dx/dθ using product rule: dx/dθ = (dr/dθ)cos θ − r sin θ</li><li>Find dy/dθ using product rule: dy/dθ = (dr/dθ)sin θ + r cos θ</li><li>Compute dy/dx = (dy/dθ)/(dx/dθ)</li><li>Evaluate at the given θ</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and avoids converting the entire curve to Cartesian form</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Product rule applications can be error-prone</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Polar area: $A = \frac{1}{2}\int_{\alpha}^{\beta} r^2\, d\theta$ (formula booklet)</div><div class="cs-formula">$\cos^2\theta = \frac{1}{2}(1 + \cos 2\theta)$ (MEMORIZE)</div><div class="cs-formula">$x = r\cos\theta,\ y = r\sin\theta$ (MEMORIZE)</div><div class="cs-formula">$\frac{dy}{dx} = \frac{dy/d\theta}{dx/d\theta}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the ½ factor in the polar area formula</li><li>Not applying double angle identities to cos²θ or sin²θ before integrating</li><li>Errors in the product rule when differentiating x = r cos θ and y = r sin θ</li><li>Choosing incorrect limits of integration</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q8.html">Jan 2023 Q8</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-rectangular-hyperbola-tangent-normal-and-intersection">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Rectangular hyperbola tangent/normal and intersection</div>
+                    <span class="rank-pill">#7</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">8-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given xy = c² (or y = c²/x) with parametric point P(ct, c/t). Find tangent or normal at P, then find where it meets the hyperbola again at Q.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">9</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.1%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">rectangular hyperbola</span><span class="chip-trigger">xy = c²</span><span class="chip-trigger">tangent</span><span class="chip-trigger">normal</span><span class="chip-trigger">second intersection</span><span class="chip-trigger">ct, c/t</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Hyperbola is in standard rectangular form xy = c²</li><li>Parametric point: (ct, c/t) for parameter t ≠ 0</li><li>When finding a second intersection, the known parameter is a repeated root that can be factored out</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Implicit differentiation of xy = c²</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the question gives the Cartesian form or says 'use calculus'</div>
+                <ol class='cs-steps'><li>Differentiate xy = c² implicitly: y + x(dy/dx) = 0</li><li>Solve: dy/dx = −y/x</li><li>At P(ct, c/t): dy/dx = −(c/t)/(ct) = −1/t²</li><li>Tangent: y − c/t = (−1/t²)(x − ct), rearrange to x + t²y = 2ct</li><li>Normal gradient = t², then y − c/t = t²(x − ct)</li><li>To find Q, substitute into xy = c² and solve the resulting quadratic</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Rigorous; earns full method marks</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> The algebra for finding Q can be heavy</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Parametric differentiation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When working with parametric form (ct, c/t)</div>
+                <ol class='cs-steps'><li>x = ct → dx/dt = c; y = c/t = ct⁻¹ → dy/dt = −c/t²</li><li>dy/dx = (−c/t²)/c = −1/t²</li><li>Continue as in approach A for tangent/normal equations</li><li>For second intersection, substitute x = cu, y = c/u into the line equation and solve for u</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Natural when parametric coordinates are given</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful with the sign of dy/dt</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$xy = c^2$ — standard rectangular hyperbola (MEMORIZE)</div><div class="cs-formula">Parametric form: $x = ct,\ y = c/t$ (MEMORIZE)</div><div class="cs-formula">Tangent at parameter $t$: $x + t^2 y = 2ct$ (MEMORIZE)</div><div class="cs-formula">Normal at parameter $t$: $t^3 x - ty = c(t^4 - 1)$ (MEMORIZE for speed)</div><div class="cs-formula">Gradient at $(ct, c/t)$: $dy/dx = -1/t^2$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Algebraic errors when solving the quadratic for the second intersection point Q — factor out the known root</li><li>Incorrectly calculating the gradient of the normal: forgetting the negative reciprocal gives +t², not −t²</li><li>Differentiating y = c²/x incorrectly — remember c² is constant so dy/dx = −c²/x²</li><li>Confusing the rectangular hyperbola xy = c² with the standard hyperbola x²/a² − y²/b² = 1</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>Parabola $y^2 = 4ax$: vertex $(0,0)$, focus $(a,0)$, directrix $x = -a$</li><li>Parabola parametric: $P = (at^2, 2at)$</li><li>Parabola tangent at $t$: $ty = x + at^2$</li><li>Parabola normal at $t$: $y + tx = 2at + at^3$</li><li>Gradient on parabola at parameter $t$: $dy/dx = 1/t$</li><li>Focus-directrix property: distance from $P$ to focus $= x_P + a$</li><li>Rectangular hyperbola $xy = c^2$: parametric $(ct, c/t)$</li><li>Rectangular hyperbola tangent at $t$: $x + t^2 y = 2ct$</li><li>Gradient on rectangular hyperbola at parameter $t$: $dy/dx = -1/t^2$</li><li>Perpendicular lines: $m_1 \times m_2 = -1$</li><li>Polar area: $A = \frac{1}{2}\int r^2\, d\theta$</li><li>$\cos^2\theta = \frac{1}{2}(1 + \cos 2\theta)$</li><li>$p^3 - q^3 = (p-q)(p^2 + pq + q^2)$</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Master the standard parabola y² = 4ax: know its parametric form (at², 2at), focus (a, 0), directrix x = −a, tangent (ty = x + at²), and normal (y + tx = 2at + at³) — these appear in nearly every session.</li><li>Know the rectangular hyperbola xy = c² equally well: parametric form (ct, c/t), tangent (x + t²y = 2ct), and gradient (−1/t²).</li><li>Always read whether the question says 'use calculus' — if so, you must show differentiation, not just quote a memorised tangent formula.</li><li>When two curves/lines intersect, substitute one equation into the other and solve. For second intersections, factor out the known root to find the other.</li><li>Keep the focus-directrix property in mind as a shortcut for distance calculations on the parabola: distance to focus = x-coordinate + a.</li><li>In longer questions (10+ marks), expect multiple parts that build on each other: tangent → intersection → geometric property (perpendicularity, collinearity, locus).</li><li>Practice algebraic manipulation heavily — most marks are lost to sign errors and incorrect simplification, not to conceptual misunderstanding.</li><li>For polar questions, always write out the area formula with the ½ factor and apply double angle identities before integrating.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Read the question stem carefully: 'use calculus' means you must differentiate; quoting a formula without derivation will lose marks.</li><li>In 'show that' questions, write every algebraic step — the examiner needs to see the working, not just the final answer.</li><li>When you get a quadratic for the second intersection parameter, always factor out the known root rather than using the quadratic formula — it's faster and less error-prone.</li><li>Simplify surds fully: factorise the number under the root (e.g., √405 = √(81×5) = 9√5).</li><li>For the directrix, double-check the sign: it is x = −a, not x = +a. This is a very common error.</li><li>If a question asks for a perimeter or distance involving a point on the parabola and the focus, try the focus-directrix property first — it almost always simplifies the calculation.</li><li>In multi-part questions, use your answers from earlier parts (e.g., the tangent equation) in later parts. If you couldn't complete an earlier part, state the result given in the question and proceed.</li><li>Keep track of parameters: if P has parameter p and Q has parameter q, label clearly and don't mix them up during simultaneous equation solving.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Parabola focus, directrix and distance properties">Parabola focus, directrix and distance properties</option><option value="Parabola normal equation and intersection properties">Parabola normal equation and intersection properties</option><option value="Parabola tangent via parametric differentiation">Parabola tangent via parametric differentiation</option><option value="Parametric to Cartesian conversion and tangent properties">Parametric to Cartesian conversion and tangent properties</option><option value="Polar curve area and tangent (polar coordinates)">Polar curve area and tangent (polar coordinates)</option><option value="Rectangular hyperbola tangent/normal and intersection">Rectangular hyperbola tangent/normal and intersection</option><option value="Tangent/line intersection with parabola and solving for parameter">Tangent/line intersection with parabola and solving for parameter</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Tangent/line intersection with parabola and solving for parameter">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q4</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangent-line-intersection-with-parabola-and-solving-for-parameter">Tangent/line intersection with parabola and solving for parameter</a><div class="qtype-freeform">equation of tangent & intersection</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola normal equation and intersection properties">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">16m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-normal-equation-and-intersection-properties">Parabola normal equation and intersection properties</a><div class="qtype-freeform">Parabola normals & intersection</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Parametric to Cartesian conversion and tangent properties">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parametric-to-cartesian-conversion-and-tangent-properties">Parametric to Cartesian conversion and tangent properties</a><div class="qtype-freeform">equation of tangent & area</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangent/line intersection with parabola and solving for parameter">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q8</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangent-line-intersection-with-parabola-and-solving-for-parameter">Tangent/line intersection with parabola and solving for parameter</a><div class="qtype-freeform">Parabola properties & tangent</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola focus, directrix and distance properties">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q3</td>
+            <td class="r">5m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-focus-directrix-and-distance-properties">Parabola focus, directrix and distance properties</a><div class="qtype-freeform">Parabola properties</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Rectangular hyperbola tangent/normal and intersection">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-rectangular-hyperbola-tangent-normal-and-intersection">Rectangular hyperbola tangent/normal and intersection</a><div class="qtype-freeform">hyperbola tangent normal properties</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola normal equation and intersection properties">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q6</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-normal-equation-and-intersection-properties">Parabola normal equation and intersection properties</a><div class="qtype-freeform">Tangent & Normal to Parabola</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Polar curve area and tangent (polar coordinates)">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-polar-curve-area-and-tangent-polar-coordinates">Polar curve area and tangent (polar coordinates)</a><div class="qtype-freeform">Polar curve area and tangent</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola focus, directrix and distance properties">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-focus-directrix-and-distance-properties">Parabola focus, directrix and distance properties</a><div class="qtype-freeform">Parabola tangent and properties</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Tangent/line intersection with parabola and solving for parameter">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q8</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-tangent-line-intersection-with-parabola-and-solving-for-parameter">Tangent/line intersection with parabola and solving for parameter</a><div class="qtype-freeform">Parabola tangent & intersection</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola tangent via parametric differentiation">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-tangent-via-parametric-differentiation">Parabola tangent via parametric differentiation</a><div class="qtype-freeform">Derive tangent to parabola</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Parabola tangent via parametric differentiation">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parabola-tangent-via-parametric-differentiation">Parabola tangent via parametric differentiation</a><div class="qtype-freeform">Missing Question Data</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Parametric to Cartesian conversion and tangent properties">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q9</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-parametric-to-cartesian-conversion-and-tangent-properties">Parametric to Cartesian conversion and tangent properties</a><div class="qtype-freeform">Parametric & Cartesian Equations, Tangent Properties</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q9.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>
