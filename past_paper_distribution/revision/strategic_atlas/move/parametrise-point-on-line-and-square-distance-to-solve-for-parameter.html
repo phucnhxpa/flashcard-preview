@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parametrise point on line and square distance to solve for parameter — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Parametric Distance Equation</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Parametrise point on line and square distance to solve for parameter</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parametric Distance Equation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>An unknown point E must lie on a given line r = a + λd AND satisfy a fixed-distance condition |PE| = k from a known point P (often where P itself sits on the line, or is the foot of perpendicular). Visual cues: &#x27;find the point(s) on l such that the distance from … is …&#x27;, &#x27;find E on the line with PE = …&#x27;. Equivalent phrasings: &#x27;where does the line meet a sphere of radius k centred at P&#x27;, &#x27;find points on l equidistant from P at distance k&#x27;. The hallmark is one geometric constraint (distance) plus one positional constraint (on the line).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any point on r = a + λd has position vector entirely controlled by the single scalar λ, so the displacement from a reference point on the line reduces to λd. Then |PE|² = λ²|d|², collapsing a three-coordinate distance equation into a single-variable quadratic in λ. Squaring removes the square root, and the identity |λd|² = λ²|d|² (from the orthogonality of i, j, k components) does the heavy lifting. The ± from the square root naturally yields the two points on the line equidistant from P, one on each side.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice E is constrained two ways: it lies on a known line (one parameter of freedom) and is at a fixed distance from a known point P (one scalar equation). One unknown, one equation — perfect.</li><li>Rule out setting up three simultaneous coordinate equations or solving geometrically with projections; those over-complicate a problem that has only one degree of freedom.</li><li>Commit to the parametric route: write E = a + λd so every coordinate of E is linear in λ.</li><li>Choose the reference origin for the displacement carefully — if P is itself on the line (e.g. P = a, or the foot of perpendicular), then PE = λd directly, and |PE|² = λ²|d|² without cross terms.</li><li>Square the distance constraint to avoid surds: set λ²|d|² = k², giving λ² = k²/|d|² and λ = ±k/|d|.</li><li>Recognise the ± gives two points; substitute each value of λ back into a + λd to get the coordinates of both candidate points E.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the general point on l as E = a + λd, with coordinates linear in λ.</li><li>Form PE = E − P. If P lies on l at parameter 0, this simplifies to PE = λd.</li><li>Compute |PE|² = λ²|d|² (or expand component-wise if P is off the line).</li><li>Set |PE|² equal to the squared target distance k², obtaining a quadratic (or pure square) in λ.</li><li>Solve for λ — keep both signs.</li><li>Substitute each λ back into E = a + λd to obtain the coordinate(s) of E.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Line $l: \mathbf{r} = (1,5,2) + t(-5,4,3)$, with $P=(1,5,2)$ on $l$. Find $E$ on $l$ with $|PE| = 2\sqrt5$. Then $\vec{PE} = t(-5,4,3)$, so $|PE|^2 = t^2(25+16+9) = 50t^2$. Setting $50t^2 = 20$ gives $t^2 = \tfrac{2}{5}$, so $t = \pm\sqrt{2/5}$. Substituting: $E = (1\mp\sqrt{10},\, 5\pm\tfrac{4\sqrt{10}}{5},\, 2\pm\tfrac{3\sqrt{10}}{5})$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Line meets a sphere |r − c|² = R²</div>
+<div class="adjustment">Substitute the parametric line into the sphere equation; expanding gives a quadratic in λ — same parametric-substitution principle, with cross terms when c is not on the line.</div>
+</div><div class="variant-row">
+<div class="scenario">Reference point P is NOT on the line</div>
+<div class="adjustment">PE = (a − P) + λd, so |PE|² expands into a full quadratic Aλ² + Bλ + C = k², not a pure square.</div>
+</div><div class="variant-row">
+<div class="scenario">Constraint is perpendicularity instead of distance (e.g. AE ⊥ AP)</div>
+<div class="adjustment">Replace |PE|² = k² with the dot-product equation AE · AP = 0; still a single linear/quadratic equation in λ.</div>
+</div><div class="variant-row">
+<div class="scenario">2D coordinate geometry: line meets a circle</div>
+<div class="adjustment">Same parametric substitution into (x−h)² + (y−k)² = r² yields a quadratic in the parameter.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating E&#x27;s three coordinates as three independent unknowns and writing three simultaneous equations rather than recognising the one-parameter structure.</li><li>Confusing &#x27;distance from P&#x27; with &#x27;distance along the line from a&#x27; — these coincide only when P is the basepoint a.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the ± when taking the square root of λ², thus reporting only one point E when two exist.</li><li>Sign errors when squaring negative direction-vector components (e.g. (−5)² written as −25).</li><li>Squaring the target distance incorrectly: |PE|² = (2√5)² = 20, not 2√5; similarly (2√2)² = 8.</li><li>Simplification slips with surds: 5√(2/5) = √(25·2/5) = √10, not √(10/5).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 vectors: uses |v|² = v·v and the parametric form r = a + λd from the formula booklet. No need for Lagrange multipliers, calculus minimisation, or any 3D geometry beyond standard dot-product methods.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Specimen_2018-Q8.html" class="example-chip">P4 Specimen 2018 Q8</a><a href="../P4/ch7/q-Specimen_2018-Q9.html" class="example-chip">P4 Specimen 2018 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

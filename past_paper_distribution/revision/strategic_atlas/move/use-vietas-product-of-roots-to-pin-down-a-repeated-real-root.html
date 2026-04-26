@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use Vieta&#x27;s product-of-roots to pin down a repeated real root — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Vieta&#x27;S Formulas</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Use Vieta&#x27;s product-of-roots to pin down a repeated real root</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Vieta&#x27;S Formulas</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A monic polynomial of known degree has its constant term given, some roots already identified (often a complex conjugate pair from an earlier part), and one or more remaining roots — possibly repeated — to determine. The unknown coefficients in the middle of the polynomial block direct long division. The phrase &#x27;repeated root&#x27; or &#x27;double root&#x27; alongside a known constant term is the strongest cue. Whenever the unknown root enters the product cleanly (e.g. as r or r²), Vieta&#x27;s product relation collapses the problem to a single equation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a monic polynomial x^n + ... + c = 0, Vieta gives the product of all roots as (−1)^n · c. The constant term is therefore a direct algebraic fingerprint of the roots, independent of the intermediate coefficients. If a subset of roots has known product (e.g. a conjugate pair contributes |z|²), the remaining factor of the product isolates the unknown root. This bypasses the need to recover any other coefficient and avoids polynomial division.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the constant term is given explicitly while several middle coefficients are unknown.</li><li>Rules out polynomial long division: it requires knowing the divisor coefficients, which depend on data not yet available.</li><li>Commits to Vieta because the product of roots is determined purely by the constant term and the leading coefficient.</li><li>Bridges by computing the product of the already-known roots (here the conjugate pair gives |4+3i|² = 25).</li><li>Sets up product_known × r^k = ±(constant), solves for r, then applies the sign/positivity constraint to pick the correct root.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write Vieta&#x27;s product-of-roots: for monic x^n + ... + c, product = (−1)^n c.</li><li>List all n roots, including multiplicity (a repeated root r appears as r·r).</li><li>Compute the product of the known roots; for a conjugate pair a±bi this is a²+b².</li><li>Form a single equation in the unknown root(s) and solve.</li><li>Apply any stated constraint (&#x27;positive&#x27;, &#x27;real&#x27;, &#x27;integer&#x27;) to select the correct value.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $x^4 + Ax^3 + Bx^2 + Cx + 225 = 0$ given $4+3i$ is a root and the remaining real root is repeated and positive. Roots: $4+3i,\ 4-3i,\ r,\ r$. Product $= 225$, so $(4+3i)(4-3i)\cdot r^2 = 25r^2 = 225$. Thus $r^2 = 9$, and positivity gives $r = 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Monic cubic x³ + px² + qx + d = 0 with one known real root and a repeated unknown root</div>
+<div class="adjustment">Product of roots = −d (sign flips for odd degree); set known_root · r² = −d.</div>
+</div><div class="variant-row">
+<div class="scenario">Coefficient of x^{n−1} is given instead of the constant term</div>
+<div class="adjustment">Use Vieta&#x27;s sum-of-roots: sum = −(coefficient of x^{n−1}); known_sum + 2r = −A gives r directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Non-monic polynomial a·x^n + ... + c = 0</div>
+<div class="adjustment">Product of roots = (−1)^n c/a; divide through by leading coefficient before applying Vieta.</div>
+</div><div class="variant-row">
+<div class="scenario">Quartic with two distinct unknown real roots r and s rather than a repeated root</div>
+<div class="adjustment">Vieta alone gives one equation in two unknowns; combine with sum-of-roots or another Vieta relation to solve simultaneously.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;repeated root&#x27; as a single extra root instead of two equal roots, leading to r¹ instead of r² in the product.</li><li>Taking the product of roots as −225 for a quartic; the sign rule (−1)^n flips only for odd degree.</li><li>Assuming the conjugate pair contributes 4²−(3i)² = 25 by accident rather than via |z|² = a²+b².</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Reporting r = ±3 without invoking the &#x27;positive&#x27; constraint to discard r = −3.</li><li>Forgetting to divide by the leading coefficient if the polynomial is not monic.</li><li>Mixing up product-of-roots and sum-of-roots formulas under time pressure.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Vieta&#x27;s relations for quadratics, cubics and quartics with real or complex conjugate roots are standard in Edexcel IAL Further Pure (FP1/FP2) and complement the conjugate-root theorem used in Core Pure.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jan_2022-Q4.html" class="example-chip">FP1 Jan 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

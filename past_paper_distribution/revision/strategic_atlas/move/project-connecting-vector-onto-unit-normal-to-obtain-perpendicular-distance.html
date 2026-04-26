@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project connecting vector onto unit normal to obtain perpendicular distance — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Scalar Projection Distance</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Project connecting vector onto unit normal to obtain perpendicular distance</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Scalar Projection Distance</strong></span>
+    <span>Frequency: <strong>5 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for the shortest/perpendicular distance from a point to a plane, between two parallel planes, or between two skew lines (where the common perpendicular direction n is already known). Visual cues: a plane given as r·n = k or ax + by + cz = d together with an external point P; or two skew lines with a known common perpendicular direction. Equivalent phrasings include &#x27;shortest distance&#x27;, &#x27;perpendicular distance&#x27;, &#x27;distance from P to the plane Π&#x27;, and &#x27;minimum distance between l₁ and l₂&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The shortest path from a point to a plane (or between skew lines) lies along the normal/common-perpendicular direction n. The signed distance is the scalar projection of any vector joining the two objects onto n̂; components parallel to the plane (or to the line directions) cancel in this projection, so the choice of joining vector does not matter. The compact formula d = |p·n − k|/|n| (or |AB·n|/|n| for skew lines) bypasses the need to find the foot of the perpendicular, replacing several lines of parametric algebra with a single dot product and magnitude.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question only asks for a distance — not for the foot of the perpendicular or the closest points themselves. So I want the fastest route to a number.</li><li>Rule out the parametric-intersection method: writing the line through P in direction n and solving for the parameter would work but is roughly three times the algebra of a direct projection.</li><li>Rule out using a direction vector of a line in the dot product (a common confusion): for skew-line distance I need the common perpendicular n = d₁ × d₂, not d₁ or d₂.</li><li>Commit to the projection formula because the signed distance is exactly (p − a)·n̂ for any point a on the plane, and a·n = k makes a disappear from the calculation.</li><li>Bridge to operation: identify n and k from the plane (or compute n = d₁ × d₂ for skew lines), pick any convenient anchor point, compute the dot product, then divide by |n|.</li><li>Tactical choice: keep n un-normalised and divide by |n| at the end — algebraically identical to using n̂ but avoids surds inside the dot product. Take absolute value at the end so the side of the plane doesn&#x27;t affect the result.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the plane in the form r·n = k (so for ax + by + cz = d, take n = (a,b,c), k = d). For skew lines, set n = d₁ × d₂ and let A, B be anchor points on l₁, l₂.</li><li>Compute the relevant dot product: p·n − k for point-to-plane, or AB·n where AB = B − A for skew lines.</li><li>Take the absolute value of the result.</li><li>Compute |n| = √(n₁² + n₂² + n₃²).</li><li>Divide: d = |p·n − k|/|n|  (or |AB·n|/|n|).</li><li>Simplify the surd, extracting square factors and rationalising the denominator if required.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Distance from $P(1,2,3)$ to the plane $2x - y + 2z = 5$. Here $\mathbf{n} = (2,-1,2)$, $k=5$. Compute $\mathbf{p}\cdot\mathbf{n} = 2 - 2 + 6 = 6$, so $|\mathbf{p}\cdot\mathbf{n} - k| = |6 - 5| = 1$. Then $|\mathbf{n}| = \sqrt{4+1+4} = 3$. Therefore $d = \tfrac{1}{3}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Distance from the origin to a plane r·n = k</div>
+<div class="adjustment">Set p = 0, giving d = |k|/|n| immediately.</div>
+</div><div class="variant-row">
+<div class="scenario">Distance between two parallel planes r·n = k₁ and r·n = k₂</div>
+<div class="adjustment">Use the same normal: d = |k₁ − k₂|/|n|.</div>
+</div><div class="variant-row">
+<div class="scenario">Shortest distance between two skew lines</div>
+<div class="adjustment">Take n = d₁ × d₂ and AB connecting anchor points; then d = |AB·n|/|n|.</div>
+</div><div class="variant-row">
+<div class="scenario">Distance from a point to a line in 3D</div>
+<div class="adjustment">Replace the dot product with a cross product: d = |AP × d|/|d|, where A is any point on the line and d its direction.</div>
+</div><div class="variant-row">
+<div class="scenario">Plane given as r·n + c = 0 instead of r·n = k</div>
+<div class="adjustment">Then k = −c; use d = |p·n + c|/|n|.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;shortest distance&#x27; as a request for the foot of the perpendicular and embarking on a full parametric intersection.</li><li>For skew lines, dotting AB with a direction vector d₁ or d₂ (which gives a projection along the line, not the perpendicular distance) instead of with n = d₁ × d₂.</li><li>Treating ax + by + cz + d = 0 as if d were the constant on the right-hand side, getting a sign wrong in the numerator.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the absolute value and reporting a negative &#x27;distance&#x27;.</li><li>Forgetting to divide by |n| (i.e. treating n as already a unit vector when it isn&#x27;t).</li><li>Arithmetic slips in computing p·n when several components are non-zero or negative.</li><li>Failing to simplify the surd, e.g. leaving √558 instead of 3√62, or not rationalising the denominator when the mark scheme requires it.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure (FP3) vector geometry. The point-to-plane distance formula d = |p·n − k|/|n| is in the formula booklet; the skew-lines distance |AB·n̂| where n = d₁ × d₂ is also covered. Avoid generalisations to higher-dimensional projections or to non-Euclidean inner products, which are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (5)</h3>
+<div class="example-grid"><a href="../FP3/ch5/q-Specimen_2018-Q6.html" class="example-chip">FP3 Specimen 2018 Q6</a><a href="../FP3/ch5/q-Oct_2021-Q5.html" class="example-chip">FP3 Oct 2021 Q5</a><a href="../FP3/ch5/q-Jun_2022-Q8.html" class="example-chip">FP3 Jun 2022 Q8</a><a href="../FP3/ch5/q-Jan_2024-Q6.html" class="example-chip">FP3 Jan 2024 Q6</a><a href="../FP3/ch5/q-Jun_2023-Q4.html" class="example-chip">FP3 Jun 2023 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

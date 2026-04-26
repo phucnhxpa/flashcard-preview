@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose composite circular region into standard sub-shapes to compute area and perimeter — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Composite Shape Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Decompose composite circular region into standard sub-shapes to compute area and perimeter</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Composite Shape Decomposition</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a region or boundary mixes a circular arc (sector, segment, or partial circle) with straight edges from triangles, rectangles, or trapezia, and no single formula covers the whole figure. Visual cues: a diagram showing a tangent line meeting an arc, a triangle with a circle cut out, or a &#x27;logo/badge&#x27; shape with a curved edge bounded by chords or radii. Equivalent phrasings of the trigger: &#x27;find the area/perimeter of the shaded region&#x27;, &#x27;the boundary consists of arc AB and straight segments&#x27;, or &#x27;the figure is bounded by a curve and chords&#x27;. The presence of a labelled centre, radius, and an angle (in radians) is a strong signal that sector/segment formulae will be in play.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A composite figure has no single area or perimeter formula, but each constituent piece does: A_sector = ½r²θ, A_segment = ½r²(θ − sinθ), A_trap = ½(a+b)h, and arc length L = rθ. By cutting the region along an internal line (typically a radius or chord), every sub-region becomes standard, the calculation reduces to substitution, and integration is avoided entirely. The same decomposition simultaneously clarifies which edges are external (contributing to perimeter) and which are internal (shared boundaries to be excluded). This rests on the additivity of area over disjoint regions and of arc length over consecutive boundary pieces.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the boundary contains BOTH a curved piece (arc of a circle) AND straight segments — so no single standard formula applies.</li><li>Rule out integration: although ∫ydx would work, it is far slower than reusing sector/segment formulae when the arc comes from a known circle with given radius and central angle.</li><li>Identify the natural cut: draw the radius (or radii) to the endpoints of the arc — this isolates a sector (or segment) on one side and a polygon (triangle/trapezium/rectangle) on the other.</li><li>Commit: Total Area = (sector or segment area) + (polygon area), and Perimeter = arc length + external straight edges only.</li><li>Tactical decision for perimeter: walk around the boundary once, listing every edge. Any line you drew internally to decompose (e.g. a shared radius OB) must NOT appear in the perimeter sum.</li><li>Check whether each vertex lies inside, on, or outside the circle — a vertex on the circle means the radial segment to it is internal, not part of the perimeter.</li><li>Decide which arc (minor or major) is traced by the boundary, and use the corresponding angle when applying L = rθ or A = ½r²θ.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Label the centre O, radius r, and central angle θ (in radians) of the arc.</li><li>Draw radii to the arc endpoints to split the region into a sector and one or more polygons.</li><li>Compute sector area: A_sector = ½r²θ (use A_segment = ½r²(θ − sinθ) if the cut is a chord rather than radii).</li><li>Compute polygon area using the appropriate formula: ½(a+b)h for a trapezium, ½bh for a triangle, or l×w for a rectangle.</li><li>Sum the sub-areas for the total area.</li><li>For perimeter: list each external boundary piece — straight edges (computed by Pythagoras or coordinate distance) and the arc length L = rθ — and sum them, omitting any internal cuts.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Region bounded by arc AB (centre O, r = 4, θ = 1.186 rad) and straight edges OD, DC, CB forming trapezium ODCB with parallel sides OD = 6, CB ≈ 2.292 and height h = 1.5. Then $A_{\text{sector}} = \tfrac{1}{2}(4)^2(1.186) \approx 9.49$, $A_{\text{trap}} = \tfrac{1}{2}(6+2.292)(1.5) \approx 6.22$, so total area $\approx 15.7$. Perimeter = arc AB + OD + DC + CB (the shared radius OB is internal and excluded).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">The arc is bounded by a chord rather than two radii</div>
+<div class="adjustment">Use the segment formula A_segment = ½r²(θ − sinθ) instead of the sector formula; the polygon piece is then a triangle or trapezium attached along the chord.</div>
+</div><div class="variant-row">
+<div class="scenario">The straight-edged sub-region is a triangle or rectangle, not a trapezium</div>
+<div class="adjustment">Strategy unchanged — substitute ½bh or l×w for the polygon area; sector/arc treatment is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">The boundary traces the major arc rather than the minor arc</div>
+<div class="adjustment">Use the reflex angle α = 2π − θ in L = rα and A = ½r²α.</div>
+</div><div class="variant-row">
+<div class="scenario">A vertex lies on the circle, so a radial line is internal</div>
+<div class="adjustment">Exclude that radius from the perimeter — it is a cut, not a boundary.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the entire region as a single sector and ignoring the attached polygon piece.</li><li>Including an internal cut (e.g. a shared radius OB) in the perimeter total.</li><li>Including a chord/radius that lies entirely inside the figure because a vertex sits on the circle.</li><li>Using the minor arc when the boundary actually traces the major arc (or vice versa).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Confusing the arc-length formula L = rθ with the sector-area formula A = ½r²θ — they share r and θ but differ by a factor of ½r.</li><li>Using a vertical or slanted length as the trapezium height — the height must be the perpendicular distance between the parallel sides.</li><li>Working in degrees instead of radians when applying ½r²θ or rθ — both formulae require radians.</li><li>Forgetting a short straight segment (e.g. the piece of a triangle side lying outside the circle) because it looks negligible on the diagram.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL P2 (radian measure, sector and segment formulae) and basic mensuration from GCSE/IGCSE. Formulae used — arc length s = rθ, sector area A = ½r²θ, segment area A = ½r²(θ − sinθ) — appear in the IAL formula booklet. Avoid invoking calculus (integration for area under arcs) when sector/segment formulae apply directly.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jun_2023-Q5.html" class="example-chip">P1 Jun 2023 Q5</a><a href="../P1/ch3/q-Specimen_2018-Q10.html" class="example-chip">P1 Specimen 2018 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

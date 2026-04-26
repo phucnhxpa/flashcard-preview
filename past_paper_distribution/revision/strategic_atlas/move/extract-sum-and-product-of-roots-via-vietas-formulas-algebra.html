@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extract sum and product of roots via Vieta&#x27;s formulas — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Vieta&#x27;S Forward</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Extract sum and product of roots via Vieta&#x27;s formulas</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Vieta&#x27;S Forward</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question states that $\alpha, \beta$ are roots of a given quadratic $ax^2+bx+c=0$ and asks for symmetric expressions in the roots (e.g. $\alpha^2+\beta^2$, $\tfrac{1}{\alpha}+\tfrac{1}{\beta}$, $\alpha^3+\beta^3$, or to form a new quadratic with related roots). Individual root values are never required. Cue phrases include &#x27;without solving the equation&#x27;, &#x27;find a quadratic whose roots are...&#x27;, or any sub-part that is symmetric in $\alpha$ and $\beta$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For $ax^2+bx+c=0$, factoring as $a(x-\alpha)(x-\beta)=0$ and expanding gives $\alpha+\beta=-b/a$ and $\alpha\beta=c/a$ directly from the coefficients. Every symmetric polynomial in two variables can be rewritten in terms of the elementary symmetric polynomials $\alpha+\beta$ and $\alpha\beta$, so these two quantities form a complete toolkit. Extracting them up front avoids the quadratic formula entirely — crucial when the discriminant is negative or messy.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question names roots $\alpha,\beta$ but only asks about symmetric combinations of them.</li><li>Rule out solving the quadratic explicitly: the discriminant may be negative or irrational, making direct substitution painful.</li><li>Commit to Vieta&#x27;s because every symmetric expression reduces to functions of $S=\alpha+\beta$ and $P=\alpha\beta$.</li><li>Bridge: read $a,b,c$ off the equation in standard form and compute $S=-b/a$, $P=c/a$ as the first line of working.</li><li>Tactically, write $S$ and $P$ as labelled values at the top of the page so every later sub-part can quote them.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rearrange the equation into standard descending form $ax^2+bx+c=0$ if not already.</li><li>Identify the coefficients $a$, $b$, $c$ paying close attention to signs.</li><li>Compute $S=\alpha+\beta=-b/a$.</li><li>Compute $P=\alpha\beta=c/a$.</li><li>Record $S$ and $P$ as named quantities to be reused in later parts.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $2x^2-5x+4=0$ with roots $\alpha,\beta$: identify $a=2,\ b=-5,\ c=4$. Then $\alpha+\beta=-b/a=-(-5)/2=\tfrac{5}{2}$ and $\alpha\beta=c/a=4/2=2$. So $\alpha^2+\beta^2=(\alpha+\beta)^2-2\alpha\beta=\tfrac{25}{4}-4=\tfrac{9}{4}$, obtained without ever solving the (complex-rooted) quadratic.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cubic $ax^3+bx^2+cx+d=0$ with roots $\alpha,\beta,\gamma$ (FP1/FP2 scope)</div>
+<div class="adjustment">Use $\sum\alpha=-b/a$, $\sum\alpha\beta=c/a$, $\alpha\beta\gamma=-d/a$.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation not in standard form, e.g. $4-5x+2x^2=0$ or $3x^2=2x-7$</div>
+<div class="adjustment">Rearrange to $ax^2+bx+c=0$ with descending powers before reading coefficients.</div>
+</div><div class="variant-row">
+<div class="scenario">Leading coefficient is $1$ (monic), e.g. $x^2+px+q=0$</div>
+<div class="adjustment">Then $\alpha+\beta=-p$ and $\alpha\beta=q$ directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks to form a new quadratic with roots $\alpha+k,\beta+k$ or $1/\alpha,1/\beta$</div>
+<div class="adjustment">Compute the new sum $S&#x27;$ and new product $P&#x27;$ from $S,P$, then write $x^2-S&#x27;x+P&#x27;=0$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using $\alpha+\beta=b/a$ instead of $-b/a$, dropping the sign.</li><li>Reading coefficients off an unsorted equation (e.g. taking $b=-5$ from $4-5x+2x^2$ as if $a=4$).</li><li>Solving the quadratic with the formula despite the question being purely symmetric — leading to complex or surd-laden arithmetic.</li><li>Forgetting to divide by $a$ when the quadratic is non-monic.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error on $b$: for $2x^2-5x+4=0$, $b=-5$, so $-b/a=5/2$ not $-5/2$.</li><li>Forgetting the leading coefficient: writing $\alpha\beta=c$ instead of $c/a$ when $a\neq 1$.</li><li>Mislabelling $S$ and $P$ midway through the question, then substituting them in the wrong slot in identities like $\alpha^2+\beta^2=S^2-2P$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Vieta&#x27;s for quadratics is core P1/P2 content; the cubic extension appears in Further Pure (FP1). All identities used (e.g. $\alpha^2+\beta^2=S^2-2P$, $\alpha^3+\beta^3=S^3-3SP$) are within Edexcel IAL Maths/Further Maths scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch2/q-Jan_2023-Q5.html" class="example-chip">FP1 Jan 2023 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

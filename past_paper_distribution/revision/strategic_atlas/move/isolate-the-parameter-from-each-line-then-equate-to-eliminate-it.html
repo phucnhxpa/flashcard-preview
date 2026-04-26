@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolate the parameter from each line, then equate to eliminate it — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Parametric Elimination</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Isolate the parameter from each line, then equate to eliminate it</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parametric Elimination</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a locus problem asks for the Cartesian equation of a point B (or S) defined as the intersection of two lines, both of which depend on a single shared parameter (e.g. t, p, or tan(θ/2)). The structural cue is two line equations, each linear in the parameter, with the parameter appearing only once or in a way that is easy to isolate. Equivalent phrasings: &#x27;find the locus of the intersection as θ varies&#x27;, &#x27;show that B lies on the curve …&#x27;, &#x27;as p varies, the point of intersection traces …&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each line equation can be rearranged to give the parameter as an explicit function of x and y. Since both expressions represent the SAME parameter at the moment of intersection, setting them equal removes the parameter in a single step, leaving a pure Cartesian relation in x and y — the locus. This avoids the algebraically heavier route of solving the two lines as a 2×2 system for (x, y) in terms of p and then eliminating p afterwards. The underlying principle is simple substitution: if p = f₁(x,y) and p = f₂(x,y), then f₁(x,y) = f₂(x,y).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the intersection point&#x27;s coordinates depend on a single parameter — so the locus is one-dimensional and a single Cartesian equation should suffice.</li><li>Rule out solving the lines simultaneously for x and y in terms of p (parametric form for B) and then eliminating p — this is valid but involves more algebra and risk of sign errors.</li><li>Rule out trig-identity elimination (e.g. sin²+cos² = 1) when the parameter is already a single rational variable like t = tan(θ/2) or p — equating the two expressions for the parameter is more direct.</li><li>Commit to the move because each line equation is linear in the parameter, so isolating p (or t) on one side is a one-line rearrangement.</li><li>Make p (or t) the subject of each equation: read off p = (something in x, y) from line 1 and p = (something else in x, y) from line 2.</li><li>Equate the two expressions and cross-multiply carefully, watching signs (especially negative gradients) and distributing across brackets.</li><li>Simplify to the standard conic form (ellipse, hyperbola, parabola, or circle) and check it matches the expected answer; note any excluded values (e.g. p ≠ 0, y ≠ 0) as special cases.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write line 1 in the form A₁(x,y)·p = B₁(x,y), so p = B₁(x,y)/A₁(x,y).</li><li>Write line 2 in the form A₂(x,y)·p = B₂(x,y), so p = B₂(x,y)/A₂(x,y).</li><li>Equate: B₁(x,y)/A₁(x,y) = B₂(x,y)/A₂(x,y).</li><li>Cross-multiply: B₁(x,y)·A₂(x,y) = B₂(x,y)·A₁(x,y).</li><li>Expand brackets and collect terms in x², y², xy, x, y, constant.</li><li>Rearrange into the standard Cartesian form for the conic and state any excluded values of (x, y) where the rearrangement was invalid (e.g. denominators = 0).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Lines: $\ell_1: y = 2t(x+1)$ and $\ell_2: ty = -2(x-1)$. From $\ell_1$: $t = \dfrac{y}{2(x+1)}$. From $\ell_2$: $t = \dfrac{-2(x-1)}{y}$. Equate: $\dfrac{y}{2(x+1)} = \dfrac{-2(x-1)}{y}$. Cross-multiply: $y^2 = -4(x^2-1)$, i.e. $4x^2 + y^2 = 4$, or $x^2 + \dfrac{y^2}{4} = 1$ — an ellipse.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Parameter is a half-angle tangent t = tan(θ/2) on a conic</div>
+<div class="adjustment">Same equate-the-parameter logic; the resulting Cartesian curve is often the &#x27;companion&#x27; conic (e.g. hyperbola → ellipse with the same a, b).</div>
+</div><div class="variant-row">
+<div class="scenario">Single parametric curve (one point, not an intersection)</div>
+<div class="adjustment">Cannot equate two parameter expressions; instead use a Pythagorean identity like sin²θ + cos²θ = 1 after expressing trig functions in terms of x, y.</div>
+</div><div class="variant-row">
+<div class="scenario">Two parameters present (e.g. chord joining two points on a parabola)</div>
+<div class="adjustment">Need a second relation between the parameters (e.g. focal chord condition pq = -1) to reduce to a single-parameter problem before equating.</div>
+</div><div class="variant-row">
+<div class="scenario">Line meets a conic rather than another line</div>
+<div class="adjustment">Substitute the line into the conic equation directly — equating parameter expressions does not apply because the conic is not linear in the parameter.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing the moving point P on the original curve with the locus point B — substituting parametric coordinates of P into the answer instead of of B.</li><li>Trying to eliminate θ directly from secθ and tanθ without converting to t = tan(θ/2) first, leading to messy algebra.</li><li>Solving for (x, y) explicitly in terms of p first and then eliminating p — works but is unnecessarily heavy.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when computing the gradient of a line through two points (e.g. m = (0 - 5p)/(5 - 0) = -p, not +p).</li><li>Cross-multiplication slip: forgetting to distribute, e.g. 2x(x − 5) = 2x² − 10x, not 2x² − 5.</li><li>Forgetting to square correctly: y · y = y², not y.</li><li>Dividing by the parameter (e.g. p or t) without noting the excluded case p = 0 or t = 0.</li><li>Failing to spot the difference of squares (x+1)(x−1) = x² − 1 and leaving the answer un-simplified.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely in Edexcel IAL Further Pure (FP1/FP3) coordinate-systems chapters on parabolas, ellipses, hyperbolas and rectangular hyperbolas. Standard parametrisations (x = at², y = 2at; x = a cosθ, y = b sinθ; x = a secθ, y = b tanθ; x = ct, y = c/t) are in the formula booklet. Avoid invoking projective-geometry generalisations or matrix methods — they are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch2/q-Jun_2021-Q8.html" class="example-chip">FP3 Jun 2021 Q8</a><a href="../FP1/ch4/q-Oct_2021-Q8.html" class="example-chip">FP1 Oct 2021 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

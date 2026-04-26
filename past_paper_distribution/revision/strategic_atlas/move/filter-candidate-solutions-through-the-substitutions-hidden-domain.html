@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filter candidate solutions through the substitution&#x27;s hidden domain — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Filtering</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Filter candidate solutions through the substitution&#x27;s hidden domain</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Filtering</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>This move fires whenever an equation has been transformed (by substitution, cross-multiplication, squaring, or composing functions) and you have arrived at a polynomial whose roots are CANDIDATE solutions, not final ones. Look for cues like: a substitution u = e^x, u = ln x, u = √x, u = cos x; an equation involving f(x) = f⁻¹(x) where each function carries its own domain; or a rational/logarithmic equation where you cleared denominators or combined logs. Whenever the original variable lives in a strictly smaller set than ℝ, every algebraic root must be tested against that set before being accepted.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Algebraic manipulation (multiplying out, substituting, squaring) can enlarge the solution set by erasing the domain restrictions that the original equation imposed. Each function in play carries its own domain — e^x &gt; 0, ln requires positive argument, f⁻¹ inherits the range of f, √ requires non-negative radicand — and the genuine solutions must lie in the intersection of all these. Filtering candidates through this intersection is the step that converts &#x27;roots of a quadratic&#x27; into &#x27;solutions of the original equation&#x27;, and it is typically where the final marks are awarded.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice I have reached a polynomial (often a quadratic) whose roots are candidate values, but the original equation involved a function with a restricted domain (exponential, log, inverse function, surd).</li><li>I rule out simply reading off both roots as the answer — algebraic validity does not guarantee functional validity, and examiners reserve marks for the rejection step.</li><li>I commit to domain filtering: I will write down the domain constraint imposed by EACH function appearing in the original equation, then intersect them.</li><li>Concretely, I list the constraints (e.g. x &gt; 0 from f, 0 &lt; x &lt; 12 from f⁻¹; or y &gt; 0 from y = e^x), form their intersection, and test each candidate.</li><li>Tactical decision: if a candidate fails any single constraint, I reject it immediately and do NOT carry it forward (e.g. I do not attempt ln of a non-positive number).</li><li>I state the surviving solution(s) explicitly as the final answer, making the rejection visible in my working.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify every function in the original equation and write its domain/range constraint.</li><li>Form the intersection of these constraints — this is the admissible set S.</li><li>List the candidate solutions obtained algebraically (e.g. roots of the quadratic).</li><li>For each candidate, check membership in S; mark valid ones with ✓ and invalid ones with ✗ giving the failed constraint.</li><li>Discard rejected candidates explicitly in writing (e.g. &#x27;reject x = −4 since x &gt; 0 required&#x27;).</li><li>State the remaining value(s) as the final solution set.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $e^{2x} - 7e^x + 6 = 0$. Let $y = e^x$, so $y^2 - 7y + 6 = 0 \Rightarrow (y-1)(y-6) = 0$, giving candidates $y = 1, 6$. Domain check: $y = e^x > 0$, both pass. Then $x = \ln 1 = 0$ or $x = \ln 6$. Had a root been $y = -2$, it would be rejected before taking $\ln$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Equation f(x) = f⁻¹(x) with restricted-domain f</div>
+<div class="adjustment">Intersect domain of f with domain of f⁻¹ (which equals range of f); reject any algebraic root outside this intersection.</div>
+</div><div class="variant-row">
+<div class="scenario">Hidden quadratic in y = e^x or y = a^x</div>
+<div class="adjustment">Require y &gt; 0 before taking logarithms; reject non-positive roots of the quadratic.</div>
+</div><div class="variant-row">
+<div class="scenario">Hidden quadratic in y = cos x or y = sin x</div>
+<div class="adjustment">Require −1 ≤ y ≤ 1; reject roots outside this range.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic equations after combining logs</div>
+<div class="adjustment">Each ln/log argument must be &gt; 0; substitute candidates back into the original arguments.</div>
+</div><div class="variant-row">
+<div class="scenario">Equations solved by squaring both sides</div>
+<div class="adjustment">Substitute every candidate back into the unsquared equation to detect sign-introduced extraneous roots.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Checking only one of the functions&#x27; domains and missing exclusions imposed by the other.</li><li>Assuming every root of the resulting polynomial is automatically a solution of the original equation.</li><li>Confusing the constraint y = e^x &gt; 0 with x &gt; 0, leading to wrongly rejecting valid positive y &lt; 1.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to apply a domain established in an earlier part of the question (e.g. domain of f⁻¹ found in part (b) must be reused in part (c)).</li><li>Attempting to take ln, √, or arccos of a rejected candidate instead of discarding it immediately.</li><li>Writing both candidates as the final answer because both &#x27;solve the quadratic&#x27;.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2/P3) for exponentials, logarithms, inverse functions, and trigonometric equations. No formula booklet entry is invoked; this is a procedural/logical step. Avoid framing this as &#x27;complex roots&#x27; filtering — at IAL we are filtering real candidates against real-domain constraints only.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jan_2020-Q2.html" class="example-chip">P3 Jan 2020 Q2</a><a href="../P3/ch3/q-Jan_2023-Q3.html" class="example-chip">P3 Jan 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

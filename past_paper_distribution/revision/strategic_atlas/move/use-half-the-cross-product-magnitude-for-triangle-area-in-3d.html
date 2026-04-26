@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use half the cross product magnitude for triangle area in 3D — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Cross Product Normal</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Use half the cross product magnitude for triangle area in 3D</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Cross Product Normal</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question gives three points $A$, $B$, $C$ in 3D (or two vectors from a common vertex) and asks for the area of the triangle they form. Phrasings include &#x27;find the area of triangle ABC&#x27;, &#x27;area of the triangle with vertices...&#x27;, or follow-up parts that need a normal vector to a plane through three points. It also fires whenever the area is needed as a stepping stone to a tetrahedron volume via the scalar triple product.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition $|\mathbf{u} \times \mathbf{v}| = |\mathbf{u}||\mathbf{v}|\sin\theta$, which is the area of the parallelogram spanned by $\mathbf{u}$ and $\mathbf{v}$; the triangle is exactly half of this parallelogram. Computing $\overrightarrow{AB} \times \overrightarrow{AC}$ packages the $\sin\theta$ factor into a single determinant, bypassing the two-step route via $\cos\theta$ from the dot product. The resulting cross product vector is also a normal to the plane $ABC$, so it is often reusable in later parts (plane equation, scalar triple product, distance from a point).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that three 3D points are given and an area is requested — coordinate-plane projection or Heron&#x27;s formula are awkward in 3D.</li><li>Rule out $\tfrac12 ab\sin\theta$ via the dot product (two stages: $\cos\theta$, then $\sin\theta$) and Heron&#x27;s (three side lengths plus a square root chain).</li><li>Commit to $\tfrac12|\overrightarrow{AB} \times \overrightarrow{AC}|$: one determinant, one magnitude, and the intermediate vector doubles as a plane normal for any follow-up.</li><li>Bridge: pick a common vertex (usually $A$) and write the two displacement vectors $\overrightarrow{AB}$ and $\overrightarrow{AC}$ component-wise.</li><li>Tactically, expand the $3\times3$ determinant along the top row, watching the alternating sign on the $\mathbf{j}$-cofactor, then compute $\sqrt{x^2+y^2+z^2}$ and halve.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Form $\overrightarrow{AB} = B - A$ and $\overrightarrow{AC} = C - A$.</li><li>Set up $\overrightarrow{AB} \times \overrightarrow{AC} = \begin{vmatrix} \mathbf{i} &amp; \mathbf{j} &amp; \mathbf{k} \\ a_1 &amp; a_2 &amp; a_3 \\ c_1 &amp; c_2 &amp; c_3 \end{vmatrix}$.</li><li>$\mathbf{i}$-component: $a_2 c_3 - a_3 c_2$.</li><li>$\mathbf{j}$-component: $-(a_1 c_3 - a_3 c_1)$ — keep the leading minus sign.</li><li>$\mathbf{k}$-component: $a_1 c_2 - a_2 c_1$.</li><li>Compute $|\overrightarrow{AB} \times \overrightarrow{AC}| = \sqrt{x^2 + y^2 + z^2}$.</li><li>Area of triangle $= \tfrac12|\overrightarrow{AB} \times \overrightarrow{AC}|$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $A=(1,2,3)$, $B=(5,-2,2)$, $C=(4,3,4)$. Then $\overrightarrow{AB}=(4,-4,-1)$, $\overrightarrow{AC}=(3,1,1)$. Cross product: $\mathbf{i}((-4)(1)-(-1)(1))-\mathbf{j}((4)(1)-(-1)(3))+\mathbf{k}((4)(1)-(-4)(3)) = (-3,-7,16)$. Magnitude $=\sqrt{9+49+256}=\sqrt{314}$, so area $=\tfrac12\sqrt{314}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Parallelogram with adjacent sides $\overrightarrow{AB}$, $\overrightarrow{AD}$</div>
+<div class="adjustment">Drop the $\tfrac12$: area $=|\overrightarrow{AB}\times\overrightarrow{AD}|$.</div>
+</div><div class="variant-row">
+<div class="scenario">Triangle in 2D with vertices $(x_i,y_i)$</div>
+<div class="adjustment">Embed in 3D with $z=0$, or use the shoelace form $\tfrac12|x_1(y_2-y_3)+x_2(y_3-y_1)+x_3(y_1-y_2)|$.</div>
+</div><div class="variant-row">
+<div class="scenario">Tetrahedron volume from four points</div>
+<div class="adjustment">Reuse the same $\overrightarrow{AB}\times\overrightarrow{AC}$ inside a scalar triple product: $V=\tfrac16|\overrightarrow{AD}\cdot(\overrightarrow{AB}\times\overrightarrow{AC})|$.</div>
+</div><div class="variant-row">
+<div class="scenario">Need a normal to the plane through $A,B,C$</div>
+<div class="adjustment">Take the cross product without halving or taking magnitude; use it directly as $\mathbf{n}$ in the plane equation $\mathbf{n}\cdot\mathbf{r}=\mathbf{n}\cdot\mathbf{a}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Forgetting the $\tfrac12$ and reporting the parallelogram area as the triangle area.</li><li>Using $\overrightarrow{AB}$ and $\overrightarrow{BC}$ (not from a common vertex), which still gives the right magnitude but is a frequent source of sign/component slips.</li><li>Treating $|\overrightarrow{AB}\times\overrightarrow{AC}|$ as $|\overrightarrow{AB}||\overrightarrow{AC}|$, ignoring the $\sin\theta$ structure.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the negative sign on the $\mathbf{j}$-cofactor when expanding the determinant — the most common cross-product error.</li><li>Sign mistakes inside the $2\times2$ minors, especially with products like $(-1)(-3)$ or $(-4)(1)$.</li><li>Computing $\sqrt{x+y+z}$ instead of $\sqrt{x^2+y^2+z^2}$ for the magnitude.</li><li>Forgetting to halve at the end, or halving twice (once on the vector, once on the magnitude).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure: cross product, its magnitude as parallelogram area, and triangle area as half of that are standard FP3 vector content; the same cross product feeds plane equations and scalar triple products.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch5/q-Jan_2021-Q1.html" class="example-chip">FP3 Jan 2021 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

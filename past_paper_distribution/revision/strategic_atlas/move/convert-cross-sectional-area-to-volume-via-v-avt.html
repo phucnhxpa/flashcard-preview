@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert cross-sectional area to volume via V = A·v·t — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Units Dimensional Modelling</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Convert cross-sectional area to volume via V = A·v·t</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Units Dimensional Modelling</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in physical modelling questions where a cross-sectional area (often estimated in a prior part using the trapezium rule or integration) is combined with a constant flow speed and a time interval. Cue phrases include &#x27;water flows at ... m/s&#x27;, &#x27;volume passing through in ... minutes&#x27;, or &#x27;rate of flow through the cross-section&#x27;. Typically appears as a follow-on part after numerical integration of a river/channel/pipe profile.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A constant-speed flow through a fixed cross-section sweeps out a prism whose length in time t is d = v·t, so the volume is V = A·d = A·v·t. The identity is just &#x27;volume of a prism = base area × length&#x27; applied to the column of fluid that has crossed the section. Dimensional analysis (m² × m/s × s = m³) confirms the structure, and reusing the previously computed A avoids redoing the integral.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that A has already been estimated in the earlier part — no new integration is required.</li><li>Rule out re-integrating or modelling a varying speed: the question states the speed is constant.</li><li>Commit to the prism model V = A·v·t once units are made consistent.</li><li>Bridge to operations: spot the unit mismatch (speed in m/s, time in minutes) and convert time to seconds first.</li><li>Carry the unrounded value of A from part (a) through the multiplication, then round only at the end to the requested significant figures.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify A (from previous part), v (flow speed), and t (time interval).</li><li>Convert all quantities to consistent SI units (e.g. minutes → seconds).</li><li>Compute the distance travelled by the fluid: d = v·t.</li><li>Compute the volume: V = A·d = A·v·t.</li><li>Round to the requested accuracy (s.f. or d.p.) only at the final step.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $A \approx 31.38\,\text{m}^2$, $v = 1.5\,\text{m/s}$, $t = 1\,\text{minute} = 60\,\text{s}$. Then $d = 1.5 \times 60 = 90\,\text{m}$, so $V = 31.38 \times 90 = 2824.2\,\text{m}^3 \approx 2800\,\text{m}^3$ (2 s.f.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Flow-rate question asking for volume per second</div>
+<div class="adjustment">Compute Q = A·v directly (m³/s), then multiply by t in seconds if total volume is needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Pipe or channel with area given in cm² and speed in m/s</div>
+<div class="adjustment">Convert area to m² (divide by 10⁴) before multiplying, or convert speed to cm/s.</div>
+</div><div class="variant-row">
+<div class="scenario">Mass flow through a section with fluid density ρ</div>
+<div class="adjustment">Multiply the volume by ρ to obtain mass: m = ρ·A·v·t.</div>
+</div><div class="variant-row">
+<div class="scenario">Mechanics displacement under constant velocity</div>
+<div class="adjustment">Same multiplicative structure with A replaced by 1: s = v·t.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Forgetting to convert minutes to seconds, giving an answer 60 times too small.</li><li>Using the rounded value of A from part (a) instead of the unrounded value, losing accuracy.</li><li>Treating the flow as filling a fixed reservoir of volume A rather than a swept prism of length v·t.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding the area too early in part (a) and propagating that error into part (b).</li><li>Misreading &#x27;2 significant figures&#x27; as &#x27;2 decimal places&#x27;.</li><li>Mixing units (e.g. A in m², v in km/h, t in minutes) without harmonising before multiplying.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits comfortably within Edexcel IAL Pure/Mechanics modelling: the trapezium rule supplies A, and V = A·v·t is the standard prism-of-fluid model used in numerical integration questions.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Oct_2023-Q6.html" class="example-chip">P2 Oct 2023 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

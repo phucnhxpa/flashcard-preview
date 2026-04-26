@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiate implicitly treating y as a function of x to extract dy/dx — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Implicit Differentiation</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Differentiate implicitly treating y as a function of x to extract dy/dx</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Implicit Differentiation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever the curve equation mixes x and y so that solving for y explicitly is awkward or wasteful. Concrete cues: a product like xy = c (rectangular hyperbola), a sum of mixed powers like x² + xy + y² = k, or transcendental mixtures such as 4y² + 3x = 6ye^{-2x} where y cannot be isolated cleanly. Also fires when y IS isolatable (e.g. y = 36/x) but implicit differentiation produces a tidier gradient formula (dy/dx = −y/x) that is faster to evaluate at a given point. Equivalent phrasings: &#x27;find the gradient of the curve at P&#x27;, &#x27;show that dy/dx = …&#x27;, &#x27;find the equation of the tangent/normal at point P on the curve f(x,y)=0&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Implicit differentiation works because if y is a (locally) differentiable function of x, then any expression involving y is a composite function of x, so d/dx[f(y)] = f&#x27;(y)·dy/dx by the chain rule, and products xy require the product rule. This produces a single linear equation in dy/dx that can be solved without ever needing y as the explicit subject. The technique converts a structural relationship between x and y into a gradient formula valid at every point on the curve, which is exactly what tangent/normal questions need.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the structure of the equation: are x and y multiplied (xy), is y raised to a power (y²), or does y appear inside a transcendental function (e^y, ln y, sin y)? Any of these signal that y is entangled with x.</li><li>Rule out making y the subject: either it is impossible (e.g. 4y² + 3x = 6ye^{-2x}), or it is possible but produces a messier derivative requiring re-substitution (e.g. y = 36/x → dy/dx = −36/x² still needs y back to simplify).</li><li>Commit to implicit differentiation because it treats every y-term uniformly via the chain rule and yields dy/dx in terms of both x and y — the cleanest form for substituting a known point P(x₀, y₀).</li><li>Bridge to operation: differentiate both sides of the equation with respect to x term-by-term, attaching a dy/dx factor whenever a y is differentiated, and using the product rule wherever x and y multiply.</li><li>Tactical decision: collect all dy/dx terms on one side, factorise, then divide to isolate dy/dx. Only then substitute the coordinates of the point of interest.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Apply d/dx to both sides of the curve equation.</li><li>For each x-only term: differentiate normally (e.g. d/dx(3x) = 3).</li><li>For each y-only term: differentiate w.r.t. y and multiply by dy/dx (e.g. d/dx(4y²) = 8y·dy/dx).</li><li>For products of x and y: apply product rule (e.g. d/dx(xy) = y + x·dy/dx).</li><li>For products of f(x) and g(y): combine product and chain rules (e.g. d/dx(6y·e^{-2x}) = 6e^{-2x}·dy/dx − 12y·e^{-2x}).</li><li>Collect all terms containing dy/dx on one side, factorise out dy/dx, and divide to obtain dy/dx = (expression in x and y).</li><li>Substitute the given point P(x₀, y₀) to evaluate the gradient numerically.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve: $xy = 36$ at $P(4,9)$. Differentiate: $y + x\frac{dy}{dx} = 0$ ⇒ $\frac{dy}{dx} = -\frac{y}{x}$. At $P$: $m_T = -\frac{9}{4}$, so the tangent has gradient $-\tfrac{9}{4}$ and the normal has gradient $\tfrac{4}{9}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Rectangular hyperbola given parametrically as x = ct, y = c/t</div>
+<div class="adjustment">Use dy/dx = (dy/dt)/(dx/dt) = (−c/t²)/c = −1/t². Same gradient as implicit route, just routed through the parameter.</div>
+</div><div class="variant-row">
+<div class="scenario">Standard conic such as x² + y² = r² or x² + xy + y² = k</div>
+<div class="adjustment">Same procedure: 2x + 2y·dy/dx = 0, etc. Just more terms; the product rule appears wherever xy occurs.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic/exponential mix like ln y + xy = c</div>
+<div class="adjustment">d/dx(ln y) = (1/y)·dy/dx; the rest follows as usual. Chain rule on every y-function.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric in y, e.g. sin(y) + x² = 1</div>
+<div class="adjustment">d/dx(sin y) = cos(y)·dy/dx; isolate dy/dx the same way.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating y as a constant when differentiating, so 4y² differentiates to 0 instead of 8y·dy/dx.</li><li>Seeing xy = 36 and rewriting as y = 36/x first — works, but slower and obscures the symmetric form dy/dx = −y/x.</li><li>Mistaking the equation for one solvable explicitly when a transcendental coupling (like ye^{-2x}) actually blocks isolation.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the dy/dx factor when differentiating any function of y (the most common error).</li><li>Forgetting the product rule on xy and writing dy/dx = 0 instead of y + x·dy/dx = 0.</li><li>Sign error when rearranging — e.g. writing dy/dx = y/x instead of −y/x for xy = c.</li><li>Failing to collect all dy/dx terms before dividing, leaving dy/dx on both sides.</li><li>Substituting the point&#x27;s coordinates before isolating dy/dx, which can hide algebraic errors.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 (implicit differentiation) and reused in Further Pure for conics. No formula-booklet entry is needed — chain rule and product rule are assumed. Avoid invoking partial derivatives or the multivariable implicit function theorem; at IAL level, y is simply a differentiable function of x and we apply the single-variable chain rule.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP1/ch4/q-Jan_2022-Q7.html" class="example-chip">FP1 Jan 2022 Q7</a><a href="../P4/ch5/q-Jan_2021-Q6.html" class="example-chip">P4 Jan 2021 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

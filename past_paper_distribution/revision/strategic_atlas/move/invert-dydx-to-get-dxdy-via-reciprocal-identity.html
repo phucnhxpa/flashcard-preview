@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invert dy/dx to get dx/dy via reciprocal identity — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Reciprocal Derivative</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Invert dy/dx to get dx/dy via reciprocal identity</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Reciprocal Derivative</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question asks for dx/dy (or 1/(dy/dx)) after dy/dx has been found, especially with the cue word &#x27;hence&#x27;. Also triggers when explicit inversion of y = f(x) is awkward (involves inverse trig, logs of complicated expressions, or implicit forms). Recognisable phrasings: &#x27;hence find dx/dy&#x27;, &#x27;hence show that dx/dy = ...&#x27;, or asking for the gradient of the inverse function at a point.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a function that is locally one-to-one with dy/dx ≠ 0, the chain rule gives (dx/dy)·(dy/dx) = 1, so dx/dy = 1/(dy/dx). This bypasses the need to solve y = f(x) for x explicitly, which is often impossible or messy. The &#x27;hence&#x27; cue is the examiner&#x27;s signal that the previous derivative is the intended ingredient. The identity is exact, not an approximation, wherever the derivative is nonzero.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question asks for dx/dy and uses &#x27;hence&#x27; immediately after a part that produced dy/dx.</li><li>I rule out rearranging y = f(x) into x = f⁻¹(y) and differentiating from scratch — slower, error-prone, and ignores the &#x27;hence&#x27; instruction.</li><li>I commit to the reciprocal route because dx/dy = 1/(dy/dx) is a one-line identity once dy/dx is known.</li><li>I write dy/dx in its current (possibly messy) form and prepare to take its reciprocal cleanly, watching for compound fractions.</li><li>I simplify by flipping the fraction (a/b → b/a) and, if a target template p/[q y √(...)] is given, match coefficients to identify p and q.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State the identity dx/dy = 1/(dy/dx), valid where dy/dx ≠ 0.</li><li>Substitute the expression for dy/dx obtained in the previous part.</li><li>Simplify the compound fraction using 1/(a/b) = b/a.</li><li>Tidy the result and, if asked, compare against a target form to read off requested constants.</li><li>Note (if relevant) that the formula is valid on the stated domain because dy/dx is nonzero there.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\dfrac{dy}{dx} = \dfrac{2y\sqrt{y^2-9}}{3}$, then $\dfrac{dx}{dy} = \dfrac{1}{\,2y\sqrt{y^2-9}/3\,} = \dfrac{3}{2y\sqrt{y^2-9}}.$ Matching against $\dfrac{p}{q\,y\sqrt{y^2-9}}$ gives $p=3,\ q=2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Parametric curve with x = x(t), y = y(t)</div>
+<div class="adjustment">Use dy/dx = (dy/dt)/(dx/dt); to get dx/dy invert: dx/dy = (dx/dt)/(dy/dt).</div>
+</div><div class="variant-row">
+<div class="scenario">Implicit relation where dx/dy is simpler</div>
+<div class="adjustment">Differentiate implicitly with respect to y to get dx/dy directly, then invert to obtain dy/dx.</div>
+</div><div class="variant-row">
+<div class="scenario">Gradient of inverse function at a point</div>
+<div class="adjustment">If g = f⁻¹, then g&#x27;(b) = 1/f&#x27;(a) where b = f(a); evaluate dy/dx at the x-value, then take reciprocal.</div>
+</div><div class="variant-row">
+<div class="scenario">Rate problems linking dV/dt and dt/dV</div>
+<div class="adjustment">Same reciprocal principle: dt/dV = 1/(dV/dt) when chaining via the chain rule.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Ignoring the &#x27;hence&#x27; cue and differentiating x = f⁻¹(y) from scratch (e.g. via arcsec), which wastes time and invites algebraic errors.</li><li>Treating dx/dy as a separate derivative needing implicit differentiation rather than a simple reciprocal.</li><li>Confusing dx/dy with d/dy of x expressed via y in a more complicated chain than necessary.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Flipping a compound fraction incorrectly: 1/(a/b) = b/a, not a/b.</li><li>Forgetting to check dy/dx ≠ 0 at any boundary point of interest.</li><li>Leaving the answer as a stacked fraction instead of simplifying to a single fraction the mark scheme expects.</li><li>Sign errors when the original dy/dx contains a minus sign that must be carried through the reciprocal.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P3/P4) and Further Pure scope: uses only the reciprocal identity dx/dy = 1/(dy/dx) following standard differentiation, with no analysis beyond noting dy/dx ≠ 0 on the stated domain.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2021-Q10.html" class="example-chip">P3 Jan 2021 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set arithmetic sum S_n equal to target to form a quadratic in n — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Sum To Target</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Set arithmetic sum S_n equal to target to form a quadratic in n</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sum To Target</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for the number of terms (weeks, days, months, payments) needed for a *cumulative* total to reach or exceed a given value. Cue words include &#x27;total&#x27;, &#x27;altogether&#x27;, &#x27;in all&#x27;, &#x27;enough money&#x27;, &#x27;accumulated&#x27;, or &#x27;after how many ... will the sum exceed&#x27;. The underlying sequence is arithmetic (constant increment), and the target refers to a running total rather than a single term. Distinguish carefully from &#x27;in which week does the saving itself reach £X&#x27;, which is a u_n problem.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For an arithmetic progression, S_n = n/2(2a + (n−1)d) is a quadratic expression in n, so equating it to a numerical target produces a quadratic equation solvable by factorising or the quadratic formula. The alternative form S_n = n/2(a + l) requires the last term l, which is itself unknown when n is the unknown, so the (2a + (n−1)d) form is strategically preferred. Reducing the worded scenario to a single equation in one unknown is the standard A-level move for sum-to-target problems.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the word &#x27;total/altogether/enough&#x27; — this signals a cumulative sum S_n, not an individual term u_n.</li><li>Rule out using S_n = n/2(a + l) because the last term l is not given and would introduce a second unknown.</li><li>Commit to S_n = n/2(2a + (n−1)d) because it expresses the sum purely in terms of the known a, d and the unknown n.</li><li>Substitute the given a, d and the target value for S_n, then clear the fraction by multiplying through by 2.</li><li>Expand and rearrange into standard quadratic form an² + bn + c = 0 ready for factorising or the quadratic formula, discarding any negative or non-integer root at the end.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify a, d and the target sum T from the wording.</li><li>Write T = n/2(2a + (n−1)d).</li><li>Multiply both sides by 2: 2T = n(2a + (n−1)d).</li><li>Expand the right-hand side to obtain a quadratic in n.</li><li>Rearrange into the form An² + Bn − 2T = 0 (or = 0 after moving 2T across).</li><li>Solve using the quadratic formula or factorisation; reject negative or non-integer solutions.</li><li>If the question asks &#x27;enough to reach £T&#x27;, round up to the next whole n.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sara saves £5 in week 1 and £0.25 more each subsequent week. After how many weeks does she have at least £350?
+Set S_n = 350: 350 = n/2(2(5) + (n−1)(0.25)) ⇒ 700 = n(9.75 + 0.25n) ⇒ 0.25n² + 9.75n − 700 = 0 ⇒ n² + 39n − 2800 = 0.
+Quadratic formula: n = (−39 + √(1521 + 11200))/2 = (−39 + √12721)/2 ≈ 36.9.
+So n = 37 weeks (rounded up since 36 weeks gives less than £350).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Loan repayment: fixed first payment, fixed monthly increase, find months to clear a balance.</div>
+<div class="adjustment">Set S_n equal to total debt; solve quadratic in n; round up to ensure repayment completes.</div>
+</div><div class="variant-row">
+<div class="scenario">Production targets: daily output increases by a constant amount, find days to reach a cumulative quota.</div>
+<div class="adjustment">Same equation; interpret n as days and round up to next integer.</div>
+</div><div class="variant-row">
+<div class="scenario">&#x27;At least&#x27; or &#x27;first exceeds&#x27; phrasing.</div>
+<div class="adjustment">Solve the quadratic equality, then take the smallest integer n strictly greater than the positive root.</div>
+</div><div class="variant-row">
+<div class="scenario">Decreasing arithmetic sequence (d &lt; 0) with cumulative target.</div>
+<div class="adjustment">Same formula with negative d; check that the target is actually attainable before n becomes ≤ 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Last term l is given instead of d.</div>
+<div class="adjustment">Use S_n = n/2(a + l) directly, giving a linear equation in n rather than a quadratic.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;how many weeks until savings are £350&#x27; as u_n = 350 (a single weekly amount) instead of S_n = 350 (cumulative).</li><li>Reading the first term as the increase d, or vice versa.</li><li>Assuming the answer must be an integer root of the quadratic; in fact the positive root is usually non-integer and must be rounded up.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the factor of n/2 and writing S_n = 2a + (n−1)d.</li><li>Sign errors when expanding n(n−1)d, especially with decimal d.</li><li>Rounding down instead of up when the target is &#x27;at least T&#x27;, giving a total below T.</li><li>Keeping both roots of the quadratic instead of discarding the negative one.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is a core P1/P2 arithmetic series technique in Edexcel IAL Mathematics; only the standard sum formula and quadratic-solving methods (factorising, quadratic formula) are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jun_2021-Q1.html" class="example-chip">P2 Jun 2021 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split the larger coefficient as inductive multiplier plus target divisor — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Divisibility Decomposition</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Split the larger coefficient as inductive multiplier plus target divisor</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Divisibility Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in induction-divisibility problems of the form $f(n)=A^n+B^n$ (or similar two-term sums) once the exponent step has been peeled, leaving $f(k+1)=a\cdot A^k + b\cdot B^k$ with unequal coefficients $a\neq b$. Cue: the two coefficients differ by exactly the target divisor $d$ (e.g. $9-2=7$). The aim is to rewrite $f(k+1)$ as $\lambda f(k)+d\cdot(\text{term})$ so both pieces are visibly divisible by $d$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The identity $a\cdot A^k+b\cdot B^k = a(A^k+B^k)+(b-a)B^k = aF(k)+(b-a)B^k$ converts an awkward two-term expression into the inductive hypothesis plus a clean residue. When $b-a$ equals the target divisor, the residue carries an explicit factor of $d$, so divisibility follows immediately. This is exactly why such induction problems are engineered with growth-factor differences matching the divisor.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that after peeling, $f(k+1)$ has two terms with different coefficients, but $f(k)$ has both terms with coefficient $1$.</li><li>Rule out subtracting $f(k)$ from $f(k+1)$ directly — it leaves a messy expression whose divisibility is not transparent.</li><li>Commit to using the smaller coefficient as a bridge multiplier $\lambda$, since $\lambda f(k)$ then absorbs both terms cleanly.</li><li>First concrete operation: write $b=\lambda+(b-\lambda)$ and split the second term so a copy of $f(k)$ emerges.</li><li>Verify $b-\lambda$ equals (a multiple of) the target divisor; this is the algebraic check that the move will work.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two coefficients $a,b$ in $f(k+1)=a\cdot A^k+b\cdot B^k$ (WLOG $a\le b$).</li><li>Choose bridge multiplier $\lambda=a$.</li><li>Rewrite: $f(k+1)=a(A^k+B^k)+(b-a)B^k = a\,f(k)+(b-a)B^k$.</li><li>Confirm $(b-a)$ is divisible by the target divisor $d$.</li><li>State: $a\,f(k)$ is divisible by $d$ by the inductive hypothesis; $(b-a)B^k$ is divisible by $d$ by inspection.</li><li>Conclude $d\mid f(k+1)$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(n)=2^{n+2}+3^{2n+1}$; assume $7\mid f(k)$. Then $f(k+1)=2\cdot 2^{k+2}+9\cdot 3^{2k+1}=2(2^{k+2}+3^{2k+1})+7\cdot 3^{2k+1}=2f(k)+7\cdot 3^{2k+1}$. Both summands are divisible by $7$, so $7\mid f(k+1)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Bridge with the larger coefficient instead</div>
+<div class="adjustment">Use $\lambda=b$: $f(k+1)=b\,f(k)-(b-a)A^k$. Equally valid; sign is negative but the factor $(b-a)$ still supplies the divisor.</div>
+</div><div class="variant-row">
+<div class="scenario">$f(n)=8^n-3^n$, divisible by $5$</div>
+<div class="adjustment">After peeling, $f(k+1)=8\cdot 8^k-3\cdot 3^k=3(8^k-3^k)+5\cdot 8^k=3f(k)+5\cdot 8^k$; the difference $8-3=5$ matches the target.</div>
+</div><div class="variant-row">
+<div class="scenario">$f(n)=5^n+2\cdot 11^n$ divisible by $3$</div>
+<div class="adjustment">Coefficients after peeling are $5$ and $22$; split $22=5+17$? No — instead use difference $11-5=6$ which is a multiple of $3$, so the same template applies with $\lambda=5$.</div>
+</div><div class="variant-row">
+<div class="scenario">Three-term sums, e.g. $f(n)=a^n+b^n+c^n$</div>
+<div class="adjustment">Apply the split twice, peeling one growth factor at a time, or use $f(k+1)=a\,f(k)+(b-a)b^k+(c-a)c^k$ and check both residues are divisible by $d$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to subtract $f(k)$ from $f(k+1)$ directly without a coefficient split, producing an expression whose divisibility by $d$ is not manifest.</li><li>Believing the multiplier must be $1$ (i.e. trying to express $f(k+1)=f(k)+\text{something}$), which only works when the coefficients are $1$ and $1+d$.</li><li>Confusing this with the &#x27;add and subtract&#x27; technique where one inserts $\pm A^k\cdot B$ — here the rewrite is purely a coefficient decomposition.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slip in the difference $b-a$ (e.g. writing $9-2=5$), which destroys the divisibility argument.</li><li>Failing to justify both pieces explicitly: the mark scheme demands citing the inductive hypothesis for $\lambda f(k)$ and identifying the explicit factor of $d$ in the residue.</li><li>Choosing $\lambda$ so that $b-\lambda$ is not a multiple of $d$ — the move only works when the coefficient difference aligns with the target divisor.</li><li>Forgetting to keep $B^k$ (not $B^{k+1}$) in the residue after the split — index bookkeeping must be consistent with the peeling step.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P4/FP1 induction-divisibility material; uses only integer arithmetic, index laws, and the inductive hypothesis. No modular arithmetic notation required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch8/q-Jan_2021-Q9.html" class="example-chip">FP1 Jan 2021 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

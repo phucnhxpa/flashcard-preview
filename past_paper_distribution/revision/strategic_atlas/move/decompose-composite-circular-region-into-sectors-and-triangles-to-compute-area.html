@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose composite circular region into sectors and triangles to compute area — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Area Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Decompose composite circular region into sectors and triangles to compute area</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Area Decomposition</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The region in question (badge, lawn, sign, platform) is bounded by a mixture of circular arc(s) and straight line segments, so no single formula (sector, triangle, rectangle) covers it. Visual cues: a boundary description that switches between &#x27;arc from A to B&#x27; and &#x27;line from B to C&#x27;; a centre O with radii drawn to boundary points; explicit mention of a &#x27;major&#x27; vs &#x27;minor&#x27; arc; or a polygon vertex sitting outside/inside a circle. Whenever you see &#x27;find the area of region [letters]&#x27; and the letters trace both an arc and chords/lines, this move fires.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Standard formulas exist for sectors (½r²θ), triangles (½ab sin C or ½ × base × height), kites, and rectangles, but not for arbitrary composite shapes. By drawing radii to the points where arc meets straight edge, the region splits cleanly along these radii into a sector plus one or more triangles (or, equivalently, a larger sector minus a triangle). Each sub-region then matches a booklet formula, and the total area is obtained by summing (when sub-regions tile the region) or subtracting (when one sub-region is an &#x27;overshoot&#x27;). This is far cleaner than integration and is the standard technique for circular-geometry area questions in IAL Pure.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the region&#x27;s boundary alternates between circular arc(s) and straight segments — so it is neither a pure sector nor a pure polygon.</li><li>Rule out integration (overkill for a sector + polygon shape) and rule out treating the whole shape as a single sector with an enlarged angle (this fails whenever the outer vertices are not equidistant from the centre).</li><li>Identify the centre O of the circular arc and draw the radii from O to the arc&#x27;s endpoints; these radii are the natural &#x27;cut lines&#x27; because they are simultaneously sides of a sector and sides of a triangle.</li><li>Decide whether the decomposition is additive (sector + triangle(s), if the sub-regions tile the shape) or subtractive (major sector − triangle, if a triangle pokes out of the desired region). Sketch and shade to confirm.</li><li>Decide which angle to use: minor angle θ or reflex/major angle 2π − θ. The choice depends on whether the arc traversed is the short or long way round.</li><li>Exploit any symmetry/congruence (e.g. two congruent flanking triangles ⇒ compute one and double) to halve the work.</li><li>Write Area = Σ(sub-areas) with signs, then evaluate each piece using ½r²θ for sectors and ½ab sin C (or ½ × base × height) for triangles.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify centre O and radius r of the circular boundary; mark the points A, B, … where arc meets straight edges.</li><li>Draw radii OA, OB, … to partition the region into a sector and triangle(s).</li><li>Determine the sector angle: θ if the minor arc bounds the region, 2π − θ if the major arc does.</li><li>Sector area = ½ r² θ_used.</li><li>For each triangle, use ½ × (side) × (side) × sin(included angle), or ½ × base × height when a right angle is present (often via Pythagoras to find a missing length).</li><li>Combine: Area_total = Area_sector ± Σ Area_triangles, with sign chosen by whether triangles tile alongside or overshoot.</li><li>Keep angles exact (e.g. arccos(1/3)) until the final step to avoid rounding error.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Region OABC has arc AB (centre O, r = 6, angle ∠AOB = 1.2 rad) and straight edges OA, OB, BC, CA, with C outside the sector and OC = 8, ∠AOC = 0.4. Then Area(sector OAB) = ½(6²)(1.2) = 21.6, Area(△OAC) = ½(6)(8) sin 0.4 ≈ 9.35, so total ≈ 21.6 + 2(9.35) = 40.3 (if a congruent △OBC also flanks the sector).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Region bounded by a major arc plus chords/lines that cut inside the sector</div>
+<div class="adjustment">Use Area = ½r²(2π − θ) − Area(triangle inside sector but outside region); a subtractive decomposition.</div>
+</div><div class="variant-row">
+<div class="scenario">Two congruent triangles flank a sector (badge-type problem)</div>
+<div class="adjustment">Compute one triangle and double: Area = sector + 2·Area(△); halves the trig work.</div>
+</div><div class="variant-row">
+<div class="scenario">Kite plus sector (sign-type problem with two equal tangent-like sides)</div>
+<div class="adjustment">The two radii are also two sides of the kite; Area(kite) = 2·½·r·(side)·sin(included angle), then add ½r²(2π − θ) for the major sector.</div>
+</div><div class="variant-row">
+<div class="scenario">Circular segment (chord cuts off a piece of disc)</div>
+<div class="adjustment">Same logic in miniature: Segment area = ½r²(θ − sin θ) = sector − triangle.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the whole composite shape as a single sector with an enlarged angle, ignoring that outer vertices may not lie on the circle.</li><li>Computing only the sector and forgetting the flanking triangle(s), or vice versa.</li><li>Subtracting the wrong triangle (e.g. △AOC instead of △AOD) when applying a &#x27;major sector minus triangle&#x27; decomposition.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using the minor angle θ when the region is bounded by the major arc (or vice versa), which gives the wrong sector area.</li><li>Premature rounding of θ (e.g. using 1.231 instead of arccos(1/3)) propagates error past the required tolerance.</li><li>Confusing a side length found by Pythagoras (e.g. AD) with a radius and substituting it into ½r²θ.</li><li>Forgetting to double a congruent triangle when symmetry was the whole reason the decomposition was tractable.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL P2/P3 &#x27;Radian measure&#x27; chapter; uses booklet entries Area of sector = ½r²θ, Arc length = rθ, and Area of triangle = ½ab sin C. Stays inside standard circle/sector/triangle geometry — no integration or polar coordinates needed.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2021-Q5.html" class="example-chip">P1 Jan 2021 Q5</a><a href="../P1/ch3/q-Jan_2020-Q4.html" class="example-chip">P1 Jan 2020 Q4</a><a href="../P1/ch3/q-Oct_2020-Q3.html" class="example-chip">P1 Oct 2020 Q3</a><a href="../P1/ch3/q-Oct_2021-Q7.html" class="example-chip">P1 Oct 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

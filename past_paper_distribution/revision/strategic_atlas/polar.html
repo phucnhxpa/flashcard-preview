@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polar Coordinates — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Polar Coordinates</strong></div>
+  <h1><span class="dot" style="background:#AB47BC;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Polar Coordinates</h1>
+  <p>15 canonical strategic moves across 15 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Parametric Tangent Condition</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/convert-polar-tangent-direction-condition-into-dydθ-0-or-dxdθ-0-via-cartesian-pa.html" class="move-row">
+  <div class="move-name">Convert polar tangent-direction condition into dy/dθ = 0 or dx/dθ = 0 via Cartesian parametric form</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polar Area Setup</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/set-up-polar-area-integral-with-correct-limits-and-symmetry.html" class="move-row">
+  <div class="move-name">Set up polar area integral with correct limits and symmetry</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Symmetry Exploitation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-reflection-symmetry-to-halve-the-polar-area-integration-range.html" class="move-row">
+  <div class="move-name">Exploit reflection symmetry to halve the polar area integration range</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Symmetry Reduction</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-polar-curve-symmetry-to-halve-or-fraction-the-integration-range.html" class="move-row">
+  <div class="move-name">Exploit polar-curve symmetry to halve (or fraction) the integration range</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Formula Selection</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-polar-area-formula-a-½r²-dθ-with-correct-limits.html" class="move-row">
+  <div class="move-name">Apply the polar area formula A = ½∫r² dθ with correct limits</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cartesian Polar Bridge</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/convert-horizontal-tangent-condition-on-a-polar-curve-to-dydθ-0-via-y-r-sin-θ.html" class="move-row">
+  <div class="move-name">Convert horizontal-tangent condition on a polar curve to dy/dθ = 0 via y = r sin θ</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Bridge</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/bridge-polar-to-parametric-via-xr-cosθ-yr-sinθ-for-dydx.html" class="move-row">
+  <div class="move-name">Bridge polar to parametric via x=r cosθ, y=r sinθ for dy/dx</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Reinterpretation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-tangent-perpendicular-to-initial-line-into-dxdθ-0.html" class="move-row">
+  <div class="move-name">Convert &#x27;tangent perpendicular to initial line&#x27; into dx/dθ = 0</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Curve Analysis</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/bound-r-values-to-confirm-one-polar-curve-dominates-another.html" class="move-row">
+  <div class="move-name">Bound r-values to confirm one polar curve dominates another</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Determination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/solve-r-0-to-find-polar-area-integration-limits.html" class="move-row">
+  <div class="move-name">Solve r = 0 to find polar area integration limits</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Feature Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-key-polar-radii-to-classify-and-sketch-the-curve.html" class="move-row">
+  <div class="move-name">Evaluate key polar radii to classify and sketch the curve</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Coordinate Conversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-polar-point-to-cartesian-using-x-r-cos-θ-y-r-sin-θ.html" class="move-row">
+  <div class="move-name">Convert polar point to Cartesian using x = r cos θ, y = r sin θ</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Feature Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/extract-pole-crossings-maximum-r-and-symmetry-before-sketching-a-polar-curve.html" class="move-row">
+  <div class="move-name">Extract pole crossings, maximum r, and symmetry before sketching a polar curve</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangent Criterion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-dydθ-0-via-product-rule-for-polar-horizontal-tangents.html" class="move-row">
+  <div class="move-name">Use dy/dθ = 0 via product rule for polar horizontal tangents</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/decompose-region-as-right-triangle-minus-polar-sector-area.html" class="move-row">
+  <div class="move-name">Decompose region as right triangle minus polar sector area</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

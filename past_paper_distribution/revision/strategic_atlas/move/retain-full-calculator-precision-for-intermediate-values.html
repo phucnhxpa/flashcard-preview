@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retain full calculator precision for intermediate values — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Numerical Accuracy</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Retain full calculator precision for intermediate values</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Numerical Accuracy</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever an intermediate quantity (a length, angle, root, or iterate) is irrational or non-terminating and will be re-used in a later calculation — especially one involving subtraction of similar-magnitude terms (cosine rule, difference of squares), squaring, or multiplication by a large factor. Cue phrases include &#x27;give your answer to 3 s.f.&#x27;, &#x27;hence find&#x27;, or any multi-step problem where one computed value feeds into the next. Also fires in iterative numerical methods (Newton-Raphson, fixed-point iteration) where each iterate depends on the previous.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Rounding errors propagate and amplify: an error of magnitude δ in an intermediate value typically produces an error of order (∂f/∂x)·δ in the next stage, and subtraction of nearly equal numbers magnifies relative error catastrophically. By keeping the full calculator value (via ANS, STO/memory) and rounding only the reported answer, the working stays inside the mark scheme&#x27;s tolerance window. This is a numerical-stability principle, not a notational nicety.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the value I just computed (e.g. OP = 1.5/sin 1.2) is irrational and will be substituted into another formula.</li><li>I rule out writing OP ≈ 1.61 and re-entering it: the next step subtracts comparable terms, so rounding error will be amplified.</li><li>I commit to storing OP exactly as the calculator holds it and only rounding the final answer to the requested precision.</li><li>Operationally, I press STO→A (or use ANS) immediately after computing OP, then refer to A in the cosine rule expression.</li><li>I double-check by recomputing the final answer using one extra digit of precision in the intermediate to confirm stability of the reported figure.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Compute the intermediate value and store it in calculator memory (e.g. STO→A) without writing down a rounded version for re-entry.</li><li>Write the next-stage expression in terms of the stored variable (A), substituting the memory directly.</li><li>Evaluate the full expression in one calculator step to keep all digits.</li><li>Round only the final reported quantity to the required significant figures or decimal places.</li><li>Optionally verify by recomputing with one fewer/more digit retained to confirm the rounded answer is stable.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $OP = \dfrac{1.5}{\sin 1.2}$ and $AP^2 = 25 + OP^2 - 10\,OP\cos 1.2$. Store $OP = 1.609365\ldots$ as $A$. Then $AP^2 = 25 + A^2 - 10A\cos 1.2 \approx 17.7286$, giving $AP \approx 4.21$ (3 s.f.). Re-entering $OP \approx 1.61$ would give $AP^2 \approx 17.74$ and $AP \approx 4.21$ here — but on borderline cases the third figure can shift.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cosine/sine rule chains where a side or angle computed in part (a) is used in part (b).</div>
+<div class="adjustment">Store the part (a) value; substitute it via memory into part (b) rather than the rounded printed answer.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton-Raphson or fixed-point iteration $x_{n+1} = g(x_n)$ to a stated accuracy.</div>
+<div class="adjustment">Keep each iterate at full calculator precision (use ANS) and only round the final iterate when checking the required d.p.</div>
+</div><div class="variant-row">
+<div class="scenario">Trapezium/Simpson&#x27;s rule where ordinates $y_i$ are summed.</div>
+<div class="adjustment">Compute each $y_i$ to full precision (or store in a list) before summing; rounding ordinates to 2 d.p. corrupts the sum.</div>
+</div><div class="variant-row">
+<div class="scenario">Statistics: computing $S_{xx}, S_{xy}$ then $r$ or regression coefficients.</div>
+<div class="adjustment">Keep $S_{xx}$ etc. unrounded when forming ratios; rounding numerator and denominator separately distorts $r$.</div>
+</div><div class="variant-row">
+<div class="scenario">Binomial/normal probabilities where a standardised $z$ is computed then looked up.</div>
+<div class="adjustment">Use the unrounded $z$ in the calculator&#x27;s normal CDF rather than rounding $z$ to 2 d.p. first.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;give your answer to 3 s.f.&#x27; as an instruction to round every intermediate step to 3 s.f.</li><li>Believing that &#x27;exact form&#x27; and &#x27;full precision&#x27; are the same — exact form means surds/fractions kept symbolically, full precision means all calculator digits retained.</li><li>Assuming that because the final answer matches to 2 s.f. either way, the rounding habit is harmless — it fails on boundary cases.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Copying a rounded intermediate value from written working back into the calculator instead of using stored memory.</li><li>Clearing the calculator (e.g. switching modes) and losing the stored value, then re-entering a truncated decimal.</li><li>Rounding an angle in degrees/radians before taking its sine or cosine, which is especially damaging for small angles.</li><li>Rounding both numerator and denominator of a ratio separately before dividing.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard expectation across Edexcel IAL Pure (trigonometry, numerical methods), Statistics (regression, correlation, normal distribution), and Mechanics (multi-stage force/kinematics problems); mark schemes routinely give a tolerance band that assumes unrounded intermediate working.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Oct_2024-Q5.html" class="example-chip">P1 Oct 2024 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

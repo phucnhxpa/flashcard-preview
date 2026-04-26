@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complex Numbers — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Complex Numbers</strong></div>
+  <h1><span class="dot" style="background:#5C6BC0;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Complex Numbers</h1>
+  <p>82 canonical strategic moves across 70 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Polar Conversion</h2>
+  <div class="family-meta">3 canonical moves · 10 example questions</div>
+  <div class="move-list">
+<a href="move/convert-complex-number-to-modulus-argument-form-before-applying-de-moivre-for-ro.html" class="move-row">
+  <div class="move-name">Convert complex number to modulus-argument form before applying de Moivre for roots</div>
+  <div class="freq-pill">5 questions</div>
+</a>
+<a href="move/convert-complex-number-to-modulus-argument-polar-form-to-enable-de-moivre-or-geo.html" class="move-row">
+  <div class="move-name">Convert complex number to modulus-argument polar form to enable de Moivre or geometric reasoning</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/convert-roots-between-cartesian-and-polar-forms-as-the-question-demands.html" class="move-row">
+  <div class="move-name">Convert roots between Cartesian and polar forms as the question demands</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Rationalisation</h2>
+  <div class="family-meta">3 canonical moves · 8 example questions</div>
+  <div class="move-list">
+<a href="move/multiply-by-complex-conjugate-of-denominator-to-rationalise-into-abi-form.html" class="move-row">
+  <div class="move-name">Multiply by complex conjugate of denominator to rationalise into a+bi form</div>
+  <div class="freq-pill">6 questions</div>
+</a>
+<a href="move/rationalise-a-complex-constant-ratio-by-conjugate-multiplication.html" class="move-row">
+  <div class="move-name">Rationalise a complex constant ratio by conjugate multiplication</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/realise-complex-denominator-by-multiplying-by-its-conjugate.html" class="move-row">
+  <div class="move-name">Realise complex denominator by multiplying by its conjugate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Conjugate Root Theorem</h2>
+  <div class="family-meta">1 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/apply-conjugate-root-theorem-to-deduce-a-paired-complex-root.html" class="move-row">
+  <div class="move-name">Apply Conjugate Root Theorem to deduce a paired complex root</div>
+  <div class="freq-pill">7 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Interpretation</h2>
+  <div class="family-meta">5 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/interpret-nth-roots-of-a-complex-number-as-vertices-of-a-regular-n-gon.html" class="move-row">
+  <div class="move-name">Interpret nth roots of a complex number as vertices of a regular n-gon</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/plot-nth-roots-as-vertices-of-a-regular-polygon-on-a-circle.html" class="move-row">
+  <div class="move-name">Plot nth roots as vertices of a regular polygon on a circle</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/recognise-real-scalar-multiple-of-a-fixed-complex-number-as-a-line-through-the-o.html" class="move-row">
+  <div class="move-name">Recognise real-scalar multiple of a fixed complex number as a line through the origin</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/identify-nth-roots-as-vertices-of-a-regular-n-gon-on-circle-of-radius-r1n.html" class="move-row">
+  <div class="move-name">Identify nth roots as vertices of a regular n-gon on circle of radius r^{1/n}</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/read-w---a-w---b-as-the-perpendicular-bisector-of-segment-ab.html" class="move-row">
+  <div class="move-name">Read |w - a| = |w - b| as the perpendicular bisector of segment ab</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>De Moivre Root Extraction</h2>
+  <div class="family-meta">5 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/apply-de-moivres-theorem-with-2kπ-offsets-to-extract-all-n-distinct-nth-roots.html" class="move-row">
+  <div class="move-name">Apply de Moivre&#x27;s theorem with 2kπ offsets to extract all n distinct nth roots</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/extract-purely-imaginary-roots-from-x²-k.html" class="move-row">
+  <div class="move-name">Extract purely imaginary roots from x² = −k</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/apply-zero-product-property-to-a-pre-factored-polynomial.html" class="move-row">
+  <div class="move-name">Apply zero-product property to a pre-factored polynomial</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/convert-to-polar-form-and-apply-de-moivre-to-extract-all-nth-roots.html" class="move-row">
+  <div class="move-name">Convert to polar form and apply de Moivre to extract all nth roots</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/parameterise-all-nth-roots-via-2kπ-before-dividing-argument.html" class="move-row">
+  <div class="move-name">Parameterise all nth roots via +2kπ before dividing argument</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Conjugate Pair To Quadratic</h2>
+  <div class="family-meta">1 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/pair-conjugate-roots-into-a-real-quadratic-factor-via-difference-of-squares.html" class="move-row">
+  <div class="move-name">Pair conjugate roots into a real quadratic factor via difference of squares</div>
+  <div class="freq-pill">6 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Locus Identification</h2>
+  <div class="family-meta">1 canonical moves · 5 example questions</div>
+  <div class="move-list">
+<a href="move/match-complex-locus-equation-to-standard-geometric-template.html" class="move-row">
+  <div class="move-name">Match complex locus equation to standard geometric template</div>
+  <div class="freq-pill">5 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>De Moivre Roots</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/apply-de-moivres-theorem-with-2kπ-to-enumerate-all-n-distinct-nth-roots.html" class="move-row">
+  <div class="move-name">Apply de Moivre&#x27;s theorem with +2kπ to enumerate all n distinct nth roots</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Locus Recognition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/classify-standard-complex-locus-equations-as-circle-perpendicular-bisector-or-ha.html" class="move-row">
+  <div class="move-name">Classify standard complex locus equations as circle, perpendicular bisector, or half-line</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution Bridge</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-to-bridge-a-complex-equation-into-a-simpler-solvable-form.html" class="move-row">
+  <div class="move-name">Substitute to bridge a complex equation into a simpler solvable form</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Substitution</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/parametrise-the-source-locus-with-one-real-parameter-to-substitute-into-the-targ.html" class="move-row">
+  <div class="move-name">Parametrise the source locus with one real parameter to substitute into the target equation</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Inverse Substitution</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/invert-the-möbius-transformation-to-express-z-in-terms-of-w.html" class="move-row">
+  <div class="move-name">Invert the Möbius transformation to express z in terms of w</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>De Moivre Power</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-de-moivres-theorem-to-compute-a-power-of-a-complex-number.html" class="move-row">
+  <div class="move-name">Apply de Moivre&#x27;s theorem to compute a power of a complex number</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Quadrant Adjusted Argument</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/find-principal-argument-via-reference-angle-plus-quadrant-adjustment.html" class="move-row">
+  <div class="move-name">Find principal argument via reference angle plus quadrant adjustment</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Argument Conversion</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/convert-cartesian-complex-numbers-to-modulus-argument-form-with-quadrant-check.html" class="move-row">
+  <div class="move-name">Convert Cartesian complex numbers to modulus-argument form with quadrant check</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Elimination</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/eliminate-the-real-parameter-to-obtain-a-cartesian-equation-in-u-and-v.html" class="move-row">
+  <div class="move-name">Eliminate the real parameter to obtain a Cartesian equation in u and v</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Equation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-z²-rez²-imz²-to-solve-for-an-unknown-real-parameter.html" class="move-row">
+  <div class="move-name">Use |z|² = Re(z)² + Im(z)² to solve for an unknown real parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Conjugate Geometry</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reflect-z-in-the-real-axis-to-locate-its-conjugate-on-an-argand-diagram.html" class="move-row">
+  <div class="move-name">Reflect z in the real axis to locate its conjugate on an Argand diagram</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Factor From Roots</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/build-real-quadratic-factor-from-conjugate-pair-using-sum-and-product.html" class="move-row">
+  <div class="move-name">Build real quadratic factor from conjugate pair using sum and product</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Quadrant Aware Arctan</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/compute-argument-from-cartesian-form-using-sign-based-quadrant-check.html" class="move-row">
+  <div class="move-name">Compute argument from Cartesian form using sign-based quadrant check</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Identity Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-complex-square-by-foil-then-substitute-i²-1.html" class="move-row">
+  <div class="move-name">Expand complex square by FOIL then substitute i² = −1</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Argand Geometry</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-conjugate-pair-vertical-symmetry-to-compute-argand-triangle-area.html" class="move-row">
+  <div class="move-name">Use conjugate-pair vertical symmetry to compute Argand triangle area</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Theorem Invocation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/invoke-conjugate-root-theorem-to-obtain-second-root-for-free.html" class="move-row">
+  <div class="move-name">Invoke Conjugate Root Theorem to obtain second root for free</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Quadrant Validation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/check-quadrant-to-select-correct-principal-argument.html" class="move-row">
+  <div class="move-name">Check quadrant to select correct principal argument</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Discriminant Classification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-discriminant-sign-to-classify-root-type-at-specific-parameter-value.html" class="move-row">
+  <div class="move-name">Evaluate discriminant sign to classify root type at specific parameter value</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Structural Recognition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-conjugate-pair-product-to-collapse-to-a-real-number.html" class="move-row">
+  <div class="move-name">Recognise conjugate pair product to collapse to a real number</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Discriminant Analysis</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-quadratic-formula-keeping-parametric-discriminant-unsimplified.html" class="move-row">
+  <div class="move-name">Apply quadratic formula keeping parametric discriminant unsimplified</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Quadrant Analysis</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/identify-quadrant-before-applying-arctan-for-principal-argument.html" class="move-row">
+  <div class="move-name">Identify quadrant before applying arctan for principal argument</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Equation Reduction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/square-both-sides-of-a-modulus-equation-to-clear-the-surd.html" class="move-row">
+  <div class="move-name">Square both sides of a modulus equation to clear the surd</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Canonical Form Compliance</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/write-every-root-in-explicit-a-ib-form-including-zeros.html" class="move-row">
+  <div class="move-name">Write every root in explicit a + ib form, including zeros</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Complex Arithmetic</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-cartesian-complex-product-and-substitute-i²-1.html" class="move-row">
+  <div class="move-name">Expand Cartesian complex product and substitute i² = −1</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Argand Representation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/plot-real-root-on-real-axis-and-conjugate-pair-symmetrically-on-argand-diagram.html" class="move-row">
+  <div class="move-name">Plot real root on real axis and conjugate pair symmetrically on Argand diagram</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Computation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/compute-modulus-as-euclidean-distance-from-origin.html" class="move-row">
+  <div class="move-name">Compute modulus as Euclidean distance from origin</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Argand Diagram Plotting</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/plot-complex-roots-on-argand-diagram-using-re-im-coordinates.html" class="move-row">
+  <div class="move-name">Plot complex roots on Argand diagram using Re-Im coordinates</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Root Coefficient Relations</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-vietas-formulas-to-recover-unknown-coefficients-from-known-roots.html" class="move-row">
+  <div class="move-name">Use Vieta&#x27;s formulas to recover unknown coefficients from known roots</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Conjugate Product Identity</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/collapse-conjugate-pair-product-to-a²b²-via-difference-of-squares.html" class="move-row">
+  <div class="move-name">Collapse conjugate pair product to a²+b² via difference of squares</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strategic Sequencing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-product-of-roots-first-to-isolate-the-unknown-third-root.html" class="move-row">
+  <div class="move-name">Use product-of-roots first to isolate the unknown third root</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Definition Encoding</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/encode-invariant-point-by-setting-w-z-in-the-möbius-equation.html" class="move-row">
+  <div class="move-name">Encode invariant point by setting w = z in the Möbius equation</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Common Factor Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-i-from-numerator-and-denominator-to-cancel.html" class="move-row">
+  <div class="move-name">Factor i from numerator and denominator to cancel</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cross Part Linkage</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rearrange-equation-to-recycle-part-a-polar-form.html" class="move-row">
+  <div class="move-name">Rearrange equation to recycle part (a) polar form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Real Imaginary Separation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-real-and-imaginary-parts-to-solve-for-a-real-parameter.html" class="move-row">
+  <div class="move-name">Equate real and imaginary parts to solve for a real parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Root Enumeration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/add-2kπ-to-argument-to-enumerate-all-n-distinct-nth-roots.html" class="move-row">
+  <div class="move-name">Add 2kπ to argument to enumerate all n distinct nth roots</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>De Moivre Application</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-de-moivre-to-compress-cosθisinθn-into-cosnθisinnθ.html" class="move-row">
+  <div class="move-name">Apply de Moivre to compress (cosθ+isinθ)^n into cos(nθ)+isin(nθ)</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Binomial Complex Expansion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-cosθ-i-sinθn-by-the-binomial-theorem-to-extract-real-and-imaginary-parts.html" class="move-row">
+  <div class="move-name">Expand (cosθ + i sinθ)^n by the binomial theorem to extract real and imaginary parts</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Principal Value Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/shift-k-index-to-keep-nth-root-arguments-in-principal-range.html" class="move-row">
+  <div class="move-name">Shift k-index to keep nth-root arguments in principal range</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Symmetry Exploitation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-conjugate-pair-symmetry-to-halve-root-finding-work.html" class="move-row">
+  <div class="move-name">Exploit conjugate-pair symmetry to halve root-finding work</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Transfer</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-modulus-of-a-quotient-to-get-an-equation-in-the-new-variable.html" class="move-row">
+  <div class="move-name">Split modulus of a quotient to get an equation in the new variable</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Parametrisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-z-eiθ-to-convert-cosθ-into-the-symmetric-sum-z-z-1.html" class="move-row">
+  <div class="move-name">Set z = e^{iθ} to convert cosθ into the symmetric sum z + z^{-1}</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Roots Of Unity</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/enumerate-nth-roots-via-φ-2kπn-argument-shifts.html" class="move-row">
+  <div class="move-name">Enumerate nth roots via (φ + 2kπ)/n argument shifts</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cartesian Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-wuiv-and-square-moduli-to-extract-cartesian-locus.html" class="move-row">
+  <div class="move-name">Substitute w=u+iv and square moduli to extract Cartesian locus</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Point Testing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/test-a-convenient-point-to-identify-the-correct-inequality-region.html" class="move-row">
+  <div class="move-name">Test a convenient point to identify the correct inequality region</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Equating Parts</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-real-or-imaginary-parts-of-two-complex-representations.html" class="move-row">
+  <div class="move-name">Equate real or imaginary parts of two complex representations</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Form Conversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-complex-number-to-exponential-form-before-extracting-nth-roots.html" class="move-row">
+  <div class="move-name">Convert complex number to exponential form before extracting nth roots</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Multi Valued Argument</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/insert-2kπ-before-taking-the-nth-root-to-capture-all-roots.html" class="move-row">
+  <div class="move-name">Insert +2kπ before taking the nth root to capture all roots</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Range Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/choose-k-values-so-all-nth-root-arguments-fall-in-the-required-range.html" class="move-row">
+  <div class="move-name">Choose k-values so all nth-root arguments fall in the required range</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>De Moivre Expansion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-cos-θ-i-sin-θn-binomially-to-extract-multiple-angle-identities.html" class="move-row">
+  <div class="move-name">Expand (cos θ + i sin θ)^n binomially to extract multiple-angle identities</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus To Cartesian</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reduce-substituted-modulus-equation-to-cartesian-circle-or-line.html" class="move-row">
+  <div class="move-name">Reduce substituted modulus equation to Cartesian circle or line</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Vieta Polynomial Root Link</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-vieta-to-conclude-sum-of-nth-roots-equals-zero.html" class="move-row">
+  <div class="move-name">Use Vieta to conclude sum of nth roots equals zero</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Test Point Method</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-test-points-on-locus-and-inside-region-to-verify-image-and-fix-shading.html" class="move-row">
+  <div class="move-name">Use test points on locus and inside region to verify image and fix shading</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polar To Cartesian</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-polar-roots-to-exact-cartesian-form-using-standard-angle-trig-values.html" class="move-row">
+  <div class="move-name">Convert polar roots to exact Cartesian form using standard-angle trig values</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Argument Periodicity Exploitation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/add-2kπ-to-argument-before-dividing-by-n-to-generate-all-nth-roots.html" class="move-row">
+  <div class="move-name">Add 2kπ to argument before dividing by n to generate all nth roots</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cartesian Conversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-z-x-iy-to-convert-a-modulus-locus-to-cartesian-form.html" class="move-row">
+  <div class="move-name">Substitute z = x + iy to convert a modulus locus to Cartesian form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Locus Parametrisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/parametrise-a-straight-line-locus-in-the-z-plane-by-a-single-real-variable.html" class="move-row">
+  <div class="move-name">Parametrise a straight-line locus in the z-plane by a single real variable</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Transformation Inversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/invert-a-möbius-map-to-express-z-in-terms-of-w-before-substituting.html" class="move-row">
+  <div class="move-name">Invert a Möbius map to express z in terms of w before substituting</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Pattern Recognition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-standard-complex-loci-to-bypass-cartesian-expansion.html" class="move-row">
+  <div class="move-name">Recognise standard complex loci to bypass Cartesian expansion</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Elimination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/square-both-sides-to-convert-modulus-locus-into-cartesian-circle-equation.html" class="move-row">
+  <div class="move-name">Square both sides to convert modulus locus into Cartesian circle equation</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Locus Transformation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/translate-möbius-locus-conditions-into-modulusargument-equations-before-cartesia.html" class="move-row">
+  <div class="move-name">Translate Möbius locus conditions into modulus/argument equations before Cartesian substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Modulus Algebra</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-inverse-map-into-modulus-locus-and-apply-quotient-rule.html" class="move-row">
+  <div class="move-name">Substitute inverse map into modulus locus and apply quotient rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Domain Restriction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/filter-intersection-points-using-half-line-directional-constraint-from-arg-locus.html" class="move-row">
+  <div class="move-name">Filter intersection points using half-line directional constraint from arg locus</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Arg To Cartesian</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-arg-half-line-to-cartesian-via-tanθ-gradient-with-directional-restrictio.html" class="move-row">
+  <div class="move-name">Convert arg half-line to Cartesian via tan(θ) gradient with directional restriction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

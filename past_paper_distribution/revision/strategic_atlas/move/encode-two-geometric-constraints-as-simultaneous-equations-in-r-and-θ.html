@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encode two geometric constraints as simultaneous equations in r and θ — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Model Formulation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Encode two geometric constraints as simultaneous equations in r and θ</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Model Formulation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem describes a single geometric object (typically a circular sector, cone, cylinder, or prism) using two independent numerical constraints — e.g. &#x27;area = 6 and perimeter = 10&#x27; — and asks for a single-variable equation or value. Look for cues like &#x27;area of the sector&#x27;, &#x27;perimeter&#x27;, &#x27;arc length&#x27;, &#x27;volume&#x27;, &#x27;surface area&#x27; paired with two given numbers and two unknown dimensions. Also fires when the final goal is a quadratic or equation in just one of the unknowns, signalling that elimination must follow.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Two numerical constraints on two unknowns form a 2×2 system that determines (or reduces) the geometry. Writing both standard formulae explicitly is the prerequisite for any elimination or substitution. Until both relationships are committed to paper, there is no algebraic bridge from the geometric description to the single-variable equation the question demands.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice two pieces of numerical data are attached to one shape, but the shape is parameterised by two unknowns (r and θ) — so I&#x27;m in a 2-equation/2-unknown setting.</li><li>I rule out trying to guess r or θ directly, and rule out one-equation shortcuts: with two unknowns I genuinely need two relationships.</li><li>I commit to the standard sector formulae (½r²θ for area, rθ + 2r for perimeter) because these are the canonical encodings and the question is phrased in radians.</li><li>Bridge: I write each constraint as an equation, clear fractions where convenient (e.g. multiply the area equation by 2), and label them Equation 1 and Equation 2 ready for elimination.</li><li>Tactically I pick the form that isolates the cleanest quantity to substitute later — usually keeping r²θ or rθ as a single block so it can be substituted into the other equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two unknowns parameterising the shape (here r and θ in radians).</li><li>Recall the two standard formulae that match the given quantities (area of sector = ½r²θ; perimeter of sector = rθ + 2r).</li><li>Substitute the given numerical values to obtain Equation 1: 6 = ½r²θ ⇒ r²θ = 12.</li><li>Obtain Equation 2: 10 = rθ + 2r.</li><li>Label the equations and check both involve only r and θ, confirming the system is closed and ready for elimination.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sector has area 6 and perimeter 10. Area: $\tfrac{1}{2}r^2\theta = 6 \Rightarrow r^2\theta = 12$ (1). Perimeter: $r\theta + 2r = 10$ (2). From (2), $r\theta = 10 - 2r$, so multiplying by $r$: $r^2\theta = r(10-2r)$. Combined with (1): $r(10-2r) = 12$, giving $2r^2 - 10r + 12 = 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cone with given volume and curved surface area</div>
+<div class="adjustment">Use $V = \tfrac{1}{3}\pi r^2 h$ and $S = \pi r l$ with $l = \sqrt{r^2+h^2}$; eliminate $h$ or $l$ to reduce to one variable.</div>
+</div><div class="variant-row">
+<div class="scenario">Closed cylinder with fixed volume and surface area</div>
+<div class="adjustment">Use $V = \pi r^2 h$ and $S = 2\pi r^2 + 2\pi r h$; substitute $h$ from the volume equation into the surface-area equation.</div>
+</div><div class="variant-row">
+<div class="scenario">Open box (cuboid) with given volume and surface area</div>
+<div class="adjustment">Two equations in base length $x$ and height $h$; eliminate $h$ to get a single equation in $x$.</div>
+</div><div class="variant-row">
+<div class="scenario">Sector with given arc length and area</div>
+<div class="adjustment">Use $s = r\theta$ and $A = \tfrac{1}{2}r^2\theta$; the block $r\theta$ substitutes directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Triangle with given perimeter and area (isoceles or right-angled)</div>
+<div class="adjustment">Encode perimeter and $\tfrac{1}{2}\times\text{base}\times\text{height}$ (or Pythagoras) as two equations in the two side-unknowns.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the perimeter as just the arc length $r\theta$, omitting the two straight radii.</li><li>Reading &#x27;area&#x27; as the area of the full circle $\pi r^2$ rather than the sector $\tfrac{1}{2}r^2\theta$.</li><li>Assuming θ is in degrees and inserting a $\pi/180$ factor when the question is in radians.</li><li>Believing one equation is enough because only θ is asked for, and so failing to write the second constraint.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using degree-mode formulae (e.g. $\pi r^2 \theta/360$) when θ is in radians.</li><li>Algebraic slip when clearing the $\tfrac{1}{2}$: forgetting to double the right-hand side.</li><li>Mislabelling equations and substituting back into the equation you derived from, producing $0=0$.</li><li>Carrying through the perimeter as $r\theta + r$ (only one radius) or $2r\theta + 2r$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (sector area/arc length in radians, P2) and standard mensuration; the elimination that follows produces a quadratic solvable by C1/C2 techniques.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2019-Q10.html" class="example-chip">P1 Jan 2019 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use total-area decomposition to replace awkward sub-region with complement — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Area Complement</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Use total-area decomposition to replace awkward sub-region with complement</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Area Complement</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a diagram shows two adjacent regions R1 and R2 that together partition a region whose total area is a single clean integral, but one of the sub-regions (typically R2) has mixed boundaries — part bounded by a line, part by a curve, part by an axis — making direct integration require splitting at an awkward x-value. Cues include: &#x27;the line cuts the curve at x = 1 − m&#x27;, &#x27;R1 = R2&#x27;, or any prompt asking for an equation in a parameter rather than a numerical area. Alternative phrasing: &#x27;shaded regions have equal area&#x27; where one shaded region is geometrically simple and the other isn&#x27;t.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If R1 ∪ R2 exactly fills a region whose area A is easy to compute as a single integral, then R2 = A − R1 by additivity of area, with no new integration needed. When the problem also states R1 = R2, substitution gives 2·R1 = A, a single equation in the unknown parameter. This converts a two-integral problem (one of which is awkward) into one easy integral plus algebra, exploiting the same complement principle that underlies P(A&#x27;) = 1 − P(A).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice R2 has mixed boundaries (line on one part, curve on another, x-axis below) — direct integration would need a split at x = 1 − m.</li><li>I rule out computing R2 directly: it would require two integrals and careful bookkeeping of which boundary is active where.</li><li>I commit to the complement approach because the diagram shows R1 + R2 fills the whole region under the parabola from 0 to 1, whose area is a single clean integral.</li><li>Bridge: compute A = ∫₀¹(x − x²)dx = 1/6, then use R1 = R2 to get 2·R1 = A.</li><li>Tactically, I only need a closed form for R1 (the easier region between curve and line) in terms of m, then solve 2·R1 = 1/6 for m.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the total region R1 ∪ R2 and compute its area as a single integral: A = ∫₀¹(x − x²)dx = [x²/2 − x³/3]₀¹ = 1/6.</li><li>Express R1 in terms of the parameter m: R1 = (1 − m)³/6 (from the earlier part of the question).</li><li>Apply R1 + R2 = A together with R1 = R2 to obtain 2·R1 = A.</li><li>Substitute: 2 · (1 − m)³/6 = 1/6.</li><li>Simplify to (1 − m)³ = 1/2, then solve for m: m = 1 − (1/2)^{1/3}.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose the line $y = m$ and curve $y = x - x^2$ partition the region under the curve on $[0,1]$ into $R_1$ (above the line) and $R_2$ (below). Total area $A = \int_0^1 (x - x^2)\,dx = \tfrac{1}{6}$. Given $R_1 = R_2$, we have $2R_1 = \tfrac{1}{6}$. With $R_1 = (1-m)^3/6$, we get $(1-m)^3 = \tfrac{1}{2}$, so $m = 1 - 2^{-1/3}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Two shaded regions inside a rectangle bounded by a curve, where one region is between curve and a chord and the other fills the rest of the rectangle</div>
+<div class="adjustment">Total area A is the rectangle&#x27;s area; R2 = A_rectangle − R1 with no integration of R2 needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Region between two curves split by a vertical line, where one sub-region has a clean integral and the other doesn&#x27;t</div>
+<div class="adjustment">Compute total ∫(upper − lower)dx over the full interval, then subtract the easy sub-region.</div>
+</div><div class="variant-row">
+<div class="scenario">Volume of revolution problems where a solid is split into two parts and one part is awkward</div>
+<div class="adjustment">Compute total volume by a single ∫πy²dx and subtract the easier piece.</div>
+</div><div class="variant-row">
+<div class="scenario">Equal-area conditions in mensuration where one region is a triangle/trapezium</div>
+<div class="adjustment">Use elementary area formula for the easy piece and total-minus-easy for the curved piece.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating R2 as just ∫_{1−m}^{1}(x − x²)dx, which gives the area under the curve on that sub-interval but ignores that R2 actually extends from the line down to the x-axis on a different sub-interval.</li><li>Assuming R1 + R2 equals the area of a bounding rectangle rather than the area under the curve — misreading which region is being partitioned.</li><li>Forgetting the condition R1 = R2 and trying to solve with only the total-area equation.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Misidentifying the total region: if the line crosses the x-axis or the curve dips negative on the interval, R1 + R2 may not equal ∫(curve)dx and the decomposition fails.</li><li>Algebraic slip when solving (1 − m)³ = 1/2 — students sometimes write 1 − m = 1/2 instead of taking the cube root.</li><li>Using the wrong expression for R1 from the earlier part (e.g. forgetting a factor or sign) propagates into a wrong m.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 integration: polynomial integration, area between curve and line, and solving a cubic equation by taking a cube root. No techniques beyond standard A-level are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jan_2022-Q9.html" class="example-chip">P2 Jan 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carry full calculator precision through iteration, round only at output — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Iterative Precision Management</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Carry full calculator precision through iteration, round only at output</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Iterative Precision Management</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a recurrence $x_{n+1} = f(x_n)$ must be iterated multiple times and a later iterate (e.g. $x_5$, $x_6$) is requested to a fixed number of decimal places. Cue phrases include &#x27;find $x_2$, $x_3$, $\ldots$, $x_n$ giving your answers to 3 decimal places&#x27; or &#x27;use the iteration formula ... starting with $x_1 = a$&#x27;. Particularly critical when the function involves transcendentals (arctan, exp, log, roots) where small input changes amplify. Also applies to Newton–Raphson iteration and fixed-point iteration questions.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each iterate is fed back as the input to the next, so any rounding error in $x_n$ propagates into $x_{n+1}$ and can compound. Edexcel mark schemes typically allow only $\pm 1$ in the last quoted digit, so a single premature rounding can shift the final iterate out of the accepted range. Storing the full calculator value (via the ANS key or a memory register) and rounding only when writing the answer guarantees that the displayed 3 d.p. value is the correctly rounded image of the true iterate. This is the standard numerical-methods discipline examiners deliberately probe by asking for a deep iterate.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the recurrence is to be applied several times and a late iterate is requested to a specified accuracy.</li><li>Rule out hand-substituting rounded intermediates — the cumulative error can flip the last digit of the final answer.</li><li>Commit to keeping every $x_n$ in calculator memory at full precision, displaying rounded values only on the answer line.</li><li>Set the calculator to radians (if a trig function appears), enter $x_1$, then build the iteration as $f(\mathrm{ANS})$ and press = repeatedly.</li><li>Record each iterate to the required d.p. as you go, but never re-type the rounded number back into the calculator.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Check angle mode (radians for arctan/sin/cos/tan in pure-maths iterations).</li><li>Enter $x_1$ on the calculator and press =.</li><li>Type the iteration formula using ANS in place of $x_n$, e.g. $2\arctan(4/\mathrm{ANS})$.</li><li>Press = repeatedly; after each press write down the displayed value rounded to the required d.p. as $x_2, x_3, \ldots$.</li><li>Do NOT clear ANS or retype rounded values; the calculator silently retains full precision.</li><li>Quote the final requested iterate to the stated number of decimal places.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $x_{n+1} = 2\arctan(4/x_n)$ with $x_1 = 2$ (radians): pressing = produces $x_2 = 2.21429\ldots \to 2.214$, $x_3 = 2.13169\ldots \to 2.132$, $x_4 = 2.16545\ldots \to 2.165$, $x_5 = 2.15169\ldots \to 2.152$, $x_6 = 2.15730\ldots \to 2.157$ (3 d.p.). Re-entering 2.214 by hand at step 3 gives $x_6 \approx 2.158$, losing the mark.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Newton–Raphson iteration $x_{n+1} = x_n - f(x_n)/f&#x27;(x_n)$ to find a root to 4 d.p.</div>
+<div class="adjustment">Define $f$ and $f&#x27;$ separately on the calculator or store the whole NR formula in ANS form; convergence is faster, but precision discipline is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">Fixed-point iteration with a logarithm or surd, e.g. $x_{n+1} = \sqrt{5 - x_n}$.</div>
+<div class="adjustment">Same ANS technique; watch for domain issues (negative argument under the root) when $x_1$ is a poor starting value.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence given by $u_{n+1} = au_n + b$ where an explicit closed form exists.</div>
+<div class="adjustment">Either iterate with ANS or use the closed-form $u_n = A\cdot a^{n-1} + b/(1-a)$; closed form avoids rounding entirely.</div>
+</div><div class="variant-row">
+<div class="scenario">Trapezium-rule or Simpson&#x27;s-rule numerical integration with several ordinates.</div>
+<div class="adjustment">Compute each ordinate $y_i$ to full precision in a list/table; round only the final $\int$ estimate.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;give to 3 d.p.&#x27; as an instruction to use 3 d.p. throughout the calculation, rather than only in the final display.</li><li>Believing the iteration formula expects degrees because it &#x27;looks like&#x27; a trig expression, when pure-maths iterations always use radians.</li><li>Thinking $x_1$ is the first iterate produced, rather than the given starting value.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding $x_2$ to 2.214 and retyping it as the input for $x_3$ — this can shift $x_6$ to 2.158 instead of the correct 2.157.</li><li>Calculator left in degree mode, giving $\arctan(2) \approx 63.43$ and a completely wrong $x_2$.</li><li>Miscounting iterations: producing $x_5$ when $x_6$ was asked for (the starting value $x_1$ is not produced by the formula).</li><li>Using a bracket error such as $2\arctan 4/x_n$ interpreted as $(2\arctan 4)/x_n$ — always bracket the argument.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P3/P4 numerical-methods technique for iterative root-finding and Newton–Raphson; no content beyond the syllabus is invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2021-Q1.html" class="example-chip">P3 Jun 2021 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

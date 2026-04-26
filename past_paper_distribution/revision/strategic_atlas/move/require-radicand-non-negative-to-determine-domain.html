@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Require radicand non-negative to determine domain — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Restriction</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Require radicand non-negative to determine domain</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Restriction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The function involves a real square root (or any even-index radical) such as f(x)=\sqrt{g(x)}, and the question asks for the domain, the largest valid set of inputs, or values of x for which f is defined. Cues include phrases like &#x27;state the domain&#x27;, &#x27;find the set of values of x for which f(x) is real/defined&#x27;, or a piecewise definition that includes a surd. It also fires whenever a surd appears as a sub-expression inside a larger function whose domain is being assembled.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>In the reals, \sqrt{A} exists only when A\ge 0, so the domain of f is exactly the solution set of the inequality g(x)\ge 0. This converts a &#x27;domain&#x27; question into a standard inequality problem, which A-level students can already solve by linear, quadratic, or sign-table methods. Equality is included because \sqrt{0}=0 is a valid real output.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the square root symbol: outputs are only real when the radicand is non-negative.</li><li>Rule out other domain restrictions (no denominator, no log, no tan, etc.) so the radicand condition is the only constraint.</li><li>Commit to writing the inequality g(x)\ge 0 because every x satisfying it gives a real f(x), and every x violating it does not.</li><li>Translate this into the concrete inequality using the actual radicand from the problem.</li><li>Choose the right solving tactic: rearrange if linear, factorise/complete the square if quadratic, and decide whether the answer should be in inequality or interval notation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the radicand g(x) inside the square root.</li><li>Write the condition g(x)\ge 0 (with weak inequality, since \sqrt{0}=0).</li><li>Solve the inequality using appropriate algebra (linear rearrangement, quadratic inequality, sign diagram).</li><li>State the domain as an inequality in x or in interval/set notation, e.g. x\ge -5 or [-5,\infty).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the domain of g(x)=\sqrt{x+5}.\\ Require x+5\ge 0.\\ Hence x\ge -5, so the domain is [-5,\infty).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quadratic radicand, e.g. f(x)=\sqrt{x^2-3x-4}</div>
+<div class="adjustment">Solve x^2-3x-4\ge 0 by factorising to (x-4)(x+1)\ge 0 and using a sign diagram, giving x\le -1 or x\ge 4.</div>
+</div><div class="variant-row">
+<div class="scenario">Surd combined with a reciprocal, e.g. f(x)=\dfrac{1}{\sqrt{x-2}}</div>
+<div class="adjustment">Strengthen to strict inequality x-2&gt;0 because the radicand also sits in a denominator and cannot be zero.</div>
+</div><div class="variant-row">
+<div class="scenario">Surd inside a composite, e.g. f(x)=\ln(\sqrt{x-1})</div>
+<div class="adjustment">Combine constraints: radicand \ge 0 and the log argument &gt;0, which together force x&gt;1.</div>
+</div><div class="variant-row">
+<div class="scenario">Sum/intersection of surds, e.g. f(x)=\sqrt{x-1}+\sqrt{5-x}</div>
+<div class="adjustment">Impose each radicand non-negative and intersect: x\ge 1 and x\le 5, giving 1\le x\le 5.</div>
+</div><div class="variant-row">
+<div class="scenario">Restricted domain stated in the question, e.g. f:x\mapsto\sqrt{x+5},\;x\in\mathbb{R}</div>
+<div class="adjustment">Intersect the natural domain x\ge -5 with any stated restriction before quoting the final answer.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the domain question as a range question and solving for y instead of x.</li><li>Assuming the domain is all real numbers because no obvious denominator is present, ignoring the surd.</li><li>Confusing &#x27;domain&#x27; with &#x27;where the graph crosses the x-axis&#x27; (i.e. setting the radicand equal to zero only).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using strict inequality x&gt;-5 instead of x\ge -5; \sqrt{0}=0 is defined.</li><li>Flipping the inequality sign when rearranging (e.g. writing x\le -5).</li><li>For quadratic radicands, taking the inside-the-roots region instead of the outside region (or vice versa) without checking with a sign diagram.</li><li>Forgetting to intersect with additional restrictions when the surd is part of a larger expression (denominators, logs, other surds).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics: domain of real functions, solving linear and quadratic inequalities, and interval notation. No complex-valued square roots are considered.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Oct_2024-Q9.html" class="example-chip">P1 Oct 2024 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

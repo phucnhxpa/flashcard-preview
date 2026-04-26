@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiply tangent/normal equation by t² to clear all fractional powers of t at once — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Strategic Multiplication</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Multiply tangent/normal equation by t² to clear all fractional powers of t at once</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Multiplication</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a tangent or normal equation to a parametric curve (e.g. rectangular hyperbola xy = c² with point (ct, c/t), or parabola y² = 4ax with point (at², 2at)) is written in point-gradient form and contains terms with denominators t and t². The target &#x27;show that&#x27; form is fraction-free with integer-looking coefficients, e.g. t²y + x = 2ct or t²y + x = 10t. Cue phrases: &#x27;show that the tangent has equation …&#x27;, &#x27;prove the tangent at P is …&#x27;. The presence of mixed denominators 1/t and 1/t² is the decisive signal.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The lowest common denominator of 1/t and 1/t² is t², so a single multiplication by t² simultaneously clears every fraction without case-splitting or term-by-term rearrangement. This is faster and less error-prone than expanding the bracket first and then clearing denominators piecemeal. It also lands the equation directly in the symmetric form the syllabus uses for parametric tangents/normals, making the final rearrangement to the required &#x27;show that&#x27; form a one-line job.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices the point-gradient equation contains 1/t on the LHS and 1/t² multiplying the bracket on the RHS.</li><li>Rules out expanding the bracket first — that scatters t² across multiple terms and forces multiple fraction-clearing steps later.</li><li>Commits to multiplying through by t² because it is the LCD of every fractional term present, so one stroke removes all denominators.</li><li>Bridges to the operation by writing the equation with the bracket still intact, then multiplying both sides (every term) by t².</li><li>Inside the move, watches the sign on -(X - 5t) when distributing, and groups X and t²Y on the same side to match the target form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the point-gradient form: Y - 5/t = -(1/t²)(X - 5t).</li><li>Multiply every term on both sides by t²: t²Y - 5t = -(X - 5t).</li><li>Distribute the negative on the RHS: t²Y - 5t = -X + 5t.</li><li>Collect X and Y on one side, constants on the other: t²Y + X = 10t.</li><li>Compare with the requested &#x27;show that&#x27; form to confirm match.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Tangent to xy = 25 at P(5t, 5/t) has gradient -1/t². Point-gradient: $y - \tfrac{5}{t} = -\tfrac{1}{t^2}(x - 5t)$. Multiply by $t^2$: $t^2 y - 5t = -(x - 5t) = -x + 5t$. Hence $t^2 y + x = 10t$, as required.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Tangent to parabola y² = 4ax at (at², 2at), gradient 1/t</div>
+<div class="adjustment">Only one fractional power (1/t) is present, so multiply through by t (not t²) to clear it; target form ty = x + at².</div>
+</div><div class="variant-row">
+<div class="scenario">Normal to rectangular hyperbola xy = c² at (ct, c/t), gradient t²</div>
+<div class="adjustment">No fractions on the gradient side, but the y-coordinate c/t still introduces 1/t; multiply by t to clear, yielding t³x - ty + c - c t⁴ = 0 style form.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent to ellipse in parametric form (a cos θ, b sin θ)</div>
+<div class="adjustment">No t-powers in denominators, so this multiplication move does not apply; instead divide through by ab to reach x cos θ /a + y sin θ /b = 1.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the equation as already simplified and trying to rearrange without clearing denominators, leading to fractional final answers.</li><li>Multiplying only the bracketed RHS by t² while forgetting the lone 5/t term on the LHS.</li><li>Choosing to multiply by t instead of t², which clears 1/t² only partially.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to multiply every term — especially the constant 5/t on the LHS — by t².</li><li>Sign errors when distributing the negative across -(X - 5t).</li><li>Writing t·t² = t² instead of t³ if the gradient also carries an extra t factor in a normal-line variant.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard for Edexcel IAL Pure/Further Pure parametric tangent and normal proofs on rectangular hyperbolas (xy = c²) and parabolas (y² = 4ax); requires only point-gradient form and basic algebraic manipulation.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch4/q-Jun_2021-Q4.html" class="example-chip">FP1 Jun 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

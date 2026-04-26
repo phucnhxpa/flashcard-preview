@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply linear interpolation between sign-change endpoints to estimate a root — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Linear Interpolation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Apply linear interpolation between sign-change endpoints to estimate a root</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Linear Interpolation</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question explicitly says &#x27;use linear interpolation&#x27; (or &#x27;method of false position&#x27;) on a stated interval [a, b] where f(a) and f(b) have opposite signs. Visual cues: a small interval such as [1.4, 1.5], [2.8, 2.9], [4.8, 4.9], often following a part where a sign change has been verified. Alternative phrasings include &#x27;use linear interpolation on the values at the end points&#x27;, &#x27;find an estimate for the root α correct to 3 d.p.&#x27;, or &#x27;use linear interpolation once on the interval&#x27;. Distinguish carefully from Newton-Raphson (which uses a tangent and the derivative) and from interval bisection (which only uses signs).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Linear interpolation replaces the curve y = f(x) with the straight chord joining (a, f(a)) and (b, f(b)) and takes the chord&#x27;s x-intercept as the root estimate. By similar triangles, the horizontal distance from a to the estimate is proportional to |f(a)| relative to |f(a)| + |f(b)|, so the estimate sits closer to whichever endpoint has the smaller |f|. This is more efficient than bisection because it weights by function values rather than just signs, and it is geometrically transparent — no derivative needed. Algebraically it is equivalent to the secant formula β = a − f(a)(b − a)/(f(b) − f(a)).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question explicitly demands linear interpolation on a given interval [a, b], with f(a) and f(b) of opposite signs already established (or to be computed).</li><li>Rule out alternatives: bisection would just take the midpoint and ignore the f-values; Newton-Raphson would need f&#x27;(x) and a single starting point — neither matches the wording.</li><li>Commit to linear interpolation because (i) the question says so, (ii) two bracketing values are provided, and (iii) the mark scheme expects an explicit similar-triangles or weighted-average setup.</li><li>Bridge to operations: evaluate f(a) and f(b) to high precision (in radians if trig is involved), record their signs, and take absolute values for the proportion.</li><li>Tactical decision: write the proportion as (β − a)/|f(a)| = (b − β)/|f(b)| (similar triangles) — the layout most aligned with mark schemes — or equivalently use the weighted average β = (a|f(b)| + b|f(a)|)/(|f(a)| + |f(b)|).</li><li>Sense-check: the estimate must lie strictly between a and b, and closer to whichever endpoint has the smaller |f|.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Compute f(a) and f(b) accurately; confirm opposite signs.</li><li>Let p = |f(a)| and q = |f(b)|.</li><li>Set up the similar-triangles proportion: (β − a)/p = (b − β)/q.</li><li>Cross-multiply: q(β − a) = p(b − β), giving β(p + q) = a·q + b·p.</li><li>Solve: β = (a·q + b·p)/(p + q), equivalently β = a + p(b − a)/(p + q).</li><li>Substitute the numerical p, q and simplify to the required number of decimal places (typically 3 d.p.).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Estimate the root of f(x) = 0 in [2.8, 2.9] given f(2.8) = 0.1420, f(2.9) = −0.8486. Set (α − 2.8)/0.1420 = (2.9 − α)/0.8486, so α = (2.8·0.8486 + 2.9·0.1420)/(0.1420 + 0.8486) = 2.78048/0.9906 ≈ 2.814 (3 d.p.). The estimate lies near 2.8, consistent with |f(2.8)| ≪ |f(2.9)|.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Function involves tan, sin, cos (e.g. g(x) = 4x² + x − tan x on [1.4, 1.5])</div>
+<div class="adjustment">Ensure calculator is in radians; otherwise tan(1.5°) ≈ 0.026 instead of tan(1.5 rad) ≈ 14.101, ruining the calculation.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks for two iterations of linear interpolation</div>
+<div class="adjustment">After computing β₁, evaluate f(β₁), discard whichever original endpoint has the same sign as f(β₁), and repeat the proportion on the new bracketing pair (regula falsi).</div>
+</div><div class="variant-row">
+<div class="scenario">Endpoints are integers like [4, 5] rather than tenths</div>
+<div class="adjustment">Same formula β = a + |f(a)|(b − a)/(|f(a)| + |f(b)|); the interval width (b − a) just changes from 0.1 to 1.</div>
+</div><div class="variant-row">
+<div class="scenario">Weighted-average phrasing preferred</div>
+<div class="adjustment">Use β = (a|f(b)| + b|f(a)|)/(|f(a)| + |f(b)|) directly — avoids cross-multiplication arithmetic.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing linear interpolation with Newton-Raphson — the former uses a chord between two points, the latter a tangent at one point.</li><li>Confusing it with interval bisection, which ignores f-values and just takes the midpoint.</li><li>Reading the proportion as (β − a)/|f(b)| = (b − β)/|f(a)| (swapping numerators), which mismatches the similar triangles.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Calculator in degrees instead of radians when f involves trig functions — catastrophic for tan near π/2.</li><li>Using signed values instead of absolute values, producing an estimate outside [a, b] or with wrong sign.</li><li>Getting the proportion upside-down, placing the estimate closer to the endpoint with larger |f| rather than smaller.</li><li>Premature rounding of f(a), f(b) before the final division — keep at least 4 s.f. through the calculation.</li><li>Arithmetic slip in cross-multiplication; always sense-check that a &lt; β &lt; b.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL Further Pure FP1 (numerical methods for locating roots). The formula is not in the formula booklet — students must reproduce the similar-triangles derivation or memorise β = a + |f(a)|(b−a)/(|f(a)|+|f(b)|). Iterated regula falsi and convergence analysis are out of scope; only one or two applications are expected.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../FP1/ch3/q-Jun_2021-Q1.html" class="example-chip">FP1 Jun 2021 Q1</a><a href="../FP1/ch3/q-Jun_2022-Q2.html" class="example-chip">FP1 Jun 2022 Q2</a><a href="../FP1/ch3/q-Oct_2021-Q2.html" class="example-chip">FP1 Oct 2021 Q2</a><a href="../FP1/ch3/q-Jan_2022-Q8.html" class="example-chip">FP1 Jan 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

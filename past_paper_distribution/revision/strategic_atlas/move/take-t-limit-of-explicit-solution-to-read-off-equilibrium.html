@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Take t→∞ limit of explicit solution to read off equilibrium — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Asymptotic Analysis</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Take t→∞ limit of explicit solution to read off equilibrium</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Asymptotic Analysis</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks for a long-run value (e.g. &#x27;find k such that H → k as t → ∞&#x27;, &#x27;state the limiting population&#x27;, &#x27;find the steady-state depth&#x27;) and an explicit closed-form solution H(t) is already available. Look for decaying exponentials e^(−αt) with α &gt; 0 inside the solution. Common phrasings: &#x27;as t becomes large&#x27;, &#x27;in the long term&#x27;, &#x27;eventually&#x27;, &#x27;limiting value&#x27;. Often appears as the final 1–2 mark part after solving the ODE.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any term of the form Ce^(−αt) with α &gt; 0 tends to 0 as t → ∞, so the limit of H(t) is obtained by literally replacing every such exponential by 0 in the closed form. This bypasses any equilibrium analysis of the ODE itself and avoids stability arguments. It works because the explicit solution already encodes which equilibrium is approached from the given initial condition. It is also self-consistent: substituting the limit back into dH/dt = f(H) gives 0, matching the equilibrium condition f(H*) = 0.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the part says H → k (or similar) as t → ∞, signalling a single finite limit is expected.</li><li>Rule out re-solving the ODE or using L&#x27;Hôpital — the explicit solution from an earlier part already contains the answer.</li><li>Commit to the substitution approach because every t-dependent term is a decaying exponential e^(−αt) with α &gt; 0.</li><li>Identify each occurrence of e^(−αt) in numerator and denominator and mark them as → 0.</li><li>Evaluate the resulting constant expression carefully, watching signs in any rational form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write down the explicit solution H(t) from the earlier part.</li><li>Identify all decaying exponentials e^(−αt) with α &gt; 0.</li><li>Replace each such term by 0 in the expression for H(t).</li><li>Simplify the resulting constant to obtain the limit k.</li><li>(Optional check) Verify by setting dH/dt = 0 in the original ODE and selecting the physically meaningful root.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $H(t) = \dfrac{10 + 3e^{-0.2t}}{2 - e^{-0.2t}}$, find $k = \lim_{t\to\infty} H$. As $t \to \infty$, $e^{-0.2t} \to 0$, so $H \to \dfrac{10 + 0}{2 - 0} = 5$. Hence $k = 5$. (Check: $dH/dt = 0$ gives $(H-5)(H+3)=0$, and the depth context selects $H=5$.)</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Logistic growth $\frac{dP}{dt} = rP(1 - P/K)$ solved explicitly</div>
+<div class="adjustment">The decaying exponential sits in the denominator; letting $e^{-rt} \to 0$ gives $P \to K$.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling $T(t) = T_a + (T_0 - T_a)e^{-kt}$</div>
+<div class="adjustment">The exponential is an additive term; as $t \to \infty$, $T \to T_a$ (ambient temperature).</div>
+</div><div class="variant-row">
+<div class="scenario">Linear ODE solution of form $y = A + Be^{-kt}$ from integrating factor</div>
+<div class="adjustment">Limit is simply the particular-integral constant $A$.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixing problem with concentration $C(t) = C_\infty + (C_0 - C_\infty)e^{-t/\tau}$</div>
+<div class="adjustment">Limit is $C_\infty$, the inflow concentration.</div>
+</div><div class="variant-row">
+<div class="scenario">Solution containing $e^{+\alpha t}$ with $\alpha &gt; 0$</div>
+<div class="adjustment">No finite limit exists; state that $H$ grows without bound rather than substituting.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $e^{-\alpha t}$ as tending to 1 (confusing with $e^0$ at $t=0$) instead of 0 as $t \to \infty$.</li><li>Believing one must re-solve the ODE or set $dH/dt = 0$ when the closed form is already in hand.</li><li>Reading &#x27;long-run&#x27; as requiring a stability discussion rather than a direct substitution.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Applying L&#x27;Hôpital&#x27;s rule unnecessarily — the expression is not indeterminate after substitution.</li><li>Sign slips in rational forms, e.g. writing $\frac{10}{2-0}$ as $\frac{10}{2+0}$ or vice versa.</li><li>Selecting the wrong equilibrium (e.g. $H = -3$) when cross-checking via $dH/dt = 0$, ignoring physical context.</li><li>Forgetting to state the limit explicitly as the value of $k$ requested.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure/Further Pure: relies only on the standard limit $e^{-\alpha t} \to 0$ as $t \to \infty$ for $\alpha &gt; 0$ and basic substitution into a closed-form ODE solution.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2021-Q10.html" class="example-chip">P4 Jan 2021 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

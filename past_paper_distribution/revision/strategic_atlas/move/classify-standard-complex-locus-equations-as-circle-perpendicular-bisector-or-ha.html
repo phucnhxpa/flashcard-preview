@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classify standard complex locus equations as circle, perpendicular bisector, or half-line — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Locus Recognition</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Classify standard complex locus equations as circle, perpendicular bisector, or half-line</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Locus Recognition</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a sub-part presents a condition on z of the form |z − z₁| = r, |z − z₁| = |z − z₂|, or arg(z − z₁) = α and asks the student to describe, sketch, or find the Cartesian equation of the locus. Equivalent phrasings include &#x27;sketch the locus of points satisfying...&#x27;, &#x27;describe the set of complex numbers z such that...&#x27;, or &#x27;find the Cartesian equation of the curve given by...&#x27;. Also fires when a region is defined by an inequality version of one of these (e.g. |z − z₁| ≤ r) or when two such loci must be intersected. The cue is the appearance of |z − constant| or arg(z − constant) on its own side of an equation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each of the three standard forms corresponds directly to a geometric object on the Argand diagram: |z − z₁| = r is the set of points at distance r from z₁ (a circle), |z − z₁| = |z − z₂| is the set equidistant from z₁ and z₂ (the perpendicular bisector of z₁z₂), and arg(z − z₁) = α is the set of points whose displacement from z₁ has argument α (a half-line from z₁). Recognising the template instantly converts an algebraic complex condition into a known geometric object, bypassing the slower route of substituting z = x + iy and expanding. This pattern-matching is the foundation of every FP2 locus question and is essential before any intersection, region, or extremal-value work begins.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the condition isolates either a single modulus, two equal moduli, or a single argument expression involving z minus a fixed complex number.</li><li>Rule out brute-force algebra (z = x + iy expansion) as the first step — it is slower, error-prone, and obscures the geometry; reserve it for when a Cartesian equation is explicitly demanded.</li><li>Match the equation to one of three templates: |z − z₁| = r ⇒ circle; |z − z₁| = |z − z₂| ⇒ perpendicular bisector; arg(z − z₁) = α ⇒ half-line. Commit to the geometric description.</li><li>Extract the parameters carefully: for a circle read off the centre z₁ and radius r (watch the sign — |z − (3 + 2i)| has centre (3, 2), not (−3, −2)); for a perpendicular bisector identify the two fixed points and their midpoint; for a half-line identify the start point z₁ and the angle α measured anticlockwise from the positive real direction.</li><li>Decide whether the answer required is a sketch, a verbal description, or a Cartesian equation. If Cartesian, substitute z = x + iy and simplify; if a sketch, mark centre/radius, midpoint and bisector, or start-point-with-open-circle and angle α.</li><li>Check edge conventions: half-line excludes its start point (open circle), and the half-line points in only one direction — not both.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Parse the equation and identify the template: |z − z₁| = r, |z − z₁| = |z − z₂|, or arg(z − z₁) = α.</li><li>For |z − z₁| = r: state &#x27;circle, centre z₁, radius r&#x27;. On the diagram, plot z₁ and draw a circle of radius r.</li><li>For |z − z₁| = |z − z₂|: compute midpoint M = (z₁ + z₂)/2 and the gradient of the segment z₁z₂; the locus is the line through M perpendicular to z₁z₂.</li><li>For arg(z − z₁) = α: plot z₁ with an open circle, and draw a ray from z₁ in the direction making angle α anticlockwise with the positive real axis.</li><li>If a Cartesian equation is required, set z = x + iy, substitute, square moduli where needed, and simplify to standard form (e.g. (x − a)² + (y − b)² = r² or y = mx + c).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sketch the locus of $|z - (3 + 2i)| = 5$. Recognise the form $|z - z_1| = r$ with $z_1 = 3 + 2i$ and $r = 5$. Therefore the locus is a circle, centre $(3, 2)$, radius $5$. Cartesian form: $(x-3)^2 + (y-2)^2 = 25$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Inequality version, e.g. |z − z₁| &lt; r or |z − z₁| ≥ r</div>
+<div class="adjustment">Same centre and radius, but shade the interior (open disk) or exterior of the circle; use a dashed boundary for strict inequality.</div>
+</div><div class="variant-row">
+<div class="scenario">Apollonius form |z − a| = k|z − b| with k ≠ 1</div>
+<div class="adjustment">Square both sides, substitute z = x + iy, expand, and complete the square to reveal a circle with non-obvious centre and radius.</div>
+</div><div class="variant-row">
+<div class="scenario">arg((z − z₁)/(z − z₂)) = α</div>
+<div class="adjustment">The locus is an arc of a circle through z₁ and z₂ subtending angle α; not a half-line. Use the inscribed angle theorem to construct it.</div>
+</div><div class="variant-row">
+<div class="scenario">Combined locus, e.g. |z − z₁| = r AND arg(z − z₂) = α</div>
+<div class="adjustment">Sketch each locus separately and identify the intersection point(s) geometrically or algebraically.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing |z − z₁| = |z − z₂| (perpendicular bisector — a line) with |z − z₁| + |z − z₂| = k (an ellipse, out of FP2 scope in this form).</li><li>Reading |z − (a + bi)| = r as having centre (−a, −b) instead of (a, b) due to the minus sign confusion.</li><li>Treating arg(z − z₁) = α as a full line through z₁ rather than a single half-line ray.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Drawing a full line instead of a half-line for arg conditions — the ray extends in one direction only.</li><li>Forgetting to exclude the start point z₁ from a half-line locus (it should be marked with an open circle since arg(0) is undefined).</li><li>Measuring the argument from the wrong reference (e.g. from the y-axis or clockwise) — it must be measured anticlockwise from the positive real direction at z₁.</li><li>On a perpendicular bisector, forgetting that the gradient is the negative reciprocal of the segment&#x27;s gradient.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure 2 (FP2) Argand-diagram loci. The three templates (circle, perpendicular bisector, half-line) and the Apollonius extension are all in scope. Avoid invoking ellipses (|z − z₁| + |z − z₂| = k) or hyperbolas as loci — these are not part of the FP2 complex-locus syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP2/ch3/q-Jan_2023-Q7.html" class="example-chip">FP2 Jan 2023 Q7</a><a href="../FP2/ch3/q-Jan_2024-Q2.html" class="example-chip">FP2 Jan 2024 Q2</a><a href="../FP2/ch3/q-Jun_2024-Q9.html" class="example-chip">FP2 Jun 2024 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solve two equations, substitute into the third to expose contradiction — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Overdetermined Inconsistency</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Solve two equations, substitute into the third to expose contradiction</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Overdetermined Inconsistency</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when equating two vector line parametrisations $\mathbf{r}_1(\lambda)=\mathbf{r}_2(\mu)$ produces three scalar equations in just two unknowns $\lambda,\mu$. Typical phrasings: &#x27;show the lines do not intersect&#x27;, &#x27;show the lines are skew&#x27; (combined with a non-parallel check), or &#x27;show no point of intersection exists&#x27;. The cue is always 3 equations, 2 unknowns, and a demand to prove non-intersection.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Two linear equations in two unknowns generically pin down unique values of $\lambda$ and $\mu$. The remaining equation is then an independent constraint that the candidate solution must also satisfy. If it fails, the full system is inconsistent and no common point exists; if it holds, the lines meet and the point can be read off. This bypasses the heavier machinery of row-reducing a $3\times 2$ augmented matrix.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the system is overdetermined: 3 component equations but only 2 parameters, so a consistency check is built in.</li><li>Rule out solving all three pairwise and comparing — valid but wasteful and error-prone.</li><li>Commit to solving any two equations simultaneously and using the third as the test of consistency.</li><li>Pick the equation whose coefficient on $\lambda$ or $\mu$ is $\pm 1$ to isolate cleanly without fractions.</li><li>After finding $\lambda,\mu$, substitute into the unused equation and compare LHS with RHS; a numerical mismatch is the contradiction that closes the argument.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the three scalar equations (i), (ii), (iii) from equating $\mathbf{i}$, $\mathbf{j}$, $\mathbf{k}$ components.</li><li>Pick the cleanest pair (say (i) and (ii)) and isolate one parameter from the simpler equation.</li><li>Substitute to find numerical values of $\lambda$ and $\mu$.</li><li>Substitute both values into the unused equation (iii) and compute LHS and RHS.</li><li>If $\mathrm{LHS}\neq\mathrm{RHS}$, state the contradiction explicitly and conclude the lines do not intersect.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>From (i) $\lambda+5\mu=6$, so $\lambda=6-5\mu$. Sub into (ii) $2\lambda-4\mu=-9$: $12-14\mu=-9$, giving $\mu=\tfrac{3}{2}$ and $\lambda=-\tfrac{3}{2}$. Test in (iii) $3\lambda-8\mu=-8$: LHS $=3(-\tfrac{3}{2})-8(\tfrac{3}{2})=-\tfrac{33}{2}\neq -8$. Contradiction, so the lines do not intersect.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Proving two lines intersect and finding the point</div>
+<div class="adjustment">Same procedure, but the third equation IS satisfied; substitute $\lambda$ (or $\mu$) back into the line equation to give the intersection point.</div>
+</div><div class="variant-row">
+<div class="scenario">Proving two lines are skew</div>
+<div class="adjustment">First confirm direction vectors are not parallel (no scalar multiple), then run this move to show non-intersection; both together establish skewness.</div>
+</div><div class="variant-row">
+<div class="scenario">Line meets a plane given parametrically (Further Maths)</div>
+<div class="adjustment">Equating the line&#x27;s parametrisation to the plane&#x27;s two-parameter form gives 3 equations in 3 unknowns; isolate two and check the third for consistency in the same way.</div>
+</div><div class="variant-row">
+<div class="scenario">Coefficients all awkward</div>
+<div class="adjustment">Use elimination (add/subtract scaled equations) instead of substitution to avoid fractions, then test the unused equation.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the third equation as redundant and concluding intersection after solving only two equations.</li><li>Confusing &#x27;directions are not parallel&#x27; with &#x27;lines do not intersect&#x27; — these are independent facts and both are needed for skew.</li><li>Getting a near-miss numerical answer in the third equation and rounding to declare intersection.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Isolating from an equation with awkward coefficients, introducing fractions early and increasing arithmetic risk.</li><li>Forgetting to perform the consistency check on the third equation at all.</li><li>Sign or fraction slips when combining terms like $3(-\tfrac{3}{2})-8(\tfrac{3}{2})$; convert to a common denominator before subtracting.</li><li>Stating &#x27;no solution&#x27; without explicitly identifying which equation fails — examiners want the contradiction shown.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure/Further Pure technique for line–line intersection and skew-line proofs in 3D; uses only simultaneous linear equations and vector component comparison, no matrix rank arguments required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Oct_2022-Q9.html" class="example-chip">P4 Oct 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

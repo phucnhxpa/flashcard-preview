@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagonalise A = PDP⁻¹ to reduce matrix powers to scalar powers — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Diagonalisation</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Diagonalise A = PDP⁻¹ to reduce matrix powers to scalar powers</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Diagonalisation</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks you to express a square matrix A in the form PDP⁻¹, or to compute A^n (often for general n, or for a large specific n like A^10), or to evaluate an expression involving powers/inverses of A. A strong cue is that the previous parts of the question have walked you through finding eigenvalues and eigenvectors. The method requires a full set of n linearly independent eigenvectors (guaranteed if the n×n matrix has n distinct eigenvalues). Phrasings include &#x27;find P and D such that A = PDP⁻¹&#x27;, &#x27;hence find A^n&#x27;, or &#x27;use your answer to evaluate A^k&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If A = PDP⁻¹ then A^n = (PDP⁻¹)(PDP⁻¹)…(PDP⁻¹) = PD^nP⁻¹ because every interior P⁻¹P collapses to I. Since D is diagonal, D^n = diag(λ₁^n, λ₂^n, λ₃^n) is trivial — scalar exponentiation along each diagonal entry. This converts a hopeless repeated 3×3 multiplication into one matrix multiplication sandwich. Geometrically, diagonalisation decouples A&#x27;s action into independent stretches along each eigenvector direction.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the question demands A^n (or a specific high power, or A^{-1}), so direct multiplication is impractical and a structural method is needed.</li><li>Rule out alternatives: brute force multiplication is too long; Cayley–Hamilton works for low powers but is awkward for general n; Jordan form is out of scope. Diagonalisation is the standard A-level/Further Maths route.</li><li>Confirm diagonalisability: the n×n matrix has n linearly independent eigenvectors (often guaranteed by n distinct eigenvalues already found in earlier parts).</li><li>Commit to A = PDP⁻¹ and recall the key identity A^n = PD^nP⁻¹ — this is the whole point of the move.</li><li>Tactical decision: fix an ordering of eigenvalues for the diagonal of D, then place the corresponding eigenvectors as the columns of P in the SAME order — consistency between P and D is non-negotiable.</li><li>Plan the arithmetic: compute D^n entry-wise, compute P⁻¹ via the adjugate/determinant or by row-reducing [P | I], then multiply PD^nP⁻¹ — this last multiplication is where errors usually creep in.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Form P = [v₁ | v₂ | v₃] with the eigenvectors as columns.</li><li>Form D = diag(λ₁, λ₂, λ₃) with eigenvalues in the order matching the columns of P.</li><li>(Optional check) Verify AP = PD, equivalently A = PDP⁻¹.</li><li>Compute D^n = diag(λ₁^n, λ₂^n, λ₃^n).</li><li>Compute P⁻¹ using P⁻¹ = (1/det P)·adj(P), or by row-reducing [P | I] → [I | P⁻¹].</li><li>Form A^n = P D^n P⁻¹ and multiply out (typically PD^n first, then ×P⁻¹).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose A has eigenvalues λ₁=1, λ₂=2, λ₃=3 with eigenvectors v₁,v₂,v₃. Set P=[v₁|v₂|v₃], D=diag(1,2,3). Then A^n = P·diag(1^n, 2^n, 3^n)·P⁻¹. For e.g. n=5: D^5=diag(1,32,243), and A^5 = P·diag(1,32,243)·P⁻¹ — a single matrix sandwich rather than five multiplications of A.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Computing A⁻¹ instead of A^n</div>
+<div class="adjustment">Use A⁻¹ = PD⁻¹P⁻¹ where D⁻¹ = diag(1/λ₁, 1/λ₂, 1/λ₃) — valid only if no eigenvalue is zero.</div>
+</div><div class="variant-row">
+<div class="scenario">A is symmetric</div>
+<div class="adjustment">Eigenvectors can be chosen orthonormal, so P is orthogonal and P⁻¹ = Pᵀ — saves the inverse computation entirely.</div>
+</div><div class="variant-row">
+<div class="scenario">Only A² or A³ requested</div>
+<div class="adjustment">Cayley–Hamilton may be quicker: write A^k as a low-degree polynomial in A, avoiding the P⁻¹ computation.</div>
+</div><div class="variant-row">
+<div class="scenario">2×2 matrices</div>
+<div class="adjustment">Same recipe with 2 eigenvectors and a 2×2 diagonal D; P⁻¹ is much easier (use the 2×2 inverse formula).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Writing A = P⁻¹DP or A = PDP instead of A = PDP⁻¹ — the order and the inverse both matter.</li><li>Treating diagonalisation as always available, even when an eigenvalue is repeated and the eigenspace is too small (matrix is defective).</li><li>Reading &#x27;find A^n&#x27; as a request for a numerical pattern guess rather than a structural derivation.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Mismatching the column order of P with the diagonal order of D — gives a completely wrong A^n even when each piece is individually correct.</li><li>Placing eigenvectors as rows instead of columns of P.</li><li>Arithmetic slips when computing P⁻¹ for a 3×3 matrix — this is the single most error-prone step; double-check via PP⁻¹ = I.</li><li>Forcing the method when there are insufficient independent eigenvectors — diagonalisation simply fails, and you must say so.</li><li>Forgetting to apply P⁻¹ on the right at the end and stopping at PD^n.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is core Edexcel IAL Further Pure (FP3) material on eigenvalues, eigenvectors and diagonalisation of 2×2 and 3×3 matrices. The identity A^n = PD^nP⁻¹ is expected to be derived/used directly; Jordan normal form for defective matrices is OUT of scope and should not be invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jun_2023-Q2.html" class="example-chip">FP3 Jun 2023 Q2</a><a href="../FP3/ch6/q-Jan_2023-Q5.html" class="example-chip">FP3 Jan 2023 Q5</a><a href="../FP3/ch6/q-Jan_2024-Q4.html" class="example-chip">FP3 Jan 2024 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

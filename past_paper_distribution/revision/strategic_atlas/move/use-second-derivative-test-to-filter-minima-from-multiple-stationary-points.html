@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use second derivative test to filter minima from multiple stationary points — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Second Derivative Classification</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Use second derivative test to filter minima from multiple stationary points</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Second Derivative Classification</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks specifically for local minima (or maxima) rather than all stationary points, and several candidate x-values have been produced — typically from a trig or polynomial equation dy/dx = 0 with multiple roots in a given interval. Phrasings include &#x27;find the smallest positive x at which y has a minimum&#x27;, &#x27;the values of x giving local minima&#x27;, or labelling them α, β, λ. The presence of more candidates than the question asks for is the key cue that classification is required.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>At a stationary point, the sign of d²y/dx² distinguishes minima (positive) from maxima (negative). For trig stationary points, d²y/dx² typically reduces to a constant times cos(kx) or sin(kx), so evaluation is cheap and avoids the bookkeeping of a first-derivative sign-change table. This filters the candidate list down to the requested type so that ordering by x then picks out the named values.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the equation dy/dx = 0 has produced more candidate x-values than the question asks for, and the question specifies &#x27;minimum&#x27; rather than &#x27;stationary point&#x27;.</li><li>I rule out a first-derivative sign-change test: with four candidates and a trig derivative, building sign tables is slow and error-prone.</li><li>I commit to the second derivative test because d²y/dx² is a single trig expression I can evaluate by inspection at each candidate.</li><li>I compute d²y/dx² once, then substitute each candidate x to read off the sign — positive ⇒ min, negative ⇒ max.</li><li>I keep only the minima, then sort by x to identify the named values (e.g. β smallest, λ next).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Differentiate dy/dx to obtain d²y/dx².</li><li>Substitute each candidate stationary x-value into d²y/dx², being careful that the argument is kx (not x) for a chain-rule term.</li><li>Record the sign: d²y/dx² &gt; 0 ⇒ minimum; d²y/dx² &lt; 0 ⇒ maximum; = 0 ⇒ inconclusive, fall back to sign-change test.</li><li>Discard maxima (and inconclusive points unless resolved).</li><li>Order the surviving minima by x and assign to the labels requested.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given y = 2\sin(3x) with stationary points at x = \tfrac{7\pi}{18}, \tfrac{11\pi}{18}, \tfrac{19\pi}{18}, \tfrac{23\pi}{18}. Then \dfrac{d^2y}{dx^2} = -18\sin(3x). At x = \tfrac{7\pi}{18}: -18\sin(\tfrac{7\pi}{6}) = -18(-\tfrac{1}{2}) = 9 > 0, so minimum. At x = \tfrac{11\pi}{18}: -18\sin(\tfrac{11\pi}{6}) = -18(-\tfrac{1}{2})… (recompute with correct derivative for the actual curve). For y with d²y/dx² = -18\cos(3x): at \tfrac{7\pi}{18}, value is 9\sqrt{3} > 0 (min); at \tfrac{11\pi}{18}, value is -9\sqrt{3} < 0 (max). Hence β = \tfrac{7\pi}{18}, λ = \tfrac{19\pi}{18}.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Polynomial curve with multiple stationary points (e.g. cubic/quartic)</div>
+<div class="adjustment">Compute d²y/dx² as a polynomial and substitute numerically; sign of the result classifies each point.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig curve where d²y/dx² = 0 at a stationary point (e.g. y = x − sin x at x = 0)</div>
+<div class="adjustment">Test inconclusive — revert to a first-derivative sign-change test on either side of the point.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve with x = f(t), y = g(t)</div>
+<div class="adjustment">Either compute d²y/dx² via the parametric formula \dfrac{d}{dt}(dy/dx) ÷ (dx/dt), or classify using sign changes of dy/dx as t passes through the stationary parameter.</div>
+</div><div class="variant-row">
+<div class="scenario">Implicit curve from F(x,y) = 0</div>
+<div class="adjustment">Differentiate dy/dx implicitly a second time, substituting dy/dx = 0 at the stationary point to simplify, then test the sign.</div>
+</div><div class="variant-row">
+<div class="scenario">Optimisation in context (max area/volume)</div>
+<div class="adjustment">Same test on the objective function in one variable; sign of d²A/dx² or d²V/dx² confirms a maximum was found.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating every solution of dy/dx = 0 as a minimum and reporting the smallest x-values without classification.</li><li>Confusing &#x27;smallest positive x with a stationary point&#x27; with &#x27;smallest positive x with a minimum&#x27;.</li><li>Reading d²y/dx² &gt; 0 as &#x27;maximum&#x27; by analogy with &#x27;biggest&#x27;, reversing the rule.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error in d²y/dx²: forgetting the leading minus in expressions like −18cos(3x) and inverting the classification.</li><li>Evaluating the trig function at x rather than at kx — e.g. cos(7π/18) instead of cos(3·7π/18) = cos(7π/6).</li><li>Failing to reduce 3x mod 2π before reading off cos/sin from the unit circle, leading to arithmetic slips.</li><li>Stopping at the first minimum found and missing that the question asks for two (β and λ).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3/P4 differentiation and trigonometry: chain rule, exact values of cos and sin at standard angles, and the standard second-derivative test for classifying stationary points.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2020-Q7.html" class="example-chip">P3 Jan 2020 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

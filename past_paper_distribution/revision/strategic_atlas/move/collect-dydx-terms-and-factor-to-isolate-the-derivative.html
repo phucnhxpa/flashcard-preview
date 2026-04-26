@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collect dy/dx terms and factor to isolate the derivative — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Collect And Factor</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Collect dy/dx terms and factor to isolate the derivative</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Collect And Factor</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires immediately after implicit differentiation produces an equation containing dy/dx in two or more additive terms. Cues: the equation is linear in dy/dx (no (dy/dx)^2 or higher), with dy/dx multiplied by different expressions in x and y. Also fires after differentiating parametric/implicit relations where products like xy, e^{f(x)}y, or y^n appear. The goal phrase is usually &#x27;find dy/dx&#x27; or &#x27;show that dy/dx = ...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because differentiation is linear, dy/dx appears only to the first power and can be treated as a single algebraic unknown. Grouping all terms containing dy/dx on one side gives an equation of the form A(x,y)·(dy/dx) = B(x,y), a linear equation in dy/dx. Factoring then dividing is the unique algebraic move that solves a linear equation for its unknown. This is the standard endgame of implicit differentiation in A-level.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that dy/dx appears in more than one term but always to the first power — the equation is linear in dy/dx.</li><li>Rule out solving as a quadratic or rearranging y explicitly; neither is needed because the structure is linear.</li><li>Commit to treating dy/dx as a common factor: this reduces the problem to (coefficient)·(dy/dx) = RHS.</li><li>Bridge: separate terms into those containing dy/dx and those that don&#x27;t, moving the latter to the opposite side.</li><li>Tactically choose which side keeps the dy/dx terms (usually the side that gives a positive or simpler coefficient) and watch signs when transposing.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify every term containing dy/dx after implicit differentiation.</li><li>Move all dy/dx terms to one side and all remaining terms to the other side, tracking sign changes.</li><li>Factor dy/dx out of its side, giving (sum of coefficients)·(dy/dx) = (remaining expression).</li><li>Divide both sides by the bracketed coefficient to obtain dy/dx as a single fraction.</li><li>Simplify the resulting expression where possible (cancel common factors, combine like terms).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Differentiate $e^{-2x}y + 2y^2 = x$ implicitly: $-2e^{-2x}y + e^{-2x}\frac{dy}{dx} + 4y\frac{dy}{dx} = 1$. Collect: $(e^{-2x} + 4y)\frac{dy}{dx} = 1 + 2ye^{-2x}$. Hence $\frac{dy}{dx} = \dfrac{1 + 2ye^{-2x}}{e^{-2x} + 4y}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Implicit polynomial relation, e.g. $x^3 + xy + y^3 = 7$</div>
+<div class="adjustment">After differentiating, collect $\frac{dy}{dx}$ terms from $x\frac{dy}{dx}$ and $3y^2\frac{dy}{dx}$, factor to get $(x + 3y^2)\frac{dy}{dx} = -(3x^2 + y)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic implicit equation, e.g. $\ln(xy) + y = x$</div>
+<div class="adjustment">Differentiating gives $\frac{1}{x} + \frac{1}{y}\frac{dy}{dx} + \frac{dy}{dx} = 1$; factor $\frac{dy}{dx}$ from the last two terms.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig implicit relation, e.g. $\sin(x+y) = xy$</div>
+<div class="adjustment">Both sides produce dy/dx terms; bring all dy/dx terms to one side before factoring.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric second derivative setups where $\frac{dy}{dx}$ appears inside another expression</div>
+<div class="adjustment">Treat $\frac{dy}{dx}$ as the unknown symbol $p$, factor, then back-substitute.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating dy/dx as if it were dy and dx separately, then trying to &#x27;cancel&#x27; them.</li><li>Believing the equation is nonlinear in dy/dx because dy/dx is multiplied by y (it is still linear in dy/dx).</li><li>Trying to solve for y explicitly first, when isolating dy/dx directly is sufficient.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when transposing terms across the equals sign.</li><li>Missing a dy/dx term (often the one hidden inside a product rule expansion) and factoring incompletely.</li><li>Forgetting to bracket the coefficient before dividing, leading to division by only part of it.</li><li>Dropping the factor of y&#x27; from chain-rule terms like $\frac{d}{dx}(y^n) = ny^{n-1}\frac{dy}{dx}$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 implicit differentiation; the algebra used is standard linear-equation manipulation taught from GCSE onward.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Oct_2023-Q10.html" class="example-chip">P3 Oct 2023 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

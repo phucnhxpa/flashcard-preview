@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form det(A − λI) = 0 to extract eigenvalues — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Characteristic Polynomial</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Form det(A − λI) = 0 to extract eigenvalues</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Characteristic Polynomial</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question explicitly asks for eigenvalues of a square matrix, or asks for any downstream object that requires eigenvalues first — diagonalisation A = PDP⁻¹, computing high powers Aⁿ, or finding eigenvectors. Visual cues: a 2×2 or 3×3 matrix is given with the words &#x27;eigenvalues&#x27;, &#x27;characteristic equation&#x27;, &#x27;diagonalise&#x27;, or &#x27;P and D such that P⁻¹AP = D&#x27;. Alternative phrasings include &#x27;find the values of λ for which Ax = λx has non-trivial solutions&#x27; or &#x27;show that λ = k is an eigenvalue of A&#x27;. If you see any of these, the very first action is to form (A − λI) and set its determinant to zero.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>An eigenvalue λ is, by definition, a scalar for which Ax = λx admits a non-zero vector x. Rearranging gives (A − λI)x = 0, and a homogeneous system has a non-trivial solution exactly when its coefficient matrix is singular, i.e. det(A − λI) = 0. This converts an abstract matrix question into a polynomial equation in λ — a quadratic for 2×2, a cubic for 3×3 — which can be tackled by standard algebraic techniques (factor theorem, polynomial division, quadratic formula). It is the universal entry point to every eigenvalue calculation in the syllabus.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question mentions eigenvalues, diagonalisation, or matrix powers — all of which depend on knowing λ first.</li><li>Recall the definition Ax = λx and rearrange it to (A − λI)x = 0; rule out trying to &#x27;guess&#x27; eigenvectors directly or solving Ax = λx component-wise (these are slower and error-prone for 3×3).</li><li>Commit to the singularity criterion: non-trivial x exists iff det(A − λI) = 0. This is the only systematic route.</li><li>Bridge to operation: write A − λI by subtracting λ from each diagonal entry of A (every diagonal entry — do not miss one).</li><li>Tactical choice for 3×3: expand the determinant along the row or column with the most zeros to minimise cofactor work; for 2×2 use the shortcut λ² − tr(A)λ + det(A).</li><li>After obtaining the polynomial, plan the factorisation: for cubics, test small integers ±1, ±2, ±3 via the factor theorem, then divide out the linear factor and solve the residual quadratic.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Form A − λI by subtracting λ from every diagonal entry of A, leaving off-diagonal entries unchanged.</li><li>Compute det(A − λI) by cofactor expansion along the row/column with the most zeros (or by the 2×2 trace–determinant formula λ² − tr(A)λ + det(A)).</li><li>Set det(A − λI) = 0; this is the characteristic equation.</li><li>Solve: for a cubic, find an integer root by inspection (factor theorem on ±1, ±2, …), perform polynomial division to extract a quadratic factor, then solve the quadratic to obtain λ₁, λ₂, λ₃.</li><li>List the eigenvalues, noting any repeated roots (algebraic multiplicity).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$. Then $A - \lambda I = \begin{pmatrix} 2-\lambda & 1 \\ 1 & 2-\lambda \end{pmatrix}$, so $\det(A - \lambda I) = (2-\lambda)^2 - 1 = \lambda^2 - 4\lambda + 3 = 0$. Factorising: $(\lambda - 1)(\lambda - 3) = 0$, giving eigenvalues $\lambda = 1, 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2×2 matrix</div>
+<div class="adjustment">Use the shortcut det(A − λI) = λ² − tr(A)λ + det(A); no cofactor expansion needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Triangular matrix (upper or lower) or diagonal matrix</div>
+<div class="adjustment">Eigenvalues are simply the diagonal entries — no expansion required, since det(A − λI) is the product of (aᵢᵢ − λ).</div>
+</div><div class="variant-row">
+<div class="scenario">Question states &#x27;show that λ = k is an eigenvalue&#x27;</div>
+<div class="adjustment">Substitute λ = k into det(A − λI) and verify it equals zero, rather than solving from scratch.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic with no obvious integer root</div>
+<div class="adjustment">Look for rational roots given by leading-coefficient/constant-term factors, or check whether the question gives one eigenvalue as a hint to factor out.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Setting up det(A + λI) = 0 or det(λA − I) = 0 instead of det(A − λI) = 0.</li><li>Computing det(A) (a number) instead of det(A − λI) (a polynomial in λ).</li><li>Confusing the characteristic equation with Cayley–Hamilton: the latter says A satisfies its own characteristic polynomial, not that one substitutes the matrix back into the scalar equation at this stage.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when subtracting λ from diagonal entries — particularly when the diagonal entry is already negative (e.g. −3 − λ, not −3 + λ).</li><li>Forgetting to subtract λ from every diagonal entry (a frequent slip in 3×3 matrices, often missing the (3,3) position).</li><li>Sign errors in the alternating +/−/+ cofactor pattern during 3×3 expansion.</li><li>Arithmetic slips inside the 2×2 sub-determinants of a 3×3 cofactor expansion.</li><li>Missing a repeated root when factorising — always check whether the quadratic factor has a double root or shares a root with the linear factor.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP1/FP3) scope for 2×2 and 3×3 real matrices. The characteristic equation is not in the formula booklet — students must derive det(A − λI) = 0 from first principles. Avoid generalisations to complex eigenvalues with non-real entries beyond what the question presents, and do not invoke Cayley–Hamilton unless explicitly asked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2024-Q4.html" class="example-chip">FP3 Jan 2024 Q4</a><a href="../FP3/ch6/q-Jun_2023-Q5.html" class="example-chip">FP3 Jun 2023 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

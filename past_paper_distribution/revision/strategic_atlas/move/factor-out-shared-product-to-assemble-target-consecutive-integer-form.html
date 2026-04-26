@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor out shared product to assemble target consecutive-integer form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Strategic Factorisation</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Factor out shared product to assemble target consecutive-integer form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Factorisation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in the inductive step of a summation proof once the inductive hypothesis has been substituted and the expression splits into two terms that visibly share a product of brackets (e.g. (k+1)(k+2)). It also fires when the target P(k+1) is itself a product of consecutive linear factors, signalling that the shared product is a substructure of the goal. Cue phrases: &#x27;both terms contain&#x27;, &#x27;target is a product of three consecutive integers&#x27;, &#x27;one more linear factor needed&#x27;. Avoid this move&#x27;s competitor — full expansion — whenever a clean common factor is visible.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Products of consecutive integers like (k+1)(k+2)(k+3) are preserved under factor extraction: if two summands share (k+1)(k+2), the residue bracket only needs to simplify to a single linear factor to complete the product. Extracting the common factor turns the algebra into a one-line bracket simplification rather than a cubic expansion-and-refactor. This is the same principle that makes telescoping and partial-fraction reassembly efficient: keep structure intact rather than destroy and rebuild it.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice both post-substitution terms contain the same pair of brackets (k+1)(k+2), and the target P(k+1) is a product of three consecutive integers.</li><li>I rule out expanding everything to a cubic — that would force me to refactor a degree-3 polynomial, which is slow and error-prone.</li><li>I commit to factoring (k+1)(k+2) out because the target only differs by one further linear factor, so the residue bracket should collapse to (k+3)/3.</li><li>Concretely, I write the sum as (k+1)(k+2)[ k/3 + 1 ] and prepare to combine the bracket over a common denominator.</li><li>Inside the bracket I keep the 1/3 coefficient attached to k carefully so I do not lose the factor of 1/3 when assembling the final triple product.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the common factor (k+1)(k+2) in both terms.</li><li>Write (1/3)k(k+1)(k+2) + (k+1)(k+2) = (k+1)(k+2)[k/3 + 1].</li><li>Combine the bracket over a common denominator: k/3 + 1 = (k+3)/3.</li><li>Reassemble: (k+1)(k+2)·(k+3)/3 = (1/3)(k+1)(k+2)(k+3).</li><li>Compare with P(k+1) target form to confirm the match.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Assume $\sum_{r=1}^{k} r(r+1) = \tfrac{1}{3}k(k+1)(k+2)$. Then $\sum_{r=1}^{k+1} r(r+1) = \tfrac{1}{3}k(k+1)(k+2) + (k+1)(k+2)$. Factoring: $(k+1)(k+2)\!\left[\tfrac{k}{3}+1\right] = (k+1)(k+2)\cdot\tfrac{k+3}{3} = \tfrac{1}{3}(k+1)(k+2)(k+3)$, which is $P(k+1)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Induction on $\sum r(r+1)(r+2) = \tfrac{1}{4}n(n+1)(n+2)(n+3)$</div>
+<div class="adjustment">Common factor is $(k+1)(k+2)(k+3)$; the residue bracket simplifies to $(k+4)/4$.</div>
+</div><div class="variant-row">
+<div class="scenario">Induction on $\sum r^2 = \tfrac{1}{6}n(n+1)(2n+1)$</div>
+<div class="adjustment">Common factor is $(k+1)$; the residue bracket simplifies to $\tfrac{1}{6}[k(2k+1)+6(k+1)] = \tfrac{1}{6}(2k+3)(k+2)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Induction on $\sum r^3 = \tfrac{1}{4}n^2(n+1)^2$</div>
+<div class="adjustment">Common factor is $(k+1)^2$; the residue bracket simplifies to $\tfrac{1}{4}[k^2 + 4(k+1)] = \tfrac{1}{4}(k+2)^2$.</div>
+</div><div class="variant-row">
+<div class="scenario">Divisibility induction (e.g. $f(k+1) - f(k)$ is a multiple of $m$)</div>
+<div class="adjustment">Instead of factoring a shared product, add and subtract a term so the difference exposes a factor of $m$ explicitly.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Mistaking the target as requiring full expansion because of the $1/3$ coefficient, when in fact the coefficient travels cleanly through the factorisation.</li><li>Treating $(k+1)(k+2)$ as two separate factors and only pulling out $(k+1)$, leaving an awkward bracket that does not match the target.</li><li>Believing the move only works when coefficients are 1; it works equally well with rational coefficients provided they are tracked carefully.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the $1/3$ when extracting $(k+1)(k+2)$, e.g. writing the residue bracket as $k+1$ instead of $k/3 + 1$.</li><li>Combining $k/3 + 1$ incorrectly as $(k+1)/3$ instead of $(k+3)/3$.</li><li>Forgetting to compare the final expression to $P(k+1)$ explicitly, which is required for full marks in induction.</li><li>Expanding the cubic anyway and then making sign or coefficient errors during refactoring.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure proof-by-induction for summation identities; uses only GCSE-level factor extraction and fraction combination.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch8/q-Jun_2021-Q7.html" class="example-chip">FP1 Jun 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

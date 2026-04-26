@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute y = f(x) to expose hidden quadratic structure in trigonometric equations — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Substitution Bridge</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Substitute y = f(x) to expose hidden quadratic structure in trigonometric equations</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Bridge</strong></span>
+    <span>Frequency: <strong>6 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>This move fires whenever a trigonometric (or other transcendental) equation contains exactly one trig expression appearing in two powers — typically a squared term and a linear term, plus a constant. Visual cues: terms like sin²x and sin x (or cos²x and cos x, tan²x and tan x, csc²x and csc x, sin²(2x) and sin(2x)) with no other trig functions present. Equivalent phrasings: &#x27;quadratic in disguise&#x27;, &#x27;polynomial of degree 2 in f(x)&#x27;, or &#x27;the equation has form a·[f(x)]² + b·[f(x)] + c = 0&#x27;. If a Pythagorean identity (e.g. cos²x = 1 − sin²x) was used to eliminate a mixed term, the resulting equation almost always falls into this pattern.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Substituting y = f(x) strips away the trigonometric wrapper and reveals a standard algebraic quadratic ay² + by + c = 0, which can be attacked with well-drilled tools: factorisation by grouping, the quadratic formula, or completing the square. This works because the equation&#x27;s algebraic structure depends only on the powers of f(x), not on what f(x) means trigonometrically. The substitution reduces cognitive load, makes factor pairs easier to spot, and cleanly separates the algebra (find y) from the trigonometry (invert f to find x). Once y-values are found, each is fed back through the inverse function to obtain angle solutions.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the equation contains exactly one trig expression f(x), appearing as [f(x)]² and f(x) (and possibly a constant) — the signature of a quadratic in disguise.</li><li>Rule out alternatives: there is no mixed product of different trig functions to suggest a factoring trick, no obvious identity to apply further, and graphical/numerical methods would be overkill.</li><li>Commit to the substitution because it converts a trig problem into an algebra problem without losing information — and because A-level expects either clean factorisation or the quadratic formula at this stage.</li><li>Bridge to action: write &#x27;Let y = f(x)&#x27; and rewrite the equation as ay² + by + c = 0; remember the constraint on y imposed by the range of f (e.g. −1 ≤ y ≤ 1 for sin or cos).</li><li>Tactical decision: try factorisation first by computing ac and seeking a factor pair summing to b; if the discriminant b² − 4ac is not a perfect square, switch to the quadratic formula.</li><li>After solving, reject any y-value that violates the range of f, then reverse the substitution and solve f(x) = y for x in the required interval.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify f(x) (e.g. sin x, cos x, tan x, sin 2x, csc x) and write &#x27;Let y = f(x)&#x27;.</li><li>Rewrite the equation in standard form: ay² + by + c = 0.</li><li>Compute ac and look for a factor pair (p, q) with pq = ac and p + q = b. If found, split the middle term and factor by grouping: ay² + py + qy + c = 0 → (αy + β)(γy + δ) = 0.</li><li>If no integer factor pair exists, apply the quadratic formula y = (−b ± √(b² − 4ac)) / (2a).</li><li>Solve for y, obtaining y₁ and y₂.</li><li>Discard any root that lies outside the range of f (e.g. |y| &gt; 1 when f = sin or cos).</li><li>Reverse the substitution: solve f(x) = y₁ and f(x) = y₂ for x in the specified interval.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $2\sin^2 x - \sin x - 1 = 0$ for $x \in [0, 2\pi)$. Let $y = \sin x$, giving $2y^2 - y - 1 = 0$. Factorise: $(2y+1)(y-1) = 0$, so $y = -\tfrac{1}{2}$ or $y = 1$. Both lie in $[-1,1]$, so $\sin x = -\tfrac{1}{2}$ gives $x = \tfrac{7\pi}{6}, \tfrac{11\pi}{6}$, and $\sin x = 1$ gives $x = \tfrac{\pi}{2}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Equation quadratic in cos x, e.g. 2cos²x + 3cos x − 2 = 0</div>
+<div class="adjustment">Let y = cos x; same range constraint −1 ≤ y ≤ 1.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation quadratic in tan x, e.g. 2tan²x − 5tan x + 2 = 0</div>
+<div class="adjustment">Let y = tan x; no range restriction since tan is unbounded — every real root is admissible.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation quadratic in a compound argument, e.g. 3sin²(2x) + sin(2x) − 1 = 0</div>
+<div class="adjustment">Let u = sin(2x); after solving, the inversion step yields 2x values, then divide by 2 and account for the doubled period when listing solutions.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation quadratic in a reciprocal trig function, e.g. 2csc²x − 9csc x − 5 = 0</div>
+<div class="adjustment">Let y = csc x; valid range is |y| ≥ 1, so reject any root with |y| &lt; 1.</div>
+</div><div class="variant-row">
+<div class="scenario">Discriminant is not a perfect square, e.g. 3sin²(2x) + sin(2x) − 1 = 0</div>
+<div class="adjustment">Use the quadratic formula instead of factorisation; surd roots are then inverted via arcsin.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed equation requiring identity first, e.g. 2cos²x + sin x = 1</div>
+<div class="adjustment">Apply cos²x = 1 − sin²x first to reduce to a single trig function, then substitute y = sin x.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Failing to recognise the quadratic structure and instead attempting ad-hoc manipulation, dividing through by f(x) (which loses the f(x) = 0 root), or applying double-angle identities to sin²(2x) when it should be treated as a single algebraic square.</li><li>Misreading sin²x as sin(x²) or as sin(2x), changing the problem entirely.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to substitute back from y to f(x) and reporting y-values as the final answer.</li><li>Errors in splitting the middle term: misidentifying the factor pair of ac that sums to b.</li><li>Failing to check the range constraint on y (|y| ≤ 1 for sin/cos, |y| ≥ 1 for sec/csc) and including extraneous roots.</li><li>Arithmetic errors in the discriminant b² − 4ac when forced to use the quadratic formula.</li><li>When f(x) = sin(kx) or similar, forgetting that the inversion step yields kx values and that the period is divided by k, leading to missing solutions in the required interval.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2/P3) trigonometric equation work; uses only standard quadratic techniques from the formula booklet (quadratic formula). Avoid introducing complex roots — if the discriminant is negative within an A-level context, it usually signals an algebraic slip rather than a genuine no-solution case.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (6)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Oct_2023-Q5.html" class="example-chip">P1 Oct 2023 Q5</a><a href="../P2/ch6/q-Oct_2022-Q5.html" class="example-chip">P2 Oct 2022 Q5</a><a href="../P3/ch2/q-Oct_2024-Q5.html" class="example-chip">P3 Oct 2024 Q5</a><a href="../P2/ch6/q-Jan_2023-Q8.html" class="example-chip">P2 Jan 2023 Q8</a><a href="../P3/ch3/q-Oct_2023-Q6.html" class="example-chip">P3 Oct 2023 Q6</a><a href="../P2/ch6/q-Jun_2023-Q9.html" class="example-chip">P2 Jun 2023 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

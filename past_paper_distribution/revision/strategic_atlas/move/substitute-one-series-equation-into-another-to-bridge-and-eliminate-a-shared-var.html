@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute one series equation into another to bridge and eliminate a shared variable — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Substitution Bridge</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Substitute one series equation into another to bridge and eliminate a shared variable</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Bridge</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem gives two equations (or conditions) about a series — typically a finite sum S_n alongside the infinite sum S_∞, or an arithmetic condition alongside a geometric condition — that share a common sub-expression or variable. Visual cues: the same factor a/(1−r) appears in both formulas; OR three unknowns (a, d, r) appear with only two sum equations plus a &#x27;linking&#x27; clause such as &#x27;the common ratio equals half the common difference&#x27;. Equivalent phrasings: &#x27;two series share a parameter&#x27;, &#x27;a bridging relation connects AP and GP&#x27;, &#x27;a common factor can be cancelled by ratio or substitution&#x27;. The move is signalled whenever isolating one variable in the simpler equation will collapse the harder one.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The technique works because the shared sub-expression (e.g. a/(1−r), or the linking r = d/2) acts as an algebraic bridge: substituting it eliminates one variable cleanly and reduces the system&#x27;s dimension. For GP problems, S_n = S_∞ · (1−r^n) is a built-in identity, so substituting S_∞ into S_n cancels the (1−r) denominator instantly. For mixed AP/GP problems, the bridge converts two equations in disjoint variable pairs into two equations in the same pair, making the system solvable. This is far more efficient than expanding term-by-term or eliminating via brute-force algebra.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the two given equations describe the same series (or linked series) and share a structural ingredient — either the factor a/(1−r), or a parameter that appears in both.</li><li>Rule out term-by-term expansion (e.g. writing S_3 = a + ar + ar^2 = 63), which produces a messier nonlinear system in two unknowns.</li><li>Rule out trying to eliminate a via direct subtraction — the (1−r) denominators make this awkward.</li><li>Commit to substitution: isolate the shared sub-expression (or use the linking condition) from the simpler equation, because the cancellation/reduction it triggers is structural, not coincidental.</li><li>Tactical choice: decide whether to substitute (cleaner audit trail) or to take the ratio of the two equations (fewer lines but less explicit) — both are valid; substitution is the standard Edexcel write-up.</li><li>Execute the substitution, cancel the common factor (justifying r ≠ 1 from |r|&lt;1), and read off a single-variable equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the shared object: e.g. a/(1−r) in S_∞ = a/(1−r) and S_n = a(1−r^n)/(1−r); or a linking relation like r = d/2.</li><li>From the simpler equation, isolate either the shared sub-expression or the linking variable: e.g. a = 64(1−r), or substitute r = d/2 directly.</li><li>Substitute into the other equation: e.g. 63 = 64(1−r)(1−r^3)/(1−r), or 32 = a/(1 − d/2).</li><li>Cancel/simplify the common factor (citing r ≠ 1 where relevant): 63 = 64(1−r^3), or a = 32 − 16d.</li><li>Solve the resulting single-variable (or reduced-dimension) equation: r^3 = 1/64 ⇒ r = 1/4, then back-substitute for a.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $S_\infty = 64$ and $S_3 = 63$ for a convergent GP. From $S_\infty$: $a = 64(1-r)$. Substitute into $S_3 = a(1-r^3)/(1-r)$: $63 = 64(1-r)(1-r^3)/(1-r) = 64(1-r^3)$. Hence $r^3 = 1/64$, so $r = 1/4$ and $a = 48$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Two finite sums given (e.g. S_5 and S_3) instead of S_∞ and S_n</div>
+<div class="adjustment">Take the ratio S_5/S_3 = (1−r^5)/(1−r^3) to eliminate a; factor numerator and denominator to reduce.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed AP/GP problem with linking condition (e.g. r = d/2 or ar^2 = a + 5d)</div>
+<div class="adjustment">Substitute the bridge into whichever equation contains the &#x27;foreign&#x27; variable, unifying both equations in the same variable pair (a,d) or (a,r).</div>
+</div><div class="variant-row">
+<div class="scenario">Linking condition is implicit (e.g. &#x27;the third GP term equals the seventh AP term&#x27;)</div>
+<div class="adjustment">First derive the bridge equation explicitly, then substitute as usual.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Expanding S_3 = a + ar + ar^2 = 63 term-by-term and trying to solve a two-variable nonlinear system, missing the structural shortcut.</li><li>Failing to spot that the linking condition (r = d/2) is essential — leaving the system with three unknowns and two equations.</li><li>Substituting the bridge into the wrong equation, producing an equation that still contains all original variables.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Cancelling (1−r) without noting r ≠ 1 — must cite |r|&lt;1 from the convergence condition.</li><li>Algebraic slip: writing (1−r^3)/(1−r) as (1+r^3)/(1−r), or expanding (1 − d/2) as (1 + d/2).</li><li>Sign errors when isolating a from S_∞ = a/(1−r): forgetting to multiply through by (1−r) gives a = 64/(1−r) instead of a = 64(1−r).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Strictly within Edexcel IAL P1/P2 sequences and series. Uses formula booklet entries S_n = a(1−r^n)/(1−r) and S_∞ = a/(1−r) for |r|&lt;1, plus AP formulas. Avoid generalisations to non-geometric series or to divergent ratios — the cancellation argument relies on |r|&lt;1.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jun_2024-Q10.html" class="example-chip">P2 Jun 2024 Q10</a><a href="../P2/ch4/q-Jun_2023-Q11.html" class="example-chip">P2 Jun 2023 Q11</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

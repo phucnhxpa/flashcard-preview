@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate reduction formula down to known base case — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Recurrence Descent</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Iterate reduction formula down to known base case</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Recurrence Descent</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A reduction formula has been established (typically in part (a)) linking I_n to I_{n-2} or I_{n-1}, and a later part demands a specific numerical value such as I_5, I_6 or a closed expression for I_n. The cue is a definite integral indexed by n where direct integration would be laborious but the recurrence collapses the index. Phrases like &#x27;hence evaluate&#x27;, &#x27;use your result to find&#x27;, or &#x27;show that I_n = ...&#x27; signal this descent. Parity of n decides which base case is reached.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each application of the recurrence (e.g. I_n = ((n-1)/n) I_{n-2}) reduces the index by a fixed step, producing a telescoping product of rational coefficients. After ⌊n/2⌋ steps the chain terminates at a directly computable elementary integral — typically I_0 = π/2 or I_1 = 1 for the standard sin^n / cos^n cases. Multiplying the accumulated coefficients with the base value yields the exact answer. This is the entire computational payoff of having derived the reduction formula in the previous part.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question asks for a specific I_n and I already have a recurrence linking I_n to I_{n-2} (or I_{n-1}), so descent is the intended route.</li><li>I rule out direct integration of sin^n x or x^n e^x etc. — that ignores part (a) and is far longer.</li><li>I commit to descent because the index decreases by a fixed amount each step, and I can predict the terminal index from the parity of n.</li><li>I check parity: even n descends to I_0, odd n descends to I_1; I evaluate that base case as a simple elementary integral.</li><li>I write the chain of equalities explicitly before multiplying, to keep the rational coefficients organised and avoid arithmetic slips.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify base case from parity: even n → I_0, odd n → I_1 (for step-2 recurrences).</li><li>Compute the base case directly as an elementary integral.</li><li>Write the descent chain: I_n = c_n I_{n-2}, I_{n-2} = c_{n-2} I_{n-4}, ..., down to the base.</li><li>Multiply all coefficients c_n · c_{n-2} · ... together with the base value.</li><li>Simplify the resulting product of fractions to lowest terms.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given I_n = \int_0^{\pi/2} \sin^n x\,dx satisfies I_n = \tfrac{n-1}{n} I_{n-2}, find I_6. Descend: I_6 = \tfrac{5}{6} I_4 = \tfrac{5}{6}\cdot\tfrac{3}{4} I_2 = \tfrac{5}{6}\cdot\tfrac{3}{4}\cdot\tfrac{1}{2} I_0. With I_0 = \int_0^{\pi/2} 1\,dx = \tfrac{\pi}{2}, we get I_6 = \tfrac{15}{48}\cdot\tfrac{\pi}{2} = \tfrac{5\pi}{32}.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Odd index, e.g. I_5 with the same sin^n recurrence</div>
+<div class="adjustment">Descend to I_1 = \int_0^{\pi/2} \sin x\,dx = 1; the answer is rational (no π factor), which itself acts as a parity sanity check.</div>
+</div><div class="variant-row">
+<div class="scenario">Step-1 recurrence such as I_n = n I_{n-1} - 1 from \int x^n e^{-x} or similar</div>
+<div class="adjustment">Descend one index at a time down to I_0; coefficients are no longer purely multiplicative, so additive remainder terms must be carried through carefully.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence for J_n = \int_0^1 x^n (1-x)^k dx or \int x^n \ln x\,dx style problems</div>
+<div class="adjustment">Same descent logic; base case is an easy polynomial or log integral. Track sign changes if the recurrence has a minus sign.</div>
+</div><div class="variant-row">
+<div class="scenario">General closed form requested (&#x27;show that I_{2n} = ...&#x27;)</div>
+<div class="adjustment">Iterate symbolically and recognise the product as a double factorial or factorial ratio, e.g. I_{2n} = \tfrac{(2n)!}{4^n (n!)^2}\cdot\tfrac{\pi}{2}.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the recurrence as a one-off and re-deriving each I_k by integration, defeating the purpose of part (a).</li><li>Believing every reduction must terminate at I_0; missing that odd n terminates at I_1.</li><li>Confusing the recurrence&#x27;s coefficient ((n-1)/n vs (n-2)/(n-1) vs n/(n+1)) when copying from part (a).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using the wrong base case: computing I_0 when n is odd (should be I_1) or vice versa.</li><li>Arithmetic errors in the product of fractions — writing the chain out explicitly before multiplying helps.</li><li>Forgetting to carry additive terms when the recurrence is non-homogeneous (e.g. I_n = n I_{n-1} - 1).</li><li>Off-by-one in the number of descent steps, leading to terminating at I_2 instead of I_0.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure 2/3 territory: reduction formulae for \int_0^{\pi/2} \sin^n x\,dx, \int x^n e^x\,dx and similar, with numerical evaluation typically requested in the part following the derivation.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Specimen_2018-Q3.html" class="example-chip">FP3 Specimen 2018 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

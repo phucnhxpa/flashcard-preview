@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up polar area integral with correct limits and symmetry — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../polar.html">Polar Coordinates</a> / <strong>Polar Area Setup</strong></div>
+  <span class="domain-pill" style="background:#AB47BC;color:white">Polar Coordinates</span>
+  <h1>Set up polar area integral with correct limits and symmetry</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Polar Area Setup</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for the area enclosed by a polar curve, the area of one petal/loop of a curve like r = a sin(nθ) or a cardioid/limaçon, the area between two polar curves, or the area of a sector-type region bounded by the curve and one or two radial lines θ = α, θ = β. Visual cues include phrases like &#x27;find the area of the finite region bounded by...&#x27;, &#x27;shaded region&#x27;, or a diagram showing a closed loop or sector. Symmetry about the initial line, about θ = π/2, or n-fold rotational symmetry of a rose curve is a strong further cue.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The area swept by the radius vector from θ = α to θ = β is A = ½∫_α^β r² dθ, derived from summing infinitesimal sector triangles of area ½r²δθ. For two curves with r₁ ≥ r₂ throughout, A = ½∫(r₁² − r₂²) dθ by direct subtraction of swept areas. Exploiting symmetry (integrate over half/quarter/one petal and multiply) avoids sign errors and shortens algebra; alternatively, integrating over a full period [0, 2π] can be advantageous when the integrand contains cos(nθ) terms that vanish over a full period.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question asks for an enclosed area in polar form — the formula A = ½∫r² dθ (or ½∫(r₁² − r₂²) dθ for two curves) is the standard tool, listed in the formula booklet.</li><li>Rule out converting to Cartesian (messy) and rule out treating the inner circle&#x27;s area as a separate πr² subtraction — keeping everything inside the integrand is cleaner.</li><li>Examine the symmetry/structure: is the curve symmetric about θ = 0 or θ = π/2? Does it have n-fold rotational symmetry? Where does r = 0 (giving the natural petal/loop limits)? Are radial lines θ = α, β given as boundaries?</li><li>Decide the integration domain. Three common choices: (i) one petal/loop using r = 0 endpoints; (ii) half the curve and double via symmetry; (iii) a full period [0, 2π] when cos(nθ) terms will integrate to zero and simplify evaluation.</li><li>Commit to writing A = ½∫_α^β r² dθ with the chosen limits. For two-curve problems, verify which curve is outer on the chosen interval (so r₁² − r₂² ≥ 0).</li><li>Substitute r(θ) and expand r² immediately to a trig polynomial ready for standard reduction (double-angle / power-reduction).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify boundary type: closed loop (use r = 0 to find limits), petal of rose r = a sin(nθ) (limits where sin(nθ) = 0), sector bounded by radial lines (limits given), or two-curve region (find intersections by solving r₁(θ) = r₂(θ)).</li><li>State symmetry, if any, and the resulting multiplier (×2 for symmetry about initial line, ×n for n petals).</li><li>Write A = (multiplier) × ½∫_α^β r² dθ, or A = ½∫_α^β (r₁² − r₂²) dθ for area between curves with r₁ outer.</li><li>Substitute r(θ) and expand: e.g. (1 + cos θ)² = 1 + 2cos θ + cos²θ, ready for power-reduction cos²θ = ½(1 + cos 2θ).</li><li>Check the ½ factor and the squared r are both present before evaluating.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the area of one petal of $r = 2\sin 3\theta$. Petal limits: $r = 0$ when $3\theta = 0, \pi$, so $\theta \in [0, \pi/3]$. Then $A = \tfrac{1}{2}\int_0^{\pi/3} 4\sin^2 3\theta\, d\theta = \int_0^{\pi/3} (1 - \cos 6\theta)\, d\theta = \left[\theta - \tfrac{1}{6}\sin 6\theta\right]_0^{\pi/3} = \tfrac{\pi}{3}.$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Rose curve r = a sin(nθ) — area of one petal vs all petals</div>
+<div class="adjustment">One petal: integrate over [0, π/n]. All petals: multiply by n (for odd n) or 2n (for even n, since negative-r repetitions create extra petals).</div>
+</div><div class="variant-row">
+<div class="scenario">Two curves with one always outside the other (e.g. r₁ = 4 − 3cos 6θ, r₂ = 1)</div>
+<div class="adjustment">Use A = ½∫₀^{2π}(r₁² − r₂²) dθ over the full period — cos(nθ) integrals vanish, leaving only constant terms.</div>
+</div><div class="variant-row">
+<div class="scenario">Limaçon with inner loop (e.g. r = 1 + 2cos θ)</div>
+<div class="adjustment">Find the two θ-values with r = 0 (cos θ = −½, so θ = 2π/3, 4π/3); integrate ½r² between these for inner-loop area.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by curve and two radial lines (sector type)</div>
+<div class="adjustment">The radial lines give the limits directly; no symmetry doubling and no subtraction needed — A = ½∫_α^β r² dθ.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the inner circle&#x27;s area as a separate πr² to subtract instead of including −r₂² inside the integrand.</li><li>Computing the whole curve&#x27;s area when only one petal is asked, or vice versa.</li><li>Setting limits 0 to 2π for r = a cos θ, which traces the circle twice and doubles the area.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the ½ factor in front of the integral.</li><li>Writing r in the integrand instead of r².</li><li>For two-curve regions, assuming the same curve is outer throughout when in fact they swap at intersection points — must split the integral.</li><li>Choosing limits that don&#x27;t correspond to r = 0 for a closed petal/loop, leaving the region not properly closed.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL Further Pure (FP2/FP3) polar coordinates. The formula A = ½∫r² dθ is in the formula booklet. Avoid out-of-scope generalisations to arc-length-weighted or signed-area conventions; treat r ≥ 0 on the integration interval.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../FP2/ch7/q-Jan_2022-Q4.html" class="example-chip">FP2 Jan 2022 Q4</a><a href="../FP2/ch7/q-Jun_2022-Q6.html" class="example-chip">FP2 Jun 2022 Q6</a><a href="../FP2/ch7/q-Jun_2024-Q10.html" class="example-chip">FP2 Jun 2024 Q10</a><a href="../FP2/ch7/q-Jun_2021-Q3.html" class="example-chip">FP2 Jun 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

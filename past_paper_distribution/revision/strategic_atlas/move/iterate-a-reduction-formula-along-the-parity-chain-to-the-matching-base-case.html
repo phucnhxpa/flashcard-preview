@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate a reduction formula along the parity chain to the matching base case — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Reduction Formula Ibp</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Iterate a reduction formula along the parity chain to the matching base case</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Reduction Formula Ibp</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires once a reduction formula of the form $nI_n = a(n-1)I_{n-2} + c$ (or similar step-2 recurrence) has been established and a specific $I_N$ is requested. The index drop is 2, so the chain lands on $I_0$ when $N$ is even and on $I_1$ when $N$ is odd. Look for cues like &#x27;hence find $I_5$&#x27; or &#x27;use the result of part (a) to evaluate&#x27;. The required base case ($I_0$ or $I_1$) is usually computed in an earlier sub-part.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A reduction formula is precisely a tool for trading a hard integral for a lower-index one, so its purpose is realised only by iterating it down to a base case that can be evaluated directly. Because the recurrence steps by 2, parity of the target index dictates which base case is needed. Each iteration is pure arithmetic once the formula and base case are in hand, which is why the question structure rewards careful, exact-form bookkeeping rather than fresh integration.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the recurrence drops $n$ by 2, so plan the chain $I_N \to I_{N-2} \to \cdots$ and count how many applications are needed.</li><li>Rule out re-deriving from scratch or using by-parts again — the formula already encodes the IBP work.</li><li>Commit to iteration once parity is checked: odd $N$ terminates at $I_1$, even $N$ at $I_0$; confirm the relevant base value is available.</li><li>Bridge to action by substituting $n = N-2k$ values in increasing order (smallest first), so each new $I_n$ is expressed via a value already known.</li><li>Tactically keep surds and fractions in exact form, simplify boundary terms once and reuse, and only combine into a single fraction at the final step.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the base case dictated by parity of $N$ (odd $\Rightarrow I_1$, even $\Rightarrow I_0$) and write down its exact value.</li><li>Apply the reduction formula with the smallest needed index first to obtain $I_{N-2k+2}$ in exact form.</li><li>Re-apply with the next index, substituting the previous result; keep numerator/denominator structure clean.</li><li>Continue until $I_N$ is reached; divide through by the leading coefficient $N$ at the final step.</li><li>Simplify the surd expression and, if useful, sanity-check numerically against the original integral.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $nI_n = 10(n-1)I_{n-2} - 3$ with $I_1 = \sqrt{10} - 3$. For $I_5$: take $n=3$ to get $3I_3 = 20(\sqrt{10}-3) - 3 = 20\sqrt{10} - 63$, so $I_3 = \tfrac{20\sqrt{10}-63}{3}$. Then $n=5$: $5I_5 = 40 \cdot \tfrac{20\sqrt{10}-63}{3} - 3 = \tfrac{800\sqrt{10}-2529}{3}$, giving $I_5 = \tfrac{800\sqrt{10}-2529}{15}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Even target index, e.g. $I_6$ from the same recurrence</div>
+<div class="adjustment">Chain $I_6 \to I_4 \to I_2 \to I_0$, with $I_0 = \int_0^1 \tfrac{dx}{\sqrt{10-x^2}} = \arcsin(1/\sqrt{10})$ as the base.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig powers $I_n = \int_0^{\pi/2} \sin^n x\,dx$ with $nI_n = (n-1)I_{n-2}$</div>
+<div class="adjustment">Same parity logic: odd $n$ ends at $I_1 = 1$, even $n$ ends at $I_0 = \pi/2$; no boundary constant to track.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence with index drop of 1, e.g. $I_n = nI_{n-1} + f(n)$</div>
+<div class="adjustment">Every step is used (no parity split); iterate $N$ times down to $I_0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence expressing $I_{n-2}$ in terms of $I_n$</div>
+<div class="adjustment">Rearrange first to make $I_n$ the subject before iterating, otherwise the chain runs the wrong way.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to use the reduction formula in the increasing direction instead of the decreasing one it is designed for.</li><li>Picking the wrong base case for the parity of the target index (using $I_0$ when $N$ is odd, or vice versa).</li><li>Treating the constant boundary term as if it appears only once, rather than at every iteration.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slips in one step propagate to the final answer; verifying $I_3$ numerically before computing $I_5$ catches most errors.</li><li>Combining surds and rationals prematurely, leading to messy fractions; keep $\sqrt{10}$ symbolic until the last line.</li><li>Forgetting to divide by the leading coefficient $n$ at the final step, leaving an answer for $nI_n$ rather than $I_n$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Reduction formulae and their iteration to base cases $I_0$ or $I_1$ are standard Edexcel IAL Further Pure content; all base integrals here ($\arcsin$, surd evaluation, simple powers) lie within the syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jun_2022-Q7.html" class="example-chip">FP3 Jun 2022 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

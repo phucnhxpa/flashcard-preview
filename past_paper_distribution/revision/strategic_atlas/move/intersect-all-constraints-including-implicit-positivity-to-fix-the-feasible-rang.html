@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intersect all constraints including implicit positivity to fix the feasible range — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Constraint Intersection</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Intersect all constraints including implicit positivity to fix the feasible range</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Constraint Intersection</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on &#x27;hence state the range of values of x&#x27; (or &#x27;find the set of values&#x27;) after earlier parts have produced two or more separate inequalities. Also fires when x represents a physical quantity (length, time, probability, count) so an unstated positivity or boundedness condition is in force. Cue words: &#x27;hence&#x27;, &#x27;combine&#x27;, &#x27;all values for which&#x27;, or a context phrase like &#x27;where x cm is the length of...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each derived inequality is a necessary condition but not sufficient on its own; the feasible set is the intersection of every condition, including any implicit physical constraint. Geometrically, sketching the solution sets on a single number line and shading the overlap gives the answer immediately. The implicit constraint (e.g. x&gt;0) can override a weaker explicit lower bound coming from a quadratic. Strict vs non-strict status is inherited from the originating inequalities.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the question word &#x27;hence&#x27; instructs combining results from earlier parts rather than re-deriving.</li><li>Rules out reporting any single part&#x27;s range as the final answer, and rules out a union (&#x27;or&#x27;) interpretation.</li><li>Commits to listing every active constraint, including the unstated physical one (x&gt;0 because x is a length).</li><li>Bridges to drawing a number line and marking each constraint as a shaded interval.</li><li>Inside the move, identifies the binding (tightest) lower and upper bounds and inherits the strictness of each.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List every constraint: explicit inequalities from previous parts plus implicit positivity/domain conditions.</li><li>Sketch each as an interval on a single number line (open/closed circles per strictness).</li><li>Identify the tightest (largest) lower bound and the tightest (smallest) upper bound.</li><li>Discard dominated constraints (those superseded by a stricter one).</li><li>Write the intersection as a single compound inequality, preserving strictness.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose part (a) gives $x>1.5$, part (b) gives $-2<x<2$, and $x$ is a length so $x>0$. On a number line: $x>0$ dominates $x>-2$; then $x>1.5$ dominates $x>0$. The upper bound $x<2$ stands. Intersection: $1.5<x<2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quadratic inequality combined with a domain restriction from a square root or logarithm</div>
+<div class="adjustment">Add the implicit domain (e.g. argument of $\ln$ positive, radicand non-negative) before intersecting.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric equation/inequality restricted to a stated interval such as $0\le\theta&lt;2\pi$</div>
+<div class="adjustment">Intersect the periodic solution set with the stated interval rather than with a positivity condition.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed strict and non-strict inequalities (e.g. $\le$ from a discriminant condition with $&lt;$ from a context)</div>
+<div class="adjustment">Track endpoint inclusion carefully; the intersection&#x27;s endpoint is included only if every contributing constraint includes it.</div>
+</div><div class="variant-row">
+<div class="scenario">Probability or count contexts where $0\le p\le 1$ or $n\in\mathbb{Z}^+$</div>
+<div class="adjustment">Append the natural bounds and, for integer variables, list the integer values inside the intersection.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Forgetting the implicit $x&gt;0$ from a length/area context and reporting a range that includes negative values.</li><li>Combining with &#x27;or&#x27; (union) instead of &#x27;and&#x27; (intersection).</li><li>Quoting only the most recent part&#x27;s inequality as the final answer because of the word &#x27;hence&#x27;.</li><li>Treating a quadratic inequality&#x27;s two-sided solution as the final answer without checking the linear constraint.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Switching strict to non-strict (or vice versa) when transcribing the bounds.</li><li>Mis-identifying the binding bound when the numbers are close (e.g. $1.318\ldots$ vs $1.5$).</li><li>Dropping a constraint that looks &#x27;redundant&#x27; without checking it actually is dominated.</li><li>Writing the final answer as two separate inequalities rather than a single compound statement.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure content: combining linear and quadratic inequalities with contextual domain constraints, presented on a number line. No linear programming or multivariable feasible regions required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2019-Q3.html" class="example-chip">P1 Jun 2019 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

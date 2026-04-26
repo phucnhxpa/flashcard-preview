@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose circular segment as sector minus triangle — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Circular Segment Decomposition</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Decompose circular segment as sector minus triangle</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Circular Segment Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a region is bounded by a chord and an arc of a circle — i.e. a circular segment. Cues include phrases like &#x27;region bounded by arc AB and chord AB&#x27;, diagrams showing a &#x27;lens-like&#x27; or &#x27;D-shaped&#x27; piece of a disc, or a question giving radius and a central angle and asking for an enclosed area that is not the full sector. Equivalent phrasings: &#x27;shaded region between chord and arc&#x27;, &#x27;area cut off by a chord&#x27;. The move applies whenever both $r$ and the subtended angle $\theta$ (in radians) are known or computable.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The Edexcel formula sheet provides $\tfrac{1}{2}r^2\theta$ for sector area and $\tfrac{1}{2}ab\sin C$ for triangle area, but no direct segment formula. A segment is exactly the sector swept by the chord&#x27;s endpoints minus the isosceles triangle joining those endpoints to the centre. Both sub-regions share the same $r$ and $\theta$, so the decomposition introduces no new unknowns and yields the compact exact form $\tfrac{1}{2}r^2(\theta - \sin\theta)$. This is far cleaner than any integration approach at A-level.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the region is bounded by one straight edge (a chord) and one curved edge (an arc of a single circle) — this is the signature of a segment.</li><li>Rule out direct formula lookup (no segment formula is given) and rule out integration (over-engineered and not expected at this level).</li><li>Commit to expressing the segment as (sector with the same chord endpoints) − (triangle with vertices at the two chord endpoints and the centre).</li><li>Identify the radius $r$ and the central angle $\theta$ subtended by the chord; ensure $\theta$ is in radians.</li><li>Apply $A_{\text{seg}} = \tfrac{1}{2}r^2\theta - \tfrac{1}{2}r^2\sin\theta = \tfrac{1}{2}r^2(\theta - \sin\theta)$, keeping symbolic form until the final numerical step.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify radius $r$ and the central angle $\theta$ (in radians) subtended at the centre by the chord.</li><li>Compute sector area $A_{\text{sect}} = \tfrac{1}{2}r^2\theta$.</li><li>Compute triangle area $A_{\triangle} = \tfrac{1}{2}r^2\sin\theta$.</li><li>Subtract: $A_{\text{seg}} = A_{\text{sect}} - A_{\triangle} = \tfrac{1}{2}r^2(\theta - \sin\theta)$.</li><li>Substitute numerical values at the end and round only once to the requested precision.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>A chord $BD$ of a circle of radius $3$ m subtends an angle of $\theta = \pi - 1.4$ at the centre $O$. Then $A_{\text{seg}} = \tfrac{1}{2}(3)^2\bigl((\pi-1.4) - \sin(\pi-1.4)\bigr) = 4.5\,(1.7416 - 0.9860) \approx 3.40\ \text{m}^2.$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Minor segment with $\theta &lt; \pi$</div>
+<div class="adjustment">Standard form $\tfrac{1}{2}r^2(\theta - \sin\theta)$ applies directly; segment is small.</div>
+</div><div class="variant-row">
+<div class="scenario">Major segment (the larger piece on the other side of the chord)</div>
+<div class="adjustment">Either use angle $2\pi - \theta$ in the same formula, or compute (full circle area $\pi r^2$) − (minor segment area).</div>
+</div><div class="variant-row">
+<div class="scenario">Only the chord length $\ell$ and radius $r$ are given</div>
+<div class="adjustment">First recover $\theta$ via $\ell = 2r\sin(\theta/2)$, then apply the segment formula.</div>
+</div><div class="variant-row">
+<div class="scenario">Only arc length $s$ and radius $r$ are given</div>
+<div class="adjustment">Use $\theta = s/r$, then apply $\tfrac{1}{2}r^2(\theta - \sin\theta)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Composite region: segment plus a triangle or rectangle</div>
+<div class="adjustment">Compute the segment piece by this decomposition and add/subtract the polygonal pieces separately.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the region as a sector and forgetting to subtract the triangle.</li><li>Treating the region as a triangle only, ignoring the curved boundary.</li><li>Computing semicircle minus two sectors — works but introduces extra rounding and unnecessary steps.</li><li>Misidentifying which angle is the central angle (e.g. using an inscribed angle from the diagram).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using degrees instead of radians in $\tfrac{1}{2}r^2\theta$ (the sector formula requires radians).</li><li>Calculator left in degree mode when evaluating $\sin\theta$ — gives a wrong triangle area.</li><li>Rounding $\theta$, sector area, and triangle area separately before subtracting, causing loss of precision in a small difference.</li><li>Confusing the angle subtended by the chord with its supplement, especially when the diagram uses $\pi - \alpha$ style expressions.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics: uses only the standard radian sector formula $\tfrac{1}{2}r^2\theta$ and triangle area $\tfrac{1}{2}ab\sin C$, both on the formula sheet. No calculus or non-standard identities required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2022-Q5.html" class="example-chip">P1 Jan 2022 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

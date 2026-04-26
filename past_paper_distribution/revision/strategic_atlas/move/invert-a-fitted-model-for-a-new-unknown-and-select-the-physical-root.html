@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invert a fitted model for a new unknown and select the physical root — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Inverse Problem Solving</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Invert a fitted model for a new unknown and select the physical root</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Inverse Problem Solving</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question first establishes a model y = f(x) with all parameters determined (often in part (a)), then in a later part supplies a value of the output y and asks for the corresponding input x. Cues include phrases like &#x27;use your model to find the time when…&#x27;, &#x27;find the value of t for which…&#x27;, or being given the dependent variable and asked for the independent one. The model is fully specified, so the task collapses to solving a single equation in one unknown.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Once parameters are pinned down, the model is just an equation; substituting the given output reduces it to one equation in one unknown. Algebraic inversion (isolate, root-extract, log, etc.) typically yields multiple mathematical solutions, but the modelling context (time, length, population) constrains the variable to a physical domain. Selecting the admissible root is a modelling decision that must be justified, not a silent algebraic choice. Carrying unrounded parameter values through the inversion preserves accuracy in the final reported answer.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the model is fully determined and I&#x27;m being asked to go backwards: output is given, input is unknown.</li><li>I rule out re-fitting or re-deriving the model — parts (a) values stand and should be reused unrounded.</li><li>I commit to substituting the given output and isolating the unknown algebraically as a single equation.</li><li>I bridge to the first operation: substitute, then peel off operations in reverse order (subtract constant, divide coefficient, take root/log).</li><li>After root extraction I check the physical meaning of the variable (e.g. t ≥ 0) and explicitly reject any root outside that domain.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Substitute the given output value into the fitted model, being careful with any transformation (e.g. H³ when H = 5 gives 125, not 5).</li><li>Isolate the term containing the unknown by subtracting the constant and dividing by the coefficient.</li><li>Apply the inverse operation (square root, cube root, ln, etc.) to free the unknown.</li><li>List all mathematical roots, then reject those incompatible with the physical context, citing the reason.</li><li>Round only at the end, using unrounded parameter values throughout.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given the model $H^3 = 0.364t^2 + 4.724$, find $t$ when $H = 5$.\\ Substitute: $125 = 0.364t^2 + 4.724 \Rightarrow t^2 = \dfrac{120.276}{0.364} \approx 330.43$.\\ So $t = \pm\sqrt{330.43}$; reject the negative root since $t$ is years after planting.\\ Therefore $t \approx 18.2$ years (1 d.p.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Kinematics: given displacement $s$, find $t$ from $s = ut + \tfrac{1}{2}at^2$</div>
+<div class="adjustment">Solve a quadratic in $t$; reject negative or pre-launch roots based on the motion&#x27;s start time.</div>
+</div><div class="variant-row">
+<div class="scenario">Exponential growth/decay model $P = A e^{kt}$, given $P$ find $t$</div>
+<div class="adjustment">Divide by $A$ and take $\ln$; only one real root, but check it lies in the modelled time interval.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic model $y = a + b\ln x$, given $y$ find $x$</div>
+<div class="adjustment">Isolate $\ln x$ then exponentiate; the unique root is automatically positive, but check domain.</div>
+</div><div class="variant-row">
+<div class="scenario">Power-law model $y = ax^n$ from log-linear regression, given $y$ find $x$</div>
+<div class="adjustment">Rearrange to $x = (y/a)^{1/n}$; for even $n$, reject the negative root by context.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting the given value of $H$ directly where $H^n$ appears (e.g. using $5$ instead of $5^3 = 125$).</li><li>Treating the question as a fresh fitting problem rather than a reuse of the part (a) parameters.</li><li>Reading &#x27;find $t$&#x27; as asking for $t^2$ and stopping at the squared quantity.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using pre-rounded parameter values (e.g. $q = 4.72$ instead of $4.724$), which can push the final answer outside the accepted range.</li><li>Forgetting to take the square/cube root after isolating $t^2$ or $t^3$.</li><li>Including the negative root in the final answer without justifying its rejection on physical grounds.</li><li>Rounding intermediate quantities and then rounding again at the end, compounding error.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL territory: appears in modelling questions across P2/P3/P4 (kinematics, exponential models, log-linear regression contexts) where a fitted model is run in reverse and a physical-domain argument selects the valid root.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2021-Q2.html" class="example-chip">P1 Jan 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

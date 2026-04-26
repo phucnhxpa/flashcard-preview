@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reject non-positive roots after exponential substitution to enforce range — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Filtering</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reject non-positive roots after exponential substitution to enforce range</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Filtering</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>After substituting y = a^x (e.g. y = e^x, y = 2^x, y = 3^x) to convert an exponential equation into a quadratic in y, you have solved the quadratic and obtained two roots, at least one of which is zero or negative. Equivalent phrasings: &#x27;one root of the disguised quadratic came out negative&#x27;, &#x27;the quadratic in e^x has a negative solution&#x27;, &#x27;two values of y, one positive and one ≤ 0&#x27;. The cue is the mismatch between the algebraic output (any real number) and the range of the substitution (strictly positive).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any substitution of the form y = a^x with a &gt; 0 silently carries the constraint y &gt; 0, because a^x maps ℝ → (0, ∞). The quadratic produced by the substitution is blind to this constraint and may deliver extraneous roots. Filtering against the range of the substitution removes solutions that satisfy the quadratic but not the original exponential equation, preventing the impossible step of taking log of a non-positive number. This is an instance of the general principle: always check candidate solutions against the domain/range of the substituted function.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice I have two roots of the quadratic in y (or p), and at least one of them is negative or zero.</li><li>I recall what y stands for: y = a^x with a &gt; 0, whose range is (0, ∞) — so y can never be ≤ 0.</li><li>I rule out the temptation to apply logarithms directly to a negative root (ln of a negative number is undefined in the reals); I also rule out searching for complex solutions, which is outside A-level real-analysis scope.</li><li>I commit to discarding the non-positive root on domain grounds and stating this rejection explicitly, because examiners award marks for the justification, not just the final answer.</li><li>I keep the positive root and solve a^x = (positive value), either by recognising a power of a (e.g. 1/9 = 3^(−2), so x = −2) or, if no clean power is visible, by taking logs: x = log_a(value) or x = ln(value)/ln(a).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List the roots of the quadratic, e.g. y = y₁ and y = y₂.</li><li>For each root, test against y &gt; 0 (the range of a^x).</li><li>Reject any root with y ≤ 0, writing explicitly: &#x27;Reject y = y₁ since a^x &gt; 0 for all real x.&#x27;</li><li>For the surviving root y = y₂ &gt; 0, solve a^x = y₂.</li><li>If y₂ is a recognisable power of a, equate exponents directly; otherwise take logs: x = ln(y₂)/ln(a).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $e^{2x} - \tfrac{5}{2}e^x - \tfrac{3}{2} = 0$. Let $y = e^x$: $2y^2 - 5y - 3 = 0 \Rightarrow (2y+1)(y-3)=0$, so $y = -\tfrac{1}{2}$ or $y = 3$. Reject $y = -\tfrac{1}{2}$ since $e^x > 0$ for all real $x$. Hence $e^x = 3$, giving $x = \ln 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Substitution y = sin θ or y = cos θ in a trigonometric equation</div>
+<div class="adjustment">Reject any root with |y| &gt; 1, since the range of sin/cos is [−1, 1]; same domain-awareness principle.</div>
+</div><div class="variant-row">
+<div class="scenario">Substitution y = √x in an equation involving surds</div>
+<div class="adjustment">Reject any negative root since √x ≥ 0 by convention.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic equations with ln(f(x))</div>
+<div class="adjustment">After solving, check that f(x) &gt; 0 for each candidate; reject any x making the argument of ln non-positive.</div>
+</div><div class="variant-row">
+<div class="scenario">Positive root equals a clean power of the base, e.g. 1/9 = 3^(−2)</div>
+<div class="adjustment">Equate exponents directly instead of using logs — faster and avoids decimal answers.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the quadratic in y as the final equation and writing x = ln(negative root), which is undefined in ℝ.</li><li>Assuming both roots must be reported because &#x27;quadratics have two solutions&#x27;, forgetting the substitution constraint.</li><li>Attempting to use complex logarithms — outside the real-analysis scope of IAL.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Silently dropping the negative root without stating the reason — examiners deduct marks for missing justification.</li><li>Using logs unnecessarily when the surviving root is a recognisable power of the base (e.g. writing x = ln(1/9)/ln 3 instead of spotting x = −2).</li><li>Forgetting to verify the surviving root really is positive (a sign error in the quadratic could produce two negative roots, leaving no real solution).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 (exponentials and logarithms). Uses the standard fact that a^x &gt; 0 for a &gt; 0, and the log laws from the formula booklet for the final step. Do not introduce complex logarithms or principal-branch arguments — these are outside IAL scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Oct_2022-Q4.html" class="example-chip">P2 Oct 2022 Q4</a><a href="../P1/ch1/q-Jan_2023-Q5.html" class="example-chip">P1 Jan 2023 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

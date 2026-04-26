@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set discriminant to zero to enforce tangency / single-intersection — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Discriminant Condition</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Set discriminant to zero to enforce tangency / single-intersection</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Discriminant Condition</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question contains a geometric phrase that means &#x27;exactly one point of contact&#x27; — typical wording: &#x27;is a tangent to&#x27;, &#x27;touches the curve&#x27;, &#x27;meets at only one point&#x27;, or &#x27;show that ... has equal roots&#x27;. After equating the line and curve (or the two curves) and rearranging, you obtain a quadratic in x of the form Ax² + Bx + C = 0 in which one or more coefficients involve an unknown parameter (k, c, m, ...). The task is to find the value(s) of that parameter, or to derive a &#x27;show that&#x27; equation in the parameter. This is also the right tool when the question asks for the boundary case between &#x27;no intersection&#x27; and &#x27;two intersections&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a quadratic Ax² + Bx + C = 0, the discriminant Δ = B² − 4AC classifies the number of distinct real roots: Δ &gt; 0 gives two, Δ = 0 gives one repeated, Δ &lt; 0 gives none. Setting Δ = 0 is the precise algebraic translation of the geometric statement &#x27;tangent&#x27; or &#x27;touches&#x27;. This bridges geometry and algebra in one line, replacing a calculus-based gradient-matching argument (which would require differentiating, equating gradients, solving for x and back-substituting) with a single algebraic equation in the unknown parameter — usually faster and aligned with the A-level expected method.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Read the geometric cue carefully: &#x27;tangent&#x27;, &#x27;touches&#x27;, or &#x27;only one point&#x27; all signal exactly one intersection — neither zero nor two.</li><li>Rule out alternatives: factoring/completing the square fail because the parameter is unknown; gradient-matching via calculus works but typically requires more steps and is rarely the cleanest route when the parameter sits in a constant term.</li><li>Commit to the discriminant route: a repeated real root ⟺ Δ = 0, which directly converts the geometric condition into one equation in the parameter.</li><li>Bridge to action: form the intersection equation by equating the two expressions, rearrange to the standard form Ax² + Bx + C = 0, and carefully read off A, B, C — being alert that A, B, or C may themselves contain the parameter.</li><li>Tactical decision: write Δ = B² − 4AC symbolically before substituting numbers, then expand and simplify; if it is a &#x27;show that&#x27; question, aim to match the printed target equation exactly (watch for needing to divide through by a common factor).</li><li>Final check: if a square root step appears (e.g. (k − a)² = N), remember the ± to avoid losing a solution, and simplify any surds to standard form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Equate the two curves (or substitute the line into the curve) to form a single equation in x.</li><li>Rearrange to standard quadratic form Ax² + Bx + C = 0; identify A, B, C, noting any dependence on the parameter.</li><li>Write the discriminant condition: B² − 4AC = 0.</li><li>Substitute the coefficients and expand, watching signs carefully (especially when B or C is negative or contains the parameter).</li><li>Simplify and either solve for the parameter, or rearrange to match the target &#x27;show that&#x27; equation.</li><li>If solving, take ± when square-rooting and present surds in simplified form (e.g. √32 = 4√2).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find c such that y = 7x + c is tangent to y = x² . Equate: $x^2 = 7x + c \Rightarrow x^2 - 7x - c = 0$. Here $A=1,\ B=-7,\ C=-c$, so $\Delta = (-7)^2 - 4(1)(-c) = 49 + 4c$. Setting $\Delta = 0$ gives $49 + 4c = 0$, hence $c = -\tfrac{49}{4}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Line y = mx + c tangent to a circle x² + y² = r²</div>
+<div class="adjustment">Substitute y = mx + c into the circle equation, collect into a quadratic in x, and set Δ = 0 to obtain c² = r²(1 + m²) — avoids the perpendicular-distance formula.</div>
+</div><div class="variant-row">
+<div class="scenario">Line tangent to a parabola y² = 4ax</div>
+<div class="adjustment">Substitute and apply Δ = 0 to recover the standard tangent condition c = a/m.</div>
+</div><div class="variant-row">
+<div class="scenario">Two curves &#x27;touch&#x27; (both contain the parameter)</div>
+<div class="adjustment">Subtract one from the other to form a quadratic in x; A, B, and C may all depend on the parameter, so compute B² − 4AC symbolically before simplifying.</div>
+</div><div class="variant-row">
+<div class="scenario">&#x27;Does not intersect&#x27; or &#x27;intersects at two points&#x27;</div>
+<div class="adjustment">Use Δ &lt; 0 (no real roots) or Δ &gt; 0 (two distinct real roots) — same machinery, inequality instead of equation.</div>
+</div><div class="variant-row">
+<div class="scenario">Line tangent to y = a/x + k (rectangular hyperbola form)</div>
+<div class="adjustment">After multiplying through by x to clear the fraction, you obtain a quadratic in x; apply Δ = 0 as usual.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing &#x27;tangent&#x27; / &#x27;touches&#x27; (Δ = 0) with &#x27;does not intersect&#x27; (Δ &lt; 0) or &#x27;crosses&#x27; (Δ &gt; 0).</li><li>Treating &#x27;one point of intersection&#x27; as &#x27;the quadratic has one positive root&#x27; — these are different conditions.</li><li>Forgetting that a repeated root counts as a single intersection point, not two.</li><li>Assuming there must be exactly one value of the parameter — square-rooting often yields two valid values, both geometrically meaningful.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in identifying C: e.g. if the equation is x² − 7x − c = 0 then C = −c, so −4AC = +4c. This is the most common slip.</li><li>Forgetting that B retains its sign: B = −7 gives B² = 49, not −49.</li><li>Arithmetic errors in 4AC, especially when A or C contain numeric coefficients (e.g. 4 × 2 × 4 = 32, not 16 or 64).</li><li>Losing a solution by dropping the ± when square-rooting (k − a)² = N.</li><li>In &#x27;show that&#x27; problems, failing to divide through by a common factor or fully expand to match the printed target equation.</li><li>Misidentifying A when both curves contribute an x² term — the coefficient of x² after rearrangement is the difference of the two leading coefficients.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1/P2) and reused throughout P3 and Further Pure for tangency to circles, parabolas, and general conics. The discriminant B² − 4AC is standard and not in the formula booklet (assumed memorised). Avoid invoking discriminants of cubics or higher (out of scope) — for those, A-level questions instead use factor theorem or gradient/derivative arguments.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2019-Q6.html" class="example-chip">P1 Jun 2019 Q6</a><a href="../P1/ch1/q-Oct_2019-Q6.html" class="example-chip">P1 Oct 2019 Q6</a><a href="../P1/ch1/q-Jun_2024-Q4.html" class="example-chip">P1 Jun 2024 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply point-gradient form to construct a line equation from a point and slope — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Line Equation Construction</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Apply point-gradient form to construct a line equation from a point and slope</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Line Equation Construction</strong></span>
+    <span>Frequency: <strong>12 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever you have (i) a specific point (x₁, y₁) on the line and (ii) the line&#x27;s gradient m, and you are asked to produce the equation of that line. Typical surface cues: &#x27;find the equation of the tangent/normal/perpendicular bisector at...&#x27;, &#x27;find the equation of line l through M with gradient...&#x27;, or two points have just been used to compute a midpoint/intersection plus a gradient has been derived (e.g. via differentiation, perpendicularity, or the two-point gradient formula). Equivalent phrasings: &#x27;show that l has equation ax + by + c = 0&#x27;, &#x27;find the equation of the line in the form y = mx + c&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The point-gradient form y − y₁ = m(x − x₁) is the unique line of slope m passing through (x₁, y₁), and it ingests exactly the two pieces of data you have in one substitution. The alternative — starting from y = mx + c, substituting the point to solve for c, then rewriting — adds an unnecessary solve step. The form is essentially the definition of slope ((y − y₁)/(x − x₁) = m) cleared of its denominator, so it is the most direct algebraic route whenever a point and gradient are simultaneously available.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the two ingredients on the table: a numerical gradient m and a concrete point (x₁, y₁) on the target line.</li><li>Rule out y = mx + c then solve for c: workable but requires an extra rearrangement, with more chances for sign error.</li><li>Rule out the two-point form (y − y₁)/(y₂ − y₁) = (x − x₁)/(x₂ − x₁): only relevant if you have two points and have not yet computed m.</li><li>Commit to point-gradient form because it absorbs both inputs in a single substitution.</li><li>Tactical choice: if two points were available and you computed m, pick the point with simpler (especially non-negative) coordinates to keep the arithmetic clean.</li><li>Bridge to action: write y − y₁ = m(x − x₁), then expand, then rearrange to whichever final form (y = mx + c or ax + by + c = 0 with integer coefficients) the question demands.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify (x₁, y₁) and m clearly; write them down to avoid mis-substitution.</li><li>Substitute into y − y₁ = m(x − x₁), being careful with negative coordinates: y − (−3) becomes y + 3, x − (−5) becomes x + 5.</li><li>Expand the right-hand side: distribute m through (x − x₁).</li><li>Rearrange to the required form: for y = mx + c isolate y; for ax + by + c = 0 collect all terms on one side and clear fractions to get integer coefficients (with a &gt; 0 if the mark scheme demands).</li><li>(Optional check) Substitute (x₁, y₁) back into the final equation to verify it satisfies it.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given point $M(5,2)$ and gradient $m=3$, find the line in the form $ax+by+c=0$. Write $y-2 = 3(x-5)$. Expand: $y-2 = 3x-15$. Rearrange: $3x - y - 13 = 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Two points known, gradient not yet computed</div>
+<div class="adjustment">First compute m = (y₂ − y₁)/(x₂ − x₁), then apply point-gradient form using whichever point has cleaner coordinates.</div>
+</div><div class="variant-row">
+<div class="scenario">Line must be perpendicular/parallel to a given line</div>
+<div class="adjustment">Take m of the given line, replace with −1/m (perpendicular) or keep it (parallel), then proceed identically.</div>
+</div><div class="variant-row">
+<div class="scenario">Final answer required as y = mx + c (e.g. for sketching or substitution into a curve)</div>
+<div class="adjustment">After expanding, isolate y rather than collecting to ax + by + c = 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent/normal at a point on a curve</div>
+<div class="adjustment">Obtain m from dy/dx evaluated at x₁ (tangent) or its negative reciprocal (normal); the construction step is unchanged.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting endpoint coordinates A or B instead of the midpoint M when the line is the perpendicular bisector.</li><li>Reading &#x27;normal&#x27; as &#x27;tangent&#x27; (or vice versa) and using the wrong gradient.</li><li>When two points are given, mixing up which is (x₁, y₁) versus (x₂, y₂) and computing −m instead of m.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors with negative coordinates: x − (−5) must become (x + 5), not (x − 5).</li><li>Distribution slip when expanding m(x − x₁), especially with fractional or negative m (e.g. −(5/4)(x+5)).</li><li>When converting to ax + by + c = 0, leaving non-integer coefficients or a negative leading coefficient when the mark scheme requires integers and a &gt; 0.</li><li>Forgetting to move all terms to one side, leaving the equation in mixed form.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P1/P2 coordinate geometry; the formula y − y₁ = m(x − x₁) is given in the formula booklet. Stays within straight-line geometry — do not over-generalise to curves, and note that vertical lines (undefined gradient) require the separate form x = x₁.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (12)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jun_2023-Q3.html" class="example-chip">P2 Jun 2023 Q3</a><a href="../P1/ch1/q-Jun_2022-Q5.html" class="example-chip">P1 Jun 2022 Q5</a><a href="../P1/ch4/q-Specimen_2018-Q9.html" class="example-chip">P1 Specimen 2018 Q9</a><a href="../P1/ch1/q-Oct_2023-Q8.html" class="example-chip">P1 Oct 2023 Q8</a><a href="../P1/ch4/q-Jun_2019-Q1.html" class="example-chip">P1 Jun 2019 Q1</a><a href="../P1/ch4/q-Jan_2024-Q3.html" class="example-chip">P1 Jan 2024 Q3</a><a href="../P1/ch1/q-Jan_2021-Q4.html" class="example-chip">P1 Jan 2021 Q4</a><a href="../P2/ch3/q-Jan_2024-Q3.html" class="example-chip">P2 Jan 2024 Q3</a><a href="../P3/ch4/q-Jun_2023-Q7.html" class="example-chip">P3 Jun 2023 Q7</a><a href="../FP1/ch4/q-Jan_2024-Q3.html" class="example-chip">FP1 Jan 2024 Q3</a><a href="../P1/ch4/q-Jun_2023-Q8.html" class="example-chip">P1 Jun 2023 Q8</a><a href="../P2/ch3/q-Oct_2024-Q10.html" class="example-chip">P2 Oct 2024 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

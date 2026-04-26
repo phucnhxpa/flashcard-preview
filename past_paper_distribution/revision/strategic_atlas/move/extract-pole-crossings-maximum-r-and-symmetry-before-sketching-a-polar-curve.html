@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extract pole crossings, maximum r, and symmetry before sketching a polar curve — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../polar.html">Polar Coordinates</a> / <strong>Feature Extraction</strong></div>
+  <span class="domain-pill" style="background:#AB47BC;color:white">Polar Coordinates</span>
+  <h1>Extract pole crossings, maximum r, and symmetry before sketching a polar curve</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Feature Extraction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question says &#x27;sketch the curve with polar equation r = f(θ)&#x27; or asks to identify key features of a polar curve. Also triggers when later parts depend on knowing tangent directions at the pole or the furthest point from O. Phrases like &#x27;show that the curve has a cusp&#x27;, &#x27;find the tangents at the pole&#x27;, or &#x27;state the maximum value of r&#x27; are explicit cues. Do not just plot a table of points — extract structural features first.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Setting r = 0 locates the angles where the curve passes through the pole; these are precisely the tangent directions there, and they partition the curve into lobes or petals. Maximising r (by inspection of the trig term or by dr/dθ = 0) gives the curve&#x27;s furthest reach and the angle at which it occurs. Symmetry tests (θ → −θ, θ → π − θ) halve the work and force a correct global shape. Together these three features determine the sketch up to smooth interpolation, which is the standard expected at A-level.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice this is a sketch task for r = f(θ), so I need a skeleton of features rather than a dense point plot.</li><li>I rule out brute-force tabulation of r at many angles — that risks missing the cusp/petal structure and wastes time.</li><li>I commit to the standard triad: pole crossings (r = 0), maximum r, and symmetry, because these pin down shape with minimal calculation.</li><li>First concrete operation: solve f(θ) = 0 on [0, 2π) to get tangent directions at O, then find where the trig term hits its max to locate r_max.</li><li>Tactically, I check f(−θ) vs f(θ) for initial-line symmetry; if r would go negative on some interval, I note the convention used (typically restrict to r ≥ 0 unless told otherwise) before joining points smoothly.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Solve f(θ) = 0 for θ ∈ [0, 2π) to find all pole crossings; these give tangent directions at O.</li><li>Find max r: either spot where the trig term equals ±1, or solve dr/dθ = 0 and evaluate.</li><li>Test symmetry: compute f(−θ) (initial-line symmetry) and/or f(π − θ) (symmetry about θ = π/2).</li><li>If r can be negative on the given range, decide whether to restrict to r ≥ 0 or reflect through the pole, per the question&#x27;s convention.</li><li>Plot the pole crossings, the max-r point(s), and a couple of intermediate points; join smoothly using symmetry; label the curve and any axis intercepts.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sketch r = a(1 + cosθ), a > 0, for θ ∈ [0, 2π). Pole: 1 + cosθ = 0 ⇒ θ = π, so the curve meets O tangent to the initial line. Max r: cosθ = 1 ⇒ θ = 0, r = 2a. Symmetry: f(−θ) = a(1 + cos(−θ)) = f(θ), so symmetric about the initial line. Sketch: cardioid with cusp at O (along θ = π) and tip at (2a, 0).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cardioid r = a(1 ± cosθ) or r = a(1 ± sinθ)</div>
+<div class="adjustment">Single pole crossing where the bracket vanishes; max r = 2a at the opposite angle; cusp at the pole along that tangent direction.</div>
+</div><div class="variant-row">
+<div class="scenario">Rose curve r = a cos(nθ) or a sin(nθ)</div>
+<div class="adjustment">Pole crossings at θ = π/(2n) + kπ/n give petal boundaries; n petals if n odd, 2n petals if n even; max r = a at petal centres.</div>
+</div><div class="variant-row">
+<div class="scenario">Limaçon r = a + b cosθ with a &lt; b</div>
+<div class="adjustment">Inner loop appears; r = 0 gives two angles bounding the inner loop; max r = a + b at θ = 0, min |r| structure must be checked.</div>
+</div><div class="variant-row">
+<div class="scenario">Spiral r = aθ on [0, 2π]</div>
+<div class="adjustment">r = 0 only at θ = 0; no finite max — endpoints determine extent; no rotational symmetry, so plot more intermediate points.</div>
+</div><div class="variant-row">
+<div class="scenario">Curve given parametrically by r and θ in part (a), area in part (b)</div>
+<div class="adjustment">Pole crossings give the integration limits for ½∫r² dθ over a single lobe.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating r = 0 as &#x27;the curve is undefined&#x27; instead of &#x27;the curve passes through the pole at this θ&#x27;.</li><li>Confusing maximum r with maximum y or maximum x — the question asks for radial distance from O.</li><li>Reading r = a(1 + cosθ) as a circle because it superficially resembles one near θ = 0.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Plotting only a handful of points without extracting features, then drawing a circle in place of a cardioid or missing petals on a rose curve.</li><li>Ignoring intervals where f(θ) &lt; 0 and either drawing a phantom branch or omitting a real loop.</li><li>Forgetting to state the tangent directions at the pole when the question asks for them, even after correctly finding r = 0.</li><li>Using degrees in dr/dθ when the rest of the working is in radians, leading to scale errors.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure polar coordinates content: sketches of cardioids, limaçons, roses, and spirals using r = 0, max r, and symmetry. No need for curvature or higher-order tangent analysis beyond identifying tangent lines at the pole.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch7/q-Jan_2024-Q5.html" class="example-chip">FP2 Jan 2024 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

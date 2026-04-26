@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose log arguments into atoms log_a(a) and log_a(b) — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Logarithmic Decomposition</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Decompose log arguments into atoms log_a(a) and log_a(b)</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Logarithmic Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when an expression involves logarithms (single base $a$) whose arguments are products, quotients, or powers built from $a$ and $b$, and the only given datum is $\log_a b = k$. The required answer must be expressed purely in terms of $k$. Surface cues: arguments like $\sqrt{a}/b$, $a^2 b^3$, $a/b^n$, or ratios of such logs. Equivalent phrasings: &#x27;express in terms of $k$&#x27;, &#x27;find the value of $\log_a(\ldots)$ given $\log_a b = k$&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any log with base $a$ whose argument is built multiplicatively from $a$ and $b$ can be reduced via the product, quotient, and power laws to a linear combination of $\log_a a$ and $\log_a b$. Since $\log_a a = 1$ and $\log_a b = k$ are the only evaluable quantities in this setting, these two are the natural &#x27;atoms&#x27; at which simplification must terminate. Targeting them up front gives a deterministic route from a compound log expression to an algebraic expression in $k$.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the only known logarithmic value is $\log_a b = k$, and that $\log_a a = 1$ is automatic — so the answer must collapse onto these two quantities.</li><li>Rules out trying to evaluate logs numerically or combining a fraction of logs as a single log (a common temptation when the expression is $\log(\cdot)/\log(\cdot)$).</li><li>Commits to applying log laws purely structurally: split products into sums, quotients into differences, and pull exponents out front.</li><li>Bridges to operation by scanning each argument: identify whether it is a product, quotient, or power of $a$ and $b$, and choose the matching law first.</li><li>Tactically applies quotient/product rule before the power rule to expose each $a^p$ and $b^q$ as a separate term, then pulls $p$ and $q$ out as coefficients and substitutes $\log_a a = 1$, $\log_a b = k$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify each argument&#x27;s multiplicative structure (product / quotient / power of $a$ and $b$).</li><li>Apply the quotient rule: $\log_a(X/Y) = \log_a X - \log_a Y$.</li><li>Apply the product rule: $\log_a(XY) = \log_a X + \log_a Y$.</li><li>Apply the power rule: $\log_a(X^n) = n\log_a X$, including fractional powers from radicals.</li><li>Substitute $\log_a a = 1$ and $\log_a b = k$.</li><li>Collect terms into a single linear or rational expression in $k$.</li><li>If the original expression is a ratio of logs, simplify numerator and denominator separately — do NOT merge into a single log.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\log_a b = k$, evaluate $\log_a\!\left(\dfrac{\sqrt{a}}{b}\right)$. \\ $\log_a(\sqrt{a}/b) = \log_a a^{1/2} - \log_a b = \tfrac{1}{2}\log_a a - \log_a b = \tfrac{1}{2} - k$. \\ Similarly $\dfrac{\log_a(a^2 b^3)}{\log_a(b^2)} = \dfrac{2 + 3k}{2k}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Numeric base with prime-factored argument, e.g. $\log_2 72$ given $\log_2 3 = c$.</div>
+<div class="adjustment">Factorise the argument over primes ($72 = 2^3\cdot 3^2$) and treat $\log_2 2 = 1$ and $\log_2 3 = c$ as the atoms.</div>
+</div><div class="variant-row">
+<div class="scenario">Two given data, e.g. $\log_a b = p$ and $\log_a c = q$, asked for $\log_a(b^m c^n / a^r)$.</div>
+<div class="adjustment">Same decomposition, now landing on three atoms $\log_a a, \log_a b, \log_a c$ with values $1, p, q$.</div>
+</div><div class="variant-row">
+<div class="scenario">Change-of-base required: expression uses $\log_b x$ but the data is in base $a$.</div>
+<div class="adjustment">Apply $\log_b x = \log_a x / \log_a b$ first, then decompose the base-$a$ logs as usual.</div>
+</div><div class="variant-row">
+<div class="scenario">Argument involves a sum/difference, e.g. $\log_a(a + b)$.</div>
+<div class="adjustment">Move does NOT apply — log laws do not split sums; flag and seek a different strategy.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\dfrac{\log_a X}{\log_a Y}$ as $\log_a(X/Y)$ — confusing division of logs with the quotient rule.</li><li>Reading $\log_a(a+b)$ as decomposable, attempting to split the sum inside the log.</li><li>Mistaking $\sqrt{a}$ for $a$ and dropping the $\tfrac{1}{2}$ exponent.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting that $\log_a a = 1$ and leaving stray $\log_a a$ terms in the final answer.</li><li>Misapplying the power rule as $\log(x^n) = (\log x)^n$ instead of $n\log x$.</li><li>Collapsing $\log_a(X)/\log_a(Y)$ into $\log_a(X/Y)$ — a frequent error in ratio-of-logs questions.</li><li>Sign errors when applying the quotient rule, especially with nested radicals like $\sqrt{a/b}$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 logarithm content: laws of logarithms (product, quotient, power), $\log_a a = 1$, and change of base. No calculus or series tools required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Oct_2019-Q7.html" class="example-chip">P2 Oct 2019 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

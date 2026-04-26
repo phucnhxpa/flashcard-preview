@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Take logs of exponential inequality, flip when base is between 0 and 1 — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Inequality Solve</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Take logs of exponential inequality, flip when base is between 0 and 1</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Inequality Solve</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The unknown sits in an exponent inside an inequality of the form $a^k &lt; b$ (or $&gt;$, $\le$, $\ge$) and the base $a$ satisfies $0 &lt; a &lt; 1$. Cues include fractional bases like $30/31$, decay factors, or expressions like $(0.97)^n$. The presence of an inequality (not an equation) is what makes the sign of $\ln a$ critical. Equivalent phrasings: &#x27;find the smallest $n$ such that …&#x27;, &#x27;how many terms before the value drops below …&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Taking $\ln$ of both sides is valid because $\ln$ is strictly increasing on $(0,\infty)$, so the direction of the inequality is preserved at this step. The exponent is brought down by the law $\ln(a^k) = k\ln a$, converting the exponential inequality into a linear one in $k$. However, isolating $k$ requires dividing by $\ln a$, and when $0 &lt; a &lt; 1$ this quantity is negative, which forces a sign-flip. Recognising the sign of $\ln a$ is the entire point of the move.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice $k$ is in the exponent, so logs are the natural tool to extract it.</li><li>Rule out trial-and-error or repeated multiplication; logs give a closed-form bound.</li><li>Commit because $\ln$ is monotonic increasing, so applying $\ln$ keeps the inequality intact.</li><li>Bridge: rewrite $k\ln a &lt; \ln b$ and prepare to divide by $\ln a$.</li><li>Tactical: check the sign of $\ln a$. Since $0 &lt; a &lt; 1$, $\ln a &lt; 0$, so dividing reverses the inequality.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Apply $\ln$ to both sides: $k\ln a &lt; \ln b$ (direction preserved).</li><li>Identify sign: since $0 &lt; a &lt; 1$, $\ln a &lt; 0$.</li><li>Divide by $\ln a$ and reverse the inequality: $k &gt; \dfrac{\ln b}{\ln a}$.</li><li>Evaluate the right-hand side numerically with full calculator precision.</li><li>Take the smallest integer satisfying the strict inequality (ceiling if non-integer).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(30/31)^k < 271/961$. Apply $\ln$: $k\ln(30/31) < \ln(271/961)$. Since $\ln(30/31) \approx -0.032789 < 0$, dividing flips: $k > \dfrac{\ln(271/961)}{\ln(30/31)} \approx \dfrac{-1.2657}{-0.032789} \approx 38.60$. Smallest integer: $k = 39$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Base $a &gt; 1$, e.g. compound growth $(1.05)^n &gt; 2$</div>
+<div class="adjustment">$\ln a &gt; 0$, so dividing preserves direction: $n &gt; \ln 2/\ln 1.05$.</div>
+</div><div class="variant-row">
+<div class="scenario">Geometric series tail bound, e.g. find smallest $n$ with $ar^{n-1} &lt; \varepsilon$ where $|r|&lt;1$</div>
+<div class="adjustment">Same flip applies after isolating $r^{n-1}$ and taking logs.</div>
+</div><div class="variant-row">
+<div class="scenario">Decay model $A_0 e^{-\lambda t} &lt; c$ with $\lambda &gt; 0$</div>
+<div class="adjustment">Dividing by $-\lambda$ flips, giving $t &gt; \tfrac{1}{\lambda}\ln(A_0/c)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Reverse inequality $a^k &gt; b$ with $0 &lt; a &lt; 1$</div>
+<div class="adjustment">Same logic; sign-flip yields $k &lt; \ln b/\ln a$, so seek the largest integer.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\ln(30/31)$ as positive and concluding $k &lt; 38.60$, giving the wrong integer.</li><li>Reading the problem as an equation and ignoring inequality direction entirely.</li><li>Confusing &#x27;smallest $k$&#x27; with &#x27;largest $k$&#x27; once the direction has flipped.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding $\ln$ values too early; the boundary value can shift across an integer.</li><li>Mixing $\ln$ and $\log_{10}$ in the same calculation due to calculator-mode error.</li><li>Forgetting to convert back to the originally requested quantity (e.g. $N = 20 + k$).</li><li>Applying $\ln$ to a negative or zero side without checking positivity first.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 logarithm work and geometric-series threshold problems; uses only monotonicity of $\ln$ and basic log laws.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2022-Q8.html" class="example-chip">P2 Jan 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split a rational fraction term-by-term into standard integrable pieces — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Algebraic Decomposition</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Split a rational fraction term-by-term into standard integrable pieces</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Algebraic Decomposition</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The integrand is a rational function whose denominator is a single power of a linear factor (e.g. u², (x+1)) or a monomial, and whose numerator is a low-degree polynomial. Either (i) numerator degree &lt; denominator degree but the fraction is not a single standard form, or (ii) numerator degree = denominator degree (improper) so direct integration fails. Visual cues: &#x27;one fraction bar, monomial or repeated linear denominator, polynomial on top&#x27;. Equivalent phrasings: &#x27;divide each term by the denominator&#x27;, &#x27;write top in terms of bottom&#x27;, &#x27;(x+1)−1 over (x+1)&#x27; trick.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Splitting the fraction converts a non-standard rational expression into a sum of elementary forms — typically 1, 1/u, and u^(−n) — each of which integrates immediately via the power rule or to ln|u|. The underlying principle is just linearity of division: (A+B)/C = A/C + B/C, plus the algebraic identity &#x27;rewrite the numerator as (denominator) ± (remainder)&#x27; for improper fractions. This avoids the heavier machinery of formal partial fractions or u-substitution when the denominator is a single repeated factor, and it produces antiderivatives without any further technique.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand is a single rational fraction that does not match any standard integral form (not 1/u, not u^n, not 1/(1+u²), etc.).</li><li>Check the degrees: if num-degree &lt; denom-degree AND the denominator is a monomial like u² or (x+a)^n, term-by-term division will work directly; if num-degree = denom-degree, rewrite the numerator as (denominator) − (remainder) first.</li><li>Rule out partial fractions — they would only re-derive the same split when the denominator is a single repeated factor — and rule out u-substitution as unnecessarily long for a linear denominator.</li><li>Commit to the split because every resulting term will be either k/u (→ ln|u|) or k·u^(−n) (→ power rule), both standard.</li><li>Execute the algebra carefully, watching the sign on each piece (especially the −u^(−2) → +u^(−1) flip), then integrate term by term and combine.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the denominator D and the numerator N; compare degrees.</li><li>If deg N &lt; deg D and D is a monomial/repeated factor: divide each term of N by D, e.g. (u−1)/u² = u/u² − 1/u² = 1/u − u^(−2).</li><li>If deg N = deg D: rewrite N as (D) − r so that N/D = 1 − r/D, e.g. x/(x+1) = [(x+1)−1]/(x+1) = 1 − 1/(x+1).</li><li>Integrate each piece using ∫1/u du = ln|u| and ∫u^n du = u^(n+1)/(n+1) (n ≠ −1).</li><li>Combine, restore constants/limits, and apply bounds if the integral is definite.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $\int_1^2 \frac{u-1}{u^2}\,du$. Split: $\frac{u-1}{u^2}=\frac{1}{u}-u^{-2}$. Antiderivative: $\ln|u|+\frac{1}{u}$. Evaluate: $\big[\ln 2 + \tfrac12\big] - \big[0+1\big] = \ln 2 - \tfrac12$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Numerator with several terms over a monomial, e.g. (x²+3x−1)/x³</div>
+<div class="adjustment">Divide each numerator term by x³ to get 1/x + 3/x² − 1/x³, then apply power rule / ln to each.</div>
+</div><div class="variant-row">
+<div class="scenario">Improper fraction with linear denominator, e.g. x/(x+1)</div>
+<div class="adjustment">Write x = (x+1) − 1, giving 1 − 1/(x+1); integrates to x − ln|x+1|.</div>
+</div><div class="variant-row">
+<div class="scenario">Improper fraction with quadratic denominator, e.g. (x²+1)/(x²−1)</div>
+<div class="adjustment">Write numerator as (denominator) + remainder: 1 + 2/(x²−1); the remainder then needs partial fractions.</div>
+</div><div class="variant-row">
+<div class="scenario">Denominator is a product of distinct linear factors, e.g. (u−1)(u+2)</div>
+<div class="adjustment">Term-by-term division does NOT work; use formal partial fractions A/(u−1) + B/(u+2).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Setting up a full partial-fractions decomposition for (au+b)/u² — not wrong but slower than just dividing each term.</li><li>Trying partial fractions on x/(x+1) — the denominator is a single linear factor, so algebraic division is what is needed.</li><li>Treating an improper fraction as if num-degree &lt; denom-degree and integrating directly, missing the need to extract the polynomial part first.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error on ∫−u^(−2) du: the answer is +u^(−1) = +1/u, because ∫u^(−2)du = −u^(−1).</li><li>Misapplying the power rule to u^(−1) (writing u^0/0); this term integrates to ln|u|, not a power.</li><li>Dropping absolute values: write ln|u|, not ln u, especially in indefinite integrals or when limits could include negatives.</li><li>Sign error when distributing a leading minus sign through the split, e.g. −∫x/(x+1)dx = −x + ln|x+1|, not −x − ln|x+1|.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3/P4 integration. Uses the standard integrals ∫1/x dx = ln|x| and ∫x^n dx = x^(n+1)/(n+1) from the formula booklet. Avoid invoking partial fractions of irreducible quadratics or repeated higher-power factors beyond IAL scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Oct_2023-Q7.html" class="example-chip">P4 Oct 2023 Q7</a><a href="../P4/ch6/q-Oct_2021-Q6.html" class="example-chip">P4 Oct 2021 Q6</a><a href="../FP2/ch4/q-Oct_2021-Q4.html" class="example-chip">FP2 Oct 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

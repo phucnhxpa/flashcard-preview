@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare coefficients of matching linear forms to extract parameters — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Coefficient Comparison</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Compare coefficients of matching linear forms to extract parameters</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Coefficient Comparison</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Two expressions for the same quantity are both linear in the same variable, with one side fully numerical (e.g. $0.154t + 3.08$) and the other carrying unknown parameters (e.g. $(\log_{10} b)\,t + \log_{10} a$). This commonly arises after linearising an exponential model $N = ab^t$ via logarithms, or when matching a derived identity to a given form. The cue is &#x27;these must be the same line/polynomial&#x27;, so corresponding coefficients must agree term-by-term.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If two polynomials (or linear expressions) are equal for all values of the variable, the identity theorem forces matching coefficients. This converts a single equation in two unknowns into two independent single-variable equations, one per coefficient slot. It avoids substitution, elimination, or solving simultaneous equations, and is exact rather than numerical. The principle generalises to any finite-dimensional basis where representations are unique.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice both sides are linear in $t$ and equal for all $t$, not just at one value.</li><li>I rule out substituting specific $t$-values to build simultaneous equations — that&#x27;s slower and risks numerical error.</li><li>I commit to coefficient comparison because uniqueness of linear representation guarantees gradient matches gradient and intercept matches intercept.</li><li>I align the two forms in the same shape: $(\log_{10} b)\,t + \log_{10} a \equiv 0.154t + 3.08$.</li><li>I read off $\log_{10} b = 0.154$ and $\log_{10} a = 3.08$, then invert each logarithm independently using $10^{(\cdot)}$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write both sides in the same canonical linear form in $t$.</li><li>Equate coefficients of $t$: $\log_{10} b = 0.154$.</li><li>Equate constant terms: $\log_{10} a = 3.08$.</li><li>Solve $b = 10^{0.154} \approx 1.43$ (3 s.f.).</li><li>Solve $a = 10^{3.08} \approx 1200$ (3 s.f.).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\log_{10} N = 0.154t + 3.08$ and the model $N = ab^t$, take logs: $\log_{10} N = (\log_{10} b)\,t + \log_{10} a$. Matching coefficients of $t$: $\log_{10} b = 0.154 \Rightarrow b = 10^{0.154} \approx 1.43$. Matching constants: $\log_{10} a = 3.08 \Rightarrow a = 10^{3.08} \approx 1200$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Polynomial identity, e.g. $x^2 + px + q \equiv (x+2)(x+3)$</div>
+<div class="adjustment">Expand RHS, then equate coefficients of $x^2$, $x$, and constant separately.</div>
+</div><div class="variant-row">
+<div class="scenario">Partial fractions, e.g. $\frac{3x+5}{(x-1)(x+2)} \equiv \frac{A}{x-1} + \frac{B}{x+2}$</div>
+<div class="adjustment">Clear denominators to get a polynomial identity, then compare coefficients of each power of $x$ (or use cover-up).</div>
+</div><div class="variant-row">
+<div class="scenario">Linearised power model $y = ax^n$ giving $\log y = n \log x + \log a$</div>
+<div class="adjustment">Compare against numerical line $\log y = m\log x + c$: $n = m$, $\log a = c$.</div>
+</div><div class="variant-row">
+<div class="scenario">Binomial expansion matched to a given series</div>
+<div class="adjustment">Equate coefficients of $x^0, x^1, x^2,\dots$ to find unknown constants in the original expression.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric identity $R\sin(\theta+\alpha) \equiv a\sin\theta + b\cos\theta$</div>
+<div class="adjustment">Expand and compare coefficients of $\sin\theta$ and $\cos\theta$ to get $R\cos\alpha = a$, $R\sin\alpha = b$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the equation as holding only at one value of $t$, then trying to solve a single equation in two unknowns.</li><li>Confusing which side carries the unknowns and which side carries the numerical data.</li><li>Believing the gradient encodes $a$ and the intercept encodes $b$ (it is the other way round for $N = ab^t$).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Swapping gradient and intercept: assigning $\log_{10} a = 0.154$ and $\log_{10} b = 3.08$.</li><li>Rounding $10^{3.08}$ prematurely or to the wrong number of significant figures.</li><li>Forgetting to take antilogs and leaving answers as $\log_{10} a$, $\log_{10} b$.</li><li>Using natural log antilog ($e^{(\cdot)}$) when the original log was base 10.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure scope: linearisation of exponential/power models with logarithms (P2/P3), polynomial identities, and partial fractions (P4) all rely on this same coefficient-matching principle.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Jun_2022-Q4.html" class="example-chip">P3 Jun 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divide two GP term equations to eliminate a and isolate r — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Ratio Elimination</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Divide two GP term equations to eliminate a and isolate r</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Ratio Elimination</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Two equations of the form $ar^{n-1}$ are known for distinct positions in a geometric progression (e.g. the 2nd and 5th terms), and the task is to find the common ratio $r$ (and possibly $a$ afterwards). The shared unknown $a$ appears as a multiplicative factor in both. Phrasings include &#x27;the second term is..., the fifth term is...&#x27; or &#x27;given $u_p$ and $u_q$ of a GP, find $r$&#x27;. Whenever you see two GP terms specified numerically, this move should be the default reflex.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Every term of a GP has the multiplicative form $ar^{n-1}$, so the ratio of any two terms is purely a power of $r$ — the factor $a$ cancels exactly. This reduces a two-unknown system to a single equation $r^{q-p} = u_q/u_p$, which is solved by a single root extraction. Substitution would also work but typically forces a fraction $a = u_p/r^{p-1}$ into the second equation, producing avoidable algebra. Division exploits the geometric (multiplicative) structure directly, mirroring how the GP itself is defined.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice both given equations share the factor $a$ and differ only in the power of $r$ — this is the GP fingerprint.</li><li>I rule out subtracting the equations (that&#x27;s an AP/linear instinct) and rule out substitution because it would introduce a fraction $a = 12/r$.</li><li>I commit to dividing the higher-index equation by the lower one because $a$ cancels in one stroke, leaving a clean power of $r$.</li><li>Concretely: $\frac{ar^4}{ar} = \frac{324}{12}$ gives $r^3 = 27$.</li><li>I check the exponent difference (here 3, odd) so only one real root applies; if it had been even I would pause to consider $\pm$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Label the two given terms with their GP formula, e.g. $u_2 = ar = 12$ and $u_5 = ar^4 = 324$.</li><li>Form the ratio (higher index)/(lower index): $\frac{ar^4}{ar} = \frac{324}{12}$.</li><li>Simplify the left side using index laws to $r^{q-p}$ (here $r^3$).</li><li>Simplify the right side numerically (here $27$).</li><li>Take the appropriate root of both sides: $r = \sqrt[3]{27} = 3$ (consider $\pm$ if the index is even).</li><li>Back-substitute $r$ into either original equation to find $a$ if required.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $u_2 = ar = 12$ and $u_5 = ar^4 = 324$ in a GP. Dividing: $\dfrac{ar^4}{ar} = \dfrac{324}{12}$, so $r^3 = 27$ and $r = 3$. Then $a = 12/r = 4$, giving the GP $4, 12, 36, 108, 324, \dots$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">GP with 3rd and 7th terms given</div>
+<div class="adjustment">Dividing yields $r^4 = u_7/u_3$; since the exponent is even, include $r = \pm\sqrt[4]{\cdot}$ unless the context (e.g. all positive terms) rules out the negative root.</div>
+</div><div class="variant-row">
+<div class="scenario">GP given by sum conditions like $u_1 + u_2 = S_1$ and $u_3 + u_4 = S_2$</div>
+<div class="adjustment">Factor each side first: $a(1+r)$ and $ar^2(1+r)$; dividing cancels both $a$ and $(1+r)$, leaving $r^2$.</div>
+</div><div class="variant-row">
+<div class="scenario">GP defined recursively with $u_{n+1}/u_n = r$ given two non-adjacent values</div>
+<div class="adjustment">Same division principle — ratio of any two terms is $r$ raised to the index gap.</div>
+</div><div class="variant-row">
+<div class="scenario">Finding $r$ in a GP from $S_n$ formulae where $a$ is shared</div>
+<div class="adjustment">Divide two $S_n$ expressions to cancel $a$, leaving an equation in $r$ alone (often non-trivial polynomial).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the two GP equations like simultaneous linear equations and subtracting them, which does not eliminate $a$.</li><li>Mislabelling the term: writing $u_5 = ar^5$ instead of $ar^4$ (off-by-one in the exponent $n-1$).</li><li>Assuming $r$ must be positive and silently dropping a valid negative root when the exponent difference is even.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>When the exponent difference is even (e.g. $r^4 = 16$), forgetting $r = -2$ if the problem allows it.</li><li>Arithmetic slip in reducing the numerical ratio (e.g. $324/12 = 27$ — verify by factoring).</li><li>Forgetting to back-substitute to find $a$ when the question also asks for $u_1$ or $S_n$.</li><li>Dividing the lower term by the higher term, producing $r^{-3}$ and an awkward reciprocal.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P1/P2 geometric series technique; relies only on the explicit formula $u_n = ar^{n-1}$ and basic index laws, fully within A-level scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jun_2023-Q6.html" class="example-chip">P2 Jun 2023 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

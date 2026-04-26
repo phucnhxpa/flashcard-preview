@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binomial Expansion — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Binomial Expansion</strong></div>
+  <h1><span class="dot" style="background:#EC407A;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Binomial Expansion</h1>
+  <p>38 canonical strategic moves across 34 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Template Matching</h2>
+  <div class="family-meta">5 canonical moves · 8 example questions</div>
+  <div class="move-list">
+<a href="move/map-expression-onto-standard-binomial-template-1yn.html" class="move-row">
+  <div class="move-name">Map expression onto standard binomial template (1+y)^n</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/match-expression-to-standard-binomial-series-form-1un.html" class="move-row">
+  <div class="move-name">Match expression to standard binomial series form (1+u)^n</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/apply-generalised-binomial-expansion-for-fractional-or-negative-powers.html" class="move-row">
+  <div class="move-name">Apply generalised binomial expansion for fractional or negative powers</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/map-expression-to-1yn-template-for-binomial-expansion.html" class="move-row">
+  <div class="move-name">Map expression to (1+y)^n template for binomial expansion</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/apply-binomial-theorem-directly-in-abn-form.html" class="move-row">
+  <div class="move-name">Apply binomial theorem directly in (a+b)^n form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Generalised Binomial Series</h2>
+  <div class="family-meta">1 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/apply-generalised-binomial-expansion-for-non-positive-integer-index.html" class="move-row">
+  <div class="move-name">Apply generalised binomial expansion for non-positive-integer index</div>
+  <div class="freq-pill">6 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Convergence Condition</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/translate-y1-convergence-condition-into-validity-range-for-x.html" class="move-row">
+  <div class="move-name">Translate |y|&lt;1 convergence condition into validity range for x</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution Bridge</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/equate-expansions-base-to-target-value-to-find-substitution-x.html" class="move-row">
+  <div class="move-name">Equate expansion&#x27;s base to target value to find substitution x</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Product Term Matching</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/enumerate-term-pairs-whose-exponents-sum-to-the-target-power.html" class="move-row">
+  <div class="move-name">Enumerate term-pairs whose exponents sum to the target power</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Coefficient Comparison</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/equate-coefficients-of-like-powers-of-x-to-solve-for-unknowns.html" class="move-row">
+  <div class="move-name">Equate coefficients of like powers of x to solve for unknowns</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Constant Extraction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-the-leading-constant-to-obtain-standard-1un-form.html" class="move-row">
+  <div class="move-name">Factor out the leading constant to obtain standard (1+u)^n form</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Standard Form Reduction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-the-constant-from-abxn-to-reach-1xn-form.html" class="move-row">
+  <div class="move-name">Factor out the constant from (a+bx)^n to reach (1+X)^n form</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Numerical Approximation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-a-small-rational-x-value-to-link-expansion-to-target-numerical-surd.html" class="move-row">
+  <div class="move-name">Substitute a small rational x-value to link expansion to target numerical surd</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Compound Substitution Tracking</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/track-compound-substitution-uax-through-each-binomial-power-separately.html" class="move-row">
+  <div class="move-name">Track compound substitution u=ax through each binomial power separately</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Targeted Product Collection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/collect-only-required-low-order-terms-from-a-polynomial-times-series-product.html" class="move-row">
+  <div class="move-name">Collect only required low-order terms from a polynomial-times-series product</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Composite Term Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/treat-composite-second-term-as-single-unit-in-binomial-expansion.html" class="move-row">
+  <div class="move-name">Treat composite second term as single unit in binomial expansion</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>General Term Targeting</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/target-a-single-power-via-the-binomial-general-term.html" class="move-row">
+  <div class="move-name">Target a single power via the binomial general term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Coefficient Computation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-binomial-coefficients-using-the-falling-factorial-shortcut.html" class="move-row">
+  <div class="move-name">Evaluate binomial coefficients using the falling-factorial shortcut</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direct Binomial Expansion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-binomial-theorem-directly-to-a-two-term-base-with-positive-integer-exponen.html" class="move-row">
+  <div class="move-name">Apply binomial theorem directly to a two-term base with positive integer exponent</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Arithmetic Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/cancel-shared-powers-of-2-between-coefficient-and-denominator-before-multiplying.html" class="move-row">
+  <div class="move-name">Cancel shared powers of 2 between coefficient and denominator before multiplying</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Truncation Error Analysis</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/determine-overunderestimate-by-checking-sign-of-omitted-binomial-tail-terms.html" class="move-row">
+  <div class="move-name">Determine over/underestimate by checking sign of omitted binomial tail terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/absorb-the-minus-sign-into-b-when-matching-abn.html" class="move-row">
+  <div class="move-name">Absorb the minus sign into b when matching (a+b)^n</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Expansion Extension</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/extend-binomial-expansion-one-term-beyond-the-stated-requirement.html" class="move-row">
+  <div class="move-name">Extend binomial expansion one term beyond the stated requirement</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Term Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/match-x-powers-across-a-linear-times-expansion-product-to-isolate-one-term.html" class="move-row">
+  <div class="move-name">Match x-powers across a linear-times-expansion product to isolate one term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Selective Multiplication</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/pair-only-the-cross-terms-that-hit-the-target-power.html" class="move-row">
+  <div class="move-name">Pair only the cross-terms that hit the target power</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Management</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/bundle-negative-sign-and-fractional-coefficient-into-a-single-substitution-varia.html" class="move-row">
+  <div class="move-name">Bundle negative sign and fractional coefficient into a single substitution variable</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Convergence Domain</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/translate-x1-binomial-convergence-into-an-interval-for-x.html" class="move-row">
+  <div class="move-name">Translate |X|&lt;1 binomial convergence into an interval for x</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direct Term Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/extract-a-specific-term-using-the-general-term-formula-cnryr.html" class="move-row">
+  <div class="move-name">Extract a specific term using the general-term formula C(n,r)y^r</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Matching</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/distribute-prefactor-and-match-x-powers-to-isolate-the-constant-term.html" class="move-row">
+  <div class="move-name">Distribute prefactor and match x-powers to isolate the constant term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Validity Condition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/state-validity-of-binomial-expansion-via-u-1.html" class="move-row">
+  <div class="move-name">State validity of binomial expansion via |u| &lt; 1</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Composite Substitution Bookkeeping</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/separate-sign-coefficient-and-variable-when-expanding-abxn-with-composite-x.html" class="move-row">
+  <div class="move-name">Separate sign, coefficient, and variable when expanding (a+bx)^n with composite X</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Standard Form Preparation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reshape-fraction-to-power-into-constant-times-1un-template.html" class="move-row">
+  <div class="move-name">Reshape fraction-to-power into constant times (1+u)^n template</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Deferred Distribution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/defer-scalar-multiplication-until-after-term-by-term-binomial-expansion.html" class="move-row">
+  <div class="move-name">Defer scalar multiplication until after term-by-term binomial expansion</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linearisation Via Binomial</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/binomial-expand-zz-1n-and-pair-symmetric-powers-to-linearise-cosn-θ.html" class="move-row">
+  <div class="move-name">Binomial-expand (z+z^{-1})^n and pair symmetric powers to linearise cos^n θ</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reverse Engineer Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/choose-x-to-link-binomial-series-to-target-surd.html" class="move-row">
+  <div class="move-name">Choose x to link binomial series to target surd</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Series Generation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-1un-as-generalized-binomial-series-for-fractionalnegative-n.html" class="move-row">
+  <div class="move-name">Expand (1+u)^n as generalized binomial series for fractional/negative n</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Binomial Standardisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-leading-constant-to-reach-1xn-standard-form.html" class="move-row">
+  <div class="move-name">Factor out leading constant to reach (1+X)^n standard form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Restructuring</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-quotient-as-product-to-reuse-a-binomial-expansion.html" class="move-row">
+  <div class="move-name">Rewrite quotient as product to reuse a binomial expansion</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

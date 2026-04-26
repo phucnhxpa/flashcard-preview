@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridge dr/dt via chain rule using dV/dt and dV/dr — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Connected Rates Of Change</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Bridge dr/dt via chain rule using dV/dt and dV/dr</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Connected Rates Of Change</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks for the rate of change of one variable (e.g. dr/dt) but you only have access to two other rates that share a common variable — typically dV/dt (from a given ODE or model) and dV/dr (from a geometric formula). Look for cues like &#x27;find the rate at which the radius is increasing&#x27; alongside a volume model V(t) and a shape (sphere, cone, cylinder). Also fires when explicitly writing r(t) would require solving a messy/transcendental equation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The chain rule identity dV/dt = (dV/dr)(dr/dt) lets you isolate dr/dt = (dV/dt) ÷ (dV/dr) at a single instant without ever inverting V(t) to get r(t). Both right-hand-side rates are easy to evaluate pointwise: dV/dr from the geometric formula, dV/dt from the supplied differential equation. This converts a hard composite-differentiation problem into two pointwise evaluations and a division.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice r depends on V which depends on t — a chain r ↔ V ↔ t — and I am asked for dr/dt at a specific instant.</li><li>I rule out forming r(t) explicitly: combining V(t) with r = (3V/(4π))^{1/3} gives a composite that is awkward to differentiate and prone to rounding error.</li><li>I commit to the chain rule because both dV/dr and dV/dt are immediately available — one from geometry, one from the ODE.</li><li>Bridge: write dV/dt = (dV/dr)(dr/dt), then rearrange to dr/dt = (dV/dt)/(dV/dr).</li><li>Tactically: evaluate dV/dt at the given t first, find V at that t, back out r from the geometric relation, then compute dV/dr, and divide — keeping full accuracy until the last line.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State the chain-rule link: dV/dt = (dV/dr)(dr/dt), so dr/dt = (dV/dt)/(dV/dr).</li><li>Evaluate dV/dt at the required instant using the given ODE or V(t).</li><li>Find r at that instant: compute V from V(t), then invert the geometric formula (e.g. r = (3V/(4π))^{1/3}).</li><li>Evaluate dV/dr at that r using the geometric derivative (e.g. dV/dr = 4πr² for a sphere).</li><li>Divide: dr/dt = (dV/dt)/(dV/dr), and state units.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $V = \tfrac{4}{3}\pi r^3$ and $\dfrac{dV}{dt} = \dfrac{900t}{(2+3t)^2}$, find $\dfrac{dr}{dt}$ at $t=3$. At $t=3$: $V = \dfrac{300\cdot 3}{2+9} \approx 81.82$, so $r=\left(\dfrac{3V}{4\pi}\right)^{1/3}\approx 2.683$. Then $\dfrac{dV}{dr}=4\pi r^2\approx 90.45$ and $\dfrac{dV}{dt}=\dfrac{2700}{121}\approx 22.31$. Hence $\dfrac{dr}{dt}\approx \dfrac{22.31}{90.45}\approx 0.247\text{ cm s}^{-1}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Circle expanding, given dA/dt</div>
+<div class="adjustment">Use dA/dt = (dA/dr)(dr/dt) with dA/dr = 2πr to get dr/dt.</div>
+</div><div class="variant-row">
+<div class="scenario">Sphere with surface area rate dS/dt</div>
+<div class="adjustment">Use dS/dr = 8πr; chain via dS/dt = (dS/dr)(dr/dt).</div>
+</div><div class="variant-row">
+<div class="scenario">Cone with fixed semi-vertical angle, given dV/dt</div>
+<div class="adjustment">Express V in terms of h alone (since r = h tan α), differentiate to get dV/dh, then dh/dt = (dV/dt)/(dV/dh).</div>
+</div><div class="variant-row">
+<div class="scenario">Cylinder with fixed radius, varying height</div>
+<div class="adjustment">dV/dh = πr² constant; dh/dt = (dV/dt)/(πr²).</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve y(t), x(t)</div>
+<div class="adjustment">Same chain idea: dy/dx = (dy/dt)/(dx/dt) when dx/dt ≠ 0.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the problem as requiring an explicit r(t) and attempting to differentiate the composite directly.</li><li>Confusing dV/dr with dr/dV and multiplying instead of dividing.</li><li>Using a formula for V(t) when asked for V at a specific t (or vice versa) and forgetting to substitute.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding r prematurely before substituting into 4πr² — keep at least 3–4 s.f. through the calculation.</li><li>Substituting t into dV/dt that has already been simplified for a different value, or mis-squaring (2+3t)² at t=3.</li><li>Forgetting units (cm s⁻¹) or mixing units between V (cm³) and r (cm).</li><li>Inverting V to find r but using the wrong geometric formula (e.g. cone instead of sphere).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P3/P4 &#x27;connected rates of change&#x27; technique; uses only the chain rule and standard volume/area derivatives, with no integration of the ODE required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2023-Q7.html" class="example-chip">P4 Jan 2023 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

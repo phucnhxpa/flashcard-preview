@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluate at endpoints and invoke IVT sign-change for root existence — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Sign Change Ivt</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Evaluate at endpoints and invoke IVT sign-change for root existence</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sign Change Ivt</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question says &#x27;show that f(x) = 0 has a root in [a, b]&#x27; or &#x27;show that the equation has a solution between x = a and x = b&#x27;, without asking you to solve it. Also fires when justifying that an iteration converges to a root in a given interval, or when verifying a root to a specified number of decimal places (interval [α − 0.5×10⁻ⁿ, α + 0.5×10⁻ⁿ]). The hallmark is a closed interval with named numerical endpoints and an equation that cannot be solved algebraically.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If f is continuous on [a, b] and f(a) and f(b) have opposite signs, the Intermediate Value Theorem guarantees at least one c ∈ (a, b) with f(c) = 0. At A-level this is the only rigorous tool for asserting existence of a root in a specified interval without explicit solution. The argument relies on continuity of f on [a, b] and on a strict change of sign — both must be stated explicitly to earn full marks.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices the phrase &#x27;show there is a root in [a, b]&#x27; — instant cue for sign-change/IVT.</li><li>Rules out solving f(x) = 0 directly; the equation mixes terms (e.g. negative powers and roots) that make algebraic solution impossible at A-level.</li><li>Commits to the IVT route because it is the only rigorous existence argument available.</li><li>Bridges by setting up f(a) and f(b) for numerical evaluation, keeping enough decimal places to be sure of the sign.</li><li>Tactically packages the conclusion as a four-part statement: numerical values with signs, sign change, continuity on the interval, therefore root exists by IVT.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Define f(x) by rearranging the equation to f(x) = 0 form if not already given.</li><li>Compute f(a) to sufficient accuracy and record its sign.</li><li>Compute f(b) to sufficient accuracy and record its sign.</li><li>State explicitly that there is a sign change between f(a) and f(b).</li><li>State that f is continuous on [a, b] (justify briefly if necessary).</li><li>Conclude: by the Intermediate Value Theorem, there exists α ∈ (a, b) with f(α) = 0.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x) = \dfrac{7}{x} - \dfrac{1}{x^{2}} - \dfrac{5}{3}\sqrt[3]{x}$. Then $f(2.8) \approx 0.142 > 0$ and $f(2.9) \approx -0.849 < 0$. Since $f$ is continuous on $[2.8, 2.9]$ and changes sign, by the IVT there exists $\alpha \in (2.8, 2.9)$ with $f(\alpha) = 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">&#x27;Show the equation g(x) = h(x) has a solution in [a, b]&#x27;</div>
+<div class="adjustment">Rearrange to f(x) = g(x) − h(x) = 0 first, then apply the same sign-change argument to f.</div>
+</div><div class="variant-row">
+<div class="scenario">Verifying a root to n decimal places</div>
+<div class="adjustment">Use the narrower interval [α − 0.5×10⁻ⁿ, α + 0.5×10⁻ⁿ] and show sign change there, concluding α is correct to n d.p.</div>
+</div><div class="variant-row">
+<div class="scenario">Justifying convergence of an iteration xₙ₊₁ = F(xₙ) to a root</div>
+<div class="adjustment">Apply the sign-change argument to f(x) = x − F(x) (or the equivalent rearrangement) on the stated interval.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric or exponential equations on a bounded interval</div>
+<div class="adjustment">Same template; just check continuity is automatic for sin, cos, eˣ, and polynomial composites on the interval.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting only one endpoint and arguing from a single value — insufficient for IVT.</li><li>Omitting the explicit statement of continuity on [a, b], which is a required IVT hypothesis.</li><li>Treating the conclusion as &#x27;exactly one root&#x27; rather than &#x27;at least one root&#x27; — IVT alone gives existence, not uniqueness.</li><li>Forgetting to name the theorem (IVT / sign-change rule) in the conclusion.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slips when evaluating f at endpoints, especially with cube roots, reciprocals, or trig values.</li><li>Over-rounding intermediate results so that the computed sign becomes ambiguous near zero.</li><li>Stating values without their signs, or stating signs without the numerical evidence.</li><li>Applying IVT on an interval where f has a discontinuity (e.g. crossing x = 0 for f involving 1/x).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL scope: standard numerical methods topic in Core Pure / FP1, where IVT (sign-change) is the prescribed justification for root existence. No formal δ-ε continuity is required — a brief appeal to continuity of standard functions suffices.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch3/q-Oct_2021-Q2.html" class="example-chip">FP1 Oct 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

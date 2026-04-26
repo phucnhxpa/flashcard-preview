@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use rectangle&#x27;s right angle to reduce triangle to right-angled — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Geometric Construction</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Use rectangle&#x27;s right angle to reduce triangle to right-angled</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Geometric Construction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a triangle is formed using two adjacent sides of a rectangle (or a side and a segment lying along an adjacent side). Typical cue: a point $O$ sits on edge $DC$ of rectangle $ABCD$, and the triangle in question has $D$ (or another rectangle corner) as a vertex with the other two vertices along perpendicular edges. Also fires for squares, and for any quadrilateral whose vertex angle is stated to be $90^\circ$. The phrase &#x27;ABCD is a rectangle&#x27; is itself the cue — it silently gives four right angles.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Every rectangle vertex is a $90^\circ$ angle, so any triangle that uses two edges meeting at that vertex is automatically right-angled there. This converts an otherwise generic triangle (needing cosine rule, sine rule, or coordinates) into a SOH-CAH-TOA / Pythagoras problem. The right angle is &#x27;free&#x27; geometric information that students often overlook because it is implied rather than marked. Recognising it collapses several lines of working into one.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the triangle&#x27;s three vertices: two are corners of the rectangle, one lies on a side.</li><li>Rule out cosine rule and coordinate setup — these are wasteful if a right angle is already present.</li><li>Commit once I confirm the two sides meeting at the rectangle corner lie along perpendicular edges of the rectangle.</li><li>Identify which vertex carries the right angle, then label opposite/adjacent/hypotenuse relative to the angle I actually want.</li><li>Choose between $\sin$, $\cos$, $\tan$, or Pythagoras based on which two sides are known.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State: $ABCD$ is a rectangle $\Rightarrow \angle ADC = 90^\circ$.</li><li>Note that $O$ lies on $DC$, so segment $DO$ lies along $DC$ and $\angle ADO = 90^\circ$.</li><li>Conclude $\triangle AOD$ is right-angled at $D$.</li><li>Label sides relative to the target angle (e.g. for $\angle AOD$: opposite $= AD$, adjacent $= OD$, hypotenuse $= OA$).</li><li>Apply the appropriate trig ratio or Pythagoras.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Rectangle $ABCD$ has $AD = 8\sqrt{2}$, and $O$ lies on $DC$ with $OD = 4$, $OA = 12$. Since $\angle ADC = 90^\circ$ and $O \in DC$, $\triangle AOD$ is right-angled at $D$. Then $\cos(\angle AOD) = \dfrac{OD}{OA} = \dfrac{4}{12} = \dfrac{1}{3}$, so $\angle AOD = \arccos\!\left(\tfrac{1}{3}\right) \approx 70.5^\circ$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Square $ABCD$ with point on a side</div>
+<div class="adjustment">Same right-angle argument; additionally all sides equal, often simplifying ratios.</div>
+</div><div class="variant-row">
+<div class="scenario">Point $O$ on extension of $DC$ beyond $C$ or $D$</div>
+<div class="adjustment">Right angle at $D$ still holds since $O$ is collinear with $DC$; just check $OD$ length sign/direction.</div>
+</div><div class="variant-row">
+<div class="scenario">Diagonal of rectangle as hypotenuse</div>
+<div class="adjustment">Triangle formed by two adjacent sides and the diagonal is right-angled at the shared corner; use Pythagoras for the diagonal length.</div>
+</div><div class="variant-row">
+<div class="scenario">Cuboid problem (3D trig)</div>
+<div class="adjustment">A face of the cuboid is a rectangle, so the same right-angle reduction works inside that face before lifting to 3D.</div>
+</div><div class="variant-row">
+<div class="scenario">Circle inscribed/triangle inside rectangle</div>
+<div class="adjustment">Drop perpendiculars to rectangle sides to recreate right triangles using the rectangle&#x27;s $90^\circ$ corners.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Defaulting to cosine rule on $\triangle AOD$ without noticing the rectangle gives a right angle at $D$.</li><li>Believing the right angle sits at $O$ (where the point lies on the side) rather than at the rectangle corner $D$.</li><li>Assuming $\triangle AOC$ or $\triangle AOB$ is right-angled at $O$ — it generally is not unless $AO \perp DC$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Mislabelling opposite vs adjacent relative to the wrong angle (using $\angle OAD$ instead of $\angle AOD$).</li><li>Confusing $OD$ with $OC$ when $O$ is given by its distance from the wrong endpoint.</li><li>Forgetting that the rectangle&#x27;s right angle is at the corner, not at the interior point on the side.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure (P1/P2) trigonometry and geometry; uses only Pythagoras and SOH-CAH-TOA, no advanced theorems.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2020-Q4.html" class="example-chip">P1 Jan 2020 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Back-substitute recovered ratio to find first term, then apply sum formula — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Parameter Recovery</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Back-substitute recovered ratio to find first term, then apply sum formula</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parameter Recovery</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in geometric series problems where the common ratio $r$ has just been determined (typically by dividing two given term equations) and a single-term equation such as $u_2 = ar = k$ remains. The question then asks for a specific partial sum $S_n$ or $S_\infty$, which requires both $a$ and $r$. Cue phrases: &#x27;hence find $S_n$&#x27;, &#x27;find the sum of the first $n$ terms&#x27;, or &#x27;find $a$ and hence...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The geometric sum formula $S_n = a(1 - r^n)/(1 - r)$ is fully determined by the parameter pair $(a, r)$. Once $r$ is known, any single equation linking $a$ and $r$ collapses to a one-step linear equation in $a$. Choosing the lowest-index term equation (e.g. $u_2 = ar$ rather than $u_5 = ar^4$) minimises arithmetic and avoids re-using fractional powers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice I already have $r$ from the previous part and still need $a$ before any sum can be computed.</li><li>I rule out solving the higher-index equation $ar^4 = \dots$ because it forces me to handle $r^4$ unnecessarily when a simpler $ar = \dots$ equation is available.</li><li>I commit to back-substituting $r$ into $u_2 = ar$ to recover $a$ in one step.</li><li>With $a$ and $r$ in hand, I move directly to $S_n = a(1-r^n)/(1-r)$ and substitute the required $n$.</li><li>Tactically I track the sign of $r^n$ (odd vs even $n$) and keep $1-r$ as an exact fraction to avoid rounding drift.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Pick the simplest term equation containing $a$, e.g. $ar = u_2$.</li><li>Substitute the known $r$ and solve $a = u_2 / r$ exactly.</li><li>Write down $S_n = a(1 - r^n)/(1 - r)$ with the required $n$.</li><li>Compute $1 - r$ as an exact fraction; compute $r^n$ on a calculator, watching the sign.</li><li>Combine and evaluate, rounding only at the final step to the requested accuracy.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $r = -2/5$ and $u_2 = ar = -320$: $a = -320 \div (-2/5) = 800$. Then $S_{13} = \dfrac{800\bigl(1 - (-2/5)^{13}\bigr)}{1 - (-2/5)} = \dfrac{800\bigl(1 - (-2/5)^{13}\bigr)}{7/5} \approx 571.43$ (2 d.p.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Sum to infinity requested with $|r| &lt; 1$</div>
+<div class="adjustment">Use $S_\infty = a/(1-r)$ instead; no power computation needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Given $u_3$ or $u_k$ rather than $u_2$</div>
+<div class="adjustment">Solve $a = u_k / r^{k-1}$; arithmetic is heavier but the structure is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">Arithmetic series analogue</div>
+<div class="adjustment">After recovering $d$, back-substitute to find $a$ from a given term, then apply $S_n = \tfrac{n}{2}(2a + (n-1)d)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence-defined geometric sequence</div>
+<div class="adjustment">Identify $r$ from the recurrence, read $a = u_1$ directly, then apply the sum formula.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing $u_2 = ar$ with $u_2 = ar^2$ (off-by-one in the exponent convention $u_n = ar^{n-1}$).</li><li>Treating the recovered $a$ as if it were $u_2$ itself and substituting $-320$ for $a$ in the sum formula.</li><li>Assuming $S_n \approx S_\infty$ is automatic without checking $|r|&lt;1$ or that $n$ is large enough.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when raising a negative $r$ to an odd power; remember odd power $\Rightarrow$ negative.</li><li>Mis-evaluating $1 - r$ for negative $r$: $1 - (-2/5) = 7/5$, not $3/5$.</li><li>Premature rounding of $r^n$ or of $1-r$ which corrupts the final 2 d.p. value.</li><li>Forgetting to divide by $1-r$ (i.e. multiplying by $1-r$ instead) when manipulating the compound fraction.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2) geometric series content: term formula $u_n = ar^{n-1}$, partial sum $S_n = a(1-r^n)/(1-r)$, and (where $|r|&lt;1$) sum to infinity.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2020-Q8.html" class="example-chip">P2 Oct 2020 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

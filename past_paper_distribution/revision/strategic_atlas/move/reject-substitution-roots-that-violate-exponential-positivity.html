@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reject substitution roots that violate exponential positivity — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Constraint</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reject substitution roots that violate exponential positivity</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Constraint</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires after substituting y = e^x (or y = a^x with a &gt; 0) to reduce an equation in e^x and e^{2x} to a quadratic in y, and then solving that quadratic. If any root is zero or negative, it cannot correspond to a value of e^x for real x. The cue is a numerical root y ≤ 0 sitting alongside a positive root, often phrased as &#x27;hence solve&#x27; or &#x27;find the exact values of x&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The exponential function e^x has range (0, ∞), so the equation e^x = k has a real solution only when k &gt; 0. Roots of the auxiliary quadratic that violate this are extraneous artefacts of the substitution, not solutions of the original equation. Discarding them with explicit justification is required both for mathematical correctness and for examiner marks, since taking ln of a non-positive number is undefined in A-level scope.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the quadratic in y has produced two roots, and one of them is negative (or zero).</li><li>I rule out the non-positive root because y was defined as e^x, and e^x is strictly positive for all real x.</li><li>I commit to keeping only the positive root(s), recording the rejection in writing rather than silently dropping it.</li><li>I bridge to the next step by setting e^x equal to the surviving positive root and preparing to take natural logs.</li><li>Tactically, I phrase the rejection clearly — e.g. &#x27;e^x &gt; 0, so y = -1/2 has no real solution&#x27; — to secure the reasoning mark.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the substitution y = e^x and the constraint y &gt; 0.</li><li>List both quadratic roots.</li><li>For each root, check the sign: if y ≤ 0, write an explicit rejection citing e^x &gt; 0.</li><li>For each positive root, set e^x = root and solve by taking ln.</li><li>Report only the x-values arising from valid (positive) roots.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $e^{2x} - \tfrac{5}{2}e^x - \tfrac{3}{2} = 0$. Let $y = e^x$: $2y^2 - 5y - 3 = 0 \Rightarrow (2y+1)(y-3) = 0$, so $y = -\tfrac{1}{2}$ or $y = 3$. Since $e^x > 0$, reject $y = -\tfrac{1}{2}$. From $e^x = 3$, $x = \ln 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Equation in $a^x$ with $a &gt; 0, a \neq 1$ reduced to a quadratic in $y = a^x$</div>
+<div class="adjustment">Same constraint $y &gt; 0$; solve $a^x = y$ via $x = \log_a y$ or $x = \ln y / \ln a$.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation in $\sqrt{f(x)}$ substituted as $y = \sqrt{f(x)}$</div>
+<div class="adjustment">Reject any negative root of the quadratic in $y$ since principal square roots are non-negative.</div>
+</div><div class="variant-row">
+<div class="scenario">Hyperbolic substitution $y = \cosh x$ (Further Maths)</div>
+<div class="adjustment">Reject roots with $y &lt; 1$ since $\cosh x \geq 1$ for real $x$.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig substitution $y = \sin x$ or $y = \cos x$</div>
+<div class="adjustment">Reject roots outside $[-1, 1]$ since sine and cosine are bounded.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating both quadratic roots as valid and attempting $\ln(-\tfrac{1}{2})$, then writing &#x27;math error&#x27; or guessing.</li><li>Dropping the negative root silently without stating the reason, losing the justification mark.</li><li>Concluding the entire equation has no solution because one root failed, instead of only that branch.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the positivity check entirely under time pressure.</li><li>Writing $x = \ln(-\tfrac{1}{2})$ as if it were a valid expression.</li><li>Confusing the constraint $y &gt; 0$ with $y \geq 0$ — note $e^x = 0$ also has no solution.</li><li>Applying the same rejection rule to substitutions where negatives are allowed (e.g. $y = \sinh x$ takes all real values).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard for Edexcel IAL P2/P3 exponential equations and reappears in Further Pure with hyperbolic substitutions; the explicit justification &#x27;since $e^x &gt; 0$&#x27; is expected in mark schemes.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Oct_2022-Q10.html" class="example-chip">P2 Oct 2022 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

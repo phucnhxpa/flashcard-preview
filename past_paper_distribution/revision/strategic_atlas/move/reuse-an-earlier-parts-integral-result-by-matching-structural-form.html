@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reuse an earlier part&#x27;s integral result by matching structural form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Cross Part Linkage</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Reuse an earlier part&#x27;s integral result by matching structural form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Cross Part Linkage</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>After setting up an integral in a later part of a multi-part question (e.g. from separation of variables, an arc-length formula, or a surface-area formula), you notice the resulting integrand matches — up to a change of dummy variable, a substitution, or a numerical index — an integral already evaluated or a reduction formula already established in part (a) or (b). Visual cues include: identical functional form (e.g. $x^n\cos x$ becoming $t^n\cos t$), matching limits, or an integrand that simplifies to $I_n$ for a specific $n$. Equivalent phrasings: &#x27;this integral is part (a) in disguise&#x27;, &#x27;the examiner has scaffolded this result for me&#x27;, &#x27;the dummy letter has changed but the antiderivative is the same&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Multi-part exam questions are deliberately scaffolded so that earlier results feed forward into later geometric or differential-equation contexts. Recognising that the new integral is structurally identical to the earlier one means you can quote the antiderivative or numerical value directly, saving time, avoiding fresh integration-by-parts errors, and confirming you are on the intended solution pathway. The underlying principle is that a definite or indefinite integral depends only on the integrand and limits, not on the name of the dummy variable — so $\int f(x)\,dx$ and $\int f(t)\,dt$ have the same antiderivative form.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that after the algebraic setup (separation of variables, arc-length simplification, or surface-area formula), the integral on the page has the same shape as the integral from part (a) or (b).</li><li>Rule out starting integration by parts or a reduction-formula derivation from scratch — that would duplicate work the examiner has already credited in an earlier part.</li><li>Commit to the cross-part link: the dummy variable might be different ($t$ vs $x$), or a substitution might be needed first, but the antiderivative structure is identical.</li><li>Bridge to operation: write the earlier result with the new variable name substituted in, or quote the numerical $I_n$ value, treating it as a known quantity.</li><li>Tactically decide whether you need the indefinite form (with $+C$) or a definite numerical value, and carry through any constant prefactors (e.g. $2\pi$ for surface area, factor of $\tfrac12$ from $y^2/2$).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write out the new integral explicitly, e.g. $\int t^2\cos t\,dt$ or $2\pi\int_a^b f(x)\,dx$.</li><li>Identify the matching earlier result: e.g. part (a) gave $\int x^2\cos x\,dx = x^2\sin x + 2x\cos x - 2\sin x + C$, or part (b) gave $I_n = \text{value}$.</li><li>Substitute the dummy variable (or apply any required substitution first) so the form matches exactly.</li><li>Quote the earlier result directly, transcribing carefully to avoid sign errors.</li><li>Multiply through by any outstanding constant factor (e.g. the $2$ from $y^2/2$, or the $2\pi$ from a surface-area formula) and add the new constant of integration $A$ if indefinite.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Part (a) established $\int x^2\cos x\,dx = x^2\sin x + 2x\cos x - 2\sin x + C$. In part (b), separation of variables gives $\tfrac{1}{2}y^2 = \int t^2\cos t\,dt$. Recognising the same form, write $\tfrac{1}{2}y^2 = t^2\sin t + 2t\cos t - 2\sin t + C$, then $y^2 = 2t^2\sin t + 4t\cos t - 4\sin t + A$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Differential-equation context after separation of variables</div>
+<div class="adjustment">The earlier integral appears with a renamed dummy variable; substitute the new letter into the antiderivative and absorb the factor of $\tfrac12$ (or similar) by multiplying through.</div>
+</div><div class="variant-row">
+<div class="scenario">Arc-length or surface-area integral matching a reduction-formula value $I_n$</div>
+<div class="adjustment">After simplifying the integrand (often via a perfect-square step), substitute the numerical $I_n$ from part (b) and remember the geometric prefactor (e.g. $2\pi$).</div>
+</div><div class="variant-row">
+<div class="scenario">Connection visible only after a substitution</div>
+<div class="adjustment">Apply a preliminary substitution (e.g. $u = \pi/2 - x$) to expose the matching form before quoting the earlier result.</div>
+</div><div class="variant-row">
+<div class="scenario">Surface-area integral splitting into two terms</div>
+<div class="adjustment">Each term matches a different $I_n$; substitute both values and combine.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Failing to spot that the dummy variable change is cosmetic, and redoing full integration by parts from scratch.</li><li>Misidentifying which $n$ in the reduction formula is needed because a power shifted during simplification.</li><li>Treating the new integral as unrelated because the surrounding context (geometry vs ODE) looks different.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when transcribing the earlier antiderivative into the new context — always re-check each term.</li><li>Forgetting outstanding constant prefactors such as $2\pi$, $\tfrac12$, or coefficients from arc-length simplification.</li><li>Applying the reduction formula at the wrong index $n$ if the integrand&#x27;s power changed during the setup.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL Further Pure (FP2/FP3) and Pure (P3) scope: integration by parts, reduction formulae, separation of variables, and arc-length/surface-area formulae are all in the formula booklet. Do not generalise to non-elementary integrals or to changes of variable that require Jacobians beyond a single substitution.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2024-Q5.html" class="example-chip">P4 Jan 2024 Q5</a><a href="../FP3/ch4/q-Jun_2023-Q3.html" class="example-chip">FP3 Jun 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate parametric lines with distinct parameters to test 3D intersection — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Parametric Intersection Test</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Equate parametric lines with distinct parameters to test 3D intersection</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parametric Intersection Test</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Two lines in 3D are given in parametric vector form r₁ = a₁ + λd₁ and r₂ = a₂ + μd₂, and the question asks you to show they do NOT intersect (i.e. are skew), or to find the point of intersection if it exists. Phrasings include &#x27;show that the lines do not meet&#x27;, &#x27;prove the lines are skew&#x27;, &#x27;show there is no point common to both lines&#x27;, or &#x27;find the position vector of the point of intersection&#x27;. The structural cue is two independent parameters and three coordinate components — an inherently overdetermined setup.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Setting r₁(λ) = r₂(μ) component-by-component produces three scalar equations in only two unknowns (λ, μ). In 3D this is generically overdetermined: any two equations pin down candidate values of λ and μ, and the third equation acts as a built-in consistency check. If the third equation holds, the lines meet (and you have the intersection point); if it fails, the system is inconsistent and the lines are skew. This exploits the fact that two non-parallel lines in R³ need not intersect — the extra equation is exactly the test for skewness.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that each line has its own independent parameter — I must use different letters (λ for line 1, μ for line 2), because using the same letter would only test whether the lines coincide at equal parameter values, which is a strictly stronger and incorrect condition.</li><li>Consider alternatives: I could check direction vectors for parallelism first, or use the (a₂ − a₁) · (d₁ × d₂) scalar triple product test for skewness — but at A-level the cleanest, most direct method is simply to attempt the intersection and look for contradiction.</li><li>Commit to equating r₁ = r₂ and extracting three component equations, knowing that 3 equations in 2 unknowns is the structural feature that makes a skew proof possible.</li><li>Bridge to operation: scan the three equations for the simplest one — typically the component where one of the parameters appears alone or with a unit coefficient — and use it to get one parameter quickly.</li><li>Tactical decision: solve any two equations (usually the two simplest) for λ and μ, then substitute into the remaining (third) equation. The third equation is the witness — if LHS ≠ RHS, declare the lines skew; if LHS = RHS, substitute back into either line to give the intersection point.</li><li>Final sanity check: verify arithmetic in the witness equation carefully, since a sign slip can falsely conclude intersection or non-intersection.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the lines using distinct parameters: r₁ = a₁ + λd₁ and r₂ = a₂ + μd₂.</li><li>Equate components to obtain three scalar equations (i), (ii), (iii) in λ and μ.</li><li>Select the two simplest equations and solve simultaneously for λ and μ.</li><li>Substitute the values of λ and μ into the third (unused) equation.</li><li>If the third equation holds: the lines intersect — substitute λ (or μ) back into the line to get the position vector of the intersection point.</li><li>If the third equation fails: state &#x27;the system is inconsistent, hence the lines do not meet (they are skew)&#x27;.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $r_1 = (6,6,2) + \lambda(0,-6,5)$ and $r_2 = (3,1,4) + \mu(1,5,9)$. Equating components: (i) $6 = 3+\mu \Rightarrow \mu = 3$; (ii) $6 - 6\lambda = 1 + 5\mu = 16 \Rightarrow \lambda = -\tfrac{5}{3}$. Check (iii): LHS $= 2 + 5(-\tfrac{5}{3}) = -\tfrac{19}{3}$, RHS $= 4 + 9(3) = 31$. Since $-\tfrac{19}{3} \neq 31$, the system is inconsistent, so the lines are skew.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">The third equation is satisfied (lines do intersect)</div>
+<div class="adjustment">Substitute the found λ back into r₁ (or μ into r₂) to compute the position vector of the intersection point — both should give the same point, which is a useful self-check.</div>
+</div><div class="variant-row">
+<div class="scenario">Direction vectors are proportional (parallel lines)</div>
+<div class="adjustment">The two equations chosen for λ, μ may be inconsistent or dependent; check parallelism first by inspecting direction vectors. If parallel and distinct, the lines never meet; if parallel and one point of l₁ lies on l₂, they coincide.</div>
+</div><div class="variant-row">
+<div class="scenario">Lines given in Cartesian form (x−a)/p = (y−b)/q = (z−c)/r</div>
+<div class="adjustment">Convert each line to parametric form by introducing parameters λ and μ, then proceed identically.</div>
+</div><div class="variant-row">
+<div class="scenario">2D setting (only x and y components)</div>
+<div class="adjustment">Two equations in two unknowns — generically a unique solution exists unless lines are parallel; the overdetermined-system trick does not apply.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using the same parameter (e.g. λ) for both lines, which incorrectly forces the parameters to be equal and only tests for points at matching parameter values.</li><li>Believing that solving two of the three equations and obtaining values for λ, μ is enough to prove intersection — without checking the third equation, this only produces a candidate.</li><li>Attempting to subtract position vectors and equate to a linear combination of directions — valid but unnecessarily complex for the A-level skew test.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when rearranging equations (e.g. moving −λ across an equals sign), which can flip a &#x27;no intersection&#x27; result into a false &#x27;intersection&#x27;.</li><li>Failing to label equations (i), (ii), (iii) clearly, leading to substitution into the wrong equation.</li><li>Arithmetic slips in the witness check that produce an accidental equality, giving a false conclusion.</li><li>Concluding &#x27;the lines meet&#x27; after solving only two equations, without the third-equation verification.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is core Edexcel IAL P3/P4 vectors material — parametric form of a line in 3D and testing intersection. No formula booklet entry is required; the technique is purely simultaneous equations applied to vector components. Avoid invoking the scalar triple product test (a₂ − a₁) · (d₁ × d₂) ≠ 0 unless cross product is in scope, as it is not the standard A-level method.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Jan_2022-Q8.html" class="example-chip">P4 Jan 2022 Q8</a><a href="../P4/ch7/q-Oct_2022-Q9.html" class="example-chip">P4 Oct 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

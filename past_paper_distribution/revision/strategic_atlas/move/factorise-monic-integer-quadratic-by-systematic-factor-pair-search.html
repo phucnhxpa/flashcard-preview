@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factorise monic integer quadratic by systematic factor-pair search — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Strategic Factorisation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Factorise monic integer quadratic by systematic factor-pair search</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Factorisation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A monic quadratic x² + bx + c = 0 (or with leading coefficient 1 after any tidy-up) appears with integer coefficients, often following a &#x27;show that&#x27; part or signalled by &#x27;hence solve&#x27;. The constant c may be moderately large (e.g. 3640) or modest (e.g. −60), but the structure suggests examiners designed it to factorise over ℤ. Cues: integer b and c, the question expects exact roots (no surds in the answer scheme), and the context (sequences, geometry) requires clean values to interpret. Equivalent phrasings: &#x27;find two integers with product c and sum b&#x27;, &#x27;apply the product–sum method&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a monic quadratic x² + bx + c, finding integers p, q with pq = c and p + q = b yields (x − p)(x − q) = 0 directly, exploiting Vieta&#x27;s relations in reverse. This delivers exact integer roots without the discriminant arithmetic of the quadratic formula and avoids surd handling errors. The signs of b and c immediately constrain the search: c &gt; 0 means p, q share a sign (matching sign of b); c &lt; 0 means they have opposite signs. A systematic walk through factor pairs of |c| is usually faster than computing √(b² − 4c), even when |c| is large.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the quadratic is monic with integer coefficients, and it sits at a &#x27;solve&#x27; or &#x27;hence&#x27; step — examiners typically engineer such quadratics to factorise over the integers.</li><li>I consider the quadratic formula as a fallback, but it would force me through b² − 4c and a square root; if integer roots exist, factorisation is cleaner and less error-prone.</li><li>I commit to the product–sum method: find integers p, q with pq = c and p + q = b.</li><li>I read off the sign structure from b and c. If c &gt; 0 both factors share the sign of b; if c &lt; 0 the factors have opposite signs and I must seek a difference equal to |b|.</li><li>I list factor pairs of |c| in order (1·|c|, 2·|c|/2, ...) and test sums systematically — not jumping around — to avoid missing the correct pair.</li><li>Once the pair is found, I write (x − p)(x − q) = 0 and read off the roots. If the surrounding context (geometric sequence, geometric length, etc.) imposes constraints, I check each root for validity and reject any spurious solutions.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the quadratic in monic form x² + bx + c = 0 and identify the target: product = c, sum = b.</li><li>Determine sign pattern: if c &gt; 0, both p, q have the sign of b; if c &lt; 0, p, q have opposite signs.</li><li>List factor pairs of |c| systematically from small to large (or large to small).</li><li>Test each pair&#x27;s signed sum against b; stop when the pair is found.</li><li>Write the factorisation (x − p)(x − q) = 0.</li><li>Solve: x = p or x = q.</li><li>(If contextual) verify each root is admissible in the original problem (e.g. no zero/undefined terms, positive lengths).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $n^2 - 121n + 3640 = 0$. Need $pq = 3640$, $p+q = 121$, both positive. Walking factor pairs: $40\times 91=3640$ but $40+91=131$; $56\times 65=3640$ and $56+65=121$ ✓. Hence $(n-56)(n-65)=0$, so $n=56$ or $n=65$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Non-monic quadratic ax² + bx + c = 0 with a ≠ 1</div>
+<div class="adjustment">Use the &#x27;ac method&#x27;: find two integers with product ac and sum b, split the middle term, then factor by grouping.</div>
+</div><div class="variant-row">
+<div class="scenario">Constant term is negative (c &lt; 0)</div>
+<div class="adjustment">Seek a factor pair of |c| with opposite signs whose signed sum is b — a difference of magnitudes equal to |b|, with the larger magnitude carrying the sign of b.</div>
+</div><div class="variant-row">
+<div class="scenario">Discriminant b² − 4c is not a perfect square</div>
+<div class="adjustment">Factorisation over ℤ fails; switch to the quadratic formula or completing the square.</div>
+</div><div class="variant-row">
+<div class="scenario">Disguised quadratic (e.g. in u = xⁿ or u = eˣ)</div>
+<div class="adjustment">Substitute to expose a monic integer quadratic in u, factorise by product–sum, then back-substitute.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming a quadratic with a large constant cannot factorise over ℤ and defaulting to the quadratic formula unnecessarily.</li><li>Treating a &#x27;hence&#x27; instruction as freedom to restart with the formula, missing the cleaner intended route.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when c &lt; 0: seeking two numbers of the same sign that sum to b, instead of opposite signs.</li><li>Sign errors when c &gt; 0 with b &lt; 0: forgetting that both factors in (x − p)(x − q) should have positive p, q (so the bracket signs are both negative).</li><li>Unsystematic searching: jumping between factor pairs and missing the correct one, especially when |c| has many divisors.</li><li>Failing to check contextual validity — e.g. rejecting a root that gives a zero term in a geometric sequence or a negative length.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1 onwards). No formula-booklet entry is required; the quadratic formula is available as a fallback. Avoid invoking ring-theoretic generalisations (factorisation over ℚ, ℝ, ℂ) — the IAL context is integer/rational factorisation only.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2020-Q5.html" class="example-chip">P2 Oct 2020 Q5</a><a href="../P2/ch4/q-Oct_2024-Q7.html" class="example-chip">P2 Oct 2024 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

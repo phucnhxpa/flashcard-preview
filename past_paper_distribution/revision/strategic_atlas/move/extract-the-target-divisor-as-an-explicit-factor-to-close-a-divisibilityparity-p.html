@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extract the target divisor as an explicit factor to close a divisibility/parity proof — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Factor Extraction</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Extract the target divisor as an explicit factor to close a divisibility/parity proof</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Factor Extraction</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires at the FINAL stage of a divisibility or parity proof, after substitution and simplification, when the expression is a sum/product whose terms all share the target divisor d as a common factor (or when one factor visibly contains d). Visual cues: every numerical coefficient is a multiple of d (e.g. 8, 2b all even when proving &#x27;even&#x27;; 576, 64, 64 all divisible by 64); or a bracket like (8−2b), (2n+4), (3k+9) literally contains d. Equivalent phrasings: &#x27;pull out a 2&#x27;, &#x27;take 64 outside&#x27;, &#x27;write as d × (integer)&#x27;. The move also fires preparatorily in induction: when f(k+1) has been rearranged to a sum of d-multiples plus a multiple of f(k), factoring d out of the residual completes the inductive step.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition, an integer N is divisible by d iff N = d·k for some integer k (with d=2 giving evenness). The most direct way to discharge this definition is to algebraically exhibit the factor of d. Factor-extraction works because integer coefficients distribute: if every term has d as a factor, the distributive law gives d·(integer combination), and the bracketed expression is automatically an integer because integers are closed under +, −, ×. This bypasses case-splits on parity, modular arithmetic, or full polynomial expansion — all of which are heavier tools that obscure the structure already visible.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Recall the goal: I need to write the expression in the form d × (integer) — that IS the definition of divisibility by d, so any other approach is indirect.</li><li>Scan the simplified expression for the target divisor: are all coefficients multiples of d? Does any bracketed factor already contain d as a sub-factor (e.g. 8−2b = 2(4−b))?</li><li>Rule out alternatives: I do NOT want to expand a product into a polynomial and argue term-by-term, nor split into parity cases on the variable, nor invoke modular arithmetic — these add work without aiding the proof.</li><li>Commit: apply the distributive law in reverse, pulling d outside. This is a one-line operation.</li><li>Tactical check: confirm the residual bracket is an integer by citing the integrality of the variables (e.g. &#x27;b ∈ ℤ&#x27;, &#x27;k ∈ ℤ&#x27;, &#x27;M ∈ ℤ from the inductive hypothesis&#x27;). This sentence is mark-bearing.</li><li>Self-audit: if any coefficient FAILS to be divisible by d, that signals an algebraic slip earlier — go back and recheck rather than fudge the factoring.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the target divisor d (from the question statement: &#x27;prove … is even&#x27; → d=2; &#x27;divisible by 64&#x27; → d=64).</li><li>Verify each term&#x27;s coefficient is divisible by d; compute the quotients (e.g. 576/64 = 9, 64/64 = 1).</li><li>Apply distributivity in reverse: write the expression as d·(sum of quotient terms). E.g. 576M + 64k + 64 = 64(9M + k + 1).</li><li>Name the bracketed quantity as an integer k (or any letter), explicitly stating why it is an integer (closure of ℤ under +, −, ×, given the variables are integers).</li><li>Conclude with the definitional sentence: &#x27;Therefore N = d·k where k ∈ ℤ, so d | N&#x27; (or &#x27;… so N is even&#x27;).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Goal: prove $abc$ is even, where $a = 8 - 2b$, $c = b+2$, and $b \in \mathbb{Z}^+$.  
+$abc = (8-2b)\,b\,(b+2) = 2(4-b)\cdot b\cdot(b+2) = 2k$, where $k = (4-b)\,b\,(b+2) \in \mathbb{Z}$ (integers closed under multiplication).  
+Hence $abc$ is even. $\blacksquare$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Induction on f(n) = a^{pn+r} + b^{qn+s} (different growth factors)</div>
+<div class="adjustment">First rewrite f(k+1) using exponent laws: a^{p(k+1)+r} = a^p · a^{pk+r}, similarly for b. Then split f(k+1) as a^p·f(k) + (b^q − a^p)·b^{qk+s}, and factor the target divisor d out of the residual coefficient (b^q − a^p) — this is where the divisibility lives.</div>
+</div><div class="variant-row">
+<div class="scenario">Proving divisibility by 6 (or any composite)</div>
+<div class="adjustment">Either factor 6 out directly if all coefficients are multiples of 6, or argue separately that the expression is divisible by 2 AND by 3 (using gcd(2,3)=1). Same factor-extraction logic, applied twice.</div>
+</div><div class="variant-row">
+<div class="scenario">Product of n consecutive integers, divisible by n!</div>
+<div class="adjustment">Factor-extraction extends: among any n consecutive integers, one is divisible by each prime up to n with the right multiplicity. Cite this rather than trying to factor by hand.</div>
+</div><div class="variant-row">
+<div class="scenario">Surd / algebraic-fraction proofs requiring a specific form</div>
+<div class="adjustment">The same &#x27;pull out the target factor&#x27; logic applies: if asked to show an expression equals k√2 for integer k, factor √2 out of every term.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Expanding a product fully into polynomial form and then trying to argue term-by-term — needlessly creates a cubic/quartic to wrangle.</li><li>Splitting on parity of the variable when the factor of 2 is already present regardless of parity (e.g. (8−2b) is even for ALL integer b).</li><li>Writing &#x27;clearly divisible by 64&#x27; without showing the factorisation — Edexcel mark schemes require the explicit d × (integer) form.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to state that the bracketed expression is an integer — this is a separate mark on Edexcel mark schemes for both induction and direct proof questions.</li><li>Arithmetic slip in the quotient (e.g. writing 576/64 = 8 instead of 9) — always double-check by multiplying back.</li><li>In induction, confusing the growth factor with the base (writing 3 instead of 3³ = 27 when the exponent jumps by 3).</li><li>Leaving the factored form as d·(expression involving a non-integer or undefined symbol) — every variable inside must be referenced as ∈ ℤ, ideally citing the inductive hypothesis.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (proof by deduction, P1) and Further Pure (proof by induction, FP1). No formula booklet entry; the move uses only the definition of divisibility and the distributive law. Avoid invoking modular arithmetic / congruences in the write-up — though valid, they sit outside the IAL syllabus and may not earn marks under the &#x27;method shown&#x27; criterion.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2022-Q2.html" class="example-chip">P2 Oct 2022 Q2</a><a href="../FP1/ch8/q-Jan_2024-Q10.html" class="example-chip">FP1 Jan 2024 Q10</a><a href="../FP1/ch8/q-Oct_2021-Q9.html" class="example-chip">FP1 Oct 2021 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

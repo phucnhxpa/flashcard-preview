@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute into derived exponential model with rounding discipline — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Model Evaluation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Substitute into derived exponential model with rounding discipline</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Model Evaluation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in part (b)/(c) of an exponential or power modelling question after a model of the form $N = ab^t$ or $y = ax^n$ has been established in part (a). The question asks for a prediction at a specific value (often large t), with phrasing like &#x27;use the model to estimate&#x27;, &#x27;predict the value when t = ...&#x27;, or &#x27;find N when t = 30&#x27;. The cue is a direct substitution task following a fitted model, where exponent size means rounding choices matter.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Substitution is mechanical, but exponential models amplify any rounding in the base $b$ across many iterations, so $(1.16)^{30}$ and $(1.1604)^{30}$ can disagree by hundreds. The mark scheme typically allows a tolerance band covering both fully-rounded and unrounded inputs, so the student should keep parameters at the precision given in part (a), evaluate, then round only the final answer to the requested accuracy. This balances &#x27;use the model&#x27; (use the stated a, b) against numerical fidelity.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that part (a)&#x27;s model is now fixed and the task is pure evaluation at a given input.</li><li>Rule out re-deriving from the log equation or refitting — the model is given.</li><li>Commit to substituting the rounded a and b from part (a) since the question says &#x27;use the model&#x27;, accepting that the mark scheme tolerance covers minor rounding drift.</li><li>Bridge to computation: write $N = a \times b^t$ with the given numbers, evaluate $b^t$ first on the calculator, then multiply.</li><li>Tactically: keep full calculator precision through the computation, round only at the final step, and attach correct units and the requested significant figures.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the model with the part (a) values, e.g. $N = 30 \times (1.16)^t$.</li><li>Substitute the required input, e.g. $t = 30$: $N = 30 \times (1.16)^{30}$.</li><li>Evaluate the exponential factor on the calculator: $(1.16)^{30} \approx 85.85$.</li><li>Multiply by the coefficient: $N \approx 30 \times 85.85 \approx 2576$.</li><li>Round to the specified accuracy (e.g. 2 s.f.) and attach units: $N \approx 2600 \text{ mm}^2$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $N = 30 \times (1.16)^t$, predict $N$ at $t = 30$.
+$N = 30 \times (1.16)^{30} \approx 30 \times 85.85 \approx 2576$.
+To 2 s.f., $N \approx 2600 \text{ mm}^2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Model in form $N = A e^{kt}$ from a $\ln N$ vs $t$ linearisation</div>
+<div class="adjustment">Substitute $t$ into $e^{kt}$ using the unrounded $k$ where possible, then multiply by $A$; same final-rounding discipline.</div>
+</div><div class="variant-row">
+<div class="scenario">Power model $y = a x^n$ from $\log y$ vs $\log x$ linearisation</div>
+<div class="adjustment">Compute $x^n$ first, then multiply by $a$; large $x$ amplifies error in $n$, so retain decimals of $n$.</div>
+</div><div class="variant-row">
+<div class="scenario">Inverse query: solve for $t$ given $N$</div>
+<div class="adjustment">Rearrange to $t = \log_b(N/a)$ or $t = \tfrac{1}{k}\ln(N/A)$; rounding discipline still applies to the final $t$.</div>
+</div><div class="variant-row">
+<div class="scenario">Comment on validity of the prediction</div>
+<div class="adjustment">After evaluating, add a one-line remark on extrapolation risk if $t$ lies outside the data range.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Plugging $t$ into the original log equation $\log_{10} N = mt + c$ and reporting $\log_{10} N$ instead of $N$.</li><li>Treating &#x27;use the model&#x27; as licence to refit or to use raw data rather than the established $a, b$.</li><li>Confusing the requested accuracy (s.f. vs d.p.) with the precision of the inputs.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Premature rounding of $b$ (e.g. $1.16 \to 1.2$) causing huge error when raised to a large power.</li><li>Rounding intermediate values like $b^t$ to too few s.f. before multiplying by $a$.</li><li>Omitting units or giving the wrong number of significant figures.</li><li>Calculator misuse: typing $30 \times 1.16 \wedge 30$ without brackets where needed, or evaluating $(30 \times 1.16)^{30}$ by mistake.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure exponential/log modelling task (P3/P4 style); requires only calculator evaluation of $b^t$ or $e^{kt}$ and basic rounding conventions.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Oct_2020-Q2.html" class="example-chip">P3 Oct 2020 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

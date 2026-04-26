@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose linear ODE solution as CF plus PI via superposition — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Superposition Principle</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Decompose linear ODE solution as CF plus PI via superposition</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Superposition Principle</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The ODE is linear (no products like y·y&#x27;, no y² etc.) with a non-zero right-hand side f(x) — i.e. of the form ay&#x27;&#x27; + by&#x27; + cy = f(x). Visual cues: constant (or variable) coefficients on the left, and a forcing term such as cos x, e^{kx}, a polynomial, or sin/cos on the right. Equivalently phrased: &#x27;find the general solution of a non-homogeneous linear ODE&#x27;. Whenever you see a second-order linear ODE that is not equal to zero, this decomposition is the standard opening move.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because the differential operator L is linear, if L[y_CF] = 0 and L[y_PI] = f(x), then L[y_CF + y_PI] = 0 + f(x) = f(x). The complementary function (CF) supplies the two arbitrary constants required for the general solution of a second-order ODE (one for first-order), and the particular integral (PI) shifts that family to satisfy the forcing term. Together they form a complete general solution: every solution of the non-homogeneous equation can be written this way. This splits one harder problem into two routine subproblems: a homogeneous auxiliary-equation problem and an undetermined-coefficients problem.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the ODE is linear (only y, y&#x27;, y&#x27;&#x27; appear to the first power, no products) and the RHS is non-zero — this is a non-homogeneous linear ODE.</li><li>Rule out direct attacks: separation of variables fails (it&#x27;s second order with mixed terms), and integrating factors are for first-order linear; tackling the full non-homogeneous equation in one shot is unnecessarily hard.</li><li>Commit to the superposition framework: y_general = y_CF + y_PI, justified by the linearity of L.</li><li>Bridge to action: set up two subproblems — (i) solve the associated homogeneous equation L[y] = 0 via the auxiliary equation to get y_CF (with arbitrary constants A, B); (ii) guess a trial form for y_PI matching the structure of f(x).</li><li>Tactical check before guessing the PI: does any term in f(x) already appear in y_CF? If yes, multiply the trial PI by x (or x²) to avoid resonance/duplication; if no, proceed with the standard trial form.</li><li>After finding both, write y = y_CF + y_PI, ensuring exactly two arbitrary constants survive (matching the order of the ODE) and the PI has fully determined numerical coefficients.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the homogeneous equation L[y] = 0 and form the auxiliary equation am² + bm + c = 0; solve for roots and write y_CF (e.g. Ae^{m₁x} + Be^{m₂x}).</li><li>Inspect f(x) and choose a trial PI of matching form: f = cos x → try p cos x + q sin x; f = e^{kx} → try pe^{kx}; f = polynomial of degree n → try a general polynomial of degree n.</li><li>Check for duplication with y_CF; if a trial term coincides with a CF term, multiply the trial by x.</li><li>Substitute the trial into L[y] = f(x), match coefficients, and solve for the unknown constants in the trial — yielding y_PI with definite numerical coefficients.</li><li>Write the general solution: y = y_CF + y_PI, retaining only A and B as arbitrary constants.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For y'' + 5y' + 6y = \cos x: auxiliary m² + 5m + 6 = 0 gives m = -2, -3, so y_{CF} = Ae^{-2x} + Be^{-3x}. Trial y_{PI} = p\cos x + q\sin x; substituting and matching gives p = 1/10, q = 1/10. Hence y = Ae^{-2x} + Be^{-3x} + \tfrac{1}{10}\cos x + \tfrac{1}{10}\sin x.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">First-order linear ODE y&#x27; + P(x)y = Q(x) solved by integrating factor</div>
+<div class="adjustment">Same CF + PI structure emerges: the homogeneous part contributes Ce^{-∫P dx} (one arbitrary constant) and the integrating-factor formula yields the PI.</div>
+</div><div class="variant-row">
+<div class="scenario">Forcing term duplicates a CF term (e.g. RHS = e^{-2x} when e^{-2x} is in the CF)</div>
+<div class="adjustment">Multiply the trial PI by x (or x² for a repeated root) to break the duplication — same superposition logic, modified trial.</div>
+</div><div class="variant-row">
+<div class="scenario">RHS is a sum, e.g. f(x) = cos x + e^{2x}</div>
+<div class="adjustment">Find a PI for each piece separately and add them (superposition applies on the right too).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the equation as separable or attempting an integrating factor on a second-order ODE.</li><li>Believing the PI alone is the &#x27;solution&#x27; because it satisfies the equation, missing that the CF is needed for arbitrary constants.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Omitting the PI and writing only the CF — this solves the homogeneous equation, not the given ODE.</li><li>Omitting the CF and writing only the PI — this loses the arbitrary constants and cannot satisfy initial/boundary conditions.</li><li>Failing to check for resonance: if the trial PI duplicates a CF term, the substitution will collapse to 0 = f(x) and produce no solution unless the trial is multiplied by x.</li><li>Leaving an arbitrary constant inside the PI (e.g. writing Ce^{3x} when the coefficient should be a determined number).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP2/FP3) coverage of second-order linear ODEs with constant coefficients. The auxiliary-equation method and standard trial PIs (polynomial, exponential, sin/cos) are in scope; variation of parameters and non-constant-coefficient cases are out of scope and should not be invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP2/ch5/q-Jan_2021-Q6.html" class="example-chip">FP2 Jan 2021 Q6</a><a href="../FP2/ch5/q-Jan_2022-Q2.html" class="example-chip">FP2 Jan 2022 Q2</a><a href="../FP2/ch5/q-Jan_2024-Q6.html" class="example-chip">FP2 Jan 2024 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

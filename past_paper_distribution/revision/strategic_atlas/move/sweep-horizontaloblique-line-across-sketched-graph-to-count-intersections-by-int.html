@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sweep horizontal/oblique line across sketched graph to count intersections by interval — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Graphical Intersection Analysis</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Sweep horizontal/oblique line across sketched graph to count intersections by interval</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Graphical Intersection Analysis</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for values of a parameter k such that an equation like f(x) = k (or f(x) = g_k(x)) has exactly a specified number of roots, where f has already been sketched (or is easy to sketch) — typically a V-shape from a modulus, a cubic, or a reciprocal. Visual cues: the parameter appears only as a height (y = k) or as a slope/intercept of a line, the equation would be algebraically intractable, and earlier parts of the question asked for a sketch. Equivalent phrasings: &#x27;find the set of k for which the line y = k meets the graph in exactly two points&#x27;, or &#x27;state the number of solutions of f(x) = k&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each real root of f(x) = k corresponds to an x-coordinate where the curve y = f(x) meets the line y = k, so &#x27;number of roots&#x27; becomes &#x27;number of intersections&#x27;. As k increases, the horizontal (or oblique) line sweeps across the graph and the intersection count only changes at critical k-values: turning points (vertex of a V, local max/min) and domain-boundary y-values (open or closed endpoints). Identifying these critical k-values partitions the real line into intervals on which the count is constant, converting a hard &#x27;for all k&#x27; algebraic problem into a simple read-off from a sketch. This is the standard examiner technique whenever a sketch in part (a) is followed by a &#x27;how many roots&#x27; part.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the equation involves a parameter k that appears only as a horizontal level (or as a simple line parameter), and that earlier parts of the question already required a sketch — strong structural hint that a graphical approach is intended.</li><li>Rule out direct algebra: clearing the modulus or cross-multiplying typically yields a high-degree polynomial (e.g. quintic) or a case-split that is more work than reading off a graph.</li><li>Commit to graphical reasoning: the count of roots equals the number of intersections between y = f(x) and y = k, so identify all critical k-values where the count changes.</li><li>Find these critical levels by computing (i) y-coordinates of vertices/turning points and (ii) y-values at any restricted-domain endpoints, being careful whether each endpoint is open or closed.</li><li>Decide which arm/branch each intersection belongs to: e.g. for a V-shape with a truncated left arm, check whether the level k still reaches the left arm.</li><li>Assemble the answer as a union of intervals, with strict inequalities where the line meets a vertex (giving a tangency / single root) or an open endpoint (root at excluded x-value), and weak inequalities where the endpoint is included.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Sketch (or recall the sketch of) y = f(x), marking vertex/turning points and any domain endpoints.</li><li>Compute the y-coordinate of each vertex/turning point: e.g. for f(x) = 21 − 2|x − 2|, vertex at (2, 21).</li><li>Compute f at each domain boundary: e.g. f(0) = 17 if the domain is x ≥ 0; note whether the endpoint is included (closed dot) or excluded (open dot).</li><li>Determine the y-range covered by each arm/branch separately: left arm spans [17, 21], right arm spans (−∞, 21].</li><li>For the required count (e.g. exactly two roots), find the k-values for which the horizontal line lies on the correct number of arms simultaneously.</li><li>State the answer as an interval, using &lt; at vertex levels (which give only one intersection) and using ≤ or &lt; at boundary levels according to whether the endpoint is closed or open.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x) = 21 - 2|x-2|$ for $x \ge 0$. Vertex: $(2, 21)$. Boundary: $f(0) = 21 - 4 = 17$ (closed). Left arm covers $y \in [17, 21]$; right arm covers $y \in (-\infty, 21]$. The line $y = k$ meets both arms iff $17 \le k < 21$ (excluding $k=21$ where the line is tangent at the vertex, giving only one root). Hence $f(x) = k$ has exactly two roots for $17 \le k < 21$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Modulus on an open domain, e.g. f(x) = 2|3 − x| + 5 for x &gt; 0</div>
+<div class="adjustment">Boundary value f(0⁺) = 11 is not attained, so the upper bound is strict: 5 &lt; k &lt; 11 (strict at vertex k = 5 and strict at open endpoint k = 11).</div>
+</div><div class="variant-row">
+<div class="scenario">Oblique line y = kx + c instead of horizontal y = k</div>
+<div class="adjustment">Decompose the V-shape into two linear arms; solve y = kx + c against each arm separately. The critical k-values are the gradients of the two arms (parallel cases) and any value making the line pass through the vertex.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation f(x) = g(x) where both sides are sketched curves (e.g. cubic = reciprocal)</div>
+<div class="adjustment">Count intersections of the two sketched curves directly, rather than intersecting one curve with a horizontal line — same principle, two non-trivial curves.</div>
+</div><div class="variant-row">
+<div class="scenario">Unrestricted domain V-shape on all of ℝ</div>
+<div class="adjustment">Endpoint considerations vanish; two roots occur for all k strictly below (or above, if inverted) the vertex y-value.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to solve the equation algebraically by squaring or cross-multiplying, producing a high-degree polynomial that is intractable at A-level.</li><li>Ignoring the domain restriction and treating the graph as the full V-shape on ℝ, which gives a wrong (often unbounded) interval for k.</li><li>Confusing &#x27;exactly two roots&#x27; with &#x27;at least two roots&#x27; and accidentally including the vertex level.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Including the vertex y-value k = (vertex height): the horizontal line is tangent there and gives only one root, so this k must be excluded.</li><li>Using ≤ versus &lt; incorrectly at a domain boundary: closed endpoint (x = 0 included) → k = f(0) gives a genuine root, so use ≤; open endpoint (x = 0 excluded) → use strict &lt;.</li><li>Miscounting which arm a horizontal line still reaches once one arm is truncated by the domain.</li><li>Producing an inaccurate sketch (e.g. wrong vertex location or wrong gradient sign) and reading off the wrong intervals.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure Maths (P2/P3 modulus functions, transformations of graphs) and Further Pure (curve sketching of rational functions). No formula booklet entry is invoked; the technique is purely graphical. Avoid generalising to discontinuous or implicitly-defined curves where intersection counting requires calculus tools beyond A-level.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Oct_2020-Q4.html" class="example-chip">P3 Oct 2020 Q4</a><a href="../P3/ch1/q-Specimen_2018-Q3.html" class="example-chip">P3 Specimen 2018 Q3</a><a href="../P1/ch1/q-Oct_2022-Q6.html" class="example-chip">P1 Oct 2022 Q6</a><a href="../P3/ch1/q-Jan_2020-Q6.html" class="example-chip">P3 Jan 2020 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

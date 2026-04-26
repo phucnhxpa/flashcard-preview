@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use trace and determinant to reduce remaining eigenvalues to a quadratic — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Eigenvalue Shortcut</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Use trace and determinant to reduce remaining eigenvalues to a quadratic</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Eigenvalue Shortcut</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires for a 3×3 matrix when one eigenvalue λ₁ is already known (given, guessed, or found from a stated eigenvector) and the other two are required. Also fires when the question explicitly asks for the remaining eigenvalues after verifying one. The full characteristic polynomial det(M − λI) = 0 would be a tedious cubic in λ. Cue phrases: &#x27;show that … is an eigenvalue, hence find the others&#x27;, or a problem that supplies one eigenvector then asks for the spectrum.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For any 3×3 matrix, tr(M) = λ₁ + λ₂ + λ₃ and det(M) = λ₁λ₂λ₃. Once λ₁ is known, the trace gives the sum S = λ₂ + λ₃ and the determinant gives the product P = λ₂λ₃. By Vieta&#x27;s, λ₂ and λ₃ are then the roots of t² − St + P = 0, a single quadratic instead of a cubic. This replaces a symbolic 3×3 determinant expansion with one numerical determinant plus a quadratic solve.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that one eigenvalue λ₁ is already in hand, so the unknowns reduce from three to two.</li><li>Rule out expanding det(M − λI) as a cubic in λ — algebraically heavy and sign-error prone.</li><li>Commit to the trace/determinant route because two symmetric functions of the eigenvalues are exactly what&#x27;s needed for two unknowns.</li><li>Bridge: read tr(M) straight off the diagonal, then compute the single numerical det(M) by cofactor expansion along the easiest row.</li><li>Tactically, divide det(M) by λ₁ for the product, subtract λ₁ from tr(M) for the sum, and assemble t² − St + P = 0.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Read off tr(M) from the diagonal entries and compute S = λ₂ + λ₃ = tr(M) − λ₁.</li><li>Compute det(M) numerically by cofactor expansion along the row or column with the most zeros / smallest entries.</li><li>Compute P = λ₂λ₃ = det(M)/λ₁.</li><li>Form the quadratic t² − St + P = 0.</li><li>Solve by factorisation or the quadratic formula to obtain λ₂ and λ₃.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $M$ have $\lambda_1 = -3$, with $\operatorname{tr}(M) = -17$ and $\det(M) = -156$. Then $\lambda_2 + \lambda_3 = -17 - (-3) = -14$ and $\lambda_2\lambda_3 = -156/(-3) = 52$. So $\lambda_2, \lambda_3$ satisfy $t^2 + 14t + 52 = 0$, giving $t = -7 \pm \sqrt{49 - 52} = -7 \pm i\sqrt{3}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2×2 matrix with no eigenvalue known</div>
+<div class="adjustment">Use t² − tr(M)·t + det(M) = 0 directly; both eigenvalues come from one quadratic with no prior root needed.</div>
+</div><div class="variant-row">
+<div class="scenario">3×3 matrix with two eigenvalues known</div>
+<div class="adjustment">The third follows from trace alone: λ₃ = tr(M) − λ₁ − λ₂. No determinant needed; use det as a check.</div>
+</div><div class="variant-row">
+<div class="scenario">3×3 matrix where an eigenvector v is given but its eigenvalue is not</div>
+<div class="adjustment">First compute Mv to read off λ₁ (since Mv = λ₁v), then proceed with the trace/determinant reduction.</div>
+</div><div class="variant-row">
+<div class="scenario">Singular 3×3 matrix (det(M) = 0) with one nonzero eigenvalue known</div>
+<div class="adjustment">Then 0 is an eigenvalue, so P = 0 and one of λ₂, λ₃ is 0; the other equals S = tr(M) − λ₁.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating det(M) as the sum of eigenvalues and tr(M) as the product — the two invariants swapped.</li><li>Thinking the method needs the full characteristic polynomial first, defeating the shortcut.</li><li>Assuming the quadratic must factor nicely and abandoning the method when it produces complex or irrational roots — these are still valid eigenvalues at this level.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in the 3×3 cofactor expansion, especially with negative diagonal entries; check by expanding along a second row.</li><li>Forgetting the minus sign in t² − St + P (writing t² + St + P instead).</li><li>Dividing det(M) by the wrong known eigenvalue, or by 0 when λ₁ = 0.</li><li>Miscounting the trace by including off-diagonal entries.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure: 2×2 and 3×3 eigenvalue problems, characteristic equations, and the identities tr(M) = Σλᵢ, det(M) = Πλᵢ are all standard. Complex eigenvalues from the resulting quadratic are accepted in FP scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2021-Q5.html" class="example-chip">FP3 Jan 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

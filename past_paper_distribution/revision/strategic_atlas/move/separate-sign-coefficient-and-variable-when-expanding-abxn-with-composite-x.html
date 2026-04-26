@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Separate sign, coefficient, and variable when expanding (a+bx)^n with composite X — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../binomial.html">Binomial Expansion</a> / <strong>Composite Substitution Bookkeeping</strong></div>
+  <span class="domain-pill" style="background:#EC407A;color:white">Binomial Expansion</span>
+  <h1>Separate sign, coefficient, and variable when expanding (a+bx)^n with composite X</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Composite Substitution Bookkeeping</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when applying the generalised binomial expansion (1+X)^n with negative or fractional n, and X = cx/d is itself a signed fraction in x, e.g. X = -5x/2, X = -3x/4, or X = 2x/5. The cue is that each power X^k = (c/d)^k x^k carries its own sign from (-1)^k, while the falling factorial n(n-1)(n-2)... already produces signs of its own. Whenever both n&lt;0 and the coefficient of x in X is negative, sign errors are highly likely without disciplined bookkeeping.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The generalised binomial coefficient n(n-1)...(n-k+1)/k! and the substitution X^k are independent pieces of the term, so evaluating them separately and only multiplying at the end isolates each potential sign error. For negative n the falling factorial alternates predictably, and for X = -5x/2 the factor (-1)^k from X^k can either reinforce or cancel that alternation. Tracking the two streams in parallel makes it transparent why, e.g., the x^3 term ends up positive: two negatives cancel. This discipline mirrors the structure of the formula itself and keeps work auditable.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Student notices that X is not just x but a signed fraction -5x/2, so every X^k will produce a sign and a power of 5/2.</li><li>They rule out substituting X directly into a single combined coefficient, since this risks losing or duplicating signs.</li><li>They commit to a three-column scheme: falling factorial / k! on one side, (-5/2)^k x^k on the other, then multiply.</li><li>First concrete operation: list n, n-1, n-2 = -2, -3, -4 and powers (-5/2)^1 = -5/2, (-5/2)^2 = 25/4, (-5/2)^3 = -125/8.</li><li>Tactically, they keep fractions unsimplified until the final multiply, so common factors with k! are visible and sign cancellations are explicit.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify n and X; here n = -2, X = -5x/2.</li><li>For each k, compute the falling-factorial coefficient n(n-1)...(n-k+1)/k! as a signed rational.</li><li>Separately compute X^k = (-5/2)^k x^k, recording the sign from (-1)^k explicitly.</li><li>Multiply the two pieces to get the term, simplifying signs last.</li><li>k=1: (-2)(-5x/2) = 5x.</li><li>k=2: [(-2)(-3)/2]·(25x^2/4) = 3·25x^2/4 = 75x^2/4.</li><li>k=3: [(-2)(-3)(-4)/6]·(-125x^3/8) = (-4)·(-125x^3/8) = 125x^3/2.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Expand $(1-5x/2)^{-2}$ up to $x^3$. Falling factorials: $-2,\ (-2)(-3)/2!=3,\ (-2)(-3)(-4)/3!=-4$. Powers of $X$: $-5x/2,\ 25x^2/4,\ -125x^3/8$. Multiplying: $1+5x+\tfrac{75}{4}x^2+\tfrac{125}{2}x^3+\cdots$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Expansion of $(1+3x/4)^{1/2}$</div>
+<div class="adjustment">X is positive so no sign alternation from X^k; only the falling factorial 1/2, -1/2, -3/2,... produces signs.</div>
+</div><div class="variant-row">
+<div class="scenario">Expansion of $(1-2x/3)^{-1/2}$</div>
+<div class="adjustment">Both n&lt;0 fractional and X negative; signs from (-1)^k and from the falling factorial both alternate, often reinforcing to give all-positive terms.</div>
+</div><div class="variant-row">
+<div class="scenario">Expansion of $(2-5x)^{-2}$ requiring factorisation first</div>
+<div class="adjustment">Factor out 2^{-2} and rewrite as (1-5x/2)^{-2}; then apply the same separated bookkeeping with X=-5x/2.</div>
+</div><div class="variant-row">
+<div class="scenario">Finding a specific coefficient (e.g. coefficient of $x^4$)</div>
+<div class="adjustment">Only one (k=4) term needs the two-column computation, but the same separation principle prevents sign slips.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating X as simply x and forgetting to raise -5/2 to the k-th power.</li><li>Believing the sign of each term must alternate because n is negative, ignoring the second sign source from X.</li><li>Thinking the formula requires (1+X)^n with X already positive, and so dropping the minus from -5x/2.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Losing a minus sign when cubing -5/2, writing +125/8 instead of -125/8.</li><li>Miscounting the falling factorial: using (n-1) instead of (n-2) for the third factor.</li><li>Forgetting that (-5x/2)^2 = +25x^2/4, not -25x^2/4.</li><li>Combining sign and magnitude too early and losing track of which negatives have already been absorbed.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 generalised binomial expansion for rational n with |X|&lt;1; no content beyond standard A-level scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch5/q-Oct_2023-Q2.html" class="example-chip">P4 Oct 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

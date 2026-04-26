@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert x-limits to u-limits immediately on substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Substitution Bridge</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Convert x-limits to u-limits immediately on substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Bridge</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A definite integral is to be evaluated using a prescribed (or chosen) substitution u = g(x), with numerical x-limits a and b. The question demands an exact numerical value, not an antiderivative in x. Cues include phrases like &#x27;use the substitution... to show that the integral equals...&#x27; or &#x27;hence find the exact value of&#x27;. Especially attractive when g(a) and g(b) are clean numbers (integers, simple surds) even though a, b are trigonometric or logarithmic.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If the limits are converted at the moment of substitution, the entire computation lives in the u-world and the final evaluation is a direct plug-in of u-values into the u-antiderivative. This avoids the error-prone back-substitution step where one rewrites F(u) as F(g(x)) and then evaluates a more complicated expression at the original x-limits. It also frequently turns awkward trigonometric or exponential limits into simple rational numbers, exploiting the fact that g was chosen precisely to simplify the integrand.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integral is definite with a substitution being introduced, so a fork appears: convert limits now, or keep x-limits and back-substitute later.</li><li>Rule out back-substitution because it would force me to re-express the u-antiderivative in x and evaluate at the original (often trigonometric) limits — extra algebra with no payoff.</li><li>Commit to the u-world entirely: rewrite limits, integrand and differential all in u before integrating.</li><li>Compute u(a) and u(b) directly from u = g(x), checking the values are clean and that the order a &lt; b transfers correctly to the new limits.</li><li>Drop all reference to x for the rest of the problem; the final line is just F(u(b)) − F(u(a)).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the substitution u = g(x) and the original x-limits a, b.</li><li>Compute the new lower limit u(a) = g(a).</li><li>Compute the new upper limit u(b) = g(b).</li><li>Compute du = g&#x27;(x) dx and rewrite the integrand in u.</li><li>Write the integral as ∫_{g(a)}^{g(b)} h(u) du and proceed with no x present.</li><li>Evaluate F(u) at the u-limits directly to obtain the exact value.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $\int_0^{\pi/6} \frac{4\cos x}{(3+4\sin x)^2}\,dx$ with $u = 3+4\sin x$, $du = 4\cos x\,dx$. Limits: $x=0 \Rightarrow u=3$; $x=\pi/6 \Rightarrow u=3+4(\tfrac{1}{2})=5$. Integral becomes $\int_3^5 u^{-2}\,du = [-u^{-1}]_3^5 = -\tfrac{1}{5}+\tfrac{1}{3} = \tfrac{2}{15}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Substitution u = e^x in $\int_0^{\ln 2} f(e^x)e^x\,dx$</div>
+<div class="adjustment">New limits become u = 1 and u = 2; integrate in u and evaluate directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig substitution u = cos x with a decreasing function on the interval</div>
+<div class="adjustment">New limits may appear in reversed order; either keep them reversed or flip and negate the integral.</div>
+</div><div class="variant-row">
+<div class="scenario">Substitution u = √(x+1) or u² = x+1</div>
+<div class="adjustment">Convert each x-limit by taking the (positive) square root to get clean u-limits, e.g. x∈[0,3] → u∈[1,2].</div>
+</div><div class="variant-row">
+<div class="scenario">Hyperbolic substitution (Further Pure) u = sinh x or x = a sinh u</div>
+<div class="adjustment">Convert limits via inverse hyperbolic, e.g. x = 0 → u = 0, x = a → u = arsinh 1 = ln(1+√2); still no back-substitution needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Indefinite integral with the same substitution</div>
+<div class="adjustment">There are no limits to convert, so back-substitution u → x is unavoidable; the move does not apply.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the substitution as purely algebraic and forgetting the integral is definite, so limits get carried over unchanged.</li><li>Believing one must always back-substitute to x before evaluating, as in indefinite integration.</li><li>Confusing &#x27;convert the limits&#x27; with &#x27;evaluate the integrand&#x27; at the limits.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Leaving the x-limits 0 and π/6 attached to a u-integrand and plugging them into F(u) — a category error.</li><li>Mis-evaluating g at the endpoints (e.g. sin(π/6) = 1/2, not √3/2).</li><li>Swapping the order of the new limits when g is decreasing, then forgetting the resulting sign change.</li><li>Forgetting to also convert dx to du via du = g&#x27;(x) dx, leaving a stray cos x or similar factor.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard technique in Edexcel IAL C34/P3 integration by substitution and extended in Further Pure to hyperbolic and trigonometric substitutions; no material outside the syllabus is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Oct_2021-Q6.html" class="example-chip">P4 Oct 2021 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

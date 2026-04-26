@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute into a standard Maclaurin series to bypass repeated differentiation — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Standard Series Substitution</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Substitute into a standard Maclaurin series to bypass repeated differentiation</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Standard Series Substitution</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The function to be expanded is not a bare elementary function but a composition or product built from them — e.g. e^(x²), sin(2x), ln(1 + x²), cos(√x), e^(sin x), x ln(1+x), or (1+x²)^(1/2). The outer function (e^u, sin u, cos u, ln(1+u), (1+u)^n) has a standard Maclaurin series in the IAL formula booklet, and the inner expression g(x) is simple enough that g(x)², g(x)³ etc. remain manageable. Equivalent phrasings: &#x27;find the series expansion of f(g(x)) up to xⁿ&#x27;, &#x27;expand the product f(x)g(x) up to terms in xᵏ&#x27;, &#x27;use a known result to deduce the series for ...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Power series can be composed and multiplied: if g(u) = Σaₙuⁿ converges, then g(h(x)) = Σaₙ[h(x)]ⁿ on the appropriate interval, and similarly two series can be multiplied term-by-term like polynomials. Differentiating a composite or product four or five times by chain/product rule produces increasingly unwieldy expressions and is a common source of arithmetic slips under exam pressure. By substituting the inner expression directly into a pre-computed standard series, you replace heavy calculus with cheap algebra, and you can discard high-order terms early. This exploits the fact that the standard results in the formula book ARE the Maclaurin coefficients — pre-differentiated for you.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that f(x) is built from a recognisable outer function (e^u, sin u, cos u, ln(1+u), (1+u)^n) applied to a simple inner expression g(x), or is a product of two such functions.</li><li>Rule out direct repeated differentiation: computing f⁽ⁿ⁾(0) via chain/product rule four or more times would mean nested derivatives with many terms — slow and error-prone.</li><li>Rule out finding f⁽ⁿ⁾(0) numerically term-by-term: the standard-series route gives the same coefficients with far less work.</li><li>Commit to substitution: write the standard series for the outer function with a dummy variable u, then set u = g(x).</li><li>Decide the cut-off: identify the highest power of x required (say xᴺ); any term whose total degree in x will exceed N can be dropped immediately, including inside expansions of u², u³, etc.</li><li>If the function is a product g(x)h(x), expand each factor&#x27;s series only up to xᴺ and multiply like polynomials, again discarding terms of degree &gt; N as they appear.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the relevant standard series from the formula book, e.g. e^u = 1 + u + u²/2! + u³/3! + ··· or ln(1+u) = u − u²/2 + u³/3 − ··· or (1+u)^n = 1 + nu + n(n−1)u²/2! + ···.</li><li>Identify the inner expression u = g(x) (e.g. u = x², u = 2x, u = −x³, or u = sin x = x − x³/6 + ···).</li><li>Substitute: replace every u in the standard series with g(x).</li><li>Expand each power [g(x)]^k carefully, raising the WHOLE expression (e.g. (2x)² = 4x², not 2x²); include cross-terms when squaring/cubing a multi-term series.</li><li>Truncate: drop any term of degree higher than the requested N as soon as it appears.</li><li>Collect like powers of x and simplify the coefficients.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the Maclaurin series of $e^{x^2}$ up to $x^4$. Standard result: $e^u = 1 + u + \tfrac{u^2}{2!} + \tfrac{u^3}{3!} + \cdots$. Set $u = x^2$: $e^{x^2} = 1 + x^2 + \tfrac{(x^2)^2}{2} + \tfrac{(x^2)^3}{6} + \cdots = 1 + x^2 + \tfrac{x^4}{2} + O(x^6)$. So up to $x^4$, $e^{x^2} \approx 1 + x^2 + \tfrac{1}{2}x^4$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Composition with a non-monomial inner series, e.g. ln(1 + sin x) or e^(sin x).</div>
+<div class="adjustment">First write the inner series sin x = x − x³/6 + ···, then substitute that ENTIRE truncated series as u into the outer series, expanding u², u³ as polynomial squares/cubes (mind the cross-terms) and truncating at the target degree.</div>
+</div><div class="variant-row">
+<div class="scenario">Product of two functions, e.g. x ln(1+x) or sin x · cos x.</div>
+<div class="adjustment">Write each factor&#x27;s series up to the required degree and multiply term-by-term like polynomials, dropping products whose combined degree exceeds N.</div>
+</div><div class="variant-row">
+<div class="scenario">Binomial-type composite, e.g. (1+x²)^(1/2) or 1/√(1−2x).</div>
+<div class="adjustment">Use (1+u)^n = 1 + nu + n(n−1)u²/2! + ··· with u set to the inner expression; check |u| &lt; 1 for the validity range.</div>
+</div><div class="variant-row">
+<div class="scenario">Quotient, e.g. (sin x)/(1+x).</div>
+<div class="adjustment">Either multiply the numerator series by the reciprocal series 1/(1+x) = 1 − x + x² − ···, or perform formal long division of series, truncating throughout.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating f(x) = e^(x²) as if it required four chain-rule differentiations instead of recognising the substitution shortcut.</li><li>Substituting the entire infinite series instead of truncating early, then drowning in algebra.</li><li>Mistaking ln(1+g(x)) for a case requiring ln(1−u): missing the sign on the inner expression.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to raise the WHOLE inner expression to the power: (2x)² = 4x², (−x³)² = x⁶, not 2x² or −x⁶.</li><li>When squaring or cubing a multi-term inner series like x − x³/6, omitting cross-terms (e.g. (x − x³/6)² has a 2·x·(−x³/6) cross-term).</li><li>Sign errors with alternating series (ln(1+x), cos x), especially when the inner expression itself is negative.</li><li>Failing to truncate consistently — keeping a degree-6 term in one place but dropping it in another leads to a corrupted coefficient.</li><li>Ignoring the radius of convergence when a validity statement is asked for (e.g. ln(1+u) needs |u| &lt; 1, so ln(1+x²) is valid for |x| &lt; 1).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely in Edexcel IAL P3/FP2 series work; uses the Maclaurin expansions for e^x, sin x, cos x, ln(1+x), and (1+x)^n given in the IAL formula booklet. Avoid invoking general analytic-function composition theorems or formal power-series rings — at this level, justify by &#x27;substituting into a known series and collecting terms up to the required order&#x27;, and state the validity interval inherited from the standard result.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP2/ch6/q-Specimen_2018-Q5.html" class="example-chip">FP2 Specimen 2018 Q5</a><a href="../FP2/ch6/q-Jun_2024-Q2.html" class="example-chip">FP2 Jun 2024 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

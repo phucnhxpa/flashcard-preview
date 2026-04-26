@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor out the common variable instead of dividing through — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Strategic Factorisation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Factor out the common variable instead of dividing through</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Factorisation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when an equation reduces to a quadratic (or higher polynomial) in some expression $u$ — typically $u=\tan x$, $\sin x$, $\cos x$, $e^x$, $\ln x$, or just $x$ itself — with no constant term, so every term contains $u$ as a factor. Cue phrases: &#x27;solve $au^2+bu=0$&#x27;, &#x27;solve $au^2=bu$&#x27;, or any equation where moving everything to one side leaves a common factor. Equivalent surface: $au^3 = bu$ or $au^2 = bu$ rearranged to $u(au-b)=0$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>When the constant term is zero, $u=0$ is automatically a root, and the factorisation $u(au-b)=0$ exposes both roots cleanly via the zero-product property. Dividing through by $u$ assumes $u\neq 0$ and silently deletes that root — a loss-of-solution error that examiners specifically test. Factoring is also faster than invoking the quadratic formula and avoids unnecessary surds when the discriminant is messy.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice every term on one side shares a factor of $\tan x$ (or $\sin x$, $x$, $e^x$, …) and the other side is $0$.</li><li>I rule out dividing both sides by that common factor, because that would assume it is non-zero and lose the root where it equals zero.</li><li>I rule out the quadratic formula too — it works, but it is heavier and obscures the structure.</li><li>I commit to factoring out the common variable and applying the zero-product property to read off both roots.</li><li>Inside the move I write $u(au-b)=0$, then split into $u=0$ and $u=b/a$, and finally translate each back into $x$ using the appropriate inverse (e.g. $\tan x=0$, $\tan x=3/2$) over the stated domain.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Move all terms to one side so the equation equals $0$.</li><li>Identify the common factor (here $\tan x$) shared by every term.</li><li>Factor it out: $\tan x(2\tan x - 3) = 0$.</li><li>Apply the zero-product property: $\tan x = 0$ or $2\tan x - 3 = 0$.</li><li>Solve each branch: $\tan x = 0$ and $\tan x = 3/2$.</li><li>Find all $x$ in the given domain for each branch, listing every solution.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $2\tan^2 x - 3\tan x = 0$ for $0 \le x < 2\pi$.\\ Factor: $\tan x(2\tan x - 3) = 0$.\\ Branch 1: $\tan x = 0 \Rightarrow x = 0,\ \pi$.\\ Branch 2: $\tan x = 3/2 \Rightarrow x = \arctan(3/2),\ \pi + \arctan(3/2)$.\\ Four solutions in total — the $\tan x = 0$ pair would be lost by dividing through.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">$2\sin^2 x = \sin x$</div>
+<div class="adjustment">Rearrange to $\sin x(2\sin x - 1) = 0$; gives $\sin x = 0$ and $\sin x = 1/2$.</div>
+</div><div class="variant-row">
+<div class="scenario">$3\cos^2 x + 2\cos x = 0$</div>
+<div class="adjustment">Factor as $\cos x(3\cos x + 2) = 0$; preserves $\cos x = 0$ root.</div>
+</div><div class="variant-row">
+<div class="scenario">$x e^{2x} = 3e^{2x}$ or $e^{2x}(x-3)=0$</div>
+<div class="adjustment">Use the fact that $e^{2x}&gt;0$ to discard that factor — but only after factoring, not by dividing blindly.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic $x^3 - 4x = 0$</div>
+<div class="adjustment">Factor $x(x^2-4)=x(x-2)(x+2)=0$; do not divide by $x$.</div>
+</div><div class="variant-row">
+<div class="scenario">$\ln x \cdot (\ln x - 2) = 0$ from $(\ln x)^2 = 2\ln x$</div>
+<div class="adjustment">Gives $\ln x = 0$ ($x=1$) and $\ln x = 2$ ($x=e^2$).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading $2\tan^2 x = 3\tan x$ as a proportion and &#x27;cancelling&#x27; $\tan x$ from both sides.</li><li>Treating the equation as a generic quadratic and reaching for the formula, not noticing the zero constant term.</li><li>Assuming $\tan x = 0$ is &#x27;trivial&#x27; and not worth recording as a solution.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dividing both sides by $\tan x$ and losing the $\tan x = 0$ branch — the headline error.</li><li>Forgetting to list all values of $x$ in the given domain for each branch (e.g. omitting $x=\pi$ when $\tan x = 0$).</li><li>After factoring, solving only one branch and stopping.</li><li>Mis-stating $\tan x = 3/2$ as $x = \arctan(2/3)$ by inverting the fraction.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure technique appearing in trigonometric equations (P2/P3), exponential/logarithmic equations (P2), and polynomial root-finding (P1). Stays entirely within the syllabus — no tools beyond factoring and the zero-product property are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch2/q-Jan_2022-Q9.html" class="example-chip">P3 Jan 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

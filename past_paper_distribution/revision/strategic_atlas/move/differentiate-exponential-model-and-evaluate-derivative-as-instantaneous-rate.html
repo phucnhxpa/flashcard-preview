@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiate exponential model and evaluate derivative as instantaneous rate — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Physical Interpretation Of Derivative</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Differentiate exponential model and evaluate derivative as instantaneous rate</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Physical Interpretation Of Derivative</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a modelling question asks for the &#x27;rate of increase/decrease&#x27; of a quantity governed by an exponential law such as θ = A − Be^{−kt} or P = P_0 e^{kt}, and gives a specific instant t = t_0. Phrases like &#x27;rate at which …&#x27;, &#x27;how fast … is changing&#x27;, &#x27;instantaneous rate&#x27;, or units of (quantity)·(time)^{−1} all signal this. The cue is a value of t supplied together with a request for a rate, not for the quantity itself.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition, the rate of change of Y with respect to X is dY/dX, so &#x27;rate of increase of θ at t = 9&#x27; is dθ/dt|_{t=9}. For exponential models the chain rule gives d/dt[Ae^{f(t)}] = A f&#x27;(t) e^{f(t)}, so the structure of the derivative mirrors the original function up to a multiplicative constant. This makes evaluation cheap once e^{f(t_0)} is known from an earlier part. The sign of the derivative also confirms whether the quantity is increasing or decreasing, providing a built-in sanity check.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question says &#x27;rate&#x27; with a specific t-value supplied — that flags an instantaneous derivative, not a function value.</li><li>Rule out re-substituting into θ itself (that would just repeat the value question) and rule out average rate Δθ/Δt since no interval is given.</li><li>Commit to computing dθ/dt because &#x27;rate of change of θ with respect to t&#x27; is, by definition, this derivative.</li><li>Bridge: differentiate term by term, applying the chain rule to e^{−kt} to pick up the factor −k.</li><li>Tactically reuse any previously computed value of e^{−kt_0} or k from earlier parts rather than recomputing, and check the sign matches the stated direction (increase ⇒ positive).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the quantity to differentiate (the model for θ, P, s, etc.) and the variable (usually t).</li><li>Differentiate using the chain rule: d/dt[Ae^{−kt}] = −kAe^{−kt}; constants differentiate to 0.</li><li>Write dθ/dt in closed form, e.g. dθ/dt = 180k e^{−kt}.</li><li>Substitute the given instant t = t_0 and any known constants (k, e^{−kt_0}).</li><li>Evaluate numerically and state with correct units (e.g. °C min^{−1}); check the sign matches the physical context.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\theta = 198 - 180e^{-kt}$ with $k = \tfrac{1}{5}\ln(5/3)$, find the rate of increase at $t=9$. Differentiate: $\dfrac{d\theta}{dt} = 180k\,e^{-kt}$. At $t=9$: $e^{-9k} = (3/5)^{9/5} \approx 0.3988$, so $\dfrac{d\theta}{dt} = 180 \times \tfrac{1}{5}\ln(5/3) \times 0.3988 \approx 7.33$ °C min$^{-1}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Population growth P = P_0 e^{kt}</div>
+<div class="adjustment">dP/dt = kP_0 e^{kt} = kP; often quickest to write rate as kP(t_0).</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling θ = θ_∞ + (θ_0 − θ_∞)e^{−kt}</div>
+<div class="adjustment">dθ/dt = −k(θ − θ_∞); derivative proportional to current excess temperature.</div>
+</div><div class="variant-row">
+<div class="scenario">Kinematics with s(t) given</div>
+<div class="adjustment">&#x27;Velocity&#x27; = ds/dt; &#x27;acceleration&#x27; = d²s/dt²; differentiate then evaluate.</div>
+</div><div class="variant-row">
+<div class="scenario">Rate of change of a difference, e.g. d/dt(198 − θ)</div>
+<div class="adjustment">Differentiate the difference directly, or use −dθ/dt; sign flips accordingly.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;rate of increase at t = 9&#x27; as the value θ(9) and substituting into the original model.</li><li>Computing an average rate (θ(9) − θ(0))/9 instead of the instantaneous derivative.</li><li>Reading k as the rate itself rather than a parameter inside the exponent.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the chain-rule factor −k when differentiating e^{−kt}.</li><li>Sign error: leaving the answer negative when context says the quantity is increasing.</li><li>Forgetting units, or mixing minutes/seconds when k was defined per minute.</li><li>Recomputing e^{−kt_0} from scratch and introducing rounding error rather than reusing an exact form from an earlier part.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure/Core content: chain-rule differentiation of e^{f(t)} and interpretation of derivatives as rates of change in modelling contexts (P3/P4 exponential models, kinematics).</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2021-Q5.html" class="example-chip">P3 Jan 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

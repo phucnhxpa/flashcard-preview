@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compute x²+y² to bridge parametric point to (x²+y²)²-form locus — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Parametric Elimination</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Compute x²+y² to bridge parametric point to (x²+y²)²-form locus</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parametric Elimination</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a parametric point (x(θ), y(θ)) must be shown to lie on a locus of the form (x²+y²)² = αx² + βy² (a pedal-curve / foot-of-perpendicular type result). Cue 1: target equation has x²+y² explicitly on the LHS. Cue 2: x and y share a common denominator D(θ) such as 4cos²θ + 9sin²θ. Cue 3: numerators of x² and y² are constant multiples of D.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>When x = N₁(θ)/D and y = N₂(θ)/D with D = a²cos²θ + b²sin²θ, the combination x²+y² typically collapses because its numerator factors as (constant)·D, leaving x²+y² = k/D. Then the RHS combination αx²+βy² is engineered (with α=a², β=b²) so its numerator is a constant multiple of cos²θ+sin²θ = 1, giving k²/D². Equating yields (x²+y²)² = αx²+βy² with no θ left. The identity cos²θ+sin²θ=1 is the only trig fact needed.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices the target LHS is (x²+y²)², so computing x²+y² from the parametric form is the obvious opening.</li><li>Rules out solving for cosθ, sinθ individually and using cos²+sin²=1, since x and y share a denominator D and that route is messy.</li><li>Commits to forming x²+y² and αx²+βy² directly, hoping the common D-denominator simplifies both.</li><li>First operation: square the parametric expressions, add, and look for the factor D = a²cos²θ + b²sin²θ inside the numerator.</li><li>Tactically, once x²+y² = k/D is obtained, square it and check that αx²+βy² also equals k²/D² by choosing α, β to make the numerator collapse via cos²θ+sin²θ=1.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write x = N₁(θ)/D, y = N₂(θ)/D and compute x²+y² = (N₁²+N₂²)/D².</li><li>Factor the numerator to expose D: typically N₁²+N₂² = k·D for some constant k.</li><li>Conclude x²+y² = k/D, hence (x²+y²)² = k²/D².</li><li>Form αx²+βy² with α, β chosen as a², b² (the squared semi-axes); simplify using cos²θ+sin²θ = 1 to get k²/D².</li><li>Equate the two expressions to obtain (x²+y²)² = αx²+βy² and read off α, β.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $x = \dfrac{12\cos\theta}{4\cos^2\theta+9\sin^2\theta}$, $y = \dfrac{18\sin\theta}{4\cos^2\theta+9\sin^2\theta}$, write $D=4\cos^2\theta+9\sin^2\theta$. Then $x^2+y^2 = \dfrac{144\cos^2\theta+324\sin^2\theta}{D^2} = \dfrac{36D}{D^2} = \dfrac{36}{D}$. Also $9x^2+4y^2 = \dfrac{1296(\cos^2\theta+\sin^2\theta)}{D^2} = \dfrac{1296}{D^2}$. Hence $(x^2+y^2)^2 = \dfrac{1296}{D^2} = 9x^2+4y^2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">General ellipse x²/a² + y²/b² = 1 with foot-of-perpendicular from centre to tangent</div>
+<div class="adjustment">Same procedure yields (x²+y²)² = a²x² + b²y²; the shared denominator becomes D = a²cos²θ + b²sin²θ and α=a², β=b².</div>
+</div><div class="variant-row">
+<div class="scenario">Hyperbola analogue x²/a² − y²/b² = 1 with similar pedal construction</div>
+<div class="adjustment">Sign change gives (x²+y²)² = a²x² − b²y² with D = a²cos²θ − b²sin²θ; identity cos²θ+sin²θ=1 still finishes the elimination.</div>
+</div><div class="variant-row">
+<div class="scenario">Target stated in polar form r² = αcos²φ + βsin²φ</div>
+<div class="adjustment">Convert via x = r cosφ, y = r sinφ; computing x²+y² = r² gives the bridge directly without needing to square.</div>
+</div><div class="variant-row">
+<div class="scenario">Locus form Ax² + By² = C with no x²+y² factor</div>
+<div class="adjustment">Skip the x²+y² step; instead form Ax²+By² directly so the numerator collapses to a constant via cos²θ+sin²θ=1.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to solve cosθ = f(x,y) and sinθ = g(x,y) separately and substitute into cos²θ+sin²θ=1; algebraically heavier because of the shared denominator D.</li><li>Attempting double-angle substitutions (cos2θ, t = tan(θ/2)) which obscure the factorisation N₁²+N₂² = kD.</li><li>Reading the target (x²+y²)² = αx²+βy² as needing two separate eliminations rather than one bridge through x²+y² = k/D.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Missing that the numerator of x²+y² factors as a constant times D (e.g. 144cos²θ+324sin²θ = 36(4cos²θ+9sin²θ)).</li><li>Forgetting to square the denominator D when computing x², y², or αx²+βy².</li><li>Not collecting kcos²θ+ksin²θ = k via the Pythagorean identity at the final step.</li><li>Mis-assigning α and β: they correspond to a² and b² (paired with x² and y² respectively), not swapped.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only IAL Core/Further content: parametric coordinates, algebraic manipulation, and the identity cos²θ+sin²θ=1. The locus (x²+y²)² = a²x²+b²y² is a standard Further Pure coordinate-geometry result.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch2/q-Jan_2022-Q8.html" class="example-chip">FP3 Jan 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

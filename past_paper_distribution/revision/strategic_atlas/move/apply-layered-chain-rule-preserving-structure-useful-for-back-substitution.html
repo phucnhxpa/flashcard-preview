@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply layered chain rule preserving structure useful for back-substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Chain Rule</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Apply layered chain rule preserving structure useful for back-substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Chain Rule</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever the expression to differentiate is a composition of three or more layers — typically an outer power wrapping a trig/exp function wrapping a linear inner function (e.g. $\sin^2(2y)$, $\cos^3(3x)$, $e^{f(t)^2}$), OR when a derivative already obtained in one variable must itself be re-differentiated with respect to another variable (so the chain rule must be re-applied with a product rule inside). Visual cues: nested brackets, exponents on trig functions, parametric/substitution problems where $\frac{dy}{dx}$ is expressed as a product of $t$-dependent factors. Phrased alternatively: &#x27;differentiate a composite of three things&#x27; or &#x27;differentiate $\frac{dy}{dx}$ again when $x$ and $y$ are both functions of a parameter&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The chain rule says $\frac{d}{dy}f(g(h(y))) = f&#x27;(g(h))\cdot g&#x27;(h)\cdot h&#x27;(y)$ — each nested layer contributes one factor. Working layer-by-layer prevents the most common error (skipping the innermost factor) and keeps the derivative in a structurally useful form. The strategic refinement is to NOT immediately collapse the result via identities (e.g. double-angle) when the un-collapsed factored form will be needed later for back-substitution into the original variable, or for combining with terms from an ODE. This same operator-thinking, $\frac{d}{dx} = \frac{dt}{dx}\cdot\frac{d}{dt}$, also generates higher derivatives correctly via the product rule.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the expression has more than two nested layers — e.g. an outer power, a middle trig, and an inner linear function — or that I&#x27;m being asked to differentiate something already expressed as a product in a different variable.</li><li>Rule out shortcuts: I could try to simplify first (e.g. $\sin^2(2y) = \tfrac12(1-\cos 4y)$), but doing so may destroy structure that the rest of the question needs (such as factors of $\sin(2y)$ and $\cos(2y)$ I can replace using the original equation and Pythagoras).</li><li>Commit to peeling layers one at a time, writing each derivative factor explicitly so no inner factor (like the innocuous $2$ from $\frac{d}{dy}(2y)$) is dropped.</li><li>For a second derivative under substitution: recognise that $\frac{d^2y}{dx^2} \neq \left(\frac{dt}{dx}\right)^2 \frac{d^2y}{dt^2}$. Instead apply the operator $\frac{d}{dx} = \frac{dt}{dx}\cdot\frac{d}{dt}$ to the whole expression for $\frac{dy}{dx}$, which is itself a product, so the product rule activates inside.</li><li>Tactical decision: keep the answer in factored/product form rather than applying identities, because the next step of the question typically requires substituting the original variable back in piece-by-piece.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the layers: write the function as $F(G(H(y)))$ with $H$ innermost.</li><li>Outer derivative: bring down the power / differentiate the outer function, evaluated at the inner pieces.</li><li>Middle derivative: differentiate the middle function with respect to its argument.</li><li>Inner derivative: differentiate the innermost (often linear) function — this is the factor most often missed.</li><li>Multiply all factors together; do NOT simplify away product structure if subsequent steps need the individual factors.</li><li>For iterated chain rule (second derivative under substitution $x = x(t)$): write $\frac{d^2y}{dx^2} = \frac{dt}{dx}\cdot\frac{d}{dt}\!\left[\frac{dy}{dx}\right]$, expand the inner $\frac{d}{dt}$ using the product rule, then multiply through by $\frac{dt}{dx}$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Differentiate $x = 6\sin^2(2y)$ w.r.t. $y$. Layers: power, sine, linear. $\frac{dx}{dy} = 6\cdot 2\sin(2y)\cdot \cos(2y)\cdot 2 = 24\sin(2y)\cos(2y)$. Keep this product form: since $\sin^2(2y) = x/6$ and $\cos^2(2y) = 1 - x/6$, we get $\left(\frac{dx}{dy}\right)^2 = 576\cdot\frac{x}{6}\cdot\left(1-\frac{x}{6}\right)$ — impossible to obtain cleanly if we had collapsed to $12\sin(4y)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Differentiating $\cos^3(3x)$, $\tan^2(\tfrac12 x)$, or similar three-layer trig powers</div>
+<div class="adjustment">Same layered procedure: outer power gives $n\cdot(\text{inner})^{n-1}$, then derivative of trig, then derivative of linear inner — three factors multiplied.</div>
+</div><div class="variant-row">
+<div class="scenario">Second derivative under Euler substitution $x = e^{t}$</div>
+<div class="adjustment">$\frac{dt}{dx} = e^{-t}$, so iterated chain rule gives $\frac{d^2y}{dx^2} = e^{-2t}\!\left(\frac{d^2y}{dt^2} - \frac{dy}{dt}\right)$ — same operator + product rule logic.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric second derivative with $x = t^2$</div>
+<div class="adjustment">$\frac{d^2y}{dx^2} = \frac{1}{4t^2}\frac{d^2y}{dt^2} - \frac{1}{4t^3}\frac{dy}{dt}$, obtained from product rule on $\frac{1}{2t}\frac{dy}{dt}$ then multiplying by $\frac{1}{2t}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading $\frac{d^2y}{dx^2}$ as $\left(\frac{dt}{dx}\right)^2\frac{d^2y}{dt^2}$ — squaring the first-derivative operator instead of applying it twice.</li><li>Reading $\sin^2(2y)$ as $(\sin 2y)\cdot 2$ in some hybrid way, or treating $\frac{d}{dy}\sin^2(2y)$ as $(\cos(2y))^2$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the innermost factor — e.g. forgetting the extra $\times 2$ from $\frac{d}{dy}(2y)$.</li><li>Forgetting the product rule inside the iterated chain rule — missing the term coming from differentiating the $1/(2t)$ factor.</li><li>Sign slip on $\frac{d}{dt}\!\left[\frac{1}{2t}\right] = -\frac{1}{2t^2}$.</li><li>Collapsing the result via a double-angle identity too early, destroying factors needed for back-substitution into $x$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 (chain rule, parametric and implicit differentiation) and FP-level second-order ODE substitutions. No formula-booklet entry — chain rule and product rule are assumed. Avoid invoking Faà di Bruno&#x27;s formula or general operator theory; stay with explicit layer-by-layer differentiation.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2021-Q7.html" class="example-chip">P3 Jun 2021 Q7</a><a href="../FP2/ch5/q-Oct_2021-Q7.html" class="example-chip">FP2 Oct 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose closed perimeter into arc and radial-edge components — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Boundary Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Decompose closed perimeter into arc and radial-edge components</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Boundary Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a region bounded by two concentric (or co-centred) circular arcs and connecting straight edges is presented — e.g. annular sectors, fan blades, petal/segment arrangements, or &#x27;sections cut from a ring&#x27;. Cues include phrases like &#x27;find the perimeter of the shaded region&#x27;, a diagram showing inner and outer arcs of differing radii, and explicit mention of multiple identical sections. Also triggers when the region is the difference of two sectors sharing a vertex/centre, where the perimeter is not the boundary of a single sector.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The perimeter of a closed planar region is the sum of the lengths of all distinct boundary pieces, traversed once. For an annular-sector-type region the boundary naturally splits into circular pieces (arcs of radius r) and rectilinear pieces (radial line segments of length r_outer − r_inner). Decomposing forces a complete inventory and prevents either missing the radial &#x27;connectors&#x27; or double-counting shared edges between adjacent sections.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the boundary is piecewise: some pieces are curved (arcs of two different radii) and some are straight (radial segments).</li><li>Rule out treating the figure as a single sector or using a closed-form &#x27;annular sector&#x27; formula, since there may be several disjoint sections each contributing their own boundary.</li><li>Commit to a parts-list approach: count inner arcs, outer arcs, and radial edges separately, multiplying by the number of identical sections.</li><li>Bridge to computation by writing arc lengths via s = rθ (θ in radians) and each radial edge as r_outer − r_inner.</li><li>Inside the move, decide whether neighbouring sections share radial edges (merge them) or are separated (each section contributes 2 radial edges); for n disjoint sections expect 2n radial edges.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify n = number of identical sections, r_inner, r_outer, and angle θ (radians) of each section.</li><li>Compute inner arc length per section: L_in = r_inner · θ; outer arc: L_out = r_outer · θ.</li><li>Compute radial edge length: d = r_outer − r_inner.</li><li>Count edges: n inner arcs + n outer arcs + 2n radial segments (if sections are disjoint).</li><li>Sum: P = n·L_in + n·L_out + 2n·d, keeping arc lengths in exact form (multiples of π) until the final step.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Three identical fan sections share a centre, with r_inner = 9, r_outer = 84, and each section subtending θ such that L_in = 15 and L_out ≈ 35.93. Then d = 84 − 9 = 75. Perimeter P = 3(15) + 3(35.93) + 6(75) = 45 + 107.79 + 450 ≈ 602.79, so P ≈ 603 cm.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Single annular sector (one section between two radii)</div>
+<div class="adjustment">Use n = 1: P = r_inner θ + r_outer θ + 2(r_outer − r_inner).</div>
+</div><div class="variant-row">
+<div class="scenario">Adjacent sections sharing radial edges (e.g. ring divided into n contiguous wedges)</div>
+<div class="adjustment">Shared radial edges are interior, not boundary; count only the outer-rim radials, or none if the ring is complete.</div>
+</div><div class="variant-row">
+<div class="scenario">Sector minus an inscribed triangle or chord region</div>
+<div class="adjustment">Replace the inner arc with the chord length 2r sin(θ/2); the radial edges remain r.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by an arc and a chord (circular segment)</div>
+<div class="adjustment">Perimeter = rθ + 2r sin(θ/2); no radial edges, no inner arc.</div>
+</div><div class="variant-row">
+<div class="scenario">Composite shape with arcs of different angles on inner vs outer boundary</div>
+<div class="adjustment">Compute each arc with its own (r, θ); radial connectors may not be purely radial — check geometry before using r_outer − r_inner.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using the full radius (r_outer or r_inner) for the straight edges rather than the difference r_outer − r_inner.</li><li>Forgetting the radial segments entirely and summing only arc lengths.</li><li>Treating the boundary as that of a full sector of radius r_outer, ignoring the inner cut-out.</li><li>Counting only n radial edges instead of 2n when the n sections are disjoint.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Miscounting radial segments: for n disjoint sections there are 2n, not n.</li><li>Using θ in degrees in s = rθ; the formula requires radians.</li><li>Rounding arc lengths early (e.g. 35.9 instead of 35.929…) and propagating an error of 1 cm into the final answer.</li><li>Double-counting an edge that is shared between two adjacent sections.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only the IAL P2/P3 arc-length formula s = rθ with θ in radians and elementary perimeter addition; no integration or vector calculus is required, so this remains within Edexcel IAL Maths/Further Maths scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jun_2022-Q8.html" class="example-chip">P1 Jun 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

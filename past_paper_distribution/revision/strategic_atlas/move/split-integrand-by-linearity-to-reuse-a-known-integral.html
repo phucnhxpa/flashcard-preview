@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split integrand by linearity to reuse a known integral — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Linearity Decomposition</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Split integrand by linearity to reuse a known integral</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Linearity Decomposition</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a new integral&#x27;s integrand is structurally close to one already evaluated (numerically by trapezium rule, or analytically) earlier in the question, or is a sum/difference of standard pieces. Cues include: &#x27;hence&#x27; instructions linking parts; integrands of the form (old integrand) + constant, (old integrand) + 1/x, k·(old integrand), or c − (old integrand); and polynomial-times-exponential integrands like (ax²+bx+c)eˣ where each monomial-times-eˣ has a standard antiderivative. In short, whenever you can read the integrand as f + g where ∫f is already in hand or trivial, this move fires.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Linearity of integration, ∫(αf + βg) dx = α∫f dx + β∫g dx, lets a complicated integral be reassembled from cheap pieces. This is exactly what &#x27;hence&#x27; parts in Edexcel papers reward: rather than re-tabulating values for the trapezium rule or pushing one big integration by parts, you reuse a previously computed estimate or apply a standard antiderivative to each piece. The principle solves two problems at once — it eliminates redundant computation and it shrinks each sub-problem to a well-rehearsed pattern with fewer error opportunities.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the new integrand looks suspiciously like the previous part&#x27;s integrand plus or minus something simple (a constant, 1/x, a scalar multiple), or that it is a sum of monomials times a common factor like eˣ.</li><li>Rule out brute force: re-applying the trapezium rule would need y-values not given in the table; doing one giant IBP on (x²−8x+16)eˣ would track a long expression through multiple stages where signs compound errors.</li><li>Commit to linearity because every sub-integral is then either (a) already estimated in an earlier part, (b) a constant times the interval length, or (c) a textbook antiderivative.</li><li>Bridge to operation: write the integrand explicitly as a sum, e.g. 26/x − x = (25/x − x) + 1/x, or (x²−8x+16)eˣ = x²eˣ − 8xeˣ + 16eˣ, then split the integral term-by-term using linearity.</li><li>Tactical decision: when substituting a numerical estimate from an earlier part, use the unrounded value (e.g. 2.96225, not 2.96) and round only at the final step to avoid premature rounding error.</li><li>Final check: reassemble carefully, watching signs and coefficients (a −8 in front of an integral must survive to the end).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rewrite the integrand as an explicit sum/difference: e.g. ∫(26/x − x) dx = ∫(25/x − x) dx + ∫(1/x) dx; or ∫(4 − y) dx = ∫4 dx − ∫y dx; or ∫(x²−8x+16)eˣ dx = ∫x²eˣ dx − 8∫xeˣ dx + 16∫eˣ dx.</li><li>For each sub-integral, identify its source: previously estimated value, constant × interval length, or standard antiderivative.</li><li>Evaluate the trivial pieces exactly (e.g. ∫_{0.5}^{3} 4 dx = 4 × 2.5 = 10; ∫_{5}^{7} (1/x) dx = ln(7/5)).</li><li>Substitute the carried-over estimate (full precision) for the recurring piece.</li><li>Combine all sub-results, paying attention to signs and coefficients, and round only at the end.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given ∫_{5}^{7}(25/x − x)dx ≈ 5.39 from part (a), evaluate ∫_{5}^{7}(26/x − x)dx. Write 26/x − x = (25/x − x) + 1/x, so ∫_{5}^{7}(26/x − x)dx = 5.39 + ∫_{5}^{7}(1/x)dx = 5.39 + ln(7/5) ≈ 5.39 + 0.3365 ≈ 5.73.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">New integrand is a scalar multiple of the old: e.g. ∫50/x − 2x dx after ∫25/x − x dx is known</div>
+<div class="adjustment">Pull the constant out: ∫k·f dx = k·∫f dx, then substitute the known estimate.</div>
+</div><div class="variant-row">
+<div class="scenario">New integrand is c − (old integrand), e.g. ∫(4 − y) dx after ∫y dx</div>
+<div class="adjustment">Split as ∫c dx − ∫y dx; the constant integrates to c·(b−a). Watch the subtraction order.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial × eˣ (or × sin x, cos x) where each monomial term needs IBP of different depth</div>
+<div class="adjustment">Split into ∫xⁿeˣ dx pieces; do IBP separately on each (0, 1, or 2 rounds depending on n), then recombine with original coefficients.</div>
+</div><div class="variant-row">
+<div class="scenario">Series questions linking a new sum to a previously computed one</div>
+<div class="adjustment">Same idea: express the new sum as (known sum) ± a few extra terms and evaluate only the extras.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Misreading an additive constant inside the integrand as a multiplicative factor outside, e.g. treating ∫(3 + 25/x − x) dx as 3·∫(25/x − x) dx.</li><li>Failing to spot the algebraic split (e.g. not seeing 26/x = 25/x + 1/x) and instead trying to build a fresh table of values for the trapezium rule.</li><li>Treating the entire polynomial as u in a single IBP for ∫(x²−8x+16)eˣ dx, producing a long expression where sign errors compound.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using a rounded estimate from the earlier part too early (e.g. 2.96 instead of 2.96225), causing the final answer to drift in the last decimal.</li><li>Forgetting that the lower limit is not 0: e.g. computing ∫_{0.5}^{3} 4 dx as 4×3 = 12 instead of 4×2.5 = 10.</li><li>Subtracting in the wrong order, e.g. writing (estimate) − (constant integral) instead of the reverse.</li><li>Losing a coefficient (the −8 or +16) when recombining sub-integrals after IBP.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL P2/P3/P4 integration: linearity of the integral, trapezium rule from P2, standard antiderivatives (∫1/x dx = ln|x|, ∫eˣ dx = eˣ) and integration by parts from P3. No use of Lebesgue, improper-integral convergence theorems, or multivariable extensions of linearity is needed.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jan_2022-Q1.html" class="example-chip">P2 Jan 2022 Q1</a><a href="../P2/ch8/q-Jun_2022-Q2.html" class="example-chip">P2 Jun 2022 Q2</a><a href="../P4/ch6/q-Jan_2022-Q7.html" class="example-chip">P4 Jan 2022 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

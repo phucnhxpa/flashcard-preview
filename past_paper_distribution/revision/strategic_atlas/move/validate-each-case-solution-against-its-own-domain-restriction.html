@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validate each case solution against its own domain restriction — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Checking</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Validate each case solution against its own domain restriction</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Checking</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a problem has been split into cases, each case carrying a domain restriction — typically piecewise functions, modulus equations |f(x)| = g(x), or equations involving √x, log x, or rational expressions with excluded values. Cue phrases include &#x27;for x &gt; a&#x27;, &#x27;on this interval&#x27;, or a piecewise definition like f(x) = {... for 0 &lt; x ≤ 3; ... for x &gt; 3}. The move is mandatory once a candidate solution has been produced from a single case: it does not become a valid solution of the original equation until its membership in that case&#x27;s domain is confirmed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Within a case, you replace f(x) by a specific local formula that only equals f(x) on that case&#x27;s interval. Solving the resulting equation may yield x-values where the two underlying expressions intersect, but if x lies outside the case&#x27;s interval, the substitution was never valid there, so the solution is extraneous. Domain validation enforces the logical conditional &#x27;IF x is in this interval THEN f(x) = (this formula)&#x27; — without the check you have only solved a related, unrestricted equation. This is why mark schemes treat the rejection/acceptance step as a scoring point.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the equation just solved was the case-specific equation, not the original — so each root is only a candidate.</li><li>Rules out treating both algebraic roots as automatically valid; recalls that a root from Case 1 must satisfy Case 1&#x27;s domain, not Case 2&#x27;s.</li><li>Commits to filtering: writes each candidate next to its parent interval and asks &#x27;is this x in that interval?&#x27;</li><li>Bridges to operation by listing candidates with their domains: (x = −38/5, need 0 &lt; x ≤ 3) and (x = 62/3, need x &gt; 3).</li><li>Tactically performs a back-substitution into the original f(x) and the other side g(x) to confirm equality, guarding against arithmetic slips made during the case-solving.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List each candidate solution alongside the domain of the case that produced it.</li><li>Test membership: substitute the numerical value into the domain inequality.</li><li>Reject any candidate failing its own domain; mark as extraneous.</li><li>Accept candidates that satisfy their domain; collect surviving roots as the solution set.</li><li>(Optional belt-and-braces) Substitute surviving roots into the original equation to verify both sides agree.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $|2x-1| = \tfrac12 x + 30$. Case 1 ($x < \tfrac12$): $1-2x = \tfrac12 x + 30 \Rightarrow x = -\tfrac{58}{5} = -11.6$. Check: $-11.6 < \tfrac12$ ✓ accept. Case 2 ($x \ge \tfrac12$): $2x-1 = \tfrac12 x + 30 \Rightarrow x = \tfrac{62}{3} \approx 20.67$. Check: $20.67 \ge \tfrac12$ ✓ accept. Both survive; if either had failed its inequality it would be discarded.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Modulus equation $|f(x)| = g(x)$ split into $f(x) \ge 0$ and $f(x) &lt; 0$ branches</div>
+<div class="adjustment">Validate each root against the sign condition on $f(x)$, not against an x-interval directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Piecewise function with three or more pieces</div>
+<div class="adjustment">Same procedure applied per piece; ensure boundary points are assigned to exactly one piece as defined.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic equations after exponentiating, e.g. $\ln(x-2)+\ln(x+1)=\ln 4$</div>
+<div class="adjustment">Reject roots making any argument ≤ 0; the &#x27;domain&#x27; is the natural domain of the logs rather than a case interval.</div>
+</div><div class="variant-row">
+<div class="scenario">Equations involving $\sqrt{f(x)}$ after squaring</div>
+<div class="adjustment">Squaring can introduce extraneous roots; check each candidate satisfies $f(x) \ge 0$ AND the original (unsquared) equation.</div>
+</div><div class="variant-row">
+<div class="scenario">Rational equations after clearing denominators</div>
+<div class="adjustment">Reject roots that make any original denominator zero.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric equations on a restricted range, e.g. $0 \le \theta &lt; 2\pi$</div>
+<div class="adjustment">Filter the general solution down to those values lying inside the stated range.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking that any algebraic solution of the case equation automatically solves the original equation.</li><li>Confusing the candidate&#x27;s case label and checking it against the wrong interval.</li><li>Believing that verification by substitution can replace the domain check (a root may satisfy the case formula = g(x) numerically yet still lie in the wrong region for f).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Skipping the rejection step entirely and listing both roots as final answers — the most common scheme-penalised error in modulus questions.</li><li>Mishandling boundary points (≤ vs &lt;) so a root sitting exactly on a case boundary is double-counted or wrongly rejected.</li><li>Arithmetic slips when re-checking inequalities involving negative fractions, e.g. comparing $-38/5$ with $0$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard across Edexcel IAL P2/P3 modulus and piecewise problems and Further Pure work involving conditional cases; uses only inequality-checking and substitution, no tools beyond the specification.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Specimen_2018-Q3.html" class="example-chip">P3 Specimen 2018 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

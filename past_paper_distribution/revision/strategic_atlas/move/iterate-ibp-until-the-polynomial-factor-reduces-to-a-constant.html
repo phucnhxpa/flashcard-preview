@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate IBP until the polynomial factor reduces to a constant — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Repeated Ibp</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Iterate IBP until the polynomial factor reduces to a constant</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Repeated Ibp</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a first IBP on ∫P(x)e^{ax} dx (or P(x)sin ax, P(x)cos ax) returns a residual integral of the same structural type but with polynomial degree reduced by one. The cue is: &#x27;I still see polynomial × exponential/trig after one round.&#x27; This applies whenever deg P ≥ 2, signalling that one IBP is not enough. Alternative phrasings: &#x27;apply IBP repeatedly&#x27;, &#x27;reduce the power of x step by step&#x27;, &#x27;iterate IBP n times for a degree-n polynomial&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each IBP with u = polynomial differentiates the polynomial once, lowering its degree by exactly one, while the exponential or trig part is preserved (up to constants) by integration. After n rounds for a degree-n polynomial, the polynomial factor becomes a constant and the remaining integral is elementary. Recognising this upfront prevents stopping prematurely or switching to an unhelpful method for the residual.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the residual integral after one IBP still has the form polynomial × exponential (or × sin/cos), just with the polynomial degree reduced by one.</li><li>I rule out substitution and any change of technique — the residual is structurally identical to the original at lower degree, so a different method offers no advantage.</li><li>I commit to repeating IBP with the same role assignment (u = polynomial part, dv/dx = exponential/trig part) because LIATE/structure dictates the same choice.</li><li>Bridge: I queue up a second IBP and plan to substitute its result back into the first expression, watching the bracket sign carefully.</li><li>Tactically, I track signs at each round and, for higher-degree cases, consider a tabular (DI) layout to avoid bookkeeping errors.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>After first IBP on ∫x²e^{2x} dx with u = x², dv/dx = e^{2x}: obtain ½x²e^{2x} − ∫xe^{2x} dx.</li><li>For the residual ∫xe^{2x} dx, set u = x, du/dx = 1; dv/dx = e^{2x}, v = ½e^{2x}.</li><li>Apply IBP: ∫xe^{2x} dx = ½xe^{2x} − ∫½e^{2x} dx = ½xe^{2x} − ¼e^{2x}.</li><li>Substitute back: ∫x²e^{2x} dx = ½x²e^{2x} − (½xe^{2x} − ¼e^{2x}) + C = ½x²e^{2x} − ½xe^{2x} + ¼e^{2x} + C.</li><li>Optionally factor: ¼e^{2x}(2x² − 2x + 1) + C.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Compute $\int x^{2}e^{2x}\,dx$. First IBP ($u=x^2$, $dv=e^{2x}dx$): $\tfrac12 x^2 e^{2x} - \int x e^{2x}\,dx$. Second IBP ($u=x$, $dv=e^{2x}dx$): $\int x e^{2x}\,dx = \tfrac12 x e^{2x} - \tfrac14 e^{2x}$. Combine: $\int x^2 e^{2x}\,dx = \tfrac12 x^2 e^{2x} - \tfrac12 x e^{2x} + \tfrac14 e^{2x} + C$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">∫x³e^{x} dx (higher-degree polynomial × exponential)</div>
+<div class="adjustment">Three rounds of IBP are required; a tabular/DI table with alternating signs is recommended for clean bookkeeping.</div>
+</div><div class="variant-row">
+<div class="scenario">∫x² sin x dx or ∫x² cos x dx</div>
+<div class="adjustment">Two rounds of IBP are needed; the v column cycles sin → −cos → −sin, so sign tracking is even more critical.</div>
+</div><div class="variant-row">
+<div class="scenario">∫x²(ax+b)^{n} dx via IBP rather than expansion</div>
+<div class="adjustment">Same iterative logic with u = x² and dv = (ax+b)^n dx; degree of x falls by one each round until constant.</div>
+</div><div class="variant-row">
+<div class="scenario">∫x² ln x dx</div>
+<div class="adjustment">Only one IBP is needed (with u = ln x), since differentiating ln x removes it entirely; iteration does not arise.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying a substitution like u = xe^{2x} for the residual instead of recognising another IBP of the same type.</li><li>Believing one IBP must always suffice and concluding the integral is &#x27;unsolvable&#x27; when the residual still has an x factor.</li><li>Switching role assignments mid-process (e.g., letting u = e^{2x} on the second round), which undoes the progress of the first round.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Losing track of the alternating −∫v du sign across rounds.</li><li>Dropping the bracket when substituting the second result into the first, e.g., writing ½x²e^{2x} − ½xe^{2x} − ¼e^{2x} instead of ½x²e^{2x} − ½xe^{2x} + ¼e^{2x}.</li><li>Forgetting the constant of integration after the final round.</li><li>Errors in v when dv/dx = e^{ax} or sin/cos(ax) — missing the 1/a factor compounds across rounds.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Repeated integration by parts for polynomial × exponential or polynomial × sine/cosine is standard in Edexcel IAL P3/P4 and Further Pure; tabular DI is acceptable as scratch work but final answers should display the IBP formula application.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jan_2024-Q4.html" class="example-chip">P2 Jan 2024 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

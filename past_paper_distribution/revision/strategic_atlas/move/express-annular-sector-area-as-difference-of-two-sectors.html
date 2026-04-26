@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Express annular sector area as difference of two sectors — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Region Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Express annular sector area as difference of two sectors</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Region Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The shaded region is bounded by two concentric circular arcs and two radial line segments — an annular sector or &#x27;sector with a hole&#x27;. The diagram shows a common centre O, two radii (one inner, one outer) and a shared angle θ. Phrasings include &#x27;the region between the two arcs&#x27;, &#x27;PQ extended to the outer arc&#x27;, or giving a width x along the radius. No single A-level formula covers this directly, so it must be split.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Both the big sector (radius R₂) and the small sector (radius R₁) subtend the same angle θ at O, so each has a clean area ½r²θ. The annular sector is exactly the set difference of these two, giving A = ½θ(R₂² − R₁²). This converts a non-standard region into two standard sector-area applications and yields a quadratic in the unknown radial width.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the region has a curved inner boundary as well as a curved outer boundary — it is a sector with the central piece removed, not a plain sector.</li><li>Rule out treating it as a single ½r²θ region, and rule out trapezium/triangle approximations or integration (overkill for A-level).</li><li>Commit to the decomposition: big sector minus small sector, since both share the same central angle θ.</li><li>Identify the two radii carefully from the diagram — typically the inner radius is given (e.g. OP = 1.2) and the outer is inner + width (e.g. OP + PQ = 1.2 + x).</li><li>Substitute into A = ½θ(R₂² − R₁²), expand the square, simplify, then equate to the given area to form the equation in the unknown.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify inner radius R₁ and outer radius R₂ = R₁ + (radial width).</li><li>Write A = ½θ(R₂² − R₁²).</li><li>Expand (R₁ + w)² = R₁² + 2R₁w + w² so that R₂² − R₁² = w² + 2R₁w.</li><li>Substitute to get A = ½θ(w² + 2R₁w).</li><li>Equate to the given numerical area and clear fractions/decimals to reach a tidy quadratic in w.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>With $\theta = 0.6$, inner radius $1.2$ and outer radius $1.2 + x$: $A = \tfrac{1}{2}(0.6)\big[(x+1.2)^2 - 1.2^2\big] = 0.3(x^2 + 2.4x) = 0.3x^2 + 0.72x$. Setting $A = 4.5$ gives $0.3x^2 + 0.72x - 4.5 = 0$, i.e. $x^2 + 2.4x - 15 = 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Perimeter of an annular sector</div>
+<div class="adjustment">Use arc length s = rθ on each arc and add the two straight radial segments of length w: P = R₁θ + R₂θ + 2w.</div>
+</div><div class="variant-row">
+<div class="scenario">Region between a chord and an arc (segment)</div>
+<div class="adjustment">Decompose as sector minus triangle: A = ½r²θ − ½r²sinθ rather than sector minus sector.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by two curves in polar form (FP further pure)</div>
+<div class="adjustment">Use ∫½(r_outer² − r_inner²) dθ — same identity, integrated when radii vary with θ.</div>
+</div><div class="variant-row">
+<div class="scenario">Annular sector with angle in degrees</div>
+<div class="adjustment">Convert θ to radians first, or use A = (θ/360)·π(R₂² − R₁²).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading the radial width as the outer radius itself, so using R₂ = x instead of R₂ = x + R₁.</li><li>Treating the region as a full sector and applying ½r²θ once, ignoring the inner arc.</li><li>Trying to integrate or set up a trapezium when a clean subtraction is available.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to square both radii — writing ½θ(R₂ − R₁) instead of ½θ(R₂² − R₁²).</li><li>Leaving the angle in degrees when applying ½r²θ.</li><li>Algebra slip when expanding (R₁ + w)² — missing the cross term 2R₁w.</li><li>Not clearing decimals before solving, leading to arithmetic errors in the quadratic formula.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits within Edexcel IAL Pure (radian measure, sector area ½r²θ and arc length rθ); the polar-integration variant belongs to Further Pure.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2023-Q11.html" class="example-chip">P1 Oct 2023 Q11</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

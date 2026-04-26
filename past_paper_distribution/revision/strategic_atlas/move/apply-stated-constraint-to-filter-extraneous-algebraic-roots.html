@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply stated constraint to filter extraneous algebraic roots — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Constraint Filtering</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Apply stated constraint to filter extraneous algebraic roots</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Constraint Filtering</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>This move fires whenever the algebra (a quadratic, a squared equation, a substitution, or a symmetric system) yields two or more candidate values, but the question text imposes an extra condition such as &#x27;p is negative&#x27;, &#x27;a is a positive constant&#x27;, &#x27;x &gt; y&#x27;, &#x27;k &lt; 2&#x27;, or an implicit domain like &#x27;real solutions of 9^z = x&#x27; (forcing x &gt; 0). Watch for phrases like &#x27;given that&#x27;, &#x27;where ... is positive/negative&#x27;, &#x27;the larger root&#x27;, &#x27;the acute angle&#x27;, or geometric restrictions to a quadrant. The cue is a mismatch between the number of algebraic solutions (often 2) and the unique answer the question demands. The constraint is never decoration — it is the disambiguator.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Many standard algebraic procedures (squaring, solving symmetric systems, factorising a polynomial in a substituted variable) produce solution sets larger than the problem actually admits. The stated constraint is the principle that breaks the symmetry or removes the spurious root, leaving a unique answer. Mathematically this reflects that operations like squaring or substituting u = f(x) are not injective, so the inverse step must be filtered against the original domain. Applying the filter is what converts a set of algebraic candidates into THE answer the examiner wants, and it almost always carries an accuracy mark.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the algebra has produced more than one candidate value (e.g. two roots from a quadratic, or a ± from a square root, or several x-values from a polynomial in a substituted variable).</li><li>Re-read the question for an explicit constraint (sign, inequality, domain, geometric region) or an implicit one from the substitution used (e.g. 9^z &gt; 0, sin θ ∈ [−1,1], lengths &gt; 0).</li><li>Rule out alternative continuations such as &#x27;just write both answers&#x27; or &#x27;pick the nicer-looking one&#x27; — recognise that the constraint exists precisely to disambiguate.</li><li>Commit to testing each candidate against the constraint individually rather than guessing.</li><li>Substitute each candidate into the constraint inequality/condition; reject any that fails; accept the unique survivor.</li><li>Carry the chosen value through all subsequent parts of the question, since downstream working depends on having the right root.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List all algebraic candidates explicitly, e.g. p = 2 + √23, p = 2 − √23.</li><li>Write the stated constraint next to them, e.g. &#x27;p &lt; 0&#x27;.</li><li>Evaluate each candidate (numerically if surds are involved) and test against the constraint.</li><li>Mark each as Accept or Reject with a one-line justification.</li><li>State the surviving value clearly as the final answer (or as the value to use in later parts).</li><li>Where useful, sanity-check geometrically or by substitution back into the original equation.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(2-p)^2 = 23$ given $p<0$. Then $2-p = \pm\sqrt{23}$, so $p = 2 \mp \sqrt{23}$, giving $p \approx 6.80$ or $p \approx -2.80$. Apply $p<0$: reject $p = 2+\sqrt{23}$, accept $p = 2-\sqrt{23}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Symmetric system in x, y with x &gt; y stated</div>
+<div class="adjustment">Both (a,b) and (b,a) satisfy the equations; assign the larger value to x and the smaller to y.</div>
+</div><div class="variant-row">
+<div class="scenario">Substitution u = a^x or u = e^x with u &gt; 0</div>
+<div class="adjustment">Reject any non-positive u-roots before back-substituting, since a^x &gt; 0 for real x.</div>
+</div><div class="variant-row">
+<div class="scenario">Substitution u = sin θ or u = cos θ</div>
+<div class="adjustment">Reject roots outside [−1, 1] before solving for θ.</div>
+</div><div class="variant-row">
+<div class="scenario">Geometric problems requiring positive length or specified quadrant</div>
+<div class="adjustment">Reject negative lengths, or roots that place the point in the wrong quadrant/region.</div>
+</div><div class="variant-row">
+<div class="scenario">Parameter constraint carried into a later part (e.g. &#x27;given k &lt; 2&#x27;)</div>
+<div class="adjustment">Filter immediately and use only the surviving value in all subsequent computations.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the constraint (&#x27;a is a positive constant&#x27;, &#x27;p is negative&#x27;, &#x27;k &lt; 2&#x27;) as flavour text rather than a selection rule.</li><li>Assuming the first root produced by the quadratic formula corresponds to the &#x27;first&#x27; variable named in the question.</li><li>Picking the root that gives &#x27;nicer&#x27; numbers instead of the one that satisfies the constraint.</li><li>Forgetting that exponentials and squares carry implicit positivity restrictions even when the question does not restate them.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Omitting the filtering step entirely and presenting both candidates — losing the final accuracy mark.</li><li>Numerical slip when estimating a surd (e.g. √23 ≈ 4.8) leading to the wrong sign decision.</li><li>Attempting to take a logarithm of a non-positive number and producing a spurious complex answer instead of rejecting the candidate.</li><li>Carrying the wrong root into a later part of the question, so all subsequent answers are silently incorrect even though internally consistent.</li><li>Confusing &#x27;reject&#x27; with &#x27;undefined&#x27; — writing z = −∞ for 9^z = 0 instead of clearly discarding it.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1–P4) and Further Pure. No formula booklet entry is required; this is a logical/reading skill applied alongside the quadratic formula or standard substitutions. Avoid invoking complex roots — at IAL, rejected roots are simply discarded, not reinterpreted in ℂ unless the question is explicitly about complex numbers (FP1).</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2023-Q2.html" class="example-chip">P1 Jun 2023 Q2</a><a href="../P1/ch1/q-Jun_2021-Q2.html" class="example-chip">P1 Jun 2021 Q2</a><a href="../P2/ch3/q-Jan_2020-Q6.html" class="example-chip">P2 Jan 2020 Q6</a><a href="../P2/ch3/q-Jan_2021-Q9.html" class="example-chip">P2 Jan 2021 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

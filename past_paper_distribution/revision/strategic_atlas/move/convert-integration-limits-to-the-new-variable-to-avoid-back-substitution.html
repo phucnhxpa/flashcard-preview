@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert integration limits to the new variable to avoid back-substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Limit Conversion</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Convert integration limits to the new variable to avoid back-substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Limit Conversion</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A definite integral is being evaluated by substitution (u-substitution, trig substitution x = tan θ, or chained substitutions). The original limits are given in x, but after substituting the integrand and dx, the antiderivative is naturally expressed in the new variable. Cue phrases include &#x27;hence evaluate&#x27;, a prescribed substitution u = g(x), or a parametric/trig substitution with stated x-bounds. Whenever you see x-bounds on an integral that has been converted to u (or θ, w), this move should fire.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Converting limits transforms the definite integral entirely into the new variable, so the antiderivative can be evaluated directly without ever undoing the substitution. This eliminates the algebraically expensive (and error-prone) step of expressing the antiderivative back in x — especially valuable when substitutions are chained or involve surds/trig inverses. The principle is the change-of-variables theorem for definite integrals: ∫_{a}^{b} f(g(x))g&#x27;(x) dx = ∫_{g(a)}^{g(b)} f(u) du, where the new limits are simply the substitution evaluated at the old limits.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the substitution has converted the integrand and dx into the new variable, but the limits are still in x — so I have a choice to make before evaluating.</li><li>Rule out back-substitution: re-expressing the antiderivative in x and then plugging in x-bounds duplicates work and reintroduces the substitution expression I just simplified away. For chained substitutions, this would require composing inverse functions — clearly worse.</li><li>Commit to converting limits because evaluating g(a) and g(b) is just two arithmetic plug-ins, and the resulting numbers are usually clean (integers or special angles) when the question is well-designed.</li><li>Bridge to the operation: compute u_lower = g(x_lower) and u_upper = g(x_upper), check whether the substitution is monotonic on the interval (so the order of limits is preserved), and write the integral with the new bounds.</li><li>Tactical check: if the new limits come out as awkward surds, reconsider — back-substitution might be cleaner. If the substitution is decreasing, the limits swap (or absorb a sign into the integrand). For chained substitutions, convert at each stage.</li><li>Final check: ensure that no asymptote of the substitution lies between the bounds (e.g. tan θ on [0, π/3] is fine; on [0, π] would not be).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the substitution u = g(x) (or x = h(θ)) used to transform the integrand.</li><li>Compute the new lower limit: u_lower = g(x_lower).</li><li>Compute the new upper limit: u_upper = g(x_upper).</li><li>Rewrite the definite integral as ∫_{u_lower}^{u_upper} F&#x27;(u) du with the antiderivative already in u.</li><li>Evaluate F(u_upper) − F(u_lower) and simplify.</li><li>(For chained substitutions) Repeat the limit-conversion at each substitution stage before evaluating.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $\int_0^1 \frac{6x}{(2x^2+3)^2}\,dx$ with $u = 2x^2+3$, $du = 4x\,dx$. Limits: $x=0 \Rightarrow u=3$; $x=1 \Rightarrow u=5$. Integral becomes $\frac{3}{2}\int_3^5 u^{-2}\,du = \left[-\frac{3}{2u}\right]_3^5 = -\frac{3}{10} + \frac{1}{2} = \frac{1}{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Trig substitution x = tan θ with surd-free x-bounds</div>
+<div class="adjustment">Solve tan θ = x_bound for special angles (e.g. tan θ = √3 ⇒ θ = π/3). Confirm the chosen branch lies in the substitution&#x27;s principal domain.</div>
+</div><div class="variant-row">
+<div class="scenario">Substitution involving √x, e.g. u = 1+√x</div>
+<div class="adjustment">u-bounds are u(x_lower) = 1+√x_lower etc. — typically yield clean integers when x-bounds are perfect squares.</div>
+</div><div class="variant-row">
+<div class="scenario">Chained substitutions x → u → w</div>
+<div class="adjustment">Convert limits at each stage rather than composing inverse functions at the end. Track sign carefully if either substitution is decreasing.</div>
+</div><div class="variant-row">
+<div class="scenario">Decreasing substitution (so u_lower &gt; u_upper)</div>
+<div class="adjustment">Either swap the limits and negate, or keep the reversed limits and let the sign propagate — be consistent.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Plugging the original x-limits directly into the u-form of the antiderivative (e.g. evaluating [−3/(2u)] at u=0 and u=1 instead of u=3 and u=5) — a major error giving a completely wrong answer.</li><li>Converting limits but then ALSO back-substituting to x, creating a contradictory expression with u-limits on an x-function.</li><li>Misreading a boundary like x = √3 as x = 3, leading to non-special-angle θ-limits.</li><li>Choosing the wrong branch of an inverse trig function (e.g. θ = π/3 + π) when the curve constrains θ to a specific interval.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to change the limits at all, leaving x-limits on a function of u.</li><li>Swapping upper and lower limits, which negates the answer.</li><li>Failing to check monotonicity: if the substitution is not one-to-one on [a,b], the conversion may be invalid.</li><li>Arithmetic slips when combining fractions at the end (e.g. common-denominator errors in −3/10 + 1/2).</li><li>In trig substitutions, crossing an asymptote of tan θ (or branch of arcsin) between the bounds without noticing.</li><li>In chained substitutions, converting limits only once and forgetting the second stage.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 integration by substitution and FP-level techniques. The change-of-variables result is not in the formula booklet — it is assumed knowledge. Avoid invoking measure-theoretic justifications; stay with the standard &#x27;if u = g(x) is differentiable and monotonic on [a,b]&#x27; framing.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jun_2024-Q6.html" class="example-chip">P2 Jun 2024 Q6</a><a href="../P4/ch6/q-Jan_2021-Q9.html" class="example-chip">P4 Jan 2021 Q9</a><a href="../P4/ch6/q-Jan_2023-Q4.html" class="example-chip">P4 Jan 2023 Q4</a><a href="../P4/ch6/q-Jan_2021-Q5.html" class="example-chip">P4 Jan 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

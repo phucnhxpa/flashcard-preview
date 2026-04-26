@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rewrite tan y as sin y / cos y to separate variables — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Separation Of Variables</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Rewrite tan y as sin y / cos y to separate variables</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Separation Of Variables</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The ODE has the form dy/dx = (trig function of y) · h(x), e.g. dy/dx = tan y / [(1+3x)(1−x)], where the RHS factorises cleanly into a pure-y part and a pure-x part. This is the hallmark of a separable equation. The trig factor in y (tan, cot, sec, etc.) signals that rewriting in terms of sin y and cos y will produce a recognisable standard integral after separation. An integrating factor is unavailable because the equation is nonlinear in y.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any separable ODE f(y) dy/dx = g(x) integrates directly as ∫f(y) dy = ∫g(x) dx. Dividing by tan y (i.e. multiplying by cot y = cos y / sin y) places all y-terms on the left and all x-terms on the right, reducing the ODE to two independent integrals. The form cos y / sin y is preferred because ∫cos y / sin y dy = ln|sin y| is a standard f&#x27;(y)/f(y) integral. Attempting a linear-ODE method would fail since tan y is nonlinear.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the RHS factorises as (function of y) × (function of x) — a textbook separable structure.</li><li>I rule out an integrating factor: the ODE is nonlinear in y because tan y appears, so the linear-ODE machinery does not apply.</li><li>I commit to separation because both sides will yield standard integrals — the x-side via partial fractions, the y-side via the f&#x27;/f form.</li><li>To bridge to computation, I divide by tan y, writing cot y dy = h(x) dx, and rewrite cot y as cos y / sin y to expose the f&#x27;(y)/f(y) pattern.</li><li>I check the initial condition does not lie on a singularity of cot y (i.e. sin y ≠ 0 there), so the separation is valid on the relevant interval.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Divide both sides by tan y to get cot y dy/dx = 1/[(1+3x)(1−x)].</li><li>Rewrite cot y as cos y / sin y so the y-integrand has the form f&#x27;(y)/f(y).</li><li>Multiply by dx to obtain (cos y / sin y) dy = 1/[(1+3x)(1−x)] dx.</li><li>Apply the partial fractions from part (a): (cos y / sin y) dy = [3/(4(1+3x)) + 1/(4(1−x))] dx.</li><li>Integrate both sides: ln|sin y| = (1/4)ln|1+3x| − (1/4)ln|1−x| + C.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve dy/dx = tan y / [(1+3x)(1−x)] with y = π/2 at x = 0. Separate: (cos y / sin y) dy = [3/(4(1+3x)) + 1/(4(1−x))] dx. Integrate: ln|sin y| = (1/4)ln|(1+3x)/(1−x)| + C. At x=0, y=π/2: ln 1 = 0, so C = 0, giving sin^4 y = (1+3x)/(1−x).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">dy/dx = cot y · g(x)</div>
+<div class="adjustment">Multiply by tan y = sin y / cos y; the y-integral becomes −ln|cos y|.</div>
+</div><div class="variant-row">
+<div class="scenario">dy/dx = sec y · g(x) or sec²y · g(x)</div>
+<div class="adjustment">Move sec y across by multiplying by cos y; integrate cos y dy = sin y, or for sec² y use 1/sec²y = cos²y and double-angle.</div>
+</div><div class="variant-row">
+<div class="scenario">dy/dx = sin y cos y · g(x)</div>
+<div class="adjustment">Separate to dy/(sin y cos y) = g(x) dx; rewrite using 2/sin(2y) or split as (sec²y / tan y) dy → ln|tan y|.</div>
+</div><div class="variant-row">
+<div class="scenario">dy/dx + P(x)y = Q(x) (linear)</div>
+<div class="adjustment">Not separable in general — use integrating factor e^{∫P dx} instead.</div>
+</div><div class="variant-row">
+<div class="scenario">dy/dx = f(y/x) (homogeneous)</div>
+<div class="adjustment">Substitute v = y/x to convert to a separable ODE in v and x.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating tan y as if it were tan x and trying to integrate it on the x-side.</li><li>Attempting an integrating factor because the ODE &#x27;looks linear&#x27;, missing the nonlinearity in y.</li><li>Substituting u = tan y unnecessarily when direct separation already gives a standard integral.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the constant of integration before applying the initial condition.</li><li>Dropping absolute value signs in ln|sin y|, which can cause sign errors when solving for y.</li><li>Failing to check that sin y ≠ 0 at the initial condition, so that division by tan y is legitimate.</li><li>Mishandling the chain rule: ∫cos y / sin y dy = ln|sin y|, not ln|cos y|.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P4/FP-level work on first-order separable ODEs, standard trig identities, partial fractions, and ln-type integrals.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jun_2022-Q2.html" class="example-chip">P4 Jun 2022 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

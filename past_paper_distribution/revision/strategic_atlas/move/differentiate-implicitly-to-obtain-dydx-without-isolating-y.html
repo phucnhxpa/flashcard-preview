@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiate implicitly to obtain dy/dx without isolating y — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Implicit Differentiation</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Differentiate implicitly to obtain dy/dx without isolating y</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Implicit Differentiation</strong></span>
+    <span>Frequency: <strong>14 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The curve is given by an equation F(x, y) = 0 in which y is entangled with x — typically as a quadratic in y (terms like y², xy) or inside a transcendental function (sin y, eʸ, ln y). Solving for y explicitly would require the quadratic formula (introducing ± branches and surds) or is outright impossible. Visual cues: a &#x27;curve C has equation …&#x27; phrasing, a mixed product term such as kxy, a y² alongside x², and a follow-up part asking for the gradient/tangent/normal at a specific point (x₀, y₀) on the curve. Alternative phrasing: &#x27;find dy/dx in terms of x and y&#x27;, or &#x27;show that the gradient at P is …&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Implicit differentiation treats y as a (locally) differentiable function of x and applies d/dx term-by-term to both sides of F(x, y) = 0. The chain rule attaches a factor dy/dx whenever a y-dependent term is differentiated, and the product rule handles mixed xy terms. Because the original equation is polynomial (or low-order) in y, the differentiated equation is linear in dy/dx, so dy/dx can be isolated by simple algebra. This bypasses the messy ± square roots and branch-selection issues that arise from solving for y, and produces a single formula dy/dx = f(x, y) that is directly evaluable at any given point on the curve.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice: the equation mixes x and y nonlinearly — a y² term plus an xy cross-term — so y is not a single-valued explicit function of x in any obvious way.</li><li>Rule out solving for y: applying the quadratic formula in y would give y = [linear in x ± √(quadratic in x)]/2, producing two branches and surds that are painful to differentiate.</li><li>Rule out parametric differentiation: no parameter t is supplied, so dy/dx = (dy/dt)/(dx/dt) is unavailable.</li><li>Commit to implicit differentiation: differentiate every term of F(x, y) = 0 with respect to x, treating y as y(x). The chain rule appends dy/dx to each y-derivative; the product rule handles the xy term.</li><li>Anticipate the form of the result: differentiating a polynomial of degree 2 in y produces an equation linear in dy/dx, so collecting dy/dx-terms on one side and factorising will isolate dy/dx as a rational function of x and y.</li><li>Tactical note: the answer dy/dx = f(x, y) is fine — the question will supply a specific point (x₀, y₀) lying on the curve to substitute, which sidesteps any need to know y as a function of x.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Apply d/dx to every term of F(x, y) = 0, including the constant on the RHS (which gives 0).</li><li>Pure-x term, e.g. ax^n: differentiate normally to get anx^(n−1).</li><li>Pure-y term, e.g. by^n: apply the chain rule to get bny^(n−1)·(dy/dx).</li><li>Mixed term, e.g. kxy: apply the product rule to get k·y + k·x·(dy/dx).</li><li>More general mixed terms, e.g. x^m y^n: product + chain rule give mx^(m−1)y^n + nx^m y^(n−1)(dy/dx).</li><li>Collect all terms containing dy/dx on one side, all other terms on the other side.</li><li>Factor out dy/dx and divide to obtain dy/dx = (expression in x, y) / (expression in x, y).</li><li>If a specific point is given, substitute (x₀, y₀) at the very end to get a numerical gradient.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $x^2 + 4xy - 3y^2 + 11 = 0$, differentiate term-by-term: $2x + \bigl(4y + 4x\tfrac{dy}{dx}\bigr) - 6y\tfrac{dy}{dx} + 0 = 0$. Collect: $(4x - 6y)\tfrac{dy}{dx} = -2x - 4y$, so $\tfrac{dy}{dx} = \dfrac{-2x - 4y}{4x - 6y} = \dfrac{x + 2y}{3y - 2x}$. At $P(2,3)$: $\tfrac{dy}{dx} = \tfrac{2 + 6}{9 - 4} = \tfrac{8}{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Equation contains a transcendental function of y, e.g. sin(y), e^y, ln(y).</div>
+<div class="adjustment">Same principle: d/dx[sin y] = cos(y)·(dy/dx); d/dx[e^y] = e^y·(dy/dx); d/dx[ln y] = (1/y)·(dy/dx). The chain rule still appends dy/dx.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation contains a function of a product, e.g. sin(xy) or e^(xy).</div>
+<div class="adjustment">Combine chain and product rules: d/dx[sin(xy)] = cos(xy)·(y + x·dy/dx).</div>
+</div><div class="variant-row">
+<div class="scenario">Curve given parametrically as x = f(t), y = g(t).</div>
+<div class="adjustment">Switch to dy/dx = (dy/dt)/(dx/dt); implicit differentiation is not the right tool here.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks for the equation of a tangent or normal at P.</div>
+<div class="adjustment">After computing dy/dx at P, use y − y₀ = m(x − x₀) for the tangent or gradient −1/m for the normal.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks for points where the tangent is horizontal/vertical.</div>
+<div class="adjustment">Set the numerator of dy/dx to 0 (horizontal) or denominator to 0 (vertical), then solve simultaneously with the original curve equation.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to rearrange for y first via the quadratic formula, wasting time and introducing surds plus ± branch ambiguity.</li><li>Treating y as a constant when differentiating, producing answers with no dy/dx in them at all.</li><li>Mistaking a mixed term kxy for a constant multiple of x (or of y) and missing the product rule entirely.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the chain-rule factor dy/dx on y-terms (e.g. writing d/dx(y²) = 2y instead of 2y·dy/dx).</li><li>Forgetting the product rule on kxy and writing only ky or only kx·dy/dx instead of both.</li><li>Differentiating the RHS constant incorrectly (e.g. d/dx(1) written as 1 instead of 0).</li><li>Sign errors when collecting dy/dx-terms: be careful with terms like −2y²·(dy/dx) when moving to the opposite side.</li><li>Substituting the point too early — substitute only after dy/dx has been fully isolated, otherwise algebraic manipulation becomes tangled.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Implicit differentiation is in scope for Edexcel IAL P3/P4 (Pure Mathematics). It uses only the chain rule, product rule, and standard derivatives — no formula booklet entry is required beyond the standard derivatives table. Avoid invoking partial derivatives or the multivariable formula dy/dx = −F_x/F_y, which is out of scope at A-level even though it would give the same result.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (14)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2023-Q10.html" class="example-chip">P3 Jan 2023 Q10</a><a href="../P3/ch4/q-Specimen_2018-Q5.html" class="example-chip">P3 Specimen 2018 Q5</a><a href="../P3/ch4/q-Oct_2024-Q8.html" class="example-chip">P3 Oct 2024 Q8</a><a href="../P4/ch5/q-Jun_2022-Q3.html" class="example-chip">P4 Jun 2022 Q3</a><a href="../P4/ch5/q-Oct_2022-Q11.html" class="example-chip">P4 Oct 2022 Q11</a><a href="../P4/ch5/q-Jun_2024-Q3.html" class="example-chip">P4 Jun 2024 Q3</a><a href="../P4/ch5/q-Oct_2022-Q6.html" class="example-chip">P4 Oct 2022 Q6</a><a href="../P4/ch5/q-Jan_2022-Q1.html" class="example-chip">P4 Jan 2022 Q1</a><a href="../P3/ch4/q-Oct_2023-Q4.html" class="example-chip">P3 Oct 2023 Q4</a><a href="../P3/ch4/q-Jun_2023-Q7.html" class="example-chip">P3 Jun 2023 Q7</a><a href="../P3/ch4/q-Oct_2024-Q4.html" class="example-chip">P3 Oct 2024 Q4</a><a href="../P4/ch5/q-Jan_2024-Q9.html" class="example-chip">P4 Jan 2024 Q9</a><a href="../P3/ch4/q-Jan_2024-Q5.html" class="example-chip">P3 Jan 2024 Q5</a><a href="../P4/ch5/q-Jun_2024-Q4.html" class="example-chip">P4 Jun 2024 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

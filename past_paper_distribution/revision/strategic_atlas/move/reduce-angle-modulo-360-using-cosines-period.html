@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reduce angle modulo 360° using cosine&#x27;s period — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Periodicity Reduction</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Reduce angle modulo 360° using cosine&#x27;s period</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Periodicity Reduction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a trig expression involves an angle outside the principal interval $0° \le \theta \le 360°$ (or $-180° \le \theta \le 180°$), such as $\cos(540°)$, $\sin(810°)$, or $\cos(-450°)$. Also triggers when evaluating $f(x) = a\cos(x)$ or $a\sin(x)$ at a large $x$-value, or when sketching/reading off function values at points beyond one period. The cue is: the angle looks unfamiliar, but subtracting (or adding) a multiple of $360°$ lands it on a known exact value.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Cosine and sine are periodic with period $360°$, so $\cos(\theta + 360°k) = \cos\theta$ and $\sin(\theta + 360°k) = \sin\theta$ for any integer $k$. This identity lets us replace any angle by its representative in $[0°, 360°)$ without changing the trig value. Doing so converts an opaque input into a standard angle whose exact value (e.g. $0, \pm\tfrac{1}{2}, \pm\tfrac{\sqrt{2}}{2}, \pm\tfrac{\sqrt{3}}{2}, \pm 1$) can be recalled directly. It is the cheapest possible simplification — pure subtraction, no identity expansion.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the angle $540°$ lies outside $[0°, 360°)$, so no immediate exact value is on hand.</li><li>Rule out compound-angle expansion ($\cos(360° + 180°)$ via addition formula) as overkill — periodicity alone suffices.</li><li>Commit to periodicity because cosine repeats every $360°$ and $540° - 360° = 180°$ is a standard angle.</li><li>Bridge: rewrite $540° = 180° + 360°$ and drop the $360°$ inside cosine.</li><li>Tactical: choose the smallest non-negative representative; if the result is still ugly, apply a further symmetry (supplementary, co-function, or $\cos(-\theta)=\cos\theta$) to land on a quadrant-1 reference angle.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the angle and check whether it lies in $[0°, 360°)$.</li><li>Find integer $k$ with $\theta - 360°k \in [0°, 360°)$.</li><li>Replace $\cos\theta$ by $\cos(\theta - 360°k)$ using periodicity.</li><li>Read off the exact value from the standard table (or apply a further reduction if needed).</li><li>Substitute back into the surrounding expression.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $y = 5\cos(540°)$.\ Write $540° = 180° + 360°$, so by periodicity $\cos(540°) = \cos(180°)$.\ From the standard values, $\cos(180°) = -1$.\ Therefore $y = 5 \times (-1) = -5$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Sine at a large angle, e.g. $\sin(540°)$</div>
+<div class="adjustment">Same subtraction: $\sin(540°) = \sin(180°) = 0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Negative angle, e.g. $\cos(-450°)$</div>
+<div class="adjustment">Add $360°k$ until inside $[0°,360°)$: $-450° + 720° = 270°$, so $\cos(-450°) = \cos(270°) = 0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Angle in radians, e.g. $\cos(7\pi/2)$</div>
+<div class="adjustment">Subtract multiples of $2\pi$: $7\pi/2 - 2\pi = 3\pi/2$, so $\cos(7\pi/2) = \cos(3\pi/2) = 0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent (period $180°$), e.g. $\tan(390°)$</div>
+<div class="adjustment">Reduce mod $180°$ instead of $360°$: $\tan(390°) = \tan(30°) = \tfrac{1}{\sqrt{3}}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Reduced angle still &gt; $90°$, e.g. $\cos(210°)$</div>
+<div class="adjustment">After modding, apply a supplementary/quadrant identity: $\cos(210°) = -\cos(30°) = -\tfrac{\sqrt{3}}{2}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\cos(540°)$ as if $540°$ needed the addition formula $\cos(360°+180°) = \cos 360°\cos 180° - \sin 360°\sin 180°$ instead of just periodicity.</li><li>Confusing periodicity ($\cos(\theta+360°)=\cos\theta$) with the supplementary identity ($\cos(180°-\theta)=-\cos\theta$).</li><li>Assuming the period of cosine is $180°$ (it isn&#x27;t — that&#x27;s tangent).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Subtracting $180°$ rather than $360°$, which is not a period of cosine and changes the sign.</li><li>Using sine&#x27;s reduction rules on cosine (or vice versa) when further simplification is needed.</li><li>Forgetting to reduce all the way: leaving an angle like $420°$ partially reduced to $60°+360°$ but then not dropping the $360°$.</li><li>Mismanaging negative-angle reductions by subtracting instead of adding $360°$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics: periodicity of $\sin$, $\cos$, $\tan$ and exact values at standard angles ($0°, 30°, 45°, 60°, 90°, 180°, 270°$) are core P2/P3 content.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2024-Q6.html" class="example-chip">P1 Jan 2024 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

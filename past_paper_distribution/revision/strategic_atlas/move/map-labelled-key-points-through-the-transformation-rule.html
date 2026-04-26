@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map labelled key points through the transformation rule — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Graph Transformation Analysis</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Map labelled key points through the transformation rule</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Graph Transformation Analysis</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a sketch of y = f(x) is supplied with specific labelled points (axis intercepts, turning points, or touching points) and follow-up parts ask to sketch y = f(x+a), y = f(-x), y = f(x)+k, y = -f(x), y = af(x) or y = f(ax). Cues include phrases like &#x27;on separate diagrams sketch...&#x27;, &#x27;showing the coordinates of points where the curve meets the axes&#x27;, or labelled features such as &#x27;(2,0) is a point where the curve touches the x-axis&#x27;. The task is transformation, not re-derivation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each standard transformation is a coordinate map applied uniformly to every point on the curve, so the entire sketch is determined by where the labelled key points go plus preservation of qualitative shape (crossing vs touching, increasing/decreasing, asymptote behaviour). Inside-the-function changes act on x-coordinates in the inverse sense (x → x − a for f(x+a); x → −x for f(−x); x → x/a for f(ax)); outside-the-function changes act directly on y-coordinates. Mapping the few marked points captures all the marks the examiner is testing.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the question supplies a finite set of labelled points and a qualitative shape — this is the signature of a transformation-of-graph item, not a curve-sketching-from-scratch item.</li><li>Rule out re-finding roots from a formula or recomputing y-values: the function f is not given explicitly, so only the transformation rule matters.</li><li>Commit to the move because each labelled point carries a mark and the new sketch is fully determined by relocating those points and copying the shape between them.</li><li>Bridge to operations: identify whether each transformation is inside or outside the function, then write down the coordinate map (x,y) → (x&#x27;,y&#x27;) before touching the diagram.</li><li>Tactically, also flag any point lying on the axis of symmetry of a reflection (it is fixed) and any &#x27;touching&#x27; point so the new sketch preserves repeated-root behaviour at the image.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Classify each requested transformation as inside-argument (horizontal) or outside (vertical), and write the explicit coordinate map.</li><li>For y = f(x+2): use (x,y) → (x−2, y); for y = f(−x): use (x,y) → (−x, y).</li><li>Apply the map to every labelled point, e.g. (−5,0)→(−7,0), (0,−3)→(−2,−3), (2,0)→(0,0) under f(x+2).</li><li>Redraw the curve through the image points preserving original shape, monotonicity, curvature, and crossing-vs-touching behaviour at the x-axis.</li><li>Label every image point with its new coordinates on the sketch.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given y = f(x) with labelled points $(-5,0)$, $(0,-3)$, $(2,0)$ where $(2,0)$ is a touching point. For $y = f(x+2)$ apply $(x,y)\mapsto(x-2,y)$: points become $(-7,0),(-2,-3),(0,0)$, with the curve still touching the x-axis at $(0,0)$. For $y = f(-x)$ apply $(x,y)\mapsto(-x,y)$: points become $(5,0),(0,-3),(-2,0)$, with $(0,-3)$ fixed since it lies on the y-axis.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">y = f(x) + k (outside vertical translation)</div>
+<div class="adjustment">Map (x,y) → (x, y+k); x-coordinates of intercepts/turning points are unchanged, but x-axis crossings generally move off the axis.</div>
+</div><div class="variant-row">
+<div class="scenario">y = -f(x) (reflection in x-axis)</div>
+<div class="adjustment">Map (x,y) → (x, −y); points on the x-axis stay fixed, touching/crossing behaviour at x-axis preserved but flipped above/below.</div>
+</div><div class="variant-row">
+<div class="scenario">y = a f(x) with a &gt; 0 (vertical stretch)</div>
+<div class="adjustment">Map (x,y) → (x, ay); x-intercepts fixed, y-values (including minima/maxima) scale by a.</div>
+</div><div class="variant-row">
+<div class="scenario">y = f(ax) with a &gt; 0 (horizontal stretch)</div>
+<div class="adjustment">Map (x,y) → (x/a, y); y-intercept fixed, x-values scale by 1/a.</div>
+</div><div class="variant-row">
+<div class="scenario">Combined y = f(2x+4)</div>
+<div class="adjustment">Factor as f(2(x+2)): either translate by −2 then horizontally compress by factor 1/2, or compress first then translate by −2 — order matters, so be explicit.</div>
+</div><div class="variant-row">
+<div class="scenario">y = |f(x)| or y = f(|x|) (modulus graphs, FP/IAL)</div>
+<div class="adjustment">For |f(x)|, reflect the portion below the x-axis upwards; for f(|x|), discard x&lt;0 part and reflect the x≥0 part in the y-axis.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading f(x+2) as a shift RIGHT by 2 instead of LEFT by 2 (inverting the inside-rule).</li><li>Reading f(−x) as a reflection in the x-axis (confusing it with −f(x)) and negating y-coordinates instead of x-coordinates.</li><li>Treating f(2x) as a horizontal stretch by factor 2 rather than factor 1/2.</li><li>Applying combined transformations in the wrong order without factorising the argument first.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Failing to relabel image points on the new sketch — examiners mark per labelled coordinate.</li><li>Losing the &#x27;touching&#x27; vs &#x27;crossing&#x27; distinction at the x-axis after transformation.</li><li>Forgetting that a point on the axis of symmetry of a reflection is fixed (e.g. y-intercept under f(−x)).</li><li>Drawing the new curve with the wrong overall shape — the qualitative features (turning points, asymptotes) must be carried over.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (graph transformations of y=f(x), including translations, reflections and stretches) and extends naturally to modulus graphs in Further Pure; no calculus or unknown function form required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2020-Q5.html" class="example-chip">P1 Oct 2020 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

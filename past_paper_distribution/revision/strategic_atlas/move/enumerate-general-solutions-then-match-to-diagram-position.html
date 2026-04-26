@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enumerate general solutions then match to diagram position — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Solution Enumeration</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Enumerate general solutions then match to diagram position</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Solution Enumeration</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A trig equation like $\cos(kx) = 0$ or $\sin(kx) = c$ has infinitely many solutions, but the diagram labels a specific point (e.g. R, P, Q) as one particular intercept or extremum. Cues include a labelled point on a sketched curve where the value is asked for, and a multiple-angle argument $kx$ that compresses the period. The phrase &#x27;find the x-coordinate of R&#x27; combined with a figure showing R after several oscillations signals this move.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The general solution of $\cos\theta = 0$ is $\theta = 90° + 180°n$, producing a discrete arithmetic sequence of $x$-values once divided by $k$. Listing these in order and cross-referencing with the figure pins down the specific solution corresponding to the labelled point. This is more reliable than estimating coordinates from the diagram&#x27;s scale, which is rarely drawn accurately.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the labelled point is a zero (or extremum) of a transformed trig function, so the equation $\cos(kx) = 0$ governs its $x$-coordinate.</li><li>Rule out reading the value directly off the diagram — figures are not to scale, and the multiple-angle factor means intercepts are closer together than they look.</li><li>Commit to enumerating solutions in order because the sequence is arithmetic and the diagram tells us *which term* of the sequence to pick.</li><li>Bridge: solve $\cos\theta = 0$ generally, then divide each $\theta$ by $k$ to list candidate $x$-values.</li><li>Tactically count intercepts on the diagram from the origin (or from the leftmost feature) up to the labelled point to choose the right index.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the general solution: $\cos\theta = 0 \Rightarrow \theta = 90° + 180°n$.</li><li>Substitute $\theta = kx$ and solve: $x = \dfrac{90° + 180°n}{k}$ for $n = 0, 1, 2, \dots$.</li><li>List the first several positive values of $x$ in order.</li><li>Read the diagram to determine which intercept (1st, 2nd, 3rd, …) is labelled.</li><li>Quote the matching $x$-value as the answer.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find $k$ where $R(k,0)$ lies on $y = \cos(2x°)$ and $R$ is the 3rd positive $x$-intercept.\\ $\cos(2x°) = 0 \Rightarrow 2x = 90, 270, 450, \dots$\\ $\Rightarrow x = 45, 135, 225, \dots$\\ The 3rd intercept gives $k = 225$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">$\sin(kx°) = 0$ with a labelled intercept</div>
+<div class="adjustment">Use $kx = 180°n$, so $x = 0, \tfrac{180}{k}, \tfrac{360}{k}, \dots$; include $x=0$ in the count.</div>
+</div><div class="variant-row">
+<div class="scenario">Labelled maximum/minimum of $y = a\cos(kx)$</div>
+<div class="adjustment">Solve $kx = 180°n$ for maxima (cos) or $kx = 90° + 180°n$ for extrema of sin; enumerate and match.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation $\cos(kx) = c$ with $|c|&lt;1$</div>
+<div class="adjustment">Two families of solutions per period: $kx = \pm\alpha + 360°n$; interleave both lists in increasing order before counting.</div>
+</div><div class="variant-row">
+<div class="scenario">Phase-shifted curve $y = \cos(kx - \phi)$</div>
+<div class="adjustment">Set $kx - \phi = 90° + 180°n$ and solve for $x$; sequence still arithmetic but offset.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the diagram as to scale and guessing the $x$-coordinate visually.</li><li>Assuming $R$ is the first intercept simply because it is the only one labelled.</li><li>Confusing intercepts of $\cos$ (starts at 1) with intercepts of $\sin$ (starts at 0), miscounting the first crossing.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Stopping at the first solution ($x = 45$) instead of enumerating to the indexed intercept.</li><li>Forgetting to divide by $k$ after solving for $\theta = kx$.</li><li>Including negative-$x$ solutions when the diagram only shows the positive branch, shifting the count.</li><li>Counting $x = 0$ as a zero of cosine when $\cos(0)=1\ne 0$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 trig: general solutions of $\sin, \cos, \tan$ equations and interpretation of transformed graphs $y = a\,\text{trig}(kx+\phi)+d$.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Oct_2021-Q4.html" class="example-chip">P1 Oct 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

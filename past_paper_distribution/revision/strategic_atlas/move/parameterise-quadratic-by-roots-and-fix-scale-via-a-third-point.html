@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parameterise quadratic by roots and fix scale via a third point — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Root Form Parameterisation</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Parameterise quadratic by roots and fix scale via a third point</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Form Parameterisation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a quadratic&#x27;s two roots (or x-intercepts) are known and one additional point on the curve is given — typically the turning point, the y-intercept, or any labelled coordinate. Cues include phrases like &#x27;the curve crosses the x-axis at x = … and x = …&#x27; together with &#x27;passes through&#x27; or &#x27;has minimum/maximum at&#x27;. Also fires when a sketch shows two x-intercepts plus one extra marked point. The task is to find the full equation y = ax² + bx + c or an equivalent factored form.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any quadratic with roots r₁ and r₂ can be written y = A(x − r₁)(x − r₂), where A is the single unknown leading coefficient controlling vertical scale and orientation. This collapses the three-unknown problem (a, b, c) to a one-unknown problem, so a single substitution of the third point yields a linear equation in A. It exploits the factor theorem directly and avoids the algebraic overhead of solving a 3×3 system.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice two roots are given, so (x − r₁) and (x − r₂) must be factors of the quadratic.</li><li>I rule out starting from y = ax² + bx + c because that would force me to set up three simultaneous equations from three points — wasteful when factors are already visible.</li><li>I commit to y = A(x − r₁)(x − r₂) because it encodes both roots automatically and leaves only A to determine.</li><li>To pin down A, I bridge to the third known point (turning point, y-intercept, or any other given coordinate) and substitute it into the factored form.</li><li>Tactically, I evaluate each bracket numerically before multiplying to minimise sign errors, then divide to isolate A and write the final equation with A explicit.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two roots r₁, r₂ and the third known point (x₀, y₀).</li><li>Write y = A(x − r₁)(x − r₂).</li><li>Substitute (x₀, y₀): y₀ = A(x₀ − r₁)(x₀ − r₂).</li><li>Evaluate each bracket carefully (watch signs), then solve the resulting linear equation for A.</li><li>Write the final equation y = A(x − r₁)(x − r₂), expanding only if the question requires y = ax² + bx + c form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>A curve has x-intercepts at x = 4 and x = 10 and turning point (7, −18). Write y = A(x − 4)(x − 10). Substitute (7, −18): −18 = A(3)(−3) = −9A, so A = 2. Therefore y = 2(x − 4)(x − 10), or equivalently y = 2x² − 28x + 80.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Turning point given but roots unknown</div>
+<div class="adjustment">Switch to vertex form y = A(x − h)² + k and substitute any other known point (e.g. a root or y-intercept) to find A.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic with three known roots plus one extra point</div>
+<div class="adjustment">Use y = A(x − r₁)(x − r₂)(x − r₃) and substitute the extra point to solve for A.</div>
+</div><div class="variant-row">
+<div class="scenario">Repeated root (curve touches x-axis at x = r) plus one extra point</div>
+<div class="adjustment">Use y = A(x − r)² and substitute the extra point to find A.</div>
+</div><div class="variant-row">
+<div class="scenario">Only y-intercept given as the third point</div>
+<div class="adjustment">Substitute x = 0 directly: y₀ = A(−r₁)(−r₂) = A·r₁·r₂, then solve for A.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming A = 1 because the roots alone seem to determine the quadratic — forgetting the vertical scaling factor.</li><li>Confusing &#x27;turning point&#x27; with &#x27;root&#x27; and trying to set y = 0 at the vertex.</li><li>Treating the factored form as the final answer when the question explicitly asks for y = ax² + bx + c.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when evaluating brackets like (7 − 10) = −3, producing the wrong sign for A.</li><li>Forgetting to include A in the final equation, leaving y = (x − r₁)(x − r₂).</li><li>Expanding prematurely before solving for A, which reintroduces the very algebra the move is designed to avoid.</li><li>Mis-identifying a y-intercept as a point of the form (x, 0) instead of (0, y).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (P1) — quadratic functions, factor theorem, and curve sketching. Extends naturally to cubics in P2/P3 using the same parameterisation principle.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2023-Q8.html" class="example-chip">P1 Jan 2023 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

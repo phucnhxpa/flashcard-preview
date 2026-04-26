@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Take log of exponential model to linearise against given axes — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Linearization</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Take log of exponential model to linearise against given axes</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Linearization</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>An exponential model of the form $A = pq^t$ (or similar with a variable in the exponent) is given alongside a graph whose axes are $\log_{10} A$ against $t$ shown as a straight line. The wording typically asks to &#x27;show that&#x27; the relationship is linear, or to find $p$ and $q$ from the gradient and intercept. Cues include log-scaled axes, a straight-line plot of transformed data, or a question stem giving the linear form $Y = mX + c$ to be matched. The base of the logarithm on the axis label dictates the base to use.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Logarithms convert products into sums and exponents into coefficients via $\log(ab) = \log a + \log b$ and $\log(a^n) = n\log a$. Applying $\log_{10}$ to $A = pq^t$ therefore produces $\log_{10} A = \log_{10} p + t\log_{10} q$, which is linear in $t$. This matches the straight-line template $Y = c + mX$ with $Y = \log_{10} A$, $X = t$, intercept $\log_{10} p$, and gradient $\log_{10} q$. The graph&#x27;s measurable features then directly recover the unknown constants.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the y-axis is $\log_{10} A$ and the x-axis is $t$, so the working equation must be in those two variables, not in $A$ and $t$.</li><li>I rule out rearranging $A = pq^t$ algebraically (e.g. dividing or substituting) — none of those produce a $\log_{10} A$ term, so logs are unavoidable.</li><li>I commit to taking $\log_{10}$ of both sides because the axis specifies base 10; using $\ln$ would give a correct linear form but with intercept $\ln p$ and gradient $\ln q$, mismatching the graph&#x27;s readings.</li><li>The first concrete step is $\log_{10} A = \log_{10}(pq^t)$, then I expand using the product and power laws.</li><li>Finally I match terms with $Y = mX + c$: gradient of the line equals $\log_{10} q$ and y-intercept equals $\log_{10} p$, so $q = 10^{\text{gradient}}$ and $p = 10^{\text{intercept}}$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Apply $\log_{10}$ to both sides: $\log_{10} A = \log_{10}(pq^t)$.</li><li>Use the product law: $\log_{10} A = \log_{10} p + \log_{10}(q^t)$.</li><li>Use the power law to bring $t$ down: $\log_{10} A = \log_{10} p + t\log_{10} q$.</li><li>Identify gradient $= \log_{10} q$ and y-intercept $= \log_{10} p$ by comparison with $Y = mX + c$.</li><li>If values are required, recover $p = 10^{\text{intercept}}$ and $q = 10^{\text{gradient}}$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $A = pq^t$ and a straight-line graph of $\log_{10} A$ against $t$ with gradient $0.2$ and y-intercept $0.7$:
+$\log_{10} A = \log_{10} p + t\log_{10} q$, so $\log_{10} p = 0.7 \Rightarrow p = 10^{0.7} \approx 5.01$.
+Also $\log_{10} q = 0.2 \Rightarrow q = 10^{0.2} \approx 1.58$.
+Hence $A \approx 5.01(1.58)^t$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Power-law model $y = ax^n$ plotted as $\log_{10} y$ against $\log_{10} x$</div>
+<div class="adjustment">Take logs of both sides to get $\log_{10} y = \log_{10} a + n\log_{10} x$; gradient gives $n$ directly, intercept gives $\log_{10} a$.</div>
+</div><div class="variant-row">
+<div class="scenario">Graph uses $\ln$ instead of $\log_{10}$</div>
+<div class="adjustment">Apply $\ln$ throughout; intercept becomes $\ln p$ and gradient becomes $\ln q$, so $p = e^{\text{intercept}}$, $q = e^{\text{gradient}}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Exponential model written as $A = pe^{kt}$</div>
+<div class="adjustment">Taking $\ln$ gives $\ln A = \ln p + kt$; the gradient is $k$ itself (no further log conversion needed).</div>
+</div><div class="variant-row">
+<div class="scenario">Only one of the axes is logarithmic, e.g. $\log_{10} A$ vs $t$ vs. $A$ vs $\log_{10} t$</div>
+<div class="adjustment">Match the log to whichever variable appears as an exponent or as a power-law base; the choice of which side to log depends on the axis labels.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using $\ln$ when the axis is $\log_{10}$ (or vice versa), so numerical readings of gradient/intercept give the wrong $p$ and $q$.</li><li>Treating $\log_{10}(pq^t)$ as $\log_{10} p \cdot \log_{10}(q^t)$ instead of a sum.</li><li>Confusing this with a power-law setup and logging $t$ as well, producing a $\log_{10} t$ term that does not match the axes.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to apply log to $p$, writing $\log_{10} A = p + t\log_{10} q$.</li><li>Leaving the answer as $\log_{10} p$ and $\log_{10} q$ when the question asks for $p$ and $q$ themselves — must antilog with $10^{(\cdot)}$.</li><li>Mis-assigning gradient and intercept (swapping which corresponds to $p$ and which to $q$).</li><li>Dropping the coefficient when applying the power law: writing $\log_{10}(q^t) = \log_{10} q$ instead of $t\log_{10} q$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 logarithm content: laws of logs and exponential models linearised on log-axes are standard exam material, including recovering constants from gradient and intercept.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Jun_2021-Q5.html" class="example-chip">P3 Jun 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

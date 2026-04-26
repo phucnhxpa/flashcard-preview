@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carry exact value forward; round only at final answer — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Precision Management</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Carry exact value forward; round only at final answer</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Precision Management</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A &#x27;show that&#x27; part establishes a value to a stated accuracy (e.g. angle = 1.742 to 4 s.f., length = 4.83 m to 3 s.f.), and later parts demand a final answer to a tighter or comparable precision (1 d.p., 2 d.p., 3 s.f.). The displayed rounded value is tempting to reuse verbatim, but doing so risks losing accuracy. The cue is any chain where a derived numerical result feeds into sector areas, cosine rule, integration limits, or further trigonometry.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Rounding errors compound through multiplication, squaring, and trigonometric evaluation, so a value rounded to 4 s.f. can degrade to 2–3 s.f. accuracy after two operations. Carrying the exact symbolic form (e.g. $\pi - 1.4$) or the full calculator-precision decimal preserves all significant figures until the final rounding step. Edexcel mark schemes explicitly penalise answers that fall outside tolerance bands due to premature rounding, even when the method is correct.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice part (a) gave me a &#x27;show that&#x27; result, and parts (b)/(c) reuse this value in further calculations.</li><li>I rule out simply typing 1.742 into the next formula — that discards information I already have exactly.</li><li>I commit to using the exact form $\pi - 1.4$ (or storing the full decimal in calculator memory) throughout.</li><li>First operation: store $\theta = \pi - 1.4$ as variable A on the calculator before touching any subsequent formula.</li><li>Tactically, I&#x27;ll only press the round button when writing the final answer of each subpart, never mid-chain.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the exact symbolic form behind the displayed rounded value (e.g. $\pi - 1.4$, $\sqrt{13}$, $\ln 5$).</li><li>Store this exact value in calculator memory (A, B, Ans, etc.) or keep it symbolic on paper.</li><li>Substitute the stored/symbolic value into every downstream formula (sector area, arc length, cosine rule, etc.).</li><li>Perform all chained operations at full precision.</li><li>Round only at the final answer of each part to the precision the question demands.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Part (a): show $\angle BOD = \pi - 1.4 = 1.742$ (4 s.f.). Part (b): area of sector $= \tfrac{1}{2}r^{2}\theta$ with $r=2$. Using stored $\theta = \pi - 1.4$: area $= 2(\pi-1.4) = 3.48318\ldots \approx 3.5$ (1 d.p.). Using rounded $1.742$ instead gives $3.484$, which still rounds correctly here, but in part (c) involving $\cos\theta$ the rounded version drifts into the wrong 1 d.p. band.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">&#x27;Show that&#x27; establishes a length to 3 s.f. then asks for an area or volume</div>
+<div class="adjustment">Keep the exact surd or expression (e.g. $\sqrt{13}$ rather than 3.61) in the area formula.</div>
+</div><div class="variant-row">
+<div class="scenario">Iteration question where $x_1$ is found, then $x_2, x_3$ requested to 4 d.p.</div>
+<div class="adjustment">Use the calculator&#x27;s Ans key to feed full-precision $x_n$ into $x_{n+1}$, rounding only when reporting.</div>
+</div><div class="variant-row">
+<div class="scenario">Trapezium rule where ordinates are computed from $f(x)$</div>
+<div class="adjustment">Compute each ordinate to full calculator precision; round only the final estimate.</div>
+</div><div class="variant-row">
+<div class="scenario">Statistics: standardising with a mean/sd given to 2 d.p.</div>
+<div class="adjustment">Use the unrounded computed values (not the displayed rounded ones) when chaining into probability lookups.</div>
+</div><div class="variant-row">
+<div class="scenario">Mechanics: a velocity is shown to equal $4.2\,\text{m s}^{-1}$, then used in energy/momentum</div>
+<div class="adjustment">Carry the exact form $\sqrt{\ldots}$ or stored decimal into KE = $\tfrac{1}{2}mv^{2}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking the &#x27;show that&#x27; value is the exact answer to use, rather than a checkpoint.</li><li>Believing that 4 s.f. input guarantees 4 s.f. output — it does not after multiplication or trig.</li><li>Assuming calculator memory introduces error; in fact it preserves more digits than transcription.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Re-entering 1.742 into each subsequent formula and producing a final answer just outside the accepted tolerance.</li><li>Mixing exact and rounded forms (using $\pi - 1.4$ once, then 1.742 later) leading to inconsistent intermediate results.</li><li>Rounding intermediate results to &#x27;tidy&#x27; values like 1.74 to save typing.</li><li>Forgetting to clear or overwrite calculator memory between parts, reusing a stale stored value.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL expectation across Pure (radians, trig, iteration, numerical methods), Statistics (standardising), and Mechanics (chained kinematics): final-step rounding only, with full precision carried via calculator memory or exact symbolic form.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2022-Q5.html" class="example-chip">P1 Jan 2022 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

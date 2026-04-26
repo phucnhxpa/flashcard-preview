@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconstruct polynomial from known roots using factored form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Root Factor Reconstruction</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reconstruct polynomial from known roots using factored form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Factor Reconstruction</strong></span>
+    <span>Frequency: <strong>5 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question gives all (or enough) roots of a polynomial of known degree and asks for its coefficients, or for unknown letters A, B, C, D in its expanded form. Visual cues: x-intercepts read off a sketch, a stated repeated root (&#x27;touches the x-axis&#x27;), a complex conjugate pair already producing a real quadratic factor, or a monic polynomial with all roots listed. Equivalent phrasings: &#x27;find the equation of the curve given its roots and one further point&#x27;, &#x27;determine p, q, r if the polynomial has roots …&#x27;, &#x27;find A, B, C given the quartic has roots …&#x27;. Whenever the count of known roots equals (or nearly equals) the degree, this move fires.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By the Factor Theorem, x = r being a root is equivalent to (x − r) being a factor. A degree-n polynomial with n known roots is determined up to a single leading coefficient: p(x) = a(x − r₁)(x − r₂)…(x − rₙ). This collapses what would otherwise be an n-by-n simultaneous system in the unknown coefficients into a single multiplication followed by coefficient comparison, and uses only one extra condition (a known point, or monic-ness) to pin down a. It is the same underlying identity that powers Vieta&#x27;s formulas, but applied directly via expansion rather than by symmetric-function lookup.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the count: how many roots are given vs the degree of the polynomial? If they match (or match up to one leading coefficient), reconstruction is on the table.</li><li>Rule out the brute-force alternative: substituting each root and any extra point into the expanded form Ax^n + … to build a simultaneous system. This is correct but slow and sign-error-prone.</li><li>Commit to factored form because each root contributes a clean linear factor (x − rᵢ); a repeated root contributes (x − r)², and a complex conjugate pair α ± βi contributes the real quadratic x² − 2αx + (α² + β²).</li><li>Decide the leading coefficient: if the polynomial is stated monic, a = 1 directly; otherwise use the one remaining condition (a given point on the curve, or a stated leading coefficient) to solve for a.</li><li>Decide the expansion order tactically: pair complex-conjugate factors first (to keep arithmetic real), and pair repeated factors together; then multiply the resulting quadratics, which is cleaner than chaining four linear distributions.</li><li>Finally, compare coefficients of like powers of x against the target form to read off the unknowns, and sanity-check the constant term as a quick verification.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List all known roots, including multiplicities and conjugate pairs.</li><li>Write each root r as a factor (x − r); for a conjugate pair α ± βi, combine immediately into x² − 2αx + (α² + β²); for a repeated root r of multiplicity k, write (x − r)^k.</li><li>Insert the leading coefficient a in front: p(x) = a · (product of factors).</li><li>Determine a: set a = 1 if monic; otherwise substitute the given point (x₀, y₀) and solve a = y₀ / [product of (x₀ − rᵢ)].</li><li>Expand by multiplying paired quadratics first, then collect like terms.</li><li>Match coefficients of x^n, x^{n−1}, … with the target form to read off the requested unknowns.</li><li>Verify by checking the constant term equals a · ∏(−rᵢ).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find p, q, r if x³ + px² + qx + r is monic with roots 2 + 3i, 2 − 3i, 1.\n Conjugate pair → x² − 4x + 13. Real root → (x − 1).\n Multiply: (x² − 4x + 13)(x − 1) = x³ − 4x² + 13x − x² + 4x − 13 = x³ − 5x² + 17x − 13.\n Compare: p = −5, q = 17, r = −13.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quadratic with two known roots and one extra point</div>
+<div class="adjustment">Write y = a(x − r₁)(x − r₂); substitute the extra point to find a.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic with three x-intercepts read from a sketch and a labelled point P</div>
+<div class="adjustment">Write y = a(x − r₁)(x − r₂)(x − r₃); use P to solve for a, then expand.</div>
+</div><div class="variant-row">
+<div class="scenario">Repeated root (curve touches the x-axis at r)</div>
+<div class="adjustment">Include (x − r)² as a factor, contributing multiplicity 2.</div>
+</div><div class="variant-row">
+<div class="scenario">Complex conjugate pair α ± βi</div>
+<div class="adjustment">Combine into the real quadratic x² − 2αx + (α² + β²) before multiplying further.</div>
+</div><div class="variant-row">
+<div class="scenario">Non-monic polynomial (leading coefficient stated, e.g. 2x³ + …)</div>
+<div class="adjustment">Pull the stated leading coefficient out front: p(x) = 2(x − r₁)(x − r₂)(x − r₃).</div>
+</div><div class="variant-row">
+<div class="scenario">Quartic with one conjugate pair and one repeated real root</div>
+<div class="adjustment">Form two quadratics — one from the conjugate pair, one as (x − r)² — and multiply the two quadratics.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Setting up a full simultaneous system in A, B, C, D by substituting each root into the expanded form — correct but vastly slower and prone to arithmetic slips.</li><li>Forgetting the leading coefficient a and assuming the polynomial equals just the product of factors when it is not stated to be monic.</li><li>Treating a conjugate pair as two separate complex factors and expanding them last instead of first, leaving complex arithmetic strewn through the workings.</li><li>Attempting polynomial long division by an unknown-coefficient polynomial — impossible when A, B, C are still unknown.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error in factors: a root x = −4 gives the factor (x + 4), not (x − 4).</li><li>Sign error during distribution, especially −1 · (−4x) = +4x or −8x · (−6x) = +48x².</li><li>Misreading the constant term: the constant in (x − r₁)(x − r₂)(x − r₃) is (−1)³ r₁r₂r₃, so signs must be tracked.</li><li>Assuming a = 1 without checking that the curve passes through the additional given point.</li><li>For conjugate pairs, miscomputing the real quadratic: it is x² − 2αx + (α² + β²), not x² − 2αx + α² − β².</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays inside Edexcel IAL Core Pure (factor theorem, P3/P4) and Further Pure (complex roots come in conjugate pairs for real-coefficient polynomials, FP1). The factor theorem and Vieta-style relations between roots and coefficients are in scope; Cardano&#x27;s formula and general quintic methods are out of scope and should not be invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (5)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2021-Q8.html" class="example-chip">P1 Jun 2021 Q8</a><a href="../FP1/ch1/q-Jun_2024-Q4.html" class="example-chip">FP1 Jun 2024 Q4</a><a href="../FP1/ch1/q-Jan_2022-Q4.html" class="example-chip">FP1 Jan 2022 Q4</a><a href="../FP3/ch6/q-Jun_2022-Q3.html" class="example-chip">FP3 Jun 2022 Q3</a><a href="../FP3/ch2/q-Oct_2021-Q7.html" class="example-chip">FP3 Oct 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolate the exponential then take ln to free the unknown from the exponent — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Inversion</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Isolate the exponential then take ln to free the unknown from the exponent</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Inversion</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever the unknown is trapped inside an exponent, typically in the form e^{kx} or e^{-kx}, and no algebraic manipulation can extract it. Visual cues: an equation like A − Be^{-kx} = C, or Ce^{kt} = L, or e^{-λt} = constant, where you are asked to solve for the variable in the exponent. Equivalent phrasings: &#x27;find t when…&#x27;, &#x27;find the value of k such that…&#x27;, or rearrangement of an exponential growth/decay model. The signal is always: one exponential term, one unknown in its exponent, everything else numeric or symbolic constants.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The natural logarithm is the inverse of the exponential function, so applying ln to both sides of e^{f(x)} = c collapses the equation to the linear form f(x) = ln c, which can then be solved by ordinary algebra. The move only works once the exponential is fully isolated — ln does not distribute over sums, so any additive constants must be cleared first. When the exponent carries a negative coefficient, the log-law −ln(a/b) = ln(b/a) is used afterwards to flip the argument and produce a clean, positive form of the answer.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the unknown sits inside an exponent (e.g. e^{-5k} or e^{-0.2T}); standard algebraic moves (factoring, expanding, dividing) cannot reach it.</li><li>Rule out trying to ln the equation immediately while there are still additive terms — ln(A − Be^{-kx}) does not simplify because ln does not split over sums or differences.</li><li>Commit to log-inversion because ln is the unique inverse of e^x, and once the exponential is isolated it converts the equation to linear form in one stroke.</li><li>Bridge to action: rearrange to the form e^{(coeff)·unknown} = (positive constant), checking that the right-hand side is positive (else ln is undefined).</li><li>Apply ln to both sides; the left side collapses to (coeff)·unknown by ln(e^x) = x, the right side becomes ln(constant).</li><li>If the coefficient is negative, divide through and use −ln(a/b) = ln(b/a) to absorb the sign into a reciprocal, presenting the answer with a positive logarithm.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rearrange the equation to isolate the exponential: write it as e^{αx} = c with c &gt; 0.</li><li>Take natural logarithms of both sides: αx = ln c.</li><li>Divide by α to obtain x = (ln c)/α.</li><li>If α &lt; 0, rewrite (ln c)/α as −(ln c)/|α| = (ln(1/c))/|α| using −ln c = ln(1/c) to keep the answer in tidy positive form.</li><li>Simplify the logarithmic argument using ln(ab) = ln a + ln b, ln(a/b) = ln a − ln b, and ln e = 1 as appropriate.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $90 = 198 - 180e^{-5k}$ for $k$. Isolate: $180e^{-5k} = 108 \Rightarrow e^{-5k} = \tfrac{3}{5}$. Take ln: $-5k = \ln\tfrac{3}{5}$. Divide and flip: $k = -\tfrac{1}{5}\ln\tfrac{3}{5} = \tfrac{1}{5}\ln\tfrac{5}{3}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Negative exponent with messy constant, e.g. e^{-0.2T} = e/[2(e+1)]</div>
+<div class="adjustment">After taking ln and dividing by the negative coefficient, apply −ln(a/b) = ln(b/a) to present T = 5 ln(2(e+1)/e) instead of the equivalent T = −5 ln(e/[2(e+1)]).</div>
+</div><div class="variant-row">
+<div class="scenario">Base other than e, e.g. 10^{kx} = c or 2^x = c</div>
+<div class="adjustment">Use the matching logarithm (log₁₀ for base 10, log₂ for base 2) — same isolation-then-invert structure.</div>
+</div><div class="variant-row">
+<div class="scenario">Logistic / exponential growth Ce^{kt} = L</div>
+<div class="adjustment">Divide by C first, then ln; identical mechanic with positive coefficient.</div>
+</div><div class="variant-row">
+<div class="scenario">Half-life: e^{-λt} = 1/2</div>
+<div class="adjustment">Take ln, divide by −λ to get t = (ln 2)/λ — the sign flip is automatic via ln(1/2) = −ln 2.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating ln(A − Be^{-kx}) = ln C as a simplification — it isn&#x27;t, because ln doesn&#x27;t distribute over subtraction.</li><li>Forgetting the sign flip when the exponent is negative, ending with a negative answer for a quantity (time, rate constant) that must be positive.</li><li>Misreading e^{-kx} = c with c &lt; 0 as solvable — the exponential is always positive, so a negative RHS signals an earlier algebra error.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Taking ln before fully isolating the exponential, e.g. writing ln(198 − 180e^{-5k}) = ln 90, which does not simplify.</li><li>Splitting ln(2(e+1)) incorrectly as ln 2 · ln(e+1) instead of ln 2 + ln(e+1).</li><li>Losing the constant term that comes from ln e = 1, e.g. dropping the &#x27;−1&#x27; when simplifying ln(e/[2(e+1)]).</li><li>Arithmetic slips when reducing fractions like 108/180 — failing to spot the common factor of 36 (= 3/5).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL P2/P3 exponentials and logarithms (formula booklet: laws of logarithms, ln e = 1, ln(ab) = ln a + ln b). Avoid invoking complex logarithms or principal-branch issues — within IAL all arguments of ln are real and positive by construction.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2021-Q5.html" class="example-chip">P3 Jan 2021 Q5</a><a href="../P3/ch4/q-Specimen_2018-Q10.html" class="example-chip">P3 Specimen 2018 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reject extraneous quadratic root using domain or contextual constraint — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Root Selection</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reject extraneous quadratic root using domain or contextual constraint</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Selection</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever solving a quadratic (via the formula, completing the square, or taking a square root) produces a ± and hence two candidate values, but the problem context allows only one. Typical cues: the question states a variable is &#x27;positive&#x27;, the point lies &#x27;in the first quadrant&#x27;, the function has a restricted domain (e.g. x &gt; 4), or you are constructing an inverse function whose range must equal the original domain. Equivalent phrasings: &#x27;pick the correct branch&#x27;, &#x27;discard the spurious root&#x27;, &#x27;apply the sign condition&#x27;. Recognise it as soon as you write &#x27;±&#x27; next to a surd and the question has imposed any inequality, sign, or geometric region condition.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A quadratic equation is symmetric in its two roots, but the original problem usually carries an asymmetric constraint (positivity, a domain, a quadrant, a length being non-negative). The squaring or quadratic-formula step introduces this symmetry artificially, so one of the two algebraic answers fails the original condition and must be discarded. Selecting correctly is what converts a purely algebraic answer into the contextually valid one — failing to do so is a logical error, not a computational one. The underlying principle: solutions of a derived equation are necessary but not sufficient; they must be checked against the original constraints.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the algebra has produced two candidate values (± a surd, or two roots from the quadratic formula).</li><li>Re-read the question for any restriction: is the variable declared positive? Is the point in a specific quadrant? Does the original function have a restricted domain that forces the inverse&#x27;s range?</li><li>Rule out the lazy default (&#x27;always take +&#x27;): the correct branch depends on the constraint, not on a universal sign convention.</li><li>Commit to testing each candidate against the constraint — either by numerical estimate (e.g. √165 ≈ 12.8), asymptotic behaviour (large-x limit), or substitution back into a second equation/sketch.</li><li>Tactically choose the cheapest test: a surd estimate if the constraint is positivity; an asymptotic argument if the domain is x &gt; k for some k; substitution into the other curve if the constraint is geometric (y &gt; 0, first quadrant).</li><li>Discard the failing root explicitly (state the reason) and present the surviving root as the final answer.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the two candidates explicitly: x = a + √D and x = a − √D (or analogous ±-expression).</li><li>Identify the active constraint from the question: e.g. p &gt; 0, x &gt; 4, P in first quadrant, range of f⁻¹ ⊆ domain of f.</li><li>Estimate or analyse each candidate: numerical bound (√D between consecutive integer squares), asymptotic limit as x → ∞, or substitute into the secondary equation.</li><li>Compare each candidate against the constraint; mark one ✓ and one ✗ with a brief reason.</li><li>State the surviving root as the final answer, citing the constraint that eliminated the other.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(p-3)^2 = 165$ with $p>0$. Take square roots: $p = 3 \pm \sqrt{165}$. Estimate $\sqrt{165} \approx 12.8$ (since $12^2=144$, $13^2=169$). Then $3 - \sqrt{165} \approx -9.8 < 0$ — reject. So $p = 3 + \sqrt{165}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Inverse functions where f has a restricted domain</div>
+<div class="adjustment">Choose the ± branch so that the range of f⁻¹ equals the domain of f; test by letting x → ∞ and seeing which branch lands in the required region.</div>
+</div><div class="variant-row">
+<div class="scenario">Geometric problem with two intersection points</div>
+<div class="adjustment">Use a sketch or substitute each x-candidate into the other curve to check the y-sign; keep the root in the specified quadrant or arc.</div>
+</div><div class="variant-row">
+<div class="scenario">Positive-length / positive-parameter constraint</div>
+<div class="adjustment">Estimate the surd numerically; reject the root with negative sign.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric equation on a restricted interval</div>
+<div class="adjustment">Same logic — list all algebraic solutions, then keep only those inside the stated interval (e.g. 0 ≤ θ &lt; 2π).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Defaulting to &#x27;+&#x27; because it &#x27;looks tidier&#x27; rather than checking the constraint.</li><li>Interpreting &#x27;first quadrant&#x27; as only x &gt; 0, forgetting to verify y &gt; 0.</li><li>Presenting both roots as joint answers when the question requires a single value.</li><li>Misreading the domain restriction as applying to the new variable rather than to the original function.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the ± when taking a square root and so missing the valid root entirely.</li><li>Numerical sign error when the constant and the surd are close in magnitude (e.g. 3 vs √8).</li><li>Using a single test value rather than the relevant asymptotic/limit when the constraint is global (e.g. &#x27;for all x &gt; 4&#x27;).</li><li>Substituting into the wrong equation when checking a geometric constraint.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely within Edexcel IAL Pure Maths (P1–P4): quadratic formula and inverse functions are in the formula booklet only as the standard quadratic root formula. No out-of-scope analysis is needed — asymptotic checks here are informal limits, not formal ε-δ work.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jan_2021-Q3.html" class="example-chip">P3 Jan 2021 Q3</a><a href="../P2/ch3/q-Oct_2021-Q6.html" class="example-chip">P2 Oct 2021 Q6</a><a href="../P1/ch1/q-Jan_2019-Q11.html" class="example-chip">P1 Jan 2019 Q11</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

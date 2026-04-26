@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build tangent equations and solve simultaneously to locate their intersection — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Tangent Intersection</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Build tangent equations and solve simultaneously to locate their intersection</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Tangent Intersection</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the question asks for the point where two tangents (or a tangent and normal) to a curve meet. Cues: a derivative or general tangent equation has been established in an earlier part; two specific points of tangency are named (or two tangents pass through a common external point). Equivalent phrasings: &#x27;the tangents at P and Q intersect at R&#x27;, &#x27;find the coordinates of the point of intersection of the two tangents&#x27;, &#x27;tangents from external point T touch the curve at Q and R — find Q and R&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A tangent line is fully determined by a point of tangency and the gradient dy/dx at that point, so each tangent can be written explicitly via point–gradient form (or via a parametric general tangent formula). The intersection of two lines is found by equating them, reducing the geometric problem to one or two linear equations. When both tangents share a known external point, substituting that point into the general tangent equation collapses the problem into a single polynomial in the parameter, whose roots give both contact points at once.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the structural setup: either two specified contact points (each gives a point + gradient), or one common external point with two unknown contact points (one parameter, two unknowns sharing the same equation).</li><li>Rule out brute-force alternatives: solving two separate tangency conditions (discriminant = 0 on a quadratic) from the external point is valid but laborious; intersecting two unknown tangents directly introduces too many unknowns.</li><li>Commit to the tangent-equation route because the earlier part of the question has handed you either dy/dx or a clean general tangent — exploit that work.</li><li>Bridge to operations: for two named contact points, evaluate dy/dx at each, write y − y₁ = m(x − x₁), then equate. For a shared external point with parametric tangent, substitute the external coordinates into the general tangent to get a polynomial in t whose roots are the two contact parameters.</li><li>Tactical check: confirm the two gradients differ (so the tangents actually meet), and remember to convert parameter values back into (x, y) coordinates if a parametric form was used.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two tangents needed and the available tools (dy/dx or general tangent at parameter t).</li><li>Case A (two known contact points): compute m₁ = dy/dx at P₁ and m₂ = dy/dx at P₂; write tangent₁: y − y₁ = m₁(x − x₁) and tangent₂: y − y₂ = m₂(x − x₂).</li><li>Equate the two y-expressions and solve the resulting linear equation for x; back-substitute to get y.</li><li>Case B (common external point T, parametric tangent F(x,y,t) = 0): substitute T&#x27;s coordinates into F to obtain a polynomial in t (typically quadratic).</li><li>Solve the polynomial for the two parameter values t₁, t₂; substitute each back into the parametric coordinates to recover the contact points.</li><li>State the intersection point (Case A) or the two contact points (Case B) in explicit coordinate form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve has dy/dx evaluated as 3 at $(0,0)$ and as $-5$ at $(0,1)$. Tangent₁: $y = 3x$. Tangent₂: $y = -5x + 1$. Equate: $3x = -5x + 1 \Rightarrow 8x = 1 \Rightarrow x = \tfrac{1}{8}$, then $y = \tfrac{3}{8}$. Intersection: $R = \left(\tfrac{1}{8}, \tfrac{3}{8}\right)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Tangent meets normal, or two normals meet</div>
+<div class="adjustment">Replace the relevant gradient(s) by $-1/m$; the equate-and-solve mechanic is unchanged.</div>
+</div><div class="variant-row">
+<div class="scenario">Parabola $(at^2, 2at)$ with two tangents from external point T</div>
+<div class="adjustment">Substitute T into $ty = x + at^2$ to get a quadratic in $t$; the two roots give the contact parameters.</div>
+</div><div class="variant-row">
+<div class="scenario">Rectangular hyperbola $xy = c^2$ at parameter $t$, tangent $t^2 y + x = 2ct$</div>
+<div class="adjustment">Substitute the external point&#x27;s $(x,y)$ to get a quadratic in $t$; recover contacts via $(ct, c/t)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Ellipse, tangent from external point</div>
+<div class="adjustment">Use $y = mx \pm \sqrt{a^2 m^2 + b^2}$; substituting the external point yields a quadratic in $m$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the two tangents as having two independent unknown gradients and trying to solve a 2-variable system from scratch instead of using the parametric tangent formula already provided.</li><li>Failing to spot that both contact parameters satisfy the same polynomial when both tangents share an external point — students set up two separate equations needlessly.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic / sign errors when evaluating dy/dx at a specific point, especially with $e^{-2x}$, negative denominators, or fractions.</li><li>Forgetting to convert the parameter root $t$ back into actual coordinates $(x(t), y(t))$ — leaving the answer as $t = \ldots$ rather than the required point.</li><li>Sign slip when substituting a negative coordinate into a $t^2$ term (double-negative confusion).</li><li>Assuming the tangents must be non-parallel without checking — if gradients coincide, no intersection exists.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely in Edexcel IAL P3/P4 coordinate geometry and FP1/FP3 conics. Uses the standard parametric tangent equations (parabola, rectangular hyperbola, ellipse) found in the formula booklet&#x27;s coordinate-geometry section. Avoid invoking projective duality or pole–polar machinery — these are out of scope, even though they generalise this technique.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch5/q-Jun_2021-Q5.html" class="example-chip">P4 Jun 2021 Q5</a><a href="../FP1/ch4/q-Jun_2021-Q4.html" class="example-chip">FP1 Jun 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

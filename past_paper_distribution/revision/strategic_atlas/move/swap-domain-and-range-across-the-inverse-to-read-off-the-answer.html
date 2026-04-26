@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swap domain and range across the inverse to read off the answer — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Range Duality</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Swap domain and range across the inverse to read off the answer</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Range Duality</strong></span>
+    <span>Frequency: <strong>5 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question asks for the domain or range of f⁻¹(x), and the corresponding range or domain of f is either given outright in the question stem or has just been computed in an earlier part. Visual cues: a multi-part question where part (a) asks for range/domain of f and a later part asks for domain/range of f⁻¹; an explicitly stated restricted domain like &#x27;x &gt; 0&#x27; or &#x27;x ≠ 1&#x27; attached to f; the inverse f⁻¹ has been derived as a rational/surd expression whose &#x27;natural&#x27; domain may differ from the true one. Alternative phrasings: &#x27;state the domain of f⁻¹&#x27;, &#x27;write down the range of g⁻¹&#x27;, &#x27;give the set of values that f⁻¹ can take&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition of an inverse function, every output of f⁻¹ is an input of f and vice versa, so domain(f⁻¹) = range(f) and range(f⁻¹) = domain(f). This duality lets the student bypass re-analysing the inverse formula (which often has a wider &#x27;natural&#x27; domain than the true one — e.g. a horizontal asymptote of f becomes an excluded value for f⁻¹&#x27;s domain that is invisible from f⁻¹&#x27;s formula alone). It also turns a potentially error-prone asymptote/limit analysis into a one-line lookup, and acts as a consistency check between parts of the question.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question asks for the domain (or range) of f⁻¹, and check whether the dual quantity for f is already available — either stated in the stem (e.g. &#x27;f: x ∈ ℝ, x ≠ 1&#x27;) or computed in a previous part.</li><li>Rule out deriving the answer from the algebraic formula of f⁻¹ directly: this risks missing exclusions caused by horizontal asymptotes of f, or losing endpoint information when f had a restricted domain like x ≥ 2.</li><li>Commit to the duality: domain(f⁻¹) = range(f), range(f⁻¹) = domain(f). Decide which direction the question is asking for.</li><li>Bridge to the operation: read off the dual set from the question or earlier work, taking care to preserve open vs closed endpoints exactly as they appeared.</li><li>Tactical check: compare against the formula of f⁻¹ as a sanity check — vertical asymptotes of f⁻¹ should match excluded values from range(f) (which equal horizontal asymptotes of f).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify what is asked: domain of f⁻¹ or range of f⁻¹.</li><li>Locate the dual quantity for f: range(f) if domain of f⁻¹ is asked; domain(f) if range of f⁻¹ is asked.</li><li>If range(f) is needed and not yet known, find it via endpoint/limit analysis on f&#x27;s restricted domain (e.g. as x → a⁺, f → L; as x → ∞, f → M) and via horizontal asymptote y = (leading coeff num)/(leading coeff den) for rationals.</li><li>Write the answer in the same interval/set notation, preserving strict vs non-strict inequalities.</li><li>Sanity check: vertical asymptote of f⁻¹ should equal the excluded value in range(f).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $f(x) = \frac{x+2}{x-3}$, $x \in \mathbb{R}, x \neq 3$. The horizontal asymptote is $y = 1$, so $\text{range}(f) = \mathbb{R} \setminus \{1\}$. Hence $\text{domain}(f^{-1}) = \mathbb{R} \setminus \{1\}$, and $\text{range}(f^{-1}) = \mathbb{R} \setminus \{3\}$ (the original domain of $f$).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Rational f with horizontal asymptote (e.g. f(x) = (x+5)/(3x−2))</div>
+<div class="adjustment">Range of f excludes the horizontal asymptote y = 1/3, so domain of f⁻¹ is ℝ \ {1/3}; this matches the vertical asymptote of f⁻¹.</div>
+</div><div class="variant-row">
+<div class="scenario">Restricted-domain f with monotonic behaviour (e.g. f(x) = 12/(x+1) on x &gt; 0)</div>
+<div class="adjustment">Compute range via endpoint limits: f(0⁺) = 12, f(∞) = 0⁺, giving range (0, 12); hence domain of f⁻¹ is 0 &lt; x &lt; 12.</div>
+</div><div class="variant-row">
+<div class="scenario">Surd-based f with closed lower endpoint (e.g. range(f) = [41/9, 5))</div>
+<div class="adjustment">Domain of f⁻¹ inherits both bounds exactly: [41/9, 5). The lower bound would be invisible from the formula of f⁻¹ alone.</div>
+</div><div class="variant-row">
+<div class="scenario">Restricted quadratic (e.g. f(x) = x², x ≥ 0)</div>
+<div class="adjustment">Range of f⁻¹ = √x&#x27;s range = domain of f = [0, ∞); same duality, applied to range instead of domain.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Stating the range of f⁻¹ as the range of f (wrong direction of swap).</li><li>Reading the domain of f⁻¹ off the formula of f⁻¹ (e.g. setting its denominator ≠ 0) — this gives the natural domain, missing exclusions inherited from range(f).</li><li>Reusing the domain of f as the domain of f⁻¹ without swapping.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Mixing up vertical and horizontal asymptotes of f: the horizontal asymptote determines exclusions in range(f) (hence domain of f⁻¹), not the vertical one.</li><li>Losing endpoint information — if domain(f) was x ≥ 2, the closed endpoint must transfer to range(f⁻¹) as ≥ 2.</li><li>Forgetting to state the domain of f⁻¹ at all — many mark schemes award a separate mark for it.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P3 inverse-function content (Functions chapter). No formula booklet entry; relies only on the definition that f and f⁻¹ swap domain and range. Avoid invoking general bijection theory or topology — stay with the elementary &#x27;inputs become outputs&#x27; justification.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (5)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2023-Q6.html" class="example-chip">P1 Oct 2023 Q6</a><a href="../P3/ch1/q-Jan_2020-Q2.html" class="example-chip">P3 Jan 2020 Q2</a><a href="../P3/ch1/q-Jun_2022-Q2.html" class="example-chip">P3 Jun 2022 Q2</a><a href="../P3/ch1/q-Oct_2022-Q2.html" class="example-chip">P3 Oct 2022 Q2</a><a href="../P4/ch6/q-Jun_2021-Q6.html" class="example-chip">P4 Jun 2021 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impose non-negativity of RHS when solving modulus equations — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Validity Check</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Impose non-negativity of RHS when solving modulus equations</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Validity Check</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever an equation has the form |E(x)| = F(x) where F(x) is not a constant or is not manifestly non-negative. Typical cues: a linear or rational expression on the right of a modulus equation, or a parameter-dependent equation like |kx − 9| = 5 − 2x where validity must be tested. Also fires when squaring both sides produces algebraic candidates that must be filtered. Any solution must satisfy F(x) ≥ 0, otherwise it is extraneous.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Since |E| ≥ 0 for all real E, the equation |E| = F can only hold where F ≥ 0. Squaring or splitting cases removes the modulus but may introduce phantom roots that satisfy |E|² = F² yet fail |E| = F because F &lt; 0 there. Imposing F ≥ 0 on each candidate filters these out. In parameter problems this becomes an inequality in the parameter, restricting the admissible parameter range.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the modulus equation has a non-constant RHS, so RHS sign is not automatic.</li><li>Rule out blindly accepting algebraic candidates from squaring or case-splitting; recall |E| ≥ 0 forces F ≥ 0.</li><li>Commit to checking F(x) ≥ 0 at each candidate, since this is the only constraint that distinguishes genuine roots from extraneous ones.</li><li>Substitute each candidate x (possibly in terms of a parameter) into F(x) ≥ 0 to obtain the validity condition.</li><li>Simplify the resulting inequality, performing careful sign analysis if it is rational, and intersect with any pre-existing parameter constraints.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify F(x), the RHS of |E(x)| = F(x), and write the constraint F(x) ≥ 0.</li><li>Solve |E(x)| = F(x) by case-splitting (E = F and E = −F) or by squaring, obtaining candidate solutions.</li><li>Substitute each candidate into F(x) ≥ 0; if candidates depend on a parameter, this yields an inequality in the parameter.</li><li>For rational inequalities like (ak + b)/(ck + d) ≥ 0, do sign analysis using critical points and any given parameter restrictions (e.g. k &gt; 0).</li><li>Intersect the validity conditions from all retained cases to obtain the final admissible set.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $|2x-1| = x-3$. Squaring gives $(2x-1)^2 = (x-3)^2 \Rightarrow 3x^2 + 2x - 8 = 0$, so $x = 4/3$ or $x = -2$. Validity needs $x - 3 \geq 0$, i.e. $x \geq 3$. Both candidates fail, so there is no solution.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">|f(x)| = c with c a numerical constant</div>
+<div class="adjustment">Just check c ≥ 0 once; if c &lt; 0 there are no solutions, otherwise both branches are kept.</div>
+</div><div class="variant-row">
+<div class="scenario">|f(x)| = |g(x)|</div>
+<div class="adjustment">No RHS sign check needed; square both sides directly since both sides are non-negative.</div>
+</div><div class="variant-row">
+<div class="scenario">Parameter problem: find values of parameter for which |E(x;k)| = F(x;k) has solutions</div>
+<div class="adjustment">Substitute candidate x(k) into F ≥ 0 to derive an inequality in k; combine with any given range of k.</div>
+</div><div class="variant-row">
+<div class="scenario">Modulus inequality |E(x)| ≤ F(x)</div>
+<div class="adjustment">Still requires F(x) ≥ 0 (otherwise no solutions), then equivalent to −F ≤ E ≤ F.</div>
+</div><div class="variant-row">
+<div class="scenario">Modulus inequality |E(x)| ≥ F(x)</div>
+<div class="adjustment">If F(x) &lt; 0 the inequality is automatic; only enforce E ≥ F or E ≤ −F where F ≥ 0.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating both algebraic candidates from squaring as automatically valid without checking RHS sign.</li><li>Believing the constraint is on E(x) rather than on F(x), the RHS.</li><li>Confusing this with the |f| = |g| case, where no sign check is needed.</li><li>In parameter problems, ignoring the given parameter range (e.g. k &gt; 0) when doing sign analysis on the rational inequality.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in rational inequalities like (5k − 18)/(k − 2) ≥ 0; failing to consider the sign of the denominator.</li><li>Forgetting to intersect validity conditions across both cases when both must hold simultaneously.</li><li>Accepting strict vs non-strict inequality incorrectly at boundary points (≥ 0 includes equality, giving F = 0 and hence E = 0).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure content: modulus equations and inequalities are covered in P2/P3, including parameter-dependent versions where validity conditions yield inequalities in the parameter.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jun_2022-Q5.html" class="example-chip">P3 Jun 2022 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deduce missing integration limit from curve-axis or curve-domain constraints — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Boundary Identification</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Deduce missing integration limit from curve-axis or curve-domain constraints</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Boundary Identification</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a region for area or volume of revolution is described geometrically (e.g. &#x27;bounded by the curve, the x-axis and...&#x27;) but at least one numerical x-limit is NOT explicitly stated. Visual cues include: a list of three or more boundaries with only one or zero numbers among them, a curve containing a square root or exponential (which forces a natural domain or an axis-crossing), or phrases like &#x27;the region enclosed by&#x27;. Also fires when an explicit limit is given on one side but the other side must be located by intersection of the curve with an axis or with another bounding line.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Definite integrals — and especially volume-of-revolution integrals \int_a^b \pi y^2\,dx — require concrete numerical limits a and b. A geometric boundary like &#x27;the x-axis&#x27; or &#x27;the curve starts here&#x27; must be converted into an algebraic x-value, either by setting y=0 (axis intersection) or by invoking the curve&#x27;s natural domain (e.g. \sqrt{x-3} forces x\ge 3). Identifying the correct limit at the outset prevents an entire downstream calculation from being wrong, and confirms that the integrand has a single consistent form across [a,b] (no hidden intersection where the &#x27;upper&#x27; and &#x27;lower&#x27; curves swap).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Read the boundary list carefully and tally how many numerical x-values are given versus how many are needed (a dx-integral needs exactly two).</li><li>For each missing limit, identify which named boundary supplies it: the y-axis gives x=0; the x-axis gives the root of y=0; a horizontal line y=k gives the solution of curve = k; a square root or log in the curve gives a domain endpoint.</li><li>Rule out using the constant inside the equation (e.g. the &#x27;2&#x27; in e^{0.5x}-2) as a limit, and rule out arbitrary defaults like x=0 or x=\infty unless an axis actually justifies them.</li><li>Commit to the move by writing the algebraic equation that encodes the boundary (set y=0, or set the radicand \ge 0, or set curve = line).</li><li>Solve cleanly, keeping exact form (e.g. x = 2\ln 2 rather than \ln 2/0.5) so the value substitutes neatly later.</li><li>Sanity-check: confirm the candidate limit lies on the correct side of any explicit limit, and verify the curve does not cross the other bounding line inside [a,b] (which would force splitting the integral).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List all stated boundaries; mark which give x-values directly (y-axis → x=0; &#x27;x = c&#x27; → x=c).</li><li>For an x-axis boundary: set y=0 in the curve equation and solve for x.</li><li>For a square-root curve y = k\sqrt{x-a}: enforce x-a \ge 0, giving lower limit x=a where y=0.</li><li>For a curve meeting a horizontal line y=k: solve curve = k for x.</li><li>Check the candidate limit against any explicitly given limit (e.g. x=6) to confirm it is the correct side and that no intersection lies strictly inside the interval.</li><li>Record the final ordered pair (a,b) and keep values in exact form for substitution.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Region bounded by y = e^{0.5x}-2, the x-axis, the y-axis. Need limits for V = \pi\int y^2\,dx. y-axis ⇒ x=0. x-axis ⇒ set e^{0.5x}-2=0 ⇒ e^{0.5x}=2 ⇒ 0.5x=\ln 2 ⇒ x = 2\ln 2. Limits: [0,\,2\ln 2].</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Curve contains \sqrt{x-a} and region is bounded above by y=k with right limit x=c stated</div>
+<div class="adjustment">Lower limit is x=a (where the radicand is 0 and y=0); check that the curve does not reach y=k before x=c by solving curve=k — if the solution exceeds c, the stated x=c is genuinely the right limit.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by curve and y-axis only, with rotation about the y-axis</div>
+<div class="adjustment">Switch to \int_a^b \pi x^2\,dy and find y-limits instead: set x=0 in the curve, or use the curve&#x27;s natural y-range.</div>
+</div><div class="variant-row">
+<div class="scenario">Curve and bounding line DO intersect inside the named interval</div>
+<div class="adjustment">The intersection x-value becomes a new limit; the integral splits into two pieces with different integrands on each side.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating a constant inside the equation (e.g. the −2 in e^{0.5x}-2) as a y-limit or x-limit.</li><li>Using a domain restriction stated elsewhere in the question (e.g. x&gt;3/2) instead of the tighter restriction forced by a square root in the actual curve.</li><li>Forgetting that &#x27;the y-axis&#x27; supplies x=0, and integrating from some arbitrary negative value or from \, -\infty.</li><li>Solving curve = k without checking whether that intersection actually lies inside the stated x-range.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Failing to verify that the curve and the other bounding line do not cross inside [a,b] — if they do, the upper/lower roles swap and the integrand changes form.</li><li>Mis-applying logs: writing x = \ln 2 / 0.5 rather than the cleaner x = 2\ln 2, which then complicates substitution of limits.</li><li>Mixing up which boundary is &#x27;upper&#x27; and which is &#x27;lower&#x27; when computing \pi\int(y_{\text{upper}}^2 - y_{\text{lower}}^2)\,dx for a washer.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely in Edexcel IAL P3/P4 integration applications (areas and volumes of revolution about the x-axis or y-axis). Uses only standard solving of e^{kx}=c via natural log and basic surd-domain reasoning; no improper integrals or implicit/parametric volume work beyond the IAL syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jun_2021-Q2.html" class="example-chip">P4 Jun 2021 Q2</a><a href="../P4/ch6/q-Oct_2020-Q3.html" class="example-chip">P4 Oct 2020 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute a specific value into a truncated series to approximate — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Series Evaluation</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Substitute a specific value into a truncated series to approximate</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Series Evaluation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on a &#x27;hence&#x27; part following a Maclaurin/Taylor expansion, with phrasing like &#x27;find an approximate value of f(0.1)&#x27;, &#x27;estimate ∫₀^{0.5} f(x) dx&#x27;, &#x27;show that f(a) ≈ …&#x27;, or &#x27;by choosing a suitable value of x, show that π ≈ …&#x27;. The earlier part has produced a polynomial expansion up to a stated power, and the later part asks for a numerical estimate. The word &#x27;hence&#x27; or &#x27;use your expansion&#x27; is the strongest cue.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A truncated Maclaurin/Taylor series is a polynomial, so evaluating it at a chosen x (or integrating it term-by-term and then evaluating) is just arithmetic. For x-values close to the expansion point, the remainder term is small, so the polynomial value is a faithful approximation of the true function value. This transforms an otherwise intractable evaluation (e.g. of a non-elementary integral, or a transcendental constant) into elementary computation, and the marks reward using the series rather than a calculator.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice &#x27;hence find an approximation&#x27; or &#x27;estimate&#x27; — this links directly to the polynomial expansion I produced in the previous part.</li><li>I rule out evaluating the original function or using a calculator value, since marks are tied to the series method.</li><li>I commit because the polynomial is short, x is small, so substitution will give an answer matching the requested precision.</li><li>I identify what to substitute: a given x, an integration over a given interval (term-by-term integrate first), or a clever x I must select (e.g. x = 1/√3 in an arctan series for π).</li><li>I decide how many decimal places to carry through intermediate terms so cumulative rounding does not corrupt the final answer.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the truncated series from the earlier part: f(x) ≈ c₀ + c₁x + c₂x² + c₃x³ + … up to the stated order.</li><li>If approximating f(a): substitute x = a into the polynomial and evaluate each term separately.</li><li>If approximating ∫_p^q f(x) dx: integrate term-by-term to get C₀x + (c₁/2)x² + (c₂/3)x³ + …, then evaluate between the limits.</li><li>If x is not given: pick a value that makes the target constant appear (e.g. x = 1/2 in ln(1+x) for ln(3/2); x = 1/√3 in arctan x for π/6).</li><li>Sum the numerical terms keeping at least one extra decimal place beyond the required accuracy.</li><li>Round only at the final step and state the answer to the requested precision.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\ln(1+x) \approx x - \tfrac{x^2}{2} + \tfrac{x^3}{3} - \tfrac{x^4}{4}$, estimate $\ln(1.1)$. Substitute $x = 0.1$: $0.1 - 0.005 + 0.000333\ldots - 0.000025 = 0.09530833\ldots$, so $\ln(1.1) \approx 0.0953$ (4 d.p.), agreeing with the true value $0.09531$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Approximate a definite integral whose integrand has no elementary antiderivative (e.g. $\int_0^{0.5} e^{-x^2}dx$)</div>
+<div class="adjustment">Integrate the Maclaurin polynomial term-by-term first, then substitute the limits; the constant of integration cancels.</div>
+</div><div class="variant-row">
+<div class="scenario">Choose x to recover a transcendental constant (e.g. show $\pi \approx \ldots$ from $\arctan x$)</div>
+<div class="adjustment">Pick x so the LHS becomes a known multiple of the constant, e.g. $x = 1/\sqrt{3}$ giving $\arctan(1/\sqrt{3}) = \pi/6$, then multiply through by 6.</div>
+</div><div class="variant-row">
+<div class="scenario">Taylor series about $x = a$ rather than 0</div>
+<div class="adjustment">Substitute the deviation $(x-a)$ into the polynomial, not x itself; e.g. for expansion about $a=1$, substituting $x=1.05$ means using $0.05$ in the series.</div>
+</div><div class="variant-row">
+<div class="scenario">Approximation via a composed series, e.g. $f(x) = (1+x)\,e^x$ expanded by multiplying two series</div>
+<div class="adjustment">Use the combined truncated polynomial obtained in the earlier part, not the individual factors evaluated separately.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting the value into the original function on a calculator instead of into the truncated series — earns no method marks.</li><li>Mistaking &#x27;hence&#x27; for an invitation to start over with a fresh method rather than reusing the series just derived.</li><li>When asked to approximate an integral, evaluating the polynomial at a single point instead of integrating term-by-term first.</li><li>Choosing the substitution x without checking it lies inside (or near) the interval of validity stated earlier.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding each term to too few decimal places, so cumulative error spoils the final figure.</li><li>Using x too large relative to the expansion point, giving an answer that does not match the printed target.</li><li>Forgetting to multiply through by the appropriate constant after solving for the target (e.g. multiplying by 6 when x = 1/√3 was used to obtain π/6).</li><li>Dropping a sign when the series is alternating, especially in the integrated form.</li><li>Quoting the answer to more figures than the series can justify given its truncation.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P4/FP2 territory: Maclaurin/Taylor expansions of $e^x, \ln(1+x), \sin x, \cos x, (1+x)^n, \arctan x$, and &#x27;hence approximate&#x27; parts. No formal remainder-term bound is required — students just trust that small x and a stated number of terms give the requested accuracy.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch6/q-Jun_2023-Q6.html" class="example-chip">FP2 Jun 2023 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

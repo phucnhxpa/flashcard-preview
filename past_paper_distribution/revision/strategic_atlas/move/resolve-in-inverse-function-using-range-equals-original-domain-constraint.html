@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resolve ± in inverse function using range-equals-original-domain constraint — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Sign Selection Via Domain</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Resolve ± in inverse function using range-equals-original-domain constraint</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sign Selection Via Domain</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever inverting a function leads to a squared expression and taking a square root introduces ±. Typical surfaces: $f(x) = a \pm b/(x+c)^2$, restricted-domain quadratics like $f(x) = (x-h)^2 + k$ on $x \ge h$, or expressions involving $\sqrt{\,\cdot\,}$ that have been squared during rearrangement. The cue is: &#x27;find $f^{-1}(x)$&#x27; on a function with a stated restricted domain, and the algebra produces $(\text{something})^2 = \ldots$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>An inverse function must be single-valued, so the ± from a square root must be resolved. The defining identity is range$(f^{-1})$ = domain$(f)$: every output of $f^{-1}$ must lie in the original domain of $f$. Substituting the boundary of that domain into the candidate expression for $y$ (or reading off the sign of $y+c$ directly from the domain inequality) forces exactly one branch. Without this step the inverse is ambiguous and the answer loses meaning.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that rearranging produced a perfect square, so taking the root introduces a ± that must be pinned down.</li><li>Rule out leaving ± in the final answer — an inverse function must be single-valued.</li><li>Commit to the principle: range of $f^{-1}$ equals domain of $f$, so any output $y = f^{-1}(x)$ must satisfy the original domain restriction.</li><li>Translate the domain restriction into a sign statement about the bracket that was squared (e.g. $x \ge 0 \Rightarrow y+3 \ge 3 &gt; 0$).</li><li>Select the matching sign of the square root, then finish the rearrangement to isolate $y$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Set $y = f^{-1}(x)$ and rearrange $x = f(y)$ to isolate the squared bracket, e.g. $(y+3)^2 = \tfrac{4}{5-x}$.</li><li>Take square roots to get $y + 3 = \pm \tfrac{2}{\sqrt{5-x}}$.</li><li>State that range$(f^{-1})$ = domain$(f)$ and translate this into a sign condition on the bracket (here $y \ge 0 \Rightarrow y+3 &gt; 0$).</li><li>Discard the branch incompatible with that sign and keep the valid one.</li><li>Solve for $y$ to obtain the explicit inverse, e.g. $f^{-1}(x) = \tfrac{2}{\sqrt{5-x}} - 3$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x) = 5 - \tfrac{4}{(x+3)^2}$, $x \ge 0$. Set $x = 5 - \tfrac{4}{(y+3)^2} \Rightarrow (y+3)^2 = \tfrac{4}{5-x}$, so $y+3 = \pm \tfrac{2}{\sqrt{5-x}}$. Since range$(f^{-1})$ = $[0,\infty)$, we need $y \ge 0$, hence $y+3 \ge 3 > 0$, forcing the $+$ branch. Therefore $f^{-1}(x) = \tfrac{2}{\sqrt{5-x}} - 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Inverting a restricted quadratic, e.g. $f(x) = (x-2)^2 + 1$ on $x \ge 2$.</div>
+<div class="adjustment">Rearrange to $(y-2)^2 = x - 1$, so $y - 2 = \pm\sqrt{x-1}$; the domain $y \ge 2$ forces the $+$ root, giving $f^{-1}(x) = 2 + \sqrt{x-1}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Same quadratic but on $x \le 2$.</div>
+<div class="adjustment">Now $y \le 2 \Rightarrow y - 2 \le 0$, so the $-$ root is selected: $f^{-1}(x) = 2 - \sqrt{x-1}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Function of the form $f(x) = a + b\sqrt{x-c}$ inverted by squaring.</div>
+<div class="adjustment">Squaring is reversible without ± here, but if rearrangement squares both sides one must check that the candidate $y$ lies in the original domain $x \ge c$ to discard extraneous solutions.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig inverse on a restricted interval, e.g. defining $f(x) = \sin x$ on $[-\pi/2, \pi/2]$.</div>
+<div class="adjustment">The principal-value range of $\arcsin$ is exactly the original domain, illustrating the same range-equals-domain principle that resolves which branch of the inverse is taken.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Leaving $\pm$ in the final expression for $f^{-1}(x)$, treating the inverse as multi-valued.</li><li>Picking the positive root by default without citing the domain of $f$.</li><li>Confusing domain and range of $f^{-1}$, and using the wrong inequality to choose the sign.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to state explicitly &#x27;range of $f^{-1}$ = domain of $f$&#x27;, which is usually the reasoning mark.</li><li>Translating the domain inequality incorrectly, e.g. concluding $y+3 \ge 0$ when actually $y+3 \ge 3$, which is harmless here but matters when $0$ is in the bracket&#x27;s range.</li><li>Squaring during rearrangement and not checking whether the resulting branch is consistent with the original domain, introducing extraneous solutions.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P2/P3 inverse function technique; uses only the definitions domain$(f^{-1})$ = range$(f)$ and range$(f^{-1})$ = domain$(f)$, with no calculus required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Oct_2022-Q2.html" class="example-chip">P3 Oct 2022 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

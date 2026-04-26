@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plot nth roots as vertices of a regular polygon on a circle — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Geometric Interpretation</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Plot nth roots as vertices of a regular polygon on a circle</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Geometric Interpretation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks to plot all solutions of $z^n = w$ on an Argand diagram, or to describe their geometric configuration. Cues include &#x27;show the roots on an Argand diagram&#x27;, &#x27;describe the shape formed by the roots&#x27;, or follow-up parts asking about distances/areas between roots. The roots share modulus $|w|^{1/n}$ with arguments in arithmetic progression of common difference $2\pi/n$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>All nth roots of a fixed complex number $w$ lie on the circle $|z|=|w|^{1/n}$ and have arguments $(\arg w + 2k\pi)/n$, which differ consecutively by $2\pi/n$. Equal modulus plus equal angular spacing is precisely the definition of vertices of a regular n-gon inscribed in that circle. Recognising this turns a multi-step plotting task into a single rotation-by-$2\pi/n$ procedure and supports clean geometric arguments for areas, perimeters, and loci in later parts.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice that after applying de Moivre I have n roots all with the same modulus $r^{1/n}$.</li><li>I rule out plotting each root from scratch via Cartesian conversion — that wastes time and accumulates rounding error.</li><li>I commit to a polygon construction because equal modulus and equal angular spacing $2\pi/n$ force a regular n-gon.</li><li>Concretely, I draw the circle of radius $r^{1/n}$, place the principal root at angle $\theta/n$, then step around by $2\pi/n$.</li><li>I check whether the equation is $z^n=w$ (centre origin) or $(z-a)^n=w$ (centre $a$), and whether $n$ is small enough to label every vertex clearly.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write $w = r(\cos\theta + i\sin\theta)$ and identify the common modulus $r^{1/n}$ of all roots.</li><li>Draw a circle of radius $r^{1/n}$ centred at the appropriate point (origin for $z^n=w$).</li><li>Plot the principal root $z_0$ at argument $\theta/n$ on this circle.</li><li>Mark the remaining $n-1$ roots by rotating $z_0$ successively by $2\pi/n$.</li><li>Label each root (e.g. $z_0,z_1,\ldots,z_{n-1}$) and, if asked, state that they form a regular n-gon inscribed in the circle.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $z^4 = 16i$ and plot the roots. Here $|w|=16$, $\arg w=\pi/2$, so $|z|=2$ and arguments are $\pi/8, 5\pi/8, 9\pi/8, 13\pi/8$. Draw the circle $|z|=2$, mark $z_0=2\operatorname{cis}(\pi/8)$, then rotate by $\pi/2$ three times to obtain a square inscribed in the circle.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Equation of the form $(z-a)^n = w$</div>
+<div class="adjustment">The regular n-gon is inscribed in a circle of radius $|w|^{1/n}$ centred at $a$, not at the origin.</div>
+</div><div class="variant-row">
+<div class="scenario">Pure roots of unity $z^n = 1$</div>
+<div class="adjustment">Circle is the unit circle and one vertex sits at $z=1$; remaining vertices are obtained by successive rotations of $2\pi/n$.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation $z^n = -k$ with $k&gt;0$ real</div>
+<div class="adjustment">Principal argument is $\pi/n$ rather than $0$; the polygon is the unit-circle one rotated by $\pi/n$.</div>
+</div><div class="variant-row">
+<div class="scenario">Follow-up asks for area or perimeter</div>
+<div class="adjustment">Use regular n-gon formulas with circumradius $R=|w|^{1/n}$, e.g. area $=\tfrac12 n R^2 \sin(2\pi/n)$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the n roots as unrelated points needing individual Cartesian computation.</li><li>Reading $(z-a)^n=w$ as if it were $z^n=w$ and centring the polygon at the origin.</li><li>Confusing the polygon&#x27;s circumradius $|w|^{1/n}$ with $|w|$ itself.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Inaccurate placement of the first root&#x27;s argument $\theta/n$, which rotates the entire polygon.</li><li>Using $2\pi/n$ in degrees vs radians inconsistently when stepping between vertices.</li><li>Forgetting to draw or indicate the circle, losing the &#x27;regular polygon&#x27; descriptive mark.</li><li>Stopping after fewer than $n$ roots or going past, producing the wrong polygon.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure: de Moivre&#x27;s theorem, nth roots of a complex number, and Argand diagram representation, including loci/regular-polygon descriptions.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch3/q-Jan_2024-Q7.html" class="example-chip">FP2 Jan 2024 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

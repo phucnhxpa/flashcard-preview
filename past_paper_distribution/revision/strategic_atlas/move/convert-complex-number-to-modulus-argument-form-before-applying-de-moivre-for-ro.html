@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert complex number to modulus-argument form before applying de Moivre for roots — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Polar Conversion</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Convert complex number to modulus-argument form before applying de Moivre for roots</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Polar Conversion</strong></span>
+    <span>Frequency: <strong>5 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever the question asks for the nth roots of a complex number — typically an equation of the form z^n = w with n ≥ 2, where w is given in Cartesian form (a + bi), as a pure negative real (e.g. z^4 = -16), as a pure imaginary (e.g. z^3 = 8i), or with surd entries (e.g. 1 + i√3). Equivalent phrasings: &#x27;solve z^n = w&#x27;, &#x27;find all nth roots of w&#x27;, &#x27;express the roots of unity scaled by w&#x27;, or &#x27;find the square roots of a complex number&#x27;. The visual cue is a complex number on the right-hand side that is not already a perfect nth power, paired with a request for multiple roots.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>De Moivre&#x27;s theorem for roots states that the nth roots of r(cos θ + i sin θ) are r^{1/n}(cos((θ + 2kπ)/n) + i sin((θ + 2kπ)/n)) for k = 0, 1, ..., n-1. This formula requires the input in modulus-argument form: only then do exponentiation and root-taking become a clean operation on r alone and an angle division on θ. Cartesian-form approaches (expanding (x+iy)^n and equating real/imaginary parts) work for n=2 but become algebraically intractable for n ≥ 3. Polar conversion thus unlocks the systematic, equally-spaced root structure on the Argand circle of radius r^{1/n}.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the equation has the shape z^n = w where w is a complex number and I am asked for all n roots — this is a textbook de Moivre roots problem.</li><li>I rule out brute-force expansion of (x+iy)^n with real/imaginary comparison: feasible only for n=2, hopeless for n ≥ 3, and it does not naturally produce all n distinct roots.</li><li>I commit to de Moivre&#x27;s root formula because it generates all n roots systematically and the modulus and arguments are easy to compute.</li><li>The bridge to action: de Moivre needs r and θ, so my first concrete operation must be to convert w from a + bi to r(cos θ + i sin θ).</li><li>Tactical decision: I sketch w on an Argand diagram to fix the correct quadrant for θ, and I check whether to use the principal range (-π, π] (Edexcel convention) or [0, 2π) depending on the question phrasing.</li><li>I also pattern-match standard angles (e.g. 1 + i√3 → 2 cis(π/3); -1 → 1·cis(π); 8i → 8 cis(π/2)) to avoid unnecessary arctan computations.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify w = a + bi. Compute the modulus r = |w| = √(a² + b²) (always the positive root).</li><li>Compute the argument θ = arg(w). Start from arctan(b/a), then adjust by ±π based on the quadrant determined by the signs of a and b; for a = 0 use ±π/2; for b = 0, a &lt; 0 use π.</li><li>Place θ in the required range (typically the principal range (-π, π] for Edexcel).</li><li>Rewrite: w = r(cos θ + i sin θ), or equivalently w = r e^{iθ}, ready for de Moivre&#x27;s theorem.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $z^4 = -8 + 8i\sqrt{3}$. Convert RHS: $r = \sqrt{(-8)^2 + (8\sqrt{3})^2} = \sqrt{64 + 192} = 16$. Argument: point is in the second quadrant, so $\theta = \pi - \arctan(\sqrt{3}) = \pi - \tfrac{\pi}{3} = \tfrac{2\pi}{3}$. Hence $-8 + 8i\sqrt{3} = 16\bigl(\cos\tfrac{2\pi}{3} + i\sin\tfrac{2\pi}{3}\bigr)$, ready for de Moivre to give $z = 2\,\mathrm{cis}\bigl(\tfrac{2\pi/3 + 2k\pi}{4}\bigr)$, $k = 0,1,2,3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">RHS is a pure negative real, e.g. z^n = -c with c &gt; 0</div>
+<div class="adjustment">Modulus is c, argument is π (NOT 0). A common slip is to treat the argument as 0 because the imaginary part is zero.</div>
+</div><div class="variant-row">
+<div class="scenario">RHS is purely imaginary, e.g. z^n = ki</div>
+<div class="adjustment">Modulus is |k|; argument is π/2 if k &gt; 0, -π/2 if k &lt; 0. No arctan needed.</div>
+</div><div class="variant-row">
+<div class="scenario">RHS contains standard surds like 1 + i√3 or √3 - i</div>
+<div class="adjustment">Pattern-match to a known exact angle (π/3, π/6, etc.) instead of computing arctan numerically.</div>
+</div><div class="variant-row">
+<div class="scenario">RHS already given in exponential form re^{iθ}</div>
+<div class="adjustment">Skip the conversion — read off r and θ directly, but verify θ lies in the required range.</div>
+</div><div class="variant-row">
+<div class="scenario">Square roots specifically (n = 2)</div>
+<div class="adjustment">Polar form still preferred; the two roots are √r·cis(θ/2) and √r·cis(θ/2 + π). Cartesian simultaneous-equation method is viable but slower.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to factor or expand z^n = a + bi algebraically by setting z = x + iy and equating real/imaginary parts — intractable for n ≥ 3.</li><li>Treating the problem as if w were already in polar form and reading &#x27;a&#x27; as the modulus when w = a + bi.</li><li>Guessing roots by inspection when no obvious factorisation exists.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Placing θ in the wrong quadrant: arctan(b/a) gives a principal value that may need ±π adjustment when a &lt; 0.</li><li>Forgetting that the modulus must be the positive square root of a² + b².</li><li>Forgetting to express arg in the required range (usually (-π, π] for Edexcel) — answers outside this range may lose marks.</li><li>For negative reals, mistakenly writing arg(w) = 0 instead of π.</li><li>Mixing degrees and radians — de Moivre works in either but must be consistent.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP2) scope: de Moivre&#x27;s theorem and nth roots of complex numbers. The relevant formula booklet entry is de Moivre&#x27;s theorem (cos θ + i sin θ)^n = cos nθ + i sin nθ. Avoid generalising to fractional/irrational n or to roots of multivalued functions like complex logarithms — those are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (5)</h3>
+<div class="example-grid"><a href="../FP2/ch3/q-Jun_2024-Q6.html" class="example-chip">FP2 Jun 2024 Q6</a><a href="../FP2/ch3/q-Jan_2023-Q7.html" class="example-chip">FP2 Jan 2023 Q7</a><a href="../FP2/ch3/q-Specimen_2018-Q4.html" class="example-chip">FP2 Specimen 2018 Q4</a><a href="../FP2/ch3/q-Jun_2024-Q9.html" class="example-chip">FP2 Jun 2024 Q9</a><a href="../FP2/ch3/q-Jan_2024-Q7.html" class="example-chip">FP2 Jan 2024 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

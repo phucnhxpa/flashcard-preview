@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collapse 1+(dy/dx)² into a perfect square to kill the arc-length radical — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Arc Length Simplification</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Collapse 1+(dy/dx)² into a perfect square to kill the arc-length radical</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Arc Length Simplification</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>An arc length integral $L = \int\sqrt{1+(dy/dx)^2}\,dx$ (or surface-area integral $2\pi\int y\sqrt{1+(dy/dx)^2}\,dx$) appears, and the curve $y=f(x)$ contains a sum of two terms with reciprocal/opposite-power structure — typical signatures are $y = \tfrac{x^{n+1}}{a} \pm \tfrac{1}{bx^{n-1}}$, $y$ involving $\cosh$/$\sinh$, or $y$ involving $\ln x$ alongside $x^2$. The hallmark is that after differentiating, $(dy/dx)^2$ produces a &#x27;middle constant&#x27; (often $\pm \tfrac{1}{2}$) that, when combined with the $+1$, completes a square. If you spot symmetric power pairs like $x^{2n}$ and $x^{-2n}$ in the squared derivative, this move is almost certainly intended.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A generic $\sqrt{1+(f&#x27;(x))^2}$ is intractable, requiring trig/hyperbolic substitution. FP3 examiners engineer the curve so that $1+(f&#x27;(x))^2 = (g(x))^2$ for an elementary $g(x)$, exploiting the algebraic identity $(A+B)^2 = A^2 + 2AB + B^2$ where the cross-term $2AB$ equals exactly $\pm 1$ minus the $-1$ already present. Recognising this design lets the radical collapse to $|g(x)|$, leaving an elementary integrand. The same identity also underlies $1+\sinh^2 x = \cosh^2 x$ for hyperbolic curves.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the integrand is the arc-length form $\sqrt{1+(dy/dx)^2}$, and I see $y$ has a sum-of-two-terms structure with reciprocal powers (or hyperbolic functions) — a strong hint of designer simplification.</li><li>I rule out trig/hyperbolic substitution as a first attempt: FP3 questions almost never require integrating an unsimplified $\sqrt{1+u^2}$, so I should test the perfect-square hypothesis first.</li><li>I commit to computing $dy/dx$, squaring it, and looking for the pattern $A^2 \pm 2AB + B^2$ after adding 1.</li><li>Concretely, after squaring I expect a middle constant like $-\tfrac{1}{2}$; adding 1 turns it into $+\tfrac{1}{2}$, which is the cross-term of $(A+B)^2$ where $A,B$ are the outer power-pair terms.</li><li>I take the positive square root, checking that $g(x) &gt; 0$ on the interval (usually obvious since terms are positive powers of positive $x$, or $\cosh$).</li><li>I integrate the resulting elementary expression term-by-term.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Differentiate to obtain $dy/dx$.</li><li>Compute $(dy/dx)^2$ and expand fully — do not skip cross terms.</li><li>Form $1 + (dy/dx)^2$ and combine the constants/middle terms.</li><li>Identify the perfect-square structure: $A^2 + 2AB + B^2 = (A+B)^2$ (or with a minus, depending on the sign of the cross term).</li><li>Take the positive square root: $\sqrt{1+(dy/dx)^2} = g(x)$, verifying $g(x) &gt; 0$ on $[a,b]$.</li><li>Integrate $\int_a^b g(x)\,dx$ as a sum of standard power/log/hyperbolic integrals.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $y = \tfrac{x^3}{3} + \tfrac{1}{4x}$. Then $\tfrac{dy}{dx} = x^2 - \tfrac{1}{4x^2}$, so $\left(\tfrac{dy}{dx}\right)^2 = x^4 - \tfrac{1}{2} + \tfrac{1}{16x^4}$. Adding 1: $1+(dy/dx)^2 = x^4 + \tfrac{1}{2} + \tfrac{1}{16x^4} = \left(x^2 + \tfrac{1}{4x^2}\right)^2$. Hence $\sqrt{1+(dy/dx)^2} = x^2 + \tfrac{1}{4x^2}$, which integrates directly to $\tfrac{x^3}{3} - \tfrac{1}{4x} + C$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Parametric arc length $\int\sqrt{(dx/dt)^2+(dy/dt)^2}\,dt$</div>
+<div class="adjustment">Hunt for $(dx/dt \pm dy/dt)^2$ structure inside the sum of squares; the cross-term &#x27;extra&#x27; provided by adding the two squares plays the role of the +1.</div>
+</div><div class="variant-row">
+<div class="scenario">Surface area of revolution $2\pi\int y\sqrt{1+(dy/dx)^2}\,dx$</div>
+<div class="adjustment">Identical perfect-square collapse for the radical; afterwards multiply the simplified $g(x)$ by $y$ before integrating.</div>
+</div><div class="variant-row">
+<div class="scenario">Polar arc length $\int\sqrt{r^2+(dr/d\theta)^2}\,d\theta$</div>
+<div class="adjustment">Same algebraic hunt — look for $(r\pm dr/d\theta)^2$ or use $r=a(1+\cos\theta)$ type identities to collapse.</div>
+</div><div class="variant-row">
+<div class="scenario">Hyperbolic curves like $y = a\cosh(x/a)$</div>
+<div class="adjustment">Use $1+\sinh^2 u = \cosh^2 u$ directly — the identity is the perfect-square collapse in disguise.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Jumping immediately to a hyperbolic or trig substitution for $\sqrt{1+u^2}$ without first checking whether the curve was designed to collapse algebraically.</li><li>Trying to simplify $(dy/dx)^2$ alone and forgetting to add the $+1$ before factorising — the $+1$ is essential to completing the square.</li><li>Not expanding $(dy/dx)^2$ fully, missing the cross-term that reveals the perfect-square pattern.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when squaring a difference: $(x^n - x^{-n})^2$ has a $-2$ middle term, not $+2$ — the sign of the cross term in $y$ flips the structure.</li><li>Forgetting that $\sqrt{A^2} = |A|$; must verify $g(x) &gt; 0$ on the integration interval before dropping the absolute value.</li><li>Algebraic slips with fractional/negative exponents when combining $(dy/dx)^2$ and 1 over a common denominator.</li><li>Mis-identifying the perfect square — e.g. writing $(A+B)^2$ when the middle term sign actually requires $(A-B)^2$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL Further Pure 3 (FP3) arc length and surface area of revolution; the formulae $L=\int\sqrt{1+(dy/dx)^2}\,dx$ and $S=2\pi\int y\sqrt{1+(dy/dx)^2}\,dx$ are in the FP3 formula booklet. Avoid invoking general non-FP3 techniques like Simpson&#x27;s rule or numerical methods — the algebraic collapse is always the intended route.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jan_2023-Q8.html" class="example-chip">FP3 Jan 2023 Q8</a><a href="../FP3/ch4/q-Jan_2024-Q8.html" class="example-chip">FP3 Jan 2024 Q8</a><a href="../FP3/ch4/q-Jun_2023-Q3.html" class="example-chip">FP3 Jun 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

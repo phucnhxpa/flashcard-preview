@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify diagonalisation by checking AP = PD column-by-column — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Verification Strategy</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Verify diagonalisation by checking AP = PD column-by-column</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Verification Strategy</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires after eigenvalues and eigenvectors have been computed and assembled into P and D, and the student wants a fast confidence check before using the diagonalisation (e.g. for A^n or in a &#x27;show that&#x27; / &#x27;verify&#x27; sub-part). Also fires whenever the question carries enough marks to suggest verification is expected, or when arithmetic-heavy row reduction makes errors likely. Surface cues: a multi-mark diagonalisation question, a follow-on part that depends on P and D being correct, or explicit instructions to &#x27;verify&#x27; an eigenpair.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The diagonalisation identity A = PDP⁻¹ is equivalent to AP = PD, which avoids inverting P and the two matrix multiplications needed to check PDP⁻¹ = A. PD is essentially free to write down (its j-th column is just λ_j times the j-th column of P), so the only real work is one matrix multiplication AP. Comparing column-by-column simultaneously verifies every eigenvalue–eigenvector pair, since column j of AP = PD is exactly the eigenpair equation Ae_j = λ_j e_j. Catching errors here prevents them propagating into A^n or any later computation.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the eigenvalues and eigenvectors came from multi-step algebra (characteristic polynomial, then row reduction), so arithmetic slips are likely and a check is worth the time.</li><li>Rule out the brute-force verification PDP⁻¹ = A: it requires computing P⁻¹ plus two matrix multiplications — expensive and error-prone.</li><li>Rule out merely checking det(P) ≠ 0 or det(A − λI) = 0: those confirm invertibility / eigenvalue only, not the eigenvectors.</li><li>Commit to AP = PD because right-multiplying A = PDP⁻¹ by P eliminates P⁻¹ entirely, leaving a single matrix multiplication and a trivial scaling.</li><li>Bridge to action: write down PD by scaling each column of P by its eigenvalue (no multiplication needed), then compute AP and compare.</li><li>Tactical decision: if any column disagrees, the error is localised to that single eigenpair, so go back to the row reduction for that specific λ rather than redoing everything.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Form PD by multiplying column j of P by λ_j for each j (no full matrix multiplication required).</li><li>Compute AP by ordinary matrix multiplication of A with P (be careful: AP, not PA).</li><li>Compare AP and PD entry-by-entry; equivalently, check column j of AP equals λ_j times column j of P.</li><li>If a column matches, that eigenpair (λ_j, e_j) is confirmed; if not, return to the linear system (A − λ_j I)x = 0 to locate the slip.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose $A=\begin{pmatrix}2&1\\0&3\end{pmatrix}$, $P=\begin{pmatrix}1&1\\0&1\end{pmatrix}$, $D=\begin{pmatrix}2&0\\0&3\end{pmatrix}$. Then $PD=\begin{pmatrix}2&3\\0&3\end{pmatrix}$ (columns of $P$ scaled by $2$ and $3$), and $AP=\begin{pmatrix}2&3\\0&3\end{pmatrix}$. Columns agree, so both eigenpairs are verified in one multiplication.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Verifying a single eigenpair (e.g. a &#x27;show that v is an eigenvector&#x27; sub-part)</div>
+<div class="adjustment">Compute Av directly and check it equals λv — this is the column-by-column version of AP = PD applied to one column only.</div>
+</div><div class="variant-row">
+<div class="scenario">Only the eigenvalue needs checking (not the eigenvector)</div>
+<div class="adjustment">Substitute λ into det(A − λI) and confirm it gives 0; note this does NOT validate the eigenvector.</div>
+</div><div class="variant-row">
+<div class="scenario">3×3 case with repeated eigenvalues</div>
+<div class="adjustment">Same AP = PD check works; the column comparison still localises errors to a specific eigenvector even when λ is repeated.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating det(P) ≠ 0 as a verification — it only confirms P is invertible, not that the eigenpairs are correct.</li><li>Believing that verifying det(A − λI) = 0 is enough — it checks the eigenvalue but says nothing about the eigenvector.</li><li>Skipping verification entirely to save time, then losing follow-through marks on later parts (e.g. A^n) because of an early slip.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Computing PA instead of AP — order matters; PA generally does not equal PD.</li><li>Scaling the wrong column of P by the wrong eigenvalue when forming PD (the j-th column of D must match the j-th column of P).</li><li>A sign error in the matrix-vector product can falsely flag a correct eigenvector as wrong — recheck the multiplication before redoing the eigenvector.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL Further Pure scope for 2×2 and 3×3 diagonalisation; uses only matrix multiplication and the definition Av = λv (no formula booklet entry). Avoid generalisations to non-diagonalisable matrices or Jordan form, which are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jun_2024-Q2.html" class="example-chip">FP3 Jun 2024 Q2</a><a href="../FP3/ch6/q-Specimen_2018-Q4.html" class="example-chip">FP3 Specimen 2018 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

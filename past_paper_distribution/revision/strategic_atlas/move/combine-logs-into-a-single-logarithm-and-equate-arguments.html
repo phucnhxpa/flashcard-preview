@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combine logs into a single logarithm and equate arguments — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Law Simplification</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Combine logs into a single logarithm and equate arguments</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Law Simplification</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The equation has logarithms on BOTH sides (or can be rearranged so it does), all sharing the SAME base. Visually you see a sum/difference of log terms like log_b(A) ± log_b(B) ± log_b(C) = log_b(D), or one side is a single log and the other is a string of log terms waiting to be merged. Alternative cues: &#x27;express y in the form px^q&#x27; after a log-linear regression line has been derived; or a transcendental equation where every term is a logarithm with no stray constants on the wrong side.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The product rule log A + log B = log(AB) and quotient rule log A − log B = log(A/B) collapse multiple log terms into ONE log. Once both sides reduce to log_b(·) = log_b(·), the one-to-one (strictly monotonic) property of the logarithm allows you to equate arguments directly, replacing the transcendental equation with a purely algebraic one. This is the standard &#x27;de-logarithming&#x27; bridge from log-form to power-law or polynomial form.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice every term in the equation is a logarithm with the same base — there are no loose constants stuck outside a log on the wrong side.</li><li>I rule out exponentiating both sides as b^(LHS) = b^(RHS): it works in principle but invites the classic error b^(A+B) = b^A + b^B; combining logs first is cleaner.</li><li>I rule out &#x27;cancelling logs term by term&#x27; — that is not a valid operation; logs only cancel once each side is a SINGLE log.</li><li>I commit to the combine-then-equate route: first use product/quotient laws to merge each side into one log, then drop the logs.</li><li>Tactical decision: if any term has a coefficient (e.g. 3 log x), I first absorb it as a power (log x^3) before combining; if a constant like 4 sits on the RHS, I rewrite it as log_10(10^4) so the entire side is a log.</li><li>After equating arguments I read off the algebraic equation and solve by standard methods (factorising, identifying p and q, etc.), remembering to check any solutions against the original log domain.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rewrite any constant terms on a log side as a log: e.g. 4 = log_10(10^4); rewrite any coefficients as powers: k log A = log A^k.</li><li>Apply the product rule on sums: log_b A + log_b B = log_b(AB), and the quotient rule on differences: log_b A − log_b B = log_b(A/B).</li><li>Reduce each side to a single logarithm of the same base: log_b(LHS-arg) = log_b(RHS-arg).</li><li>Equate arguments using one-to-one property: LHS-arg = RHS-arg.</li><li>Solve the resulting algebraic equation (linear, quadratic, or power form).</li><li>Check solutions are admissible — every argument inside an original log must be &gt; 0.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $\log_2 2 + \log_2 y + \log_2(y+4) = \log_2(5-y)$.\\Combine LHS: $\log_2[2y(y+4)] = \log_2(5-y)$.\\Equate arguments: $2y(y+4) = 5-y \Rightarrow 2y^2 + 9y - 5 = 0 \Rightarrow (2y-1)(y+5)=0$.\\So $y = \tfrac{1}{2}$ (reject $y=-5$ since it makes $\log_2 y$ undefined).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Power-law extraction: $\log_{10} y = -\tfrac{2}{3}\log_{10} x + 4$</div>
+<div class="adjustment">Rewrite $4 = \log_{10} 10^4$ and $-\tfrac{2}{3}\log_{10} x = \log_{10} x^{-2/3}$, combine to $\log_{10} y = \log_{10}(10^4 x^{-2/3})$, then $y = 10000\, x^{-2/3}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Subtraction on one side: $\log_a f(x) - \log_a g(x) = \log_a h(x)$</div>
+<div class="adjustment">Use the quotient rule: $f(x)/g(x) = h(x)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed bases (e.g. one $\log_{10}$ and one $\ln$)</div>
+<div class="adjustment">Convert to a common base via change-of-base $\log_a x = \ln x / \ln a$ BEFORE attempting to equate arguments.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\log A + \log B$ as $\log(A+B)$ instead of $\log(AB)$.</li><li>Trying to &#x27;cancel logs&#x27; term by term across the equation before merging each side into a single log.</li><li>Exponentiating prematurely and then writing $b^{A+B} = b^A + b^B$ — confusing exponent rules with log rules.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to multiply ALL arguments when three or more log terms appear on one side (e.g. dropping the leading $\log_2 2$).</li><li>Sign errors when moving log terms across the &#x27;=&#x27; before combining — particularly flipping a subtraction into a division the wrong way.</li><li>Failing to check the domain: solutions that make any original log argument $\le 0$ must be rejected.</li><li>Equating arguments when bases differ — the one-to-one step requires identical bases on both sides.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2 (Logarithms) and reused in P3/P4 modelling contexts. Uses the laws of logarithms listed in the formula booklet ($\log_a xy$, $\log_a (x/y)$, $\log_a x^k$). Avoid invoking complex-valued logs or branch issues — at IAL level all log arguments must be positive reals.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Jan_2020-Q3.html" class="example-chip">P3 Jan 2020 Q3</a><a href="../P2/ch5/q-Jan_2021-Q3.html" class="example-chip">P2 Jan 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

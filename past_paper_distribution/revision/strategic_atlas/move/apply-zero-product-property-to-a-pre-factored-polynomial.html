@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply zero-product property to a pre-factored polynomial — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>De Moivre Root Extraction</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Apply zero-product property to a pre-factored polynomial</h1>
+  <div class="meta-row">
+    <span>Family: <strong>De Moivre Root Extraction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The polynomial equation f(x) = 0 is presented already factored as a product of lower-degree polynomials, e.g. f(x) = (x² + 9)(x² − 10x + d²). Cues include explicit brackets multiplied together, or a problem statement that hands you the factorisation. This fires whenever the equation is set to zero and at least one factor is non-trivial. The move is the reflex to split rather than expand.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Over ℂ (an integral domain), a product equals zero iff at least one factor is zero. This decouples a degree-n problem into independent lower-degree problems, each attackable by standard tools (quadratic formula, completing the square, De Moivre for x^n = c). Expanding the product would destroy the structure and force you back into a harder factorisation problem. Preserving the given factorisation is therefore both faster and safer.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that f(x) is already displayed as a product of brackets equal to zero.</li><li>Rules out expanding to a single quartic/cubic since that would discard hard-won structure and force a re-factorisation.</li><li>Commits to the zero-product principle: solve each factor = 0 independently.</li><li>Bridges to first operation by writing each factor on its own line, equated to zero.</li><li>Decides which standard technique to use per factor (quadratic formula, x² = −k giving x = ±i√k, or De Moivre for higher-order factors).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Read off each factor of f(x).</li><li>Set each factor equal to zero, producing independent sub-equations.</li><li>Solve each sub-equation by the appropriate standard method (quadratic formula, square-root extraction, De Moivre).</li><li>Collect all roots; check the count matches the degree of f(x) (counting multiplicity).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(x^2+9)(x^2-10x+d^2)=0$ for real $d>5$.\\ Factor 1: $x^2+9=0 \Rightarrow x=\pm 3i$.\\ Factor 2: $x^2-10x+d^2=0 \Rightarrow x=\dfrac{10\pm\sqrt{100-4d^2}}{2}=5\pm i\sqrt{d^2-25}$.\\ Four roots: $\pm 3i,\;5\pm i\sqrt{d^2-25}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cubic given as (linear)(quadratic), e.g. $(x-2)(x^2+x+1)=0$</div>
+<div class="adjustment">Read off the linear root directly; apply quadratic formula to the quadratic factor.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation of the form $(z^n - a)(z^2+bz+c)=0$</div>
+<div class="adjustment">Use De Moivre / nth roots on the first factor and the quadratic formula on the second.</div>
+</div><div class="variant-row">
+<div class="scenario">Repeated factor, e.g. $(x^2+1)^2(x-3)=0$</div>
+<div class="adjustment">Same split, but record multiplicities so the total root count equals the degree.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial not pre-factored</div>
+<div class="adjustment">First obtain a factor (factor theorem, given root, conjugate-root pairing) before this move can be applied.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Expanding the product into a single quartic and then attempting to re-factorise from scratch.</li><li>Treating the equation as if both factors must vanish simultaneously rather than &#x27;either/or&#x27;.</li><li>Discarding the $x^2+9=0$ factor because it has no real roots, forgetting the question is over ℂ.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign slip when solving $x^2 = -k$; the roots are $\pm i\sqrt{k}$, not $\pm\sqrt{k}$.</li><li>Mis-applying the quadratic formula when the discriminant is negative — must write the result as $\alpha \pm i\beta$.</li><li>Failing to verify that the total number of roots (with multiplicity) equals the degree of f(x).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL FP1/FP2 scope: zero-product reasoning over ℂ, quadratic formula with negative discriminant, and complex roots in conjugate pairs are all standard.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jun_2021-Q5.html" class="example-chip">FP1 Jun 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

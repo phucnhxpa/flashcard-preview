@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert x-limits to u-limits to keep the definite integral in u-space — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Limit Transformation</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Convert x-limits to u-limits to keep the definite integral in u-space</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Limit Transformation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a definite integral undergoes a substitution u = f(x) and the original bounds are x-values. Visual cues: integral signs with numerical/expression bounds in x (e.g. ∫₀^{π/2}, ∫₁^e) together with a chosen substitution. Also fires when the question explicitly states a target form with new limits in u (e.g. &#x27;show that I = ∫₁² g(u) du&#x27;), which signals limit conversion is mandatory. Equivalently phrased: &#x27;change the limits&#x27; or &#x27;transform the bounds&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Converting limits keeps the entire problem in u-space, so the antiderivative can be evaluated directly without the extra algebra and error-risk of back-substituting u → x. Mathematically this rests on the substitution rule for definite integrals: ∫_{a}^{b} f(g(x)) g&#x27;(x) dx = ∫_{g(a)}^{g(b)} f(u) du, provided g is differentiable on [a,b]. It also matches Edexcel mark schemes, which typically award a B mark for the correctly converted limits, and produces cleaner exact answers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integral is definite (bounds visible) and that a substitution u = f(x) has been (or will be) made — so the bounds must be handled, not ignored.</li><li>Rule out back-substitution: integrating in u and then reverting to x just to use the original x-limits doubles the algebra and invites sign/notation slips, especially when the final answer is just a number.</li><li>Commit to converting the limits because (a) it is shorter, (b) it is what the mark scheme rewards, and (c) if the question shows a target integral with u-bounds, conversion is required for the &#x27;show that&#x27; step.</li><li>Bridge to action: evaluate u = f(x) at each x-bound to get the corresponding u-bound — i.e. compute f(a) and f(b).</li><li>Tactical check: confirm f is monotonic on [a,b] so the new bounds keep their order; if f were decreasing, the new lower bound would exceed the upper, requiring a swap (with a sign change) or careful retention of order.</li><li>Rewrite the integral entirely in u with the new bounds, then proceed to integrate.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the substitution u = f(x) and the original bounds x = a, x = b.</li><li>Compute the new lower limit: u_lower = f(a).</li><li>Compute the new upper limit: u_upper = f(b).</li><li>Replace the integrand and dx with their u-expressions (using du = f&#x27;(x) dx).</li><li>Write the transformed integral as ∫_{f(a)}^{f(b)} (integrand in u) du and evaluate.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $I = \int_{0}^{\pi/2} \frac{\cos x}{(3+\sin x)^2}\,dx$. Let $u = 3 + \sin x$, so $du = \cos x\,dx$. Limits: $x=0 \Rightarrow u=3$; $x=\pi/2 \Rightarrow u=4$. Then $I = \int_{3}^{4} u^{-2}\,du = \left[-\tfrac{1}{u}\right]_{3}^{4} = -\tfrac{1}{4}+\tfrac{1}{3} = \tfrac{1}{12}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Logarithmic substitution, e.g. u = 1 + ln x with x ∈ [1, e]</div>
+<div class="adjustment">Compute u(1) = 1 and u(e) = 2; new bounds are 1 to 2.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric substitution x = a sin θ for ∫ involving √(a² − x²)</div>
+<div class="adjustment">Convert x-bounds to θ-bounds via θ = arcsin(x/a); the new limits are angles.</div>
+</div><div class="variant-row">
+<div class="scenario">Decreasing substitution (e.g. u = cos x on [0, π/2])</div>
+<div class="adjustment">New lower limit exceeds upper limit; either keep the swapped order or flip with a sign change.</div>
+</div><div class="variant-row">
+<div class="scenario">Indefinite integral</div>
+<div class="adjustment">This move does not apply — there are no limits to convert; back-substitute u → x in the antiderivative instead.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the integral as if the x-limits still apply to the u-integrand and evaluating the u-antiderivative at x = a, x = b.</li><li>Assuming limit conversion is optional when the question says &#x27;show that&#x27; with new bounds — it is then required to earn the method/B mark.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Swapping the new limits accidentally (e.g. writing ∫₄³ instead of ∫₃⁴), producing a sign error.</li><li>Miscomputing trig/log values at the bounds, e.g. sin(π/2) as 0 or ln(e) as 0.</li><li>Forgetting to change limits entirely and mixing x-bounds with a fully u-form integrand.</li><li>Ignoring non-monotonicity of the substitution on the interval, which can require splitting the integral.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P3/P4 integration-by-substitution technique; uses the substitution rule listed implicitly in the formula booklet under &#x27;Integration&#x27;. Stay within elementary substitutions (algebraic, trig, exponential/log); avoid invoking change-of-variables theorems for improper or multivariable integrals.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Oct_2022-Q6.html" class="example-chip">P2 Oct 2022 Q6</a><a href="../P4/ch6/q-Oct_2023-Q7.html" class="example-chip">P4 Oct 2023 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiply leading terms of factors to determine cubic end behaviour — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Leading Term Extraction</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Multiply leading terms of factors to determine cubic end behaviour</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Leading Term Extraction</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a polynomial (typically a cubic) is given in fully factored form, e.g. $(ax+b)(cx+d)^2$ or $(x-r_1)(x-r_2)(x-r_3)$, and you need its overall shape for sketching. The cues are: factored form present, a sketch/curve description required, and no algebraic need for the full expansion. Equivalent phrasings: &#x27;find end behaviour without expanding&#x27;, &#x27;determine which arms go up/down&#x27;, &#x27;orient the sketch as $x \to \pm\infty$&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For large $|x|$, only the highest-degree term of a polynomial matters — lower-order terms become negligible. So the sign of the leading coefficient together with the parity of the degree fully determines end behaviour: positive coefficient + odd degree gives bottom-left to top-right; negative coefficient + odd degree reverses it; even degree gives both arms in the same direction. Extracting just the product of the leading terms from each factor short-circuits a wasteful full expansion and instantly anchors the sketch.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the function is given as a product of factors and a sketch is required — I need to know which way each end of the curve goes.</li><li>I rule out full expansion: it would give every coefficient, but I only need the highest-degree one. I also rule out evaluating at large test values, which is slower and less reliable.</li><li>I commit to leading-term extraction because end behaviour depends solely on the leading term, and that term is the product of the leading terms of each factor.</li><li>I read off the leading term of each factor carefully — crucially, $(2x-k)$ contributes $2x$, not $x$, and $(x+4)^2$ contributes $x^2$.</li><li>I multiply these to obtain the overall leading term, then read off its sign and the (odd/even) degree to state the limits as $x \to \pm\infty$.</li><li>I use this to orient the sketch: which arm goes down on the left, which goes up on the right, before placing roots and turning points.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the leading term of each factor (include any coefficient on $x$).</li><li>For a repeated factor $(\text{linear})^n$, raise its leading term to the $n$th power.</li><li>Multiply all leading terms together to get the overall leading term $a x^d$.</li><li>Read off sign of $a$ and parity of $d$.</li><li>State end behaviour: if $a&gt;0$ and $d$ odd, $y\to-\infty$ as $x\to-\infty$ and $y\to+\infty$ as $x\to+\infty$; reverse if $a&lt;0$. If $d$ even, both ends agree in sign with $a$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sketch shape of $y=(4x-3)(x-5)^2$. Leading terms: $4x$ and $x^2$. Product: $4x\cdot x^2 = 4x^3$. Positive coefficient, odd degree $\Rightarrow$ as $x\to-\infty$, $y\to-\infty$; as $x\to+\infty$, $y\to+\infty$. Curve enters bottom-left and exits top-right.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Negative leading coefficient cubic, e.g. $y=-2(x-1)(x+3)(x-4)$</div>
+<div class="adjustment">Leading term is $-2x^3$; end behaviour reverses — curve goes from top-left to bottom-right.</div>
+</div><div class="variant-row">
+<div class="scenario">Quartic in factored form, e.g. $y=(x-1)^2(x+2)^2$</div>
+<div class="adjustment">Leading term $x^4$; even degree means both arms go to $+\infty$ (or both to $-\infty$ if coefficient is negative).</div>
+</div><div class="variant-row">
+<div class="scenario">Factor with non-unit $x$-coefficient, e.g. $(2x-k)(x+4)^2$</div>
+<div class="adjustment">Use $2x\cdot x^2 = 2x^3$; the constant $k$ does not affect the leading term.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Expanding the whole product to read off the leading coefficient — wasteful when only the top-degree term is needed.</li><li>Treating $(ax+b)$ as if its leading term were just $x$, ignoring the coefficient $a$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting that $(2x-k)$ contributes a coefficient of $2$, not $1$, to the leading term.</li><li>Forgetting to raise the leading term of a repeated factor to the correct power, e.g. taking $(x-5)^2$ to give $x$ instead of $x^2$.</li><li>Confusing odd-degree and even-degree end-behaviour rules (even degree means the two ends match).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure (P1/P2) curve-sketching technique; no formula booklet entry required. Avoid invoking limit notation formally beyond &#x27;as $x\to\pm\infty$&#x27; and stay with polynomials — do not generalise to rational functions where horizontal asymptotes need degree comparison instead.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2020-Q10.html" class="example-chip">P1 Jan 2020 Q10</a><a href="../P1/ch1/q-Oct_2022-Q6.html" class="example-chip">P1 Oct 2022 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

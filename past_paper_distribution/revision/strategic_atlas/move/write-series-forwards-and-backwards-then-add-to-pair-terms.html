@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Write series forwards and backwards then add to pair terms — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Reverse And Add</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Write series forwards and backwards then add to pair terms</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Reverse And Add</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A &#x27;prove from first principles&#x27; request for the arithmetic series sum formula $S_n = \tfrac{n}{2}[2a + (n-1)d]$ (or the equivalent $S_n = \tfrac{n}{2}(a+L)$). Also fires whenever a finite sum has the symmetry $u_k + u_{n+1-k} = \text{const}$, e.g. summing $1+2+\dots+n$ or any AP-style list. Cue phrases: &#x27;prove that&#x27;, &#x27;show that&#x27;, &#x27;derive the formula for $S_n$&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Adding the forward sum to its reverse pairs the $k$-th term with the $(n+1-k)$-th term; in an AP these pair sums are all equal to $2a+(n-1)d$. This converts $n$ distinct terms into $n$ identical pair-sums, so the total collapses to a single product $n[2a+(n-1)d]$. The principle exploited is the equidistant-pair symmetry of an arithmetic progression — the structural fact that makes the closed form exist at all.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question says &#x27;prove&#x27; or &#x27;derive&#x27;, so quoting the formula is not allowed — a first-principles argument is required.</li><li>Rule out induction: it is valid but longer, less elegant, and on Edexcel IAL the standard expected proof is the reverse-and-add derivation.</li><li>Commit to reverse-and-add because the AP&#x27;s defining property — constant common difference — guarantees that $u_k + u_{n+1-k}$ is constant, the exact symmetry this trick needs.</li><li>Bridge to action: write $S_n$ once in increasing order using $a, a+d, \dots, a+(n-1)d$, then write it again in decreasing order, labelling them (1) and (2).</li><li>Tactically, when adding term-by-term, make the pairing explicit: state the common pair-sum is $2a+(n-1)d$ and that there are exactly $n$ pairs before dividing by 2.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write $S_n = a + (a+d) + (a+2d) + \dots + (a+(n-1)d)$ — label (1).</li><li>Reverse the order: $S_n = (a+(n-1)d) + (a+(n-2)d) + \dots + a$ — label (2).</li><li>Add (1) and (2) term-by-term; each of the $n$ paired sums equals $2a+(n-1)d$.</li><li>Conclude $2S_n = n[2a+(n-1)d]$.</li><li>Divide by 2 to obtain $S_n = \tfrac{n}{2}[2a+(n-1)d]$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Prove $S_n = \tfrac{n}{2}[2a+(n-1)d]$.
+(1) $S_n = a + (a+d) + \dots + (a+(n-1)d)$.
+(2) $S_n = (a+(n-1)d) + (a+(n-2)d) + \dots + a$.
+Adding: $2S_n = \underbrace{[2a+(n-1)d] + \dots + [2a+(n-1)d]}_{n\text{ terms}} = n[2a+(n-1)d]$.
+Hence $S_n = \tfrac{n}{2}[2a+(n-1)d]$. $\blacksquare$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Prove $S_n = \tfrac{n}{2}(a+L)$ where $L$ is the last term</div>
+<div class="adjustment">Same proof, but keep the last term as $L$ throughout; each pair sums to $a+L$, giving $2S_n = n(a+L)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Sum $1+2+3+\dots+n$ (triangular numbers)</div>
+<div class="adjustment">Special case with $a=1, d=1$; pair-sum is $n+1$, yielding $\tfrac{n(n+1)}{2}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Gauss&#x27;s $1+2+\dots+100$</div>
+<div class="adjustment">Numerical instance: 50 pairs each summing to 101, giving 5050.</div>
+</div><div class="variant-row">
+<div class="scenario">Sum of an AP given first term $a$ and last term $L$ but $d$ unknown</div>
+<div class="adjustment">Use the $(a+L)$ form directly — $d$ is not needed if both endpoints are stated.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the question as &#x27;use the formula&#x27; rather than &#x27;prove the formula&#x27;, so quoting $S_n=\tfrac{n}{2}[2a+(n-1)d]$ without derivation.</li><li>Attempting induction when the mark scheme expects the direct reverse-and-add derivation.</li><li>Writing only a few terms with &#x27;...&#x27; on each side without explicitly identifying the constant pair-sum.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to state that the last term is $a+(n-1)d$ via the $n$-th term formula.</li><li>Failing to say there are exactly $n$ pairs — examiners deduct for this omission.</li><li>Using $L$ for the last term but never linking $L = a+(n-1)d$, leaving the proof incomplete.</li><li>Adding only some pairs and writing &#x27;$\dots$&#x27; without justifying that every pair gives the same sum.</li><li>Dropping the factor of 2 when dividing, or writing $\tfrac{n}{2}[2a+nd]$ instead of $\tfrac{n}{2}[2a+(n-1)d]$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is the standard Edexcel IAL Pure (P2) proof of the arithmetic series sum formula; only AP notation $a, d, n, L$ and basic algebra are used, fully within syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2020-Q8.html" class="example-chip">P2 Jan 2020 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

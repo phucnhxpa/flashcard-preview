@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scale or sign-flip an equation/expression to match a given target form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Show That Simplification</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Scale or sign-flip an equation/expression to match a given target form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Show That Simplification</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in any &#x27;show that&#x27; or &#x27;hence show&#x27; question where you have derived a correct intermediate equation, inequality, or expression but its coefficients or signs do not literally match the printed target. Typical visual cues: (a) all coefficients of your equation share a common numerical factor while the target&#x27;s leading coefficient is 1 or smaller (e.g. 144p² − 384p − 480 &gt; 0 vs target 3p² − 10p − 8 &gt; 0); (b) every term in your numerator and denominator has the opposite sign to the target (e.g. (−2ye^{−2x} − 3)/(2y − e^{−2x}) vs (2ye^{−2x} + 3)/(e^{−2x} − 2y)); (c) the structure already matches but the surface presentation does not. Equivalent phrasings: &#x27;tidy to match the printed answer&#x27;, &#x27;reconcile derived form with target form&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The move works because multiplying or dividing every term of an equation/inequality by a non-zero constant k preserves its solution set, and multiplying both numerator and denominator of a fraction by the same non-zero k preserves its value (since k/k = 1). When k &gt; 0 the inequality direction is preserved; when k &lt; 0 it flips. In a &#x27;show that&#x27; the endpoint is fixed by the question, so this transformation is the standard &#x27;last-mile&#x27; technique: it converts a structurally correct but cosmetically mismatched result into the exact printed form, securing the final mark. The underlying principle is the multiplicative identity / invariance of equations under non-zero scaling.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the derived result is structurally the same shape as the target (same powers, same variables in the same positions), but the numerical coefficients or signs differ.</li><li>Compare term-by-term ratios: divide a coefficient in your line by the corresponding coefficient in the target. If the same ratio k appears for every term, this is a pure scaling mismatch.</li><li>Rule out re-doing the algebra from scratch (a common panic response) and rule out factorising or completing the square — those would change structure, not just scale.</li><li>Commit to scaling: decide whether to divide by the GCF (to shrink coefficients), multiply through (to clear fractions), or multiply numerator and denominator by −1 (to flip signs).</li><li>Check the sign of the scaling factor: if k &gt; 0 the inequality/equation sign is preserved; if k &lt; 0 an inequality must be flipped. For a fraction, ensure BOTH numerator and denominator are multiplied by the same factor.</li><li>Execute the division/multiplication on every term, then verify each transformed term matches the target exactly before writing &#x27;as required&#x27;.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the scaling factor k: compute gcd of the coefficients (for an equation), or inspect the sign pattern (for a fraction).</li><li>Verify divisibility/consistency: every term must transform to an integer (or the target value) under the same k.</li><li>Apply the operation uniformly: divide every term of the equation by k, OR multiply numerator and denominator of the fraction by −1.</li><li>If k &lt; 0 and the relation is an inequality, flip the inequality sign.</li><li>Write the simplified form and state explicitly that it matches the required result (e.g. &#x27;as required&#x27; or &#x27;QED&#x27;).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Derived: $144p^2 - 384p - 480 > 0$. Target: $3p^2 - 10p - 8 > 0$. Compute $\gcd(144,384,480) = 48 > 0$. Divide every term by 48: $\frac{144}{48}p^2 - \frac{384}{48}p - \frac{480}{48} > 0$, giving $3p^2 - 10p - 8 > 0$ as required (inequality preserved since $48 > 0$).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Derived equation has integer leading coefficient but target is monic (e.g. 15N² − 975N + 15540 = 0 vs N² − 65N + 1036 = 0).</div>
+<div class="adjustment">Divide every term by the leading coefficient; verify each constant term divides cleanly (15540/15 = 1036).</div>
+</div><div class="variant-row">
+<div class="scenario">Derived fraction has every sign opposite to target (e.g. implicit differentiation result).</div>
+<div class="adjustment">Multiply numerator AND denominator by −1; the fraction&#x27;s value is unchanged because (−1)/(−1) = 1.</div>
+</div><div class="variant-row">
+<div class="scenario">Partial fractions yield −A/(b − x) but mark scheme prints A/(x − b).</div>
+<div class="adjustment">Apply the same −1/−1 trick to flip the denominator&#x27;s order.</div>
+</div><div class="variant-row">
+<div class="scenario">&#x27;Show that&#x27; produces an inequality with negative leading coefficient and target has positive leading coefficient.</div>
+<div class="adjustment">Multiply through by −1 AND flip the inequality sign.</div>
+</div><div class="variant-row">
+<div class="scenario">Trig &#x27;show that&#x27; where target has factored form and derived form has a common trig factor.</div>
+<div class="adjustment">Divide by the common trig factor (e.g. cos²θ), but only after confirming it is non-zero on the relevant domain.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Panicking that &#x27;my answer doesn&#x27;t match&#x27; and restarting the whole derivation, when only a cosmetic scaling/sign step remains.</li><li>Trying to factorise a large-coefficient quadratic directly instead of first dividing by the obvious GCF.</li><li>Believing the derived form is wrong because the printed target has a different sign convention.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dividing by a negative common factor without flipping the inequality sign.</li><li>Multiplying only the numerator (or only the denominator) by −1, which changes the fraction&#x27;s value.</li><li>Arithmetic slip when dividing the constant term (e.g. 15540 ÷ 15) — always verify by multiplying back.</li><li>Cancelling a factor that could be zero on the relevant domain (especially in trig contexts) without justification.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure Mathematics (P1–P4) and Further Pure scope; no formula-booklet entry is invoked — this is a manipulation principle. Avoid generalising to dividing by expressions that may equal zero (e.g. dividing by (x − a) without case-splitting), which is out of scope at this level of rigour.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Oct_2023-Q10.html" class="example-chip">P1 Oct 2023 Q10</a><a href="../P2/ch4/q-Oct_2021-Q5.html" class="example-chip">P2 Oct 2021 Q5</a><a href="../P4/ch5/q-Jun_2021-Q5.html" class="example-chip">P4 Jun 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

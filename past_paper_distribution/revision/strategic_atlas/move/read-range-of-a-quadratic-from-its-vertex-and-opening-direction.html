@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read range of a quadratic from its vertex and opening direction — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Range From Vertex</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Read range of a quadratic from its vertex and opening direction</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Range From Vertex</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on a part asking for the range of f(x) when f is quadratic and an earlier part has produced its completed-square form a(x-p)^2 + q (so the vertex (p, q) and sign of a are known). Typical phrasings: &#x27;state the range of f&#x27;, &#x27;find the set of values f(x) can take&#x27;, &#x27;write down the range&#x27;. Often follows immediately after &#x27;find the minimum/maximum value&#x27; or a completed-square question. The move is also cued whenever the domain is the full real line (no restriction stated).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A quadratic in completed-square form a(x-p)^2 + q has its extreme value at x = p with f(p) = q, and (x-p)^2 takes every non-negative real value. If a &gt; 0 the parabola opens upward so f(x) - q = a(x-p)^2 ≥ 0, giving f(x) ≥ q with equality attained; if a &lt; 0, f(x) ≤ q. As x → ±∞ the magnitude grows without bound, so every value on the correct side of q is attained. This bypasses inverse-function or graphing arguments entirely.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice f is quadratic and the previous part produced a(x-p)^2 + q, so the vertex (p, q) is already in hand.</li><li>Rule out doing calculus, inverse functions, or sketching from scratch — the completed-square form alone determines the range.</li><li>Commit because a fixes the opening direction and q is the extreme value, attained at x = p.</li><li>Bridge: read off the sign of a, then write y ≥ q (if a &gt; 0) or y ≤ q (if a &lt; 0).</li><li>Tactical: use ≥ / ≤ (not strict) since the vertex value is attained, and write the range in terms of f(x) or y, not x.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>From the completed-square form a(x-p)^2 + q, extract the vertex y-coordinate q and the sign of a.</li><li>If a &gt; 0, the minimum value of f is q, attained at x = p; if a &lt; 0, the maximum value is q.</li><li>Note that (x-p)^2 ranges over [0, ∞), so f(x) takes every value on the correct side of q.</li><li>State the range using a non-strict inequality: f(x) ≥ q or f(x) ≤ q (equivalently [q, ∞) or (-∞, q]).</li><li>Check the variable: the inequality must be on f(x) or y, not on x.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given f(x) = 2x^2 - 12x + 11 = 2(x-3)^2 - 7 with domain \(\mathbb{R}\). Here a = 2 > 0 and the vertex is (3, -7). So f(x) - (-7) = 2(x-3)^2 \ge 0, with equality at x = 3. As x \to \pm\infty, f(x) \to +\infty. Hence the range is \(f(x) \ge -7\).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Downward-opening quadratic, e.g. f(x) = -3(x+1)^2 + 5</div>
+<div class="adjustment">Vertex gives the maximum; range is f(x) ≤ 5, i.e. (-∞, 5].</div>
+</div><div class="variant-row">
+<div class="scenario">Restricted domain such as x ≥ 0 or a closed interval [a, b]</div>
+<div class="adjustment">Check whether the vertex x = p lies in the domain. If yes, the vertex value is still extreme; otherwise the extremes are at the endpoints — evaluate f at the relevant boundary points and use monotonicity on each side of p.</div>
+</div><div class="variant-row">
+<div class="scenario">Composite g(x) = f(x) + k or k·f(x) where f is quadratic with known vertex</div>
+<div class="adjustment">Shift/scale the vertex value: minimum becomes q + k or k·q (flipping direction if k &lt; 0).</div>
+</div><div class="variant-row">
+<div class="scenario">Range of |f(x)| or [f(x)]^2 type questions seen in Further Maths</div>
+<div class="adjustment">Use the quadratic range first, then apply the outer operation to the interval; absolute value may fold negative parts.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Stating the domain (e.g. x ∈ \(\mathbb{R}\)) instead of the range.</li><li>Giving the vertex coordinates (p, q) as the answer rather than the set of output values.</li><li>Reporting only the minimum value q without the inequality or interval describing all attained y.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using strict inequality f(x) &gt; q when the minimum/maximum is actually attained at x = p.</li><li>Writing the range as q ≤ x instead of q ≤ f(x) or q ≤ y, confusing input and output.</li><li>Forgetting to flip the inequality direction when a &lt; 0.</li><li>Ignoring a restricted domain and quoting [q, ∞) when the vertex is outside the allowed x-values.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1/P2 quadratics and functions): completed-square form, vertex, and range/inequality notation are standard. No calculus or limit machinery is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2024-Q2.html" class="example-chip">P1 Oct 2024 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bound a region horizontally using intersection x-coordinates — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Domain Restriction</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Bound a region horizontally using intersection x-coordinates</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Restriction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when defining a finite enclosed region R by a system of inequalities and the curve/line inequalities alone leave the solution set unbounded or include extraneous regions. Typical cues: a shaded region in a diagram bounded by two curves meeting at points P and Q, a question asking to &#x27;write down inequalities that define R&#x27;, or part (a) having already produced intersection x-values. Also fires when the curves cross more than once and only the segment between two specific intersections is shaded.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Intersection points are where the relative ordering of the bounding curves can switch, so they are the natural horizontal limits of the enclosed region. Inside [x_P, x_Q] one curve sits above the other consistently; outside, the inequalities y ≤ f(x), y ≤ g(x), y ≥ 0 may still be satisfied but describe a different (often unbounded) region. Adding x_P ≤ x ≤ x_Q closes the system so its solution set is exactly the shaded R. This mirrors the role intersection abscissae play as integration limits when computing the same region&#x27;s area.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the three inequalities y ≤ curve, y ≤ line, y ≥ 0 still admit points far to the left/right of the shaded R.</li><li>Rules out adding more curve-based inequalities — the boundary curves are already used; what is missing is a horizontal cut-off.</li><li>Commits to using the intersection x-coordinates of the bounding curves as the cut-off, since these are exactly where the ordering of the boundaries changes.</li><li>Bridges to the concrete operation by retrieving x_P and x_Q from part (a) (e.g. solving curve = line) and writing x_P ≤ x ≤ x_Q.</li><li>Decides on weak (≤) inequalities so the boundary points P and Q are included in R, matching the closed shaded region in the figure.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the intersection points P and Q of the bounding curves (typically from part (a)).</li><li>Read off their x-coordinates, e.g. x = 1 and x = 5/2.</li><li>Write the horizontal bound: 1 ≤ x ≤ 5/2 (use ≤ to include endpoints).</li><li>Combine with the curve/line/axis inequalities to give the full system defining R.</li><li>Sanity-check by testing an interior point of R and an exterior point with the same y-conditions.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve $y = 6 - 2x$ and curve $y = \tfrac{2}{x}$ meet where $6 - 2x = 2/x \Rightarrow 2x^2 - 6x + 2 = 0$, giving $x = 1$ and $x = 5/2$. The shaded region $R$ above the x-axis between them is defined by $y \ge 0,\ y \le 6 - 2x,\ y \le 2/x,\ 1 \le x \le 5/2$. The final inequality is what closes the system.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Area between two curves by integration</div>
+<div class="adjustment">The same intersection x-values become the limits of $\int_{x_P}^{x_Q}(\text{upper}-\text{lower})\,dx$.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by a curve and a horizontal/vertical line</div>
+<div class="adjustment">Use the line $x = a$ directly as the bound, or solve curve = line for x.</div>
+</div><div class="variant-row">
+<div class="scenario">Region bounded by three curves meeting pairwise</div>
+<div class="adjustment">Split R at the middle intersection and impose piecewise x-bounds, or add y-bounds as well.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric or trig curves crossing multiple times</div>
+<div class="adjustment">Restrict to the specific adjacent pair of intersection x-values that enclose the shaded lobe.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Believing the curve/line/axis inequalities alone already pin down a finite region.</li><li>Taking only one of P, Q as a bound (e.g. writing x ≥ 1) and leaving the other side open.</li><li>Using y-bounds (e.g. 0 ≤ y ≤ something) when the natural cut-off is horizontal.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Propagating an incorrect intersection from part (a) — always re-check by substituting back.</li><li>Using strict inequalities $1 &lt; x &lt; 5/2$ when the shaded region is closed and includes P and Q.</li><li>Swapping the bounds (writing $5/2 \le x \le 1$) or mixing up which curve is upper on the interval.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure content: defining regions by inequalities and locating intersections by simultaneous equations, directly linked to area-between-curves integration in P2/P3.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2022-Q4.html" class="example-chip">P1 Jan 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

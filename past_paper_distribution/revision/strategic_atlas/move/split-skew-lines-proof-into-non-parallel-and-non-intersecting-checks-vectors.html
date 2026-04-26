@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split skew-lines proof into non-parallel and non-intersecting checks — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Proof Decomposition</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Split skew-lines proof into non-parallel and non-intersecting checks</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Proof Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question explicitly says &#x27;show/prove the lines are skew&#x27; or asks to verify two 3D lines are skew before computing a distance or angle. The lines are given in vector form $\mathbf{r}=\mathbf{a}+\lambda\mathbf{d}$ with 3D direction vectors. Phrasings like &#x27;show $L_1$ and $L_2$ do not meet and are not parallel&#x27; are the same trigger spelled out. Typically appears as a 5–7 mark structured proof, often as a lead-in to a shortest-distance calculation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition, two lines in 3D are skew iff they are (i) not parallel and (ii) do not intersect — both conditions are independent and necessary. Parallel non-intersecting lines are coplanar, not skew, so non-intersection alone is insufficient; conversely, two non-parallel lines in 3D may still meet at a point, so non-parallelism alone is also insufficient. Splitting the proof guarantees both logical gaps are closed and matches the examiner mark scheme, which awards marks separately for each condition and for the concluding statement.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that &#x27;skew&#x27; is a compound definition requiring two distinct geometric facts, not a single computation.</li><li>Rules out using a one-shot test (e.g. cross product non-zero), recalling that this only certifies non-parallelism, not non-intersection.</li><li>Commits to a two-stage plan because in 3D the system from equating the two lines has 3 equations in 2 parameters — overdetermined, so inconsistency is the natural way to rule out intersection.</li><li>Bridges to the first concrete operation by inspecting the direction vectors $\mathbf{d}_1, \mathbf{d}_2$ for proportionality, since this is the cheapest check.</li><li>Plans Step 2 by setting $\mathbf{r}_1=\mathbf{r}_2$, solving any two component equations for $\lambda,\mu$, then substituting into the third to expose a contradiction.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State the two conditions: (1) $\mathbf{d}_1 \neq k\mathbf{d}_2$ for any scalar $k$; (2) the system $\mathbf{a}_1+\lambda\mathbf{d}_1 = \mathbf{a}_2+\mu\mathbf{d}_2$ has no solution.</li><li>Step 1: compare components of $\mathbf{d}_1$ and $\mathbf{d}_2$; show the ratios disagree, so the lines are not parallel.</li><li>Step 2: equate the two position vectors component-wise to get three equations in $\lambda,\mu$.</li><li>Solve any two equations simultaneously for $\lambda$ and $\mu$.</li><li>Substitute into the remaining equation; obtain a numerical contradiction (e.g. $5=7$), proving non-intersection.</li><li>Conclude with an explicit statement: &#x27;Since the lines are neither parallel nor intersecting, they are skew.&#x27;</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $L_1:\mathbf{r}=\begin{pmatrix}1\\0\\2\end{pmatrix}+\lambda\begin{pmatrix}1\\1\\1\end{pmatrix}$, $L_2:\mathbf{r}=\begin{pmatrix}0\\1\\0\end{pmatrix}+\mu\begin{pmatrix}2\\1\\0\end{pmatrix}$. Step 1: $(1,1,1)$ is not a scalar multiple of $(2,1,0)$ (third components give $k=0$, first give $k=\tfrac12$), so not parallel. Step 2: equating gives $1+\lambda=2\mu$, $\lambda=1+\mu$, $2+\lambda=0$. From the third $\lambda=-2$, then $\mu=-3$, but $1+(-2)=-1\neq 2(-3)=-6$, contradiction, so they do not intersect. Hence $L_1$ and $L_2$ are skew.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Proving two lines are parallel but distinct (not coincident)</div>
+<div class="adjustment">Show $\mathbf{d}_1 = k\mathbf{d}_2$ for some scalar $k$, then take a point on $L_1$ and show it does not satisfy $L_2$&#x27;s equation.</div>
+</div><div class="variant-row">
+<div class="scenario">Proving two lines intersect and finding the point</div>
+<div class="adjustment">Show directions are not parallel, then solve two of the three component equations for $\lambda,\mu$ and verify the third is consistent; substitute back to give the intersection point.</div>
+</div><div class="variant-row">
+<div class="scenario">Showing a line is skew to an edge of a given solid (in a 3D geometry context)</div>
+<div class="adjustment">Parametrise the edge as a line segment with its own direction vector and apply the same two-stage check; the segment restriction does not affect the skew argument.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating non-intersection alone as proof of skew, ignoring the parallel case.</li><li>Using $\mathbf{d}_1\times\mathbf{d}_2\neq\mathbf{0}$ as a single test for skew — this only proves non-parallelism.</li><li>Assuming that because the lines are in 3D and &#x27;look different&#x27;, they must be skew, without any algebraic check.</li><li>Confusing &#x27;skew&#x27; with &#x27;perpendicular and non-intersecting&#x27;; skew lines need not be perpendicular.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Solving all three component equations simultaneously and finding &#x27;no solution&#x27; from the solver without explicitly displaying the contradiction line — examiners want the inconsistent equation shown.</li><li>Forgetting the concluding sentence linking both parts; the final &#x27;therefore skew&#x27; mark is often dropped.</li><li>Reusing the same parameter letter for both lines (writing $\lambda$ in both), which spuriously forces the lines to share a parameter and can lead to a false intersection.</li><li>Checking proportionality of direction vectors using only one pair of components; one matching ratio is not enough to establish parallelism either way.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (3D vector lines, skew lines, intersection of lines). Uses only vector equations of lines, scalar multiples, and simultaneous equations — no projection or distance formulae are required for the skew proof itself.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Oct_2022-Q9.html" class="example-chip">P4 Oct 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

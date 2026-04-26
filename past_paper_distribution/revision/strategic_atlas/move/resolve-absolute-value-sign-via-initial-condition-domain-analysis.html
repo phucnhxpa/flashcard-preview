@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resolve absolute value sign via initial-condition domain analysis — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Sign Analysis</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Resolve absolute value sign via initial-condition domain analysis</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sign Analysis</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires after integrating a separable ODE of the form ∫ dH/[(H−a)(H−b)] = ∫ k dt, where partial fractions and exponentiation produce |(H−a)/(H−b)| = Ae^(kt). The absolute-value bars must be removed before applying the initial condition and solving for the constant. Cue phrases: &#x27;given H(0) = …&#x27;, &#x27;find H explicitly&#x27;, or any time you have |f(H)| = Ce^(λt) and need a clean algebraic solution.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The absolute value arises because ∫ du/u = ln|u| + C is valid on either sign of u, so exponentiating only recovers |u|. However, solutions of an autonomous ODE cannot cross equilibria (uniqueness), so the sign of each factor (H−a), (H−b) is preserved for all t in the solution interval. Checking the sign at t=0 therefore fixes the sign for all t, allowing the bars to be dropped and A to be assigned a definite sign.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the equation has |…| = Ae^(λt) and the next step (apply IC, solve for H) requires a clean rational expression.</li><li>Rule out keeping ± as a case-split — wasteful when the IC unambiguously fixes the branch.</li><li>Commit to evaluating each factor of the ratio at t=0 to read off signs.</li><li>Bridge: substitute H(0) into (H−a) and (H−b) separately, note both signs, and conclude the sign of the ratio.</li><li>Tactical: confirm the solution stays on the same side of each equilibrium (no crossing), so the sign persists; then drop bars and write A with the correct sign.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the factors inside the absolute value, e.g. (H−a) and (H−b).</li><li>Substitute the initial value H(0) into each factor and record its sign.</li><li>Determine the sign of the ratio (H−a)/(H−b) at t=0.</li><li>Argue (via uniqueness / no-crossing of equilibria) that this sign persists on the solution interval.</li><li>Drop the absolute value, writing (H−a)/(H−b) = Ae^(λt) with A taking the matching sign.</li><li>Apply the IC at t=0 to compute |A| and confirm its sign agrees with step 3.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>From dH/dt = −(H−5)(H+3)/40 with H(0)=13, separation gives ln|(H−5)/(H+3)| = −t/5 + C, so |(H−5)/(H+3)| = Ae^{−t/5}. At t=0: H−5 = 8 > 0 and H+3 = 16 > 0, so the ratio is positive and stays positive (H decreases toward 5 from above). Drop the bars: (H−5)/(H+3) = Ae^{−t/5}, and IC gives A = 8/16 = 1/2.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Logistic ODE dP/dt = kP(1−P/M) with P(0) between 0 and M</div>
+<div class="adjustment">After separating one gets |P/(M−P)| = Ae^{kt}; both P&gt;0 and M−P&gt;0, so drop bars with A&gt;0.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling: dθ/dt = −k(θ−θ_room) with θ(0) &gt; θ_room</div>
+<div class="adjustment">ln|θ−θ_room| = −kt + C; since θ−θ_room &gt; 0 throughout cooling, |θ−θ_room| = (θ−θ_room) and A&gt;0.</div>
+</div><div class="variant-row">
+<div class="scenario">Same ODE but initial value below the lower equilibrium (e.g. H(0) = 0 &lt; 5)</div>
+<div class="adjustment">Then H−5 &lt; 0 and H+3 &gt; 0, so (H−5)/(H+3) &lt; 0; drop bars but write A as negative (or equivalently flip the sign of the ratio).</div>
+</div><div class="variant-row">
+<div class="scenario">Exponential decay dN/dt = −kN with N(0) &gt; 0</div>
+<div class="adjustment">|N| = Ae^{−kt} reduces to N = Ae^{−kt} since N stays positive.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading |u| = Ae^{λt} as already meaning u = Ae^{λt} without justification.</li><li>Thinking A must always be positive because it came from e^{C}; in fact after dropping bars A can absorb a sign.</li><li>Believing the sign could flip mid-trajectory, forgetting that solutions cannot cross equilibria of an autonomous ODE.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the absolute value with no written justification — examiners expect a one-line sign argument.</li><li>Forgetting to recheck signs when the IC places H below an equilibrium, leading to a wrong-sign A.</li><li>Confusing the constant of integration C with A = e^{C}; A is positive by construction only before the bars are removed.</li><li>Failing to state the domain of validity (the t-interval on which the sign is preserved).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard for Edexcel IAL P3/FP separable ODE problems involving partial fractions and an initial condition; uses only ln|·|, exponentiation, and elementary sign reasoning.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2021-Q10.html" class="example-chip">P4 Jan 2021 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply Newton-Raphson formula for one iteration to refine a root estimate — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Newton Raphson Iteration</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Apply Newton-Raphson formula for one iteration to refine a root estimate</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Newton Raphson Iteration</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question explicitly directs you to use the Newton-Raphson method (or simply &#x27;N-R&#x27;) and supplies a starting value x₀. Often this is the third part of a structured pipeline: an earlier part shows a sign change to locate a root in an interval, and another part computes f&#x27;(x), which is the exact ingredient needed in the denominator. Phrasings include &#x27;apply Newton-Raphson once&#x27;, &#x27;find x₁ using the Newton-Raphson method&#x27;, or &#x27;use x₀ = … to obtain a better approximation to α to n decimal places&#x27;. The presence of both a polynomial/transcendental f(x) = 0 and a precomputed f&#x27;(x) is the strongest structural cue.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Newton-Raphson replaces the curve y = f(x) near x_n by its tangent line and takes the tangent&#x27;s x-intercept as the next estimate, giving x_{n+1} = x_n − f(x_n)/f&#x27;(x_n). Geometrically the tangent at (x_n, f(x_n)) crosses the x-axis at this new value, and algebraically each iteration typically doubles the number of correct decimal places (quadratic convergence). This makes it dramatically faster than interval bisection or linear interpolation when f&#x27;(x) is available and the starting value is reasonably close to the root. The whole technique rests on the local linearisation y ≈ f(x_n) + f&#x27;(x_n)(x − x_n), set to zero.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question names Newton-Raphson and gives x₀ explicitly, so I do not need to choose a method or a starting point — the question has done both for me.</li><li>I rule out fixed-point iteration x_{n+1} = g(x_n) (which would require rearranging f(x) = 0 into x = g(x) and checking |g&#x27;(x)| &lt; 1) and interval bisection/linear interpolation, because they are slower and not what was asked.</li><li>I commit to Newton-Raphson because f is a polynomial/standard function whose derivative is cheap, x₀ is close enough to the root, and an earlier part of the question has prepared f&#x27;(x) for me to reuse here.</li><li>I quote the formula x₁ = x₀ − f(x₀)/f&#x27;(x₀) explicitly before substituting — this often secures a method mark and prevents sign errors.</li><li>I evaluate f(x₀) and f&#x27;(x₀) as separate numerical quantities, keeping full calculator precision; I check that f&#x27;(x₀) ≠ 0 so the division is valid and the tangent isn&#x27;t horizontal.</li><li>I check the sign sense: if f(x₀) &gt; 0 and f&#x27;(x₀) &lt; 0, then −f/f&#x27; is positive so x₁ &gt; x₀ (and vice versa) — this gives me a quick sanity check that the correction moves me toward the root.</li><li>Only at the very end do I round to the requested number of decimal places, to avoid losing accuracy in the last digit.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State the formula: x₁ = x₀ − f(x₀)/f&#x27;(x₀).</li><li>Compute f(x₀) by substituting into the original function; keep full precision.</li><li>Compute f&#x27;(x₀) by substituting into the derivative (from the earlier part of the question); confirm it is non-zero.</li><li>Form the quotient f(x₀)/f&#x27;(x₀) on the calculator without intermediate rounding.</li><li>Subtract: x₁ = x₀ − [f(x₀)/f&#x27;(x₀)].</li><li>Round the final value to the decimal places requested by the question.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x) = x^3 - 3x + 1$ with $x_0 = 0.3$. Then $f(0.3) = 0.027 - 0.9 + 1 = 0.127$ and $f'(0.3) = 3(0.09) - 3 = -2.73$. So $x_1 = 0.3 - \dfrac{0.127}{-2.73} = 0.3 + 0.04652\ldots = 0.3465$ (4 d.p.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Question asks for two iterations (find x₂ as well as x₁)</div>
+<div class="adjustment">Feed x₁ back into the same formula: x₂ = x₁ − f(x₁)/f&#x27;(x₁). Identical logic, repeated; carry full precision from x₁ into the second pass.</div>
+</div><div class="variant-row">
+<div class="scenario">f(x) is given implicitly, e.g. &#x27;show x³ = 3x − 1 has a root, then apply N-R&#x27;</div>
+<div class="adjustment">First rearrange to the standard form f(x) = x³ − 3x + 1 = 0 before differentiating and applying the formula.</div>
+</div><div class="variant-row">
+<div class="scenario">The question accompanies a tangent diagram and asks for the geometric meaning</div>
+<div class="adjustment">Interpret x₁ as the x-intercept of the tangent to y = f(x) at (x₀, f(x₀)); the algebra is unchanged.</div>
+</div><div class="variant-row">
+<div class="scenario">Comparison with fixed-point iteration x_{n+1} = g(x_n)</div>
+<div class="adjustment">Different formula and a different convergence criterion (|g&#x27;(x)| &lt; 1 near the root); choose N-R when speed is needed and f&#x27;(x) is accessible.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using x₁ = x₀ + f(x₀)/f&#x27;(x₀) (wrong sign) — the minus is essential and reverses the correction direction.</li><li>Confusing Newton-Raphson with simple iteration x_{n+1} = g(x_n) and unnecessarily rearranging f(x) = 0 into x = g(x) form.</li><li>Substituting x₀ into the original f for the denominator instead of into f&#x27;(x).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when both f(x₀) and f&#x27;(x₀) are negative — be careful that −(neg)/(neg) is negative.</li><li>Premature rounding of f(x₀) or f&#x27;(x₀) before dividing; this can shift the final digit at the requested precision.</li><li>Arithmetic slips evaluating cubes/powers (e.g. (3.5)³ = 42.875, not 43.75).</li><li>Forgetting to quote the formula explicitly — Edexcel often awards a method mark for this even if a later arithmetic slip occurs.</li><li>Carrying through a sign error in f&#x27;(x) from the previous part of the question.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is the standard Newton-Raphson technique in Edexcel IAL Further Pure Mathematics 1 (FP1), Numerical Methods chapter; the formula x_{n+1} = x_n − f(x_n)/f&#x27;(x_n) is given in the FP1 formula booklet. Avoid out-of-scope discussion of convergence theorems, basins of attraction, or failure cases beyond simple observations like f&#x27;(x_n) = 0 or starting values far from the root.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP1/ch3/q-Jan_2024-Q6.html" class="example-chip">FP1 Jan 2024 Q6</a><a href="../FP1/ch3/q-Jun_2024-Q3.html" class="example-chip">FP1 Jun 2024 Q3</a><a href="../FP1/ch3/q-Jun_2022-Q2.html" class="example-chip">FP1 Jun 2022 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

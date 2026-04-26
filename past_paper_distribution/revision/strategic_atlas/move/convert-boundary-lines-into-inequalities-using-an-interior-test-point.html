@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert boundary lines into inequalities using an interior test point — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Inequality From Boundary</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Convert boundary lines into inequalities using an interior test point</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Inequality From Boundary</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks for the system of inequalities defining a closed region R bounded by lines (often after a part (a) that found vertices or intersection points). Cues include phrases like &#x27;find the inequalities that define R&#x27;, &#x27;write down three inequalities&#x27;, or a shaded region in a diagram. Typically appears in linear programming-flavoured coordinate geometry questions where R is a triangle or polygon. The boundary equations are already known; the task is purely to assign the correct direction (≤ or ≥) to each.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A closed convex polygonal region is the intersection of half-planes, one per boundary line. For each line, the region lies entirely on one side, so testing any single interior point (or a known interior vertex/centroid) against the line equation determines the correct inequality direction unambiguously. This converts a picture into an algebraic specification that can be checked mechanically. The principle generalises any time a region is described by boundaries: orientation is fixed by one interior point.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the region R is closed and bounded by a known list of lines, so the answer must be one inequality per boundary line.</li><li>Rule out guessing signs from the form of the equation (e.g. assuming y ≤ for any line written as y = ...); the orientation depends on where R sits, not on how the line is written.</li><li>Commit to the test-point method: find any point demonstrably inside R (centroid of vertices, or an obvious lattice point), then check each boundary.</li><li>Pick a concrete interior point — e.g. the centroid of the three vertices, or a visibly-inside integer point — and substitute into each line equation in the form LHS vs RHS.</li><li>For each line, compare LHS and RHS at the test point; whichever sign holds is the correct inequality direction. Write inequalities in the form the mark scheme expects (often y on the left, or cleared of fractions).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List the boundary line equations in the form y = mx+c (or ax+by=c).</li><li>Determine an interior test point: average the three vertex coordinates to get the centroid, or read off any clearly-interior point.</li><li>For each boundary, substitute the test point&#x27;s coordinates into both sides and observe which inequality (≤ or ≥) holds.</li><li>Record that inequality, using the same algebraic form as the boundary equation.</li><li>Sanity check: confirm all three inequalities are simultaneously satisfied at the test point and that each vertex satisfies them with equality on exactly two boundaries.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Triangle with vertices $(9/4,2)$, $(4,2)$, $(45/13,40/13)$, bounded by $y=\tfrac{8}{9}x$, $y=10-2x$, $y=2$. Centroid $\approx(3.42,\,2.69)$. Test $y$ vs $\tfrac{8}{9}x$: $2.69$ vs $3.04$, so $y\le \tfrac{8}{9}x$ fails — actually $\tfrac{8}{9}x>y$, giving $y\le\tfrac{8}{9}x$. Re-checking with point $(3.5,2.5)$: $\tfrac{8}{9}(3.5)\approx3.11>2.5$, confirms $y\le\tfrac{8}{9}x$ on this side. Test $y$ vs $10-2x$: $2.69$ vs $3.16$, so $y\le 10-2x$. Test $y$ vs $2$: $2.69\ge 2$. Inequalities: $y\le\tfrac{8}{9}x$, $y\le 10-2x$, $y\ge 2$ (direction follows the actual interior point — always trust the test).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Region bounded by a curve and a line (e.g. parabola and chord)</div>
+<div class="adjustment">Same test-point method; substitute interior point into the curve equation, e.g. decide between $y\le x^2$ and $y\ge x^2$.</div>
+</div><div class="variant-row">
+<div class="scenario">Mark scheme wants inequalities cleared of fractions</div>
+<div class="adjustment">Multiply through, e.g. $y\ge\tfrac{8}{9}x \Leftrightarrow 9y\ge 8x$; preserve direction since multiplier is positive.</div>
+</div><div class="variant-row">
+<div class="scenario">Strict inequalities for an open region</div>
+<div class="adjustment">Use $&lt;$ and $&gt;$ if the boundary is dashed/excluded; otherwise use $\le,\ge$.</div>
+</div><div class="variant-row">
+<div class="scenario">Region is unbounded (e.g. feasible region in linear programming extending to infinity)</div>
+<div class="adjustment">Same per-line test; just no closure condition needed, but check a point clearly in the unbounded region.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Writing the inequality the wrong way round because no interior point was tested — sign chosen by feel.</li><li>Omitting the &#x27;trivial&#x27; horizontal or vertical boundary (e.g. $y\ge 2$) and giving only two inequalities for a triangle.</li><li>Confusing &#x27;above the line&#x27; with $y\ge$ when the line equation is not solved for $y$ (e.g. for $2x+y=10$, &#x27;above&#x27; means $y\ge 10-2x$, not $2x+y\ge 10$ — actually these agree, but care is needed).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Choosing a test point that lies on a boundary, so the comparison gives equality and doesn&#x27;t fix the direction.</li><li>Leaving a parameter (e.g. $k$) in the inequality instead of substituting its determined value.</li><li>Multiplying or dividing by a negative quantity while rearranging without flipping the inequality sign.</li><li>Mixing strict and non-strict signs inconsistently across the three boundaries.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure/Core coordinate geometry: linear boundaries, triangular or simple polygonal regions, exact-fraction vertices. No optimisation theory beyond identifying the region itself.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2023-Q7.html" class="example-chip">P1 Jun 2023 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split a^{k+1} via index laws to expose the P(k) sub-expression — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Index Law Decomposition</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Split a^{k+1} via index laws to expose the P(k) sub-expression</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Index Law Decomposition</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires during the inductive step of a proof by induction whenever the P(k+1) expression contains exponential terms a^{f(k+1)} whose exponents are a fixed shift above those in P(k) (e.g. 4^{k+3} vs 4^{k+2}, or 5^{2k+3} vs 5^{2k+1}, or simply a^{k+1} vs a^k). The visual cue is: same base in P(k) and P(k+1), but the exponent has increased by a constant. Equivalently: &#x27;I can see a^{k+1} in my goal expression but my hypothesis only tells me about a^k&#x27;. The move is needed because the inductive hypothesis cannot be substituted until the higher-power term is rewritten as (constant)·(lower-power term).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The identity a^{m+r} = a^r · a^m lets us peel off a constant factor and expose the exact sub-expression that appears in P(k). This is the structural bridge that makes the inductive hypothesis substitutable — without it, P(k) and P(k+1) are algebraically disconnected. The move converts a goal involving &#x27;next-step&#x27; powers into a linear combination of &#x27;current-step&#x27; powers plus known constants, which is precisely the form needed to invoke the hypothesis (whether by direct substitution or by forming combinations like P(k+1) − c·P(k) for divisibility proofs).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice that P(k+1) and P(k) share the same exponential bases, but the exponents in P(k+1) are each shifted up by a fixed amount (e.g. 4^{k+3} vs 4^{k+2} differs by 1; 5^{2k+3} vs 5^{2k+1} differs by 2).</li><li>I rule out trying to manipulate P(k+1) directly (no link to hypothesis) and rule out additive &#x27;splits&#x27; like a^{k+1} = a^k + a (a fundamental error — index laws are multiplicative, not additive).</li><li>I commit to the index-law decomposition because the exponential structure is preserved under multiplication by a constant: a^{k+r} = a^r · a^k cleanly extracts the P(k) component.</li><li>I count the exponent difference carefully for each term separately: difference of 1 → factor of a; difference of 2 → factor of a²; etc. Each term may have a different multiplier, and that mismatch is intentional — it&#x27;s what creates the residual structure used downstream.</li><li>After splitting, I have an expression of the form c₁·(P(k)-term₁) + c₂·(P(k)-term₂) + …, ready for substitution from the hypothesis or for forming P(k+1) − c·P(k) to isolate a known multiple.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify each exponential term in P(k+1) and compute the exponent difference r relative to the matching term in P(k).</li><li>Rewrite each term using a^{m+r} = a^r · a^m, e.g. 4^{k+3} = 4 · 4^{k+2} and 5^{2k+3} = 25 · 5^{2k+1}.</li><li>Collect: P(k+1) = c₁ · (term from P(k)) + c₂ · (other term from P(k)) + (any non-exponential remainder).</li><li>Substitute the rearranged inductive hypothesis (or form P(k+1) − c·P(k) for divisibility) to complete the inductive step.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Goal: show $4^{k+3} + 5^{2k+3}$ is divisible by 21, given $4^{k+2}+5^{2k+1}$ is. Split: $4^{k+3}=4\cdot 4^{k+2}$ and $5^{2k+3}=25\cdot 5^{2k+1}$. So $P(k+1)=4\cdot 4^{k+2}+25\cdot 5^{2k+1}=4(4^{k+2}+5^{2k+1})+21\cdot 5^{2k+1}$, which is $4\cdot P(k) + 21\cdot 5^{2k+1}$ — divisible by 21. ✓</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Simple single-base divisibility, e.g. f(k) = 4^k + 6k − 1</div>
+<div class="adjustment">Just one split: 4^{k+1} = 4·4^k, then substitute 4^k from the rearranged hypothesis.</div>
+</div><div class="variant-row">
+<div class="scenario">Higher exponent shifts, e.g. 7^{2k+2} or 3^{3(n+1)+1}</div>
+<div class="adjustment">Multiplier is the base raised to the shift: 7^{2k+2} = 49·7^{2k}; 3^{3n+4} = 27·3^{3n+1}.</div>
+</div><div class="variant-row">
+<div class="scenario">Induction on a summation formula</div>
+<div class="adjustment">Analogous structural move: Σ_{r=1}^{k+1} = Σ_{r=1}^{k} + a_{k+1}, splitting off the new term to expose the hypothesis.</div>
+</div><div class="variant-row">
+<div class="scenario">Divisibility proof preferring linear combination</div>
+<div class="adjustment">Instead of substituting, compute P(k+1) − c·P(k) for a chosen c (often the smaller multiplier) — the exponential terms with that base cancel, leaving an obviously-divisible residue.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating P(k+1) as needing full expansion/factorisation from scratch, ignoring that the hypothesis already controls most of it.</li><li>Trying to force both bases to share the same multiplier (e.g. multiplying everything by 4), which obscures the natural structure and complicates the algebra.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Miscounting the exponent shift: writing 5^{2k+3} = 5·5^{2k+1} (wrong — the difference is 2, so the multiplier is 5² = 25).</li><li>Confusing index laws with addition: writing a^{k+1} = a^k + a — a catastrophic error that invalidates the proof.</li><li>Forgetting to also handle non-exponential terms (e.g. the +6(k+1) − 1 in f(k+1)) — these need separate treatment, typically via expanding and regrouping.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure (FP1) proof-by-induction technique. Relies only on the index law a^{m+n} = a^m · a^n (not in the formula booklet — assumed known). Stay within integer exponents and induction on ℕ; do not invoke strong induction or generalisations beyond the IAL syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP1/ch8/q-Jun_2021-Q8.html" class="example-chip">FP1 Jun 2021 Q8</a><a href="../FP1/ch8/q-Jun_2024-Q6.html" class="example-chip">FP1 Jun 2024 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

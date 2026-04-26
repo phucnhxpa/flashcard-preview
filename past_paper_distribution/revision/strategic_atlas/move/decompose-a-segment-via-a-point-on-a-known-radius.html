@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose a segment via a point on a known radius — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Segment Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Decompose a segment via a point on a known radius</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Segment Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A point D is stated to lie on a radius (or diameter) OC of length r, and a perimeter or path length requires the sub-segment CD. CD is not given directly, but OD can be obtained from a triangle whose other elements are already known. Cue phrases: &#x27;D lies on OC&#x27;, &#x27;D is a point on the radius&#x27;, or a diagram showing D between O and C. Fires whenever a known total length is split into a found part and an unknown part.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because D lies between O and C on the same straight radius, the segment additivity OD + DC = OC holds, so DC = r − OD. This converts an awkward length DC (not adjacent to easily known angles) into a subtraction once OD is found from a triangle with sufficient known data. The Sine Rule or Cosine Rule in triangle AOD typically supplies OD, since after earlier parts of the question its angles and one side are usually accessible.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the required perimeter contains CD, which has no direct formula from the given data.</li><li>Rules out treating CD as an arc or as the full radius; recognises D is interior to OC.</li><li>Commits to the decomposition CD = OC − OD because OC is the known radius r.</li><li>Bridges to triangle AOD: identifies which angles/sides are already known from earlier parts and selects Sine or Cosine Rule accordingly.</li><li>Decides which angle pairs with which side in the Sine Rule, computes OD, then subtracts from r to get CD.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify that D lies on radius OC so OD + DC = OC = r.</li><li>Locate a triangle (here AOD) containing OD with enough known data.</li><li>Find any missing angle using the angle sum of the triangle, e.g. ∠OAD = π − ∠AOD − ∠ADO.</li><li>Apply Sine Rule: OD/sin(∠OAD) = AD/sin(∠AOD), solve for OD.</li><li>Compute CD = r − OD.</li><li>Substitute CD into the perimeter/path expression along with arc lengths and other known segments.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>In a circle centre $O$ radius $6$, $D$ lies on $OC$ with $AD = 5$, $\angle AOD = 0.7$, $\angle ADO = 2.257$. Then $\angle OAD = \pi - 0.7 - 2.257 = 0.185$. By Sine Rule, $OD = \dfrac{5\sin 0.185}{\sin 0.7} \approx 1.426$. Hence $CD = 6 - 1.426 \approx 4.574$ cm.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Point on a diameter rather than a radius</div>
+<div class="adjustment">Use the full diameter $2r$ as the total: $CD = 2r - OD$ with $O$ replaced by the appropriate endpoint.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent from external point split by point of tangency</div>
+<div class="adjustment">The external segment decomposes as (full length) − (internal piece), with the internal piece found via right-angled triangle and Pythagoras.</div>
+</div><div class="variant-row">
+<div class="scenario">Chord crossed by a perpendicular from centre</div>
+<div class="adjustment">Use the foot of perpendicular to split the chord into two equal halves; recover half-length via Pythagoras in the right triangle.</div>
+</div><div class="variant-row">
+<div class="scenario">Point on a line segment in a vector/coordinate setup</div>
+<div class="adjustment">Use position vector $\vec{OD} = \lambda \vec{OC}$ with $0&lt;\lambda&lt;1$; then $CD = (1-\lambda)|OC|$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating CD as equal to the full radius OC because D is &#x27;on&#x27; OC.</li><li>Confusing CD with the arc from C to D rather than a straight segment.</li><li>Trying to compute CD directly from triangle ACD without realising OD is the natural bridge.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Pairing the wrong angle with the wrong side in the Sine Rule (angle must be opposite the chosen side).</li><li>Rounding ∠OAD or OD prematurely, causing visible error in the final perimeter.</li><li>Forgetting to add DA and the arc length once CD is found, or double-counting OC.</li><li>Working in degrees when the question gives angles in radians (or vice versa).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only segment additivity on a straight line and the Sine Rule with arc length $s = r\theta$ — all standard Edexcel IAL P2/P3 circular measure and trigonometry content.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jun_2019-Q7.html" class="example-chip">P1 Jun 2019 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

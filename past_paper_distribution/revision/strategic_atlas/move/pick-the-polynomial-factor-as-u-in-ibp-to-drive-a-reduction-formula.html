@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pick the polynomial factor as u in IBP to drive a reduction formula — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Ibp Factor Selection</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Pick the polynomial factor as u in IBP to drive a reduction formula</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Ibp Factor Selection</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The integrand is a product of a polynomial power x^n (or (ln x)^n) and a function that is easy to integrate repeatedly, such as sin x, cos x, or e^x. The question explicitly asks for a reduction formula linking I_n to I_{n-1} or I_{n-2}, or a recursive expression for a family of integrals indexed by n. Common phrasings include &#x27;show that I_n = ...&#x27;, &#x27;hence find I_4&#x27;, or &#x27;derive a reduction formula&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Integration by parts trades a derivative on one factor for an antiderivative on the other. If we differentiate x^n we drop the index by 1; if we integrate sin x, cos x, or e^x we stay at the same level of complexity. Repeating this asymmetry is exactly the mechanism that produces a reduction formula: the polynomial side erodes while the trig/exponential side cycles. The reverse choice would inflate the polynomial power and never terminate.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand is a product of two distinct families — an algebraic factor x^n and a transcendental factor (sin x, cos x, or e^x) — and that the index n suggests a recursion is sought.</li><li>Rule out u = sin x (or u = e^x): integrating x^n gives x^{n+1}/(n+1), which raises the index and moves away from a reduction.</li><li>Commit via the LIATE heuristic: u = x^n (Algebraic) is differentiated, dv = sin x dx (Trig) is integrated, so the polynomial index falls by 1 per IBP.</li><li>Bridge to operation: compute du = n x^{n-1} dx and v = -cos x, then write I_n = [uv] - ∫ v du with the correct limits.</li><li>Tactical choice: for sin x / cos x integrands, expect to apply IBP twice to reach I_{n-2}; for e^x integrands, one application suffices to reach I_{n-1}.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify I_n = ∫_a^b x^n f(x) dx with f ∈ {sin x, cos x, e^x}.</li><li>Set u = x^n and dv = f(x) dx.</li><li>Compute du = n x^{n-1} dx and v = ∫ f(x) dx.</li><li>Apply IBP: I_n = [u v]_a^b − ∫_a^b v du.</li><li>If the remaining integral still contains a trig factor, apply IBP a second time (same choice u = x^{n-1}) to express the result in terms of I_{n-2}.</li><li>Simplify boundary terms using the given limits to obtain the closed reduction formula.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let I_n = \int_0^{\pi/2} x^n \sin x \, dx. Take u = x^n, dv = \sin x\, dx, so du = n x^{n-1} dx, v = -\cos x. Then I_n = [-x^n \cos x]_0^{\pi/2} + n\int_0^{\pi/2} x^{n-1} \cos x\, dx = 0 + n\int_0^{\pi/2} x^{n-1} \cos x\, dx. A second IBP with u = x^{n-1}, dv = \cos x\, dx gives I_n = n(\pi/2)^{n-1} - n(n-1) I_{n-2}.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">I_n = ∫ x^n e^x dx</div>
+<div class="adjustment">u = x^n, dv = e^x dx gives v = e^x and the one-step recursion I_n = x^n e^x − n I_{n-1}.</div>
+</div><div class="variant-row">
+<div class="scenario">I_n = ∫ x^n cos x dx</div>
+<div class="adjustment">Same choice u = x^n, dv = cos x dx (so v = sin x); two IBPs produce a link between I_n and I_{n-2}.</div>
+</div><div class="variant-row">
+<div class="scenario">I_n = ∫ (ln x)^n dx</div>
+<div class="adjustment">Now (ln x)^n is the &#x27;difficult&#x27; factor — let u = (ln x)^n, dv = dx, so v = x and du = n(ln x)^{n-1}/x dx, giving I_n = x(ln x)^n − n I_{n-1}.</div>
+</div><div class="variant-row">
+<div class="scenario">I_n = ∫_0^1 x^n (1−x)^m dx (Beta-type)</div>
+<div class="adjustment">Differentiate the higher-power algebraic factor; same principle of eroding one index while the other antiderivative stays polynomial.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Choosing u = sin x because trig &#x27;looks harder&#x27; — this raises the polynomial power and prevents reduction.</li><li>Treating the product as needing a substitution rather than IBP, e.g. trying u = x^n as a substitution variable.</li><li>Stopping after one IBP for x^n sin x and concluding I_n is in terms of I_{n-1}, missing that a second IBP is required to return to a sin x integrand and obtain I_{n-2}.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors from v = −cos x, especially when combined with the −∫ v du in the IBP formula.</li><li>Forgetting to evaluate the boundary term [u v]_a^b at both limits, particularly that x^n vanishes at 0 only when n ≥ 1.</li><li>Algebra slips with the factor n(n−1) when chaining two IBPs.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Reduction formulae of this type are standard Edexcel IAL Further Pure content; both sin/cos and e^x recursions, and the (ln x)^n variant, appear in past papers and remain within syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Specimen_2018-Q8.html" class="example-chip">FP3 Specimen 2018 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combine 1 + (dy/dx)² over common denominator to collapse the arc-length integrand — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Algebraic Collapse</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Combine 1 + (dy/dx)² over common denominator to collapse the arc-length integrand</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Algebraic Collapse</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires inside an arc-length problem when (dy/dx)² emerges as a rational expression p(x)/q(x) and you must form 1 + (dy/dx)² under the square root. Especially strong cue: the numerator and denominator contain the same quadratic block with opposite signs (e.g. x² and 9 − x²), or share a structural identity that will cancel. Also triggers when (dy/dx)² is sinh²x, tan²x, or any expression where 1 + (·) is a known identity. Recognise that the integrand will not simplify until the fraction is consolidated.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Writing 1 as q(x)/q(x) and adding gives a single fraction whose numerator often collapses by cancellation or identity. In the canonical case 1 + x²/(9 − x²) = 9/(9 − x²), the x² terms annihilate, turning a nested radical into a clean reciprocal-square-root form that matches a standard integral (here arcsin). The principle is purely algebraic — common denominator first, simplify second — but the payoff is that the resulting √ collapses to an A-level recognisable antiderivative.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice (dy/dx)² is a fraction p(x)/q(x), so 1 + (dy/dx)² is not yet a single object I can take a square root of cleanly.</li><li>I rule out expanding or substituting prematurely — any u-substitution or trig substitution applied before consolidating will only entangle the algebra further.</li><li>I commit to the common-denominator move because the numerator structure (same quadratic with opposite signs, or a Pythagorean-style pairing) signals an imminent cancellation.</li><li>Bridge: rewrite 1 = q(x)/q(x), add the fractions, and simplify the numerator before doing anything with the square root.</li><li>Tactically, after collapse I extract constants from the radical (√9 = 3) and identify the leftover 1/√(a² − x²) or 1/√(x² ± a²) shape to match a standard integral on the formula sheet.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify (dy/dx)² as a single fraction p(x)/q(x).</li><li>Rewrite 1 = q(x)/q(x) so both terms share the denominator.</li><li>Add: 1 + p(x)/q(x) = (q(x) + p(x))/q(x).</li><li>Simplify the numerator using cancellation or a known identity.</li><li>Take the square root, separating constants: √(c/q(x)) = √c / √q(x).</li><li>Match the resulting integrand to a standard form (e.g. 1/√(a² − x²) → arcsin).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For $y = \sqrt{9-x^2}$, $\frac{dy}{dx} = \frac{-x}{\sqrt{9-x^2}}$, so $\left(\frac{dy}{dx}\right)^2 = \frac{x^2}{9-x^2}$. Then $1 + \frac{x^2}{9-x^2} = \frac{9-x^2+x^2}{9-x^2} = \frac{9}{9-x^2}$. Hence $\sqrt{1+(y')^2} = \frac{3}{\sqrt{9-x^2}}$, and arc length $= \int \frac{3}{\sqrt{9-x^2}}\,dx = 3\arcsin(x/3) + C$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">y = cosh x, giving (dy/dx)² = sinh²x</div>
+<div class="adjustment">Use identity 1 + sinh²x = cosh²x; the radical collapses directly to cosh x without needing a common denominator.</div>
+</div><div class="variant-row">
+<div class="scenario">y involves ln(sec x) so (dy/dx)² = tan²x</div>
+<div class="adjustment">Use 1 + tan²x = sec²x; √ collapses to |sec x|.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric arc length x = a cos t, y = a sin t</div>
+<div class="adjustment">Combine (dx/dt)² + (dy/dt)² and apply sin²t + cos²t = 1 to get the constant a².</div>
+</div><div class="variant-row">
+<div class="scenario">Surface of revolution integrand 2πy√(1+(y&#x27;)²)</div>
+<div class="adjustment">Same common-denominator collapse on the radical, then multiply by 2πy before integrating.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating 1 + p/q as already simplified and trying to integrate √(1 + p/q) directly.</li><li>Mistaking the move for a trig substitution cue and introducing x = 3 sin θ before simplifying — this works but is heavier than necessary.</li><li>Assuming the cancellation is special to circles; in fact any p, q with q + p simplifying triggers it.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to put 1 over the same denominator and instead adding numerators directly.</li><li>Mis-simplifying √(9/(9−x²)) as 3/(9−x²) instead of 3/√(9−x²).</li><li>Dropping the modulus when extracting √ of an expression that could be negative on part of the interval.</li><li>Losing the constant: √9 = 3 must come outside the integral cleanly.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure scope: arc-length formula ∫√(1+(dy/dx)²) dx and standard integrals 1/√(a²−x²) → arcsin(x/a) appear on the formula sheet. Hyperbolic and parametric variants are also in-scope for FP2/FP3.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jun_2021-Q2.html" class="example-chip">FP3 Jun 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

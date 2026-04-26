@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proof — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Proof</strong></div>
+  <h1><span class="dot" style="background:#789262;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Proof</h1>
+  <p>35 canonical strategic moves across 35 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Induction Conclusion</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/close-induction-with-a-complete-formal-conclusion-to-secure-the-final-a-mark.html" class="move-row">
+  <div class="move-name">Close induction with a complete formal conclusion to secure the final A-mark</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Factor Extraction</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/extract-the-target-divisor-as-an-explicit-factor-to-close-a-divisibilityparity-p.html" class="move-row">
+  <div class="move-name">Extract the target divisor as an explicit factor to close a divisibility/parity proof</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Recurrence Induction Bridge</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-the-assumed-closed-form-into-the-recurrence-to-bridge-k-to-k1.html" class="move-row">
+  <div class="move-name">Substitute the assumed closed form into the recurrence to bridge k to k+1</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Analysis</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/use-sign-analysis-on-the-domain-to-fix-square-root-signs-or-disprove-inequalitie.html" class="move-row">
+  <div class="move-name">Use sign analysis on the domain to fix square-root signs or disprove inequalities</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Hypothesis Substitution</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-rearranged-inductive-hypothesis-to-expose-the-divisor-as-a-common-fac.html" class="move-row">
+  <div class="move-name">Substitute rearranged inductive hypothesis to expose the divisor as a common factor</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Index Law Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/split-ak1-via-index-laws-to-expose-the-pk-sub-expression.html" class="move-row">
+  <div class="move-name">Split a^{k+1} via index laws to expose the P(k) sub-expression</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Hypothesis Rearrangement</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/rearrange-the-inductive-hypothesis-to-isolate-one-exponential-term-for-direct-su.html" class="move-row">
+  <div class="move-name">Rearrange the inductive hypothesis to isolate one exponential term for direct substitution</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/decompose-the-k1-case-to-expose-the-inductive-hypothesis.html" class="move-row">
+  <div class="move-name">Decompose the (k+1) case to expose the inductive hypothesis</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reverse And Add</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/write-series-forwards-and-backwards-then-add-to-pair-terms.html" class="move-row">
+  <div class="move-name">Write series forwards and backwards then add to pair terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Staggered Subtraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/multiply-sum-by-common-ratio-then-subtract-to-telescope.html" class="move-row">
+  <div class="move-name">Multiply sum by common ratio then subtract to telescope</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Domain Restriction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/bound-integer-variable-using-positivity-to-enumerate-finite-cases.html" class="move-row">
+  <div class="move-name">Bound integer variable using positivity to enumerate finite cases</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exhaustion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-proof-by-exhaustion-over-a-small-finite-case-set.html" class="move-row">
+  <div class="move-name">Apply proof by exhaustion over a small finite case set</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Proof By Counterexample</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/disprove-a-universal-claim-by-exhibiting-one-counterexample.html" class="move-row">
+  <div class="move-name">Disprove a universal claim by exhibiting one counterexample</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Proof By Contradiction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-derived-constraint-into-curve-equation-to-force-a-contradiction.html" class="move-row">
+  <div class="move-name">Substitute derived constraint into curve equation to force a contradiction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Perfect Square Anchoring</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reverse-engineer-a-perfect-square-from-the-target-inequality.html" class="move-row">
+  <div class="move-name">Reverse-engineer a perfect square from the target inequality</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Inequality Division By Sign</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/divide-a-polynomial-inequality-by-a-positive-variable-to-introduce-a-reciprocal-.html" class="move-row">
+  <div class="move-name">Divide a polynomial inequality by a positive variable to introduce a reciprocal term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Hypothesis Encoding</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/encode-divisibility-hypothesis-as-an-algebraic-equation-with-integer-parameter.html" class="move-row">
+  <div class="move-name">Encode divisibility hypothesis as an algebraic equation with integer parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Separation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-sum-to-k1-into-sum-to-k-plus-new-term.html" class="move-row">
+  <div class="move-name">Split sum to k+1 into sum to k plus new term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Summation Split</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-sum-to-k1-as-sum-to-k-plus-the-k1th-term.html" class="move-row">
+  <div class="move-name">Split sum to k+1 as sum to k plus the (k+1)th term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strategic Factorisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-shared-product-to-assemble-target-consecutive-integer-form.html" class="move-row">
+  <div class="move-name">Factor out shared product to assemble target consecutive-integer form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Bridge</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-exponent-via-index-laws-to-expose-induction-hypothesis-term.html" class="move-row">
+  <div class="move-name">Split exponent via index laws to expose induction hypothesis term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Goal Directed Algebra</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/write-the-explicit-pk1-target-before-manipulating.html" class="move-row">
+  <div class="move-name">Write the explicit P(k+1) target before manipulating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Anchor</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/verify-base-case-by-evaluating-both-sides-explicitly.html" class="move-row">
+  <div class="move-name">Verify base case by evaluating both sides explicitly</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Change Ivt</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-at-endpoints-and-invoke-ivt-sign-change-for-root-existence.html" class="move-row">
+  <div class="move-name">Evaluate at endpoints and invoke IVT sign-change for root existence</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Framework</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/select-proof-by-induction-for-a-universal-summation-identity.html" class="move-row">
+  <div class="move-name">Select proof by induction for a universal summation identity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Goal Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/state-the-target-pk1-before-manipulating-the-lhs.html" class="move-row">
+  <div class="move-name">State the target P(k+1) before manipulating the LHS</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Divisibility Parameterisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-divisibility-claim-as-equation-with-named-integer-parameter.html" class="move-row">
+  <div class="move-name">Rewrite divisibility claim as equation with named integer parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Closure</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/close-induction-with-the-three-part-conclusion-statement.html" class="move-row">
+  <div class="move-name">Close induction with the three-part conclusion statement</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Divisibility Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-the-larger-coefficient-as-inductive-multiplier-plus-target-divisor.html" class="move-row">
+  <div class="move-name">Split the larger coefficient as inductive multiplier plus target divisor</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strong Induction Framing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-strong-induction-with-two-base-cases-for-a-second-order-linear-recurrence.html" class="move-row">
+  <div class="move-name">Apply strong induction with two base cases for a second-order linear recurrence</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Induction Target Factoring</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-k1²-to-match-the-target-closed-form-in-induction.html" class="move-row">
+  <div class="move-name">Factor out (k+1)² to match the target closed form in induction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponent Peeling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/peel-one-growth-factor-from-each-exponential-to-expose-fk-components.html" class="move-row">
+  <div class="move-name">Peel one growth factor from each exponential to expose f(k) components</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Definition Proof</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-rhs-via-exponential-definitions-to-verify-hyperbolic-identity.html" class="move-row">
+  <div class="move-name">Expand RHS via exponential definitions to verify hyperbolic identity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Recurrence Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/drive-the-inductive-step-through-the-recurrence-not-the-closed-form.html" class="move-row">
+  <div class="move-name">Drive the inductive step through the recurrence, not the closed form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ratio Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/cancel-shared-linear-factor-to-reduce-conic-distance-ratio-to-eccentricity.html" class="move-row">
+  <div class="move-name">Cancel shared linear factor to reduce conic distance ratio to eccentricity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

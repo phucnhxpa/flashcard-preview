@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split polynomial-over-surd into separate index-form power terms — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Index Form Preprocessing</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Split polynomial-over-surd into separate index-form power terms</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Index Form Preprocessing</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when an expression to be differentiated or integrated has the form (polynomial)/x^k or (polynomial)/√x, with a single-term denominator. Cues include a sum in the numerator divided by a monomial, or a surd/root in the denominator. Also triggered by phrases like &#x27;find dy/dx&#x27; or &#x27;∫ ... dx&#x27; on a quotient where the bottom is one power of x. The move precedes any application of the power rule.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The power rule d/dx(ax^n) = anx^(n−1) and ∫ax^n dx = ax^(n+1)/(n+1) + c require each term to already be in the form ax^n. Because division distributes over a sum in the numerator (a+b)/c = a/c + b/c, and because x^a/x^b = x^(a−b), a single-term denominator can be absorbed into each numerator term as a shift in index. This bypasses the quotient rule entirely and produces an additive form that calculus rules act on term-by-term.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the expression is a sum of polynomial terms divided by a single power of x (here √x = x^(1/2)).</li><li>Rule out the quotient rule (overkill for three terms) and &#x27;integrating top and bottom separately&#x27; (invalid).</li><li>Commit to splitting because the denominator is a monomial, so distribution is legitimate and each piece will simplify via index laws.</li><li>Rewrite the surd as a fractional index so subtraction of exponents is mechanical: √x → x^(1/2).</li><li>Subtract exponents term-by-term, keeping coefficients intact, and check each resulting power (including any that become negative or zero) before applying the calculus rule.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rewrite any surds/roots in the denominator as fractional indices, e.g. √x = x^(1/2).</li><li>Distribute the division: (A + B + C)/x^k = A/x^k + B/x^k + C/x^k.</li><li>Apply x^a / x^b = x^(a−b) to each term, treating constants as x^0.</li><li>Collect into the standard form Σ a_i x^(n_i), ready for differentiation or integration.</li><li>Apply the power rule term-by-term.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Integrate $\dfrac{x^2 + 10x + 25}{\sqrt{x}}$. Rewrite as $x^{3/2} + 10x^{1/2} + 25x^{-1/2}$. Then $\int \left(x^{3/2} + 10x^{1/2} + 25x^{-1/2}\right)dx = \tfrac{2}{5}x^{5/2} + \tfrac{20}{3}x^{3/2} + 50x^{1/2} + c$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Polynomial over a positive integer power, e.g. $(x^3 - 4x)/x^2$</div>
+<div class="adjustment">Split to give $x - 4x^{-1}$; one term has a negative index, integrate $-4x^{-1}$ as $-4\ln|x|$ rather than via the power rule.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial over a cube root, e.g. $(x^2 + 1)/\sqrt[3]{x}$</div>
+<div class="adjustment">Rewrite denominator as $x^{1/3}$ and subtract $1/3$ from each numerator index, giving $x^{5/3} + x^{-1/3}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Numerator is a product expanded first, e.g. $(2x+1)^2/\sqrt{x}$</div>
+<div class="adjustment">Expand the bracket before splitting, since the move requires an explicit sum in the numerator.</div>
+</div><div class="variant-row">
+<div class="scenario">Denominator is a binomial such as $(x+1)$</div>
+<div class="adjustment">Splitting is invalid; use polynomial division, partial fractions, or substitution instead.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the expression as needing the quotient rule, which is technically valid for differentiation but slow and error-prone here.</li><li>Attempting to &#x27;differentiate/integrate numerator and denominator separately&#x27;, which is not a valid rule.</li><li>Reading $\sqrt{x}$ as a constant or leaving it un-indexed, blocking the index-law step.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to subtract the denominator&#x27;s index from every numerator term — e.g., writing $10x$ instead of $10x^{1/2}$ for the middle term.</li><li>Sign errors on negative indices, e.g., $25/x^{1/2} = 25x^{-1/2}$, not $25x^{1/2}$.</li><li>Mishandling a constant numerator term: a constant is $x^0$, so dividing by $x^{1/2}$ gives $x^{-1/2}$, not $x^{1/2}$.</li><li>After splitting, forgetting to add the constant of integration when integrating.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure Mathematics: index laws (P1), differentiation and integration of $ax^n$ (P1/P2), and the special case $\int x^{-1}dx = \ln|x| + c$ (P2).</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Oct_2024-Q3.html" class="example-chip">P1 Oct 2024 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

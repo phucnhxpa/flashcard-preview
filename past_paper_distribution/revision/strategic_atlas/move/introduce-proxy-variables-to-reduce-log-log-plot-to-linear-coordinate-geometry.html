@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduce proxy variables to reduce log-log plot to linear coordinate geometry — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Substitution Bridge</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Introduce proxy variables to reduce log-log plot to linear coordinate geometry</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Bridge</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question shows a straight-line graph whose axes are themselves logarithmic expressions (e.g. log₁₀y vs log₁₀x, ln y vs x, log y vs x²) and asks for the equation relating those logarithmic quantities. Cues include explicit axis labels of the form &#x27;log₁₀y&#x27; or &#x27;ln y&#x27;, given coordinates such as intercepts on those axes, and the phrase &#x27;the points (a,b) and (c,d) lie on the line&#x27;. It also fires when later parts ask to express y in terms of x via a power law or exponential model.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because the plotted quantities themselves are linearly related, the underlying geometry is just y = mx + c in the transformed plane. Substituting Y = log₁₀y and X = log₁₀x converts the problem into a standard gradient-and-intercept exercise, postponing any logarithm manipulation. This separation prevents algebraic errors from conflating the line-finding step with the later step of recovering y in terms of x. It exploits the fact that linearisation by logs is reversible: any line in (X,Y) corresponds to a power law or exponential in (x,y).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the axes are not x and y but log₁₀x and log₁₀y, so the linear relationship is between these logged quantities, not between x and y themselves.</li><li>I rule out treating the graph as y = mx + c in (x,y); that would misread the axes and give a wrong model.</li><li>I commit to a substitution because the line is straight in the logged coordinates, so coordinate geometry applies directly there.</li><li>I let Y = log₁₀y and X = log₁₀x, then re-label the given points in (X,Y) form, e.g. (0,4) and (6,0).</li><li>I compute gradient and intercept in (X,Y), write Y = mX + c, then substitute back log₁₀y for Y and log₁₀x for X to deliver the requested equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the axis labels and define proxy variables matching them, e.g. Y = log₁₀y, X = log₁₀x.</li><li>Rewrite each given point as (X,Y) coordinates.</li><li>Compute gradient m = (Y₂ − Y₁)/(X₂ − X₁) and intercept c using one point.</li><li>Write the line as Y = mX + c.</li><li>Substitute back: replace Y with log₁₀y and X with log₁₀x to obtain the equation in logs.</li><li>If a later part asks for y in terms of x, apply 10^(·) to both sides and simplify using log laws.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>A line on axes log₁₀y vs log₁₀x passes through (0,4) and (6,0). Let Y = log₁₀y, X = log₁₀x. Gradient m = (0−4)/(6−0) = −2/3, intercept c = 4, so Y = −\tfrac{2}{3}X + 4. Substituting back: \log_{10}y = -\tfrac{2}{3}\log_{10}x + 4. Then y = 10^{4} x^{-2/3}.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Semi-log plot: log₁₀y vs x is a straight line</div>
+<div class="adjustment">Let Y = log₁₀y, X = x; recovering y gives an exponential model y = A·b^x rather than a power law.</div>
+</div><div class="variant-row">
+<div class="scenario">ln y vs x² is a straight line</div>
+<div class="adjustment">Let Y = ln y, X = x²; back-substitution and exponentiation give y = A·e^{mx²}.</div>
+</div><div class="variant-row">
+<div class="scenario">log₁₀y vs log₁₀x with gradient/intercept given instead of two points</div>
+<div class="adjustment">Skip the gradient calculation; write Y = mX + c directly and substitute back.</div>
+</div><div class="variant-row">
+<div class="scenario">Axes are lg y vs lg x (lg meaning log₁₀)</div>
+<div class="adjustment">Same substitution; just match notation used in the question.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading the axes as y and x directly, producing y = mx + c instead of log₁₀y = m log₁₀x + c.</li><li>Mistaking a semi-log plot (log y vs x) for a log-log plot and assuming a power law instead of an exponential.</li><li>Swapping which axis is X and which is Y, inverting the gradient.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Leaving the final answer in terms of the proxy variables Y and X rather than log₁₀y and log₁₀x.</li><li>When recovering y, mishandling 10^{c} as the constant — e.g. writing y = x^{m} + 10^{c} instead of y = 10^{c}·x^{m}.</li><li>Sign errors in the gradient when one of the points is on an axis.</li><li>Confusing log₁₀ and ln when the axis label uses ln; the substitution must mirror the exact log used.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (P2/P3 logarithms and exponentials), where linearising power-law and exponential models via logs and reading gradient/intercept from a straight-line graph is a standard examined skill.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Jan_2020-Q3.html" class="example-chip">P3 Jan 2020 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

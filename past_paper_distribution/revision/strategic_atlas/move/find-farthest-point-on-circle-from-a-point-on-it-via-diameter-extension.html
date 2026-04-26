@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find farthest point on circle from a point on it via diameter extension — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Extremal Diameter Argument</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Find farthest point on circle from a point on it via diameter extension</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Extremal Diameter Argument</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks for the point S on a circle C such that the distance QS is maximised, where Q is a known point lying on C. Watch for phrases like &#x27;greatest distance&#x27;, &#x27;maximum value of QS&#x27;, or &#x27;farthest point on the circle from Q&#x27;. The centre and radius of C are typically given or easily found by completing the square. No calculus or parametrisation is required once the geometric configuration is recognised.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The longest chord of a circle is a diameter, of length $2r$. So if Q lies on the circle, the point S on the circle maximising $QS$ must be the other end of the diameter through Q — i.e. the reflection of Q in the centre. This collapses an apparent optimisation problem into a single midpoint-reversal calculation, exploiting the symmetry of the circle about its centre.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that both Q and S lie on the same circle, and the question asks to maximise QS — a chord length.</li><li>Rule out calculus or parametric optimisation: although $S=(a+r\cos\theta, b+r\sin\theta)$ would work, it&#x27;s overkill given the symmetry.</li><li>Commit to the geometric fact that the longest chord is a diameter, so S must be diametrically opposite Q.</li><li>Bridge to computation: the centre $C$ is the midpoint of the diameter $QS$, so $S$ is found by reversing the midpoint formula.</li><li>Tactically, just compute $S = 2C - Q$ componentwise; no need to find the radius or write a circle equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the centre $(a,b)$ of circle C (complete the square if needed).</li><li>Confirm Q lies on C (substitute and check), so QS is a chord with maximum length when it is a diameter.</li><li>Use the fact that the centre is the midpoint of the diameter: $a = \tfrac{x_Q + x_S}{2}$, $b = \tfrac{y_Q + y_S}{2}$.</li><li>Solve: $x_S = 2a - x_Q$ and $y_S = 2b - y_Q$.</li><li>State $S = (2a - x_Q,\ 2b - y_Q)$ and, if asked, $QS = 2r$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Circle C has centre $(8,-6)$ and passes through $Q(15,-30)$. Find the point $S$ on C with $QS$ greatest. Since QS must be a diameter, $C$ is the midpoint of $QS$: $x_S = 2(8) - 15 = 1$, $y_S = 2(-6) - (-30) = 18$. So $S = (1, 18)$, and $QS = 2r = 2\sqrt{7^2 + 24^2} = 50$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Q is external to the circle, asking for the farthest point on C from Q</div>
+<div class="adjustment">The farthest point still lies on the line through Q and the centre, but now it is the far intersection of that line with the circle; distance is $|QC| + r$.</div>
+</div><div class="variant-row">
+<div class="scenario">Q external, asking for the nearest point on C from Q</div>
+<div class="adjustment">Use the same line through the centre; nearest point is the near intersection, distance $|QC| - r$.</div>
+</div><div class="variant-row">
+<div class="scenario">Asked for the maximum length of a chord through a fixed interior point P</div>
+<div class="adjustment">Maximum chord through P is the diameter through P; reflect P&#x27;s role and use centre as midpoint of that diameter&#x27;s endpoints.</div>
+</div><div class="variant-row">
+<div class="scenario">Asked only for the maximum distance $QS$ (not the point)</div>
+<div class="adjustment">Skip finding S; answer is simply $2r$ once the radius is known.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating S as the point on C farthest from the centre (which is meaningless — every point on C is at distance r from the centre).</li><li>Attempting to differentiate $QS^2(\theta)$ from a parametrisation — correct but unnecessarily long.</li><li>Believing the answer requires the equation of the circle when only centre and Q are needed.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when applying $S = 2C - Q$, especially with negative coordinates.</li><li>Forgetting to verify Q is actually on the circle before invoking the diameter argument.</li><li>Confusing the midpoint formula direction: writing $S = (Q+C)/2$ instead of $S = 2C - Q$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (P2 coordinate geometry of the circle): uses only the midpoint formula and the fact that the longest chord is a diameter. No calculus or trigonometric parametrisation required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jan_2022-Q6.html" class="example-chip">P2 Jan 2022 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

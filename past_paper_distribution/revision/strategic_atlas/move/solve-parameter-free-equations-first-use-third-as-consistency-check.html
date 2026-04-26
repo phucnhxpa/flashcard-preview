@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solve parameter-free equations first, use third as consistency check — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Strategic Elimination</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Solve parameter-free equations first, use third as consistency check</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Elimination</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Equating two vector lines (or a line and a plane) gives three component equations in only two unknowns λ and μ, but an unknown constant (e.g. b) appears in exactly one of them. The task is to find the value of the constant for which the lines intersect, or to prove they are skew. Cue phrases include &#x27;find the value of b for which the lines meet&#x27;, &#x27;show the lines do not intersect for any other value&#x27;, or simply a 3×2 system with one parameter-bearing equation.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A 3-equation, 2-unknown system is overdetermined: the two parameter-free equations already pin down λ and μ uniquely, and the third equation then plays the role of a consistency check. Substituting the determined λ, μ into the parameter-bearing equation reduces it to a single linear equation in the unknown constant, isolating exactly one value that permits intersection. This separation keeps the algebra clean and makes the logical structure (existence of solution ⇔ consistency of third equation) transparent.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that of the three component equations, two are free of the unknown constant b and only one contains it.</li><li>Rules out solving all three simultaneously with b carried through, since that entangles b in every line of working unnecessarily.</li><li>Commits to treating the b-free pair as the primary 2×2 system and the b-equation as a downstream consistency condition.</li><li>Bridges to action by labelling the equations (A), (B), (C) and selecting the b-free pair for elimination.</li><li>Plans tactically: solve for λ and μ as exact fractions, then substitute into the remaining equation and solve the resulting linear equation for b.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Equate the position vectors of the two lines component-by-component to obtain three equations in λ and μ.</li><li>Identify which equations are free of the unknown constant; label them clearly, e.g. (A), (C) parameter-free and (B) contains b.</li><li>Solve the 2×2 system formed by the parameter-free equations using elimination or substitution to obtain numerical λ and μ.</li><li>Substitute these values into the parameter-bearing equation to obtain a single linear equation in the unknown constant.</li><li>Solve for the constant; this is the unique value for which the lines intersect.</li><li>State the conclusion: for any other value of the constant the third equation is inconsistent, so the lines do not meet (and, if direction vectors are non-parallel, they are skew).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Lines give equations (A) $2\lambda - 4\mu = 1$, (B) $5\lambda - b\mu = -5$, (C) $-4\lambda + 5\mu = 6$. From (A) and (C): $2\times$(A)+(C) gives $-3\mu = 8$, so $\mu = -\tfrac{8}{3}$ and then $\lambda = -\tfrac{29}{6}$. Substituting into (B): $5(-\tfrac{29}{6}) - b(-\tfrac{8}{3}) = -5$ yields a unique $b$; for any other $b$ equation (B) fails, so the lines do not intersect.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Parameter appears in two of the three equations</div>
+<div class="adjustment">Solve the single parameter-free equation together with one parameter-bearing equation to get λ, μ in terms of the parameter, then impose the remaining equation as the consistency condition.</div>
+</div><div class="variant-row">
+<div class="scenario">Line meets plane with an unknown coefficient in the plane equation</div>
+<div class="adjustment">Use the two parameter-free component equations from the line–plane substitution first; impose the third as the condition fixing the unknown coefficient.</div>
+</div><div class="variant-row">
+<div class="scenario">Showing two given lines are skew (no parameter)</div>
+<div class="adjustment">Same structure: solve any two component equations for λ, μ, then verify the third fails — the failure itself is the proof of non-intersection.</div>
+</div><div class="variant-row">
+<div class="scenario">Three planes sharing a common point (Further Maths)</div>
+<div class="adjustment">Solve two planes&#x27; equations for the line of intersection, then substitute into the third; consistency yields the parameter value or proves no common point.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the system as 3 equations in 3 unknowns (λ, μ, b) and trying to solve simultaneously, producing tangled algebra.</li><li>Choosing to eliminate using the parameter-bearing equation first, leaving λ and μ expressed in terms of b unnecessarily.</li><li>Believing that any value of b will work because &#x27;there are enough equations&#x27;, missing the overdetermined nature of the system.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slips when λ and μ come out as awkward fractions; carry exact values rather than decimals.</li><li>Sign errors when multiplying an equation through before adding to eliminate a variable.</li><li>Forgetting to state the logical conclusion that inconsistency for other values of b proves non-intersection (and hence skewness when directions are non-parallel).</li><li>Not checking that the two direction vectors are non-parallel before declaring the lines skew.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL scope: 3D vector lines, equating position vectors, and solving 2×2 linear systems by elimination. The overdetermined-system reasoning is standard for intersection/skew problems in Pure and for line–plane work in Further Pure.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Jan_2021-Q8.html" class="example-chip">P4 Jan 2021 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

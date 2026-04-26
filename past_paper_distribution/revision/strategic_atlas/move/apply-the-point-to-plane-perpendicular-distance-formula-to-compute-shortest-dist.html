@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply the point-to-plane perpendicular distance formula to compute shortest distance — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Distance Formula</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Apply the point-to-plane perpendicular distance formula to compute shortest distance</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Distance Formula</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question asks for the shortest (perpendicular) distance from a specific point P(x₀, y₀, z₀) to a plane Π, AND the plane is available (or readily obtainable) in Cartesian form ax + by + cz = d (or ax + by + cz + d = 0, or vector form r·n = k). Typical phrasings: &#x27;find the shortest distance from the point... to the plane Π&#x27;, &#x27;find the perpendicular distance&#x27;, &#x27;show that the distance from Q to Π is...&#x27;. Often the point may contain a parameter (e.g. Q = (2, k, −7)), signalling that a later part will solve an equation/inequality in that parameter. Also fires when asked for the distance between two parallel planes (variant).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The formula D = |ax₀ + by₀ + cz₀ − d| / √(a² + b² + c²) is derived by projecting the displacement vector from any point on the plane to P onto the unit normal n̂ = (a, b, c)/|n|. It converts a geometric perpendicular-distance problem into pure substitution, bypassing the need to construct the foot of the perpendicular (i.e. parameterising a line through P in direction n and intersecting it with Π). When the Cartesian equation is already in hand, this is by far the most efficient and least error-prone route to a single numerical (or parametric) answer.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question asks specifically for the shortest/perpendicular distance from a given point to a plane — geometric distance from a 0-dim object to a 2-dim object.</li><li>Check that the plane is (or can be put) in Cartesian form ax + by + cz = d; if it&#x27;s in vector form r·n = k, read off coefficients directly from n and k.</li><li>Rule out alternatives: I could write a line through P with direction n, intersect with Π to get the foot F, then compute |PF| — but that&#x27;s ~3 extra steps and more arithmetic. I could also use a projection of AP onto n̂ for any A∈Π — equivalent to the formula but messier. Commit to the direct formula.</li><li>Bridge to operation: line up the plane as ax + by + cz − d = 0 so the substitution yields a single signed scalar; then take |·| because distance is non-negative.</li><li>Tactical care: if the point contains a parameter k, keep the numerator factorised (e.g. |−2k − 14| = 2|k + 7|) so the next part (often an equation/inequality in k) is clean.</li><li>Sanity check: the denominator |n| = √(a²+b²+c²) should match any earlier simplification; rationalise if exact form is required.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the plane as ax + by + cz − d = 0 (or ax + by + cz + d = 0 — be careful which sign convention).</li><li>Substitute the point P = (x₀, y₀, z₀) into the LHS to obtain the signed scalar S = ax₀ + by₀ + cz₀ − d.</li><li>Compute |n| = √(a² + b² + c²).</li><li>Form D = |S| / |n|.</li><li>Simplify: factorise the numerator if a parameter is present; rationalise the denominator if the mark scheme expects exact simplified form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the distance from Q(2, k, −7) to Π: 6x − 2y + 3z = 5. Substitute: $6(2) - 2(k) + 3(-7) - 5 = -2k - 14$. Normal magnitude: $\sqrt{36+4+9} = \sqrt{49} = 7$. Hence $D = \dfrac{|-2k-14|}{7} = \dfrac{2|k+7|}{7}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Plane given in vector form r·n = k</div>
+<div class="adjustment">Read (a, b, c) from n and the constant from k; formula becomes |r₀·n − k| / |n|.</div>
+</div><div class="variant-row">
+<div class="scenario">Plane written as ax + by + cz + d = 0</div>
+<div class="adjustment">Numerator becomes |ax₀ + by₀ + cz₀ + d| (do NOT subtract d again).</div>
+</div><div class="variant-row">
+<div class="scenario">Distance between two parallel planes ax + by + cz = d₁ and ax + by + cz = d₂</div>
+<div class="adjustment">Same denominator √(a²+b²+c²); numerator becomes |d₁ − d₂|.</div>
+</div><div class="variant-row">
+<div class="scenario">Point contains an unknown parameter and a follow-up part sets the distance equal to a value</div>
+<div class="adjustment">Keep the numerator factorised as a multiple of |k − α|; solve |k − α| = (mark-scheme value) at the next stage.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing this with the distance between two points (just |PQ|, no plane involved).</li><li>Confusing this with the distance from a point to a LINE in 3D, which requires |AP × d| / |d|, not the plane formula.</li><li>Treating a plane given in vector parametric form r = a + λb + μc as if it were Cartesian — must convert (via cross product b×c for the normal) first.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the absolute value, leading to a negative &#x27;distance&#x27;.</li><li>Sign error from misreading the plane&#x27;s constant: ax+by+cz=d versus ax+by+cz+d=0 use opposite signs in the numerator.</li><li>Computing |n| with a sign mistake (e.g. (−2)² written as −4) or forgetting to square-root.</li><li>Failing to rationalise the denominator when Edexcel expects exact simplified surd form.</li><li>When the point has a parameter, expanding |−2k − 14| as −2k − 14 without the modulus, dropping a needed case.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL Further Pure (FP3) vectors. The formula d = |ax₀ + by₀ + cz₀ − d| / √(a²+b²+c²) is in the IAL Further Maths formula booklet under &#x27;3D Vectors&#x27;. Do not generalise to distances in higher dimensions or to non-flat surfaces — those are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch5/q-Jan_2023-Q7.html" class="example-chip">FP3 Jan 2023 Q7</a><a href="../FP3/ch5/q-Jan_2021-Q7.html" class="example-chip">FP3 Jan 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

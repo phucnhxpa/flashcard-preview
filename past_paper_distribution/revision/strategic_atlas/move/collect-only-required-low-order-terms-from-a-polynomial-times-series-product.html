@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collect only required low-order terms from a polynomial-times-series product — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../binomial.html">Binomial Expansion</a> / <strong>Targeted Product Collection</strong></div>
+  <span class="domain-pill" style="background:#EC407A;color:white">Binomial Expansion</span>
+  <h1>Collect only required low-order terms from a polynomial-times-series product</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Targeted Product Collection</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a function is presented as a product of a short polynomial (often linear or quadratic) and a binomial expansion, and the question only asks about a specific low-order coefficient or imposes a condition on a few coefficients (e.g. &#x27;constant term equals 3 times coefficient of x&#x27;). Cues include phrases like &#x27;find the coefficient of x^n&#x27;, &#x27;show that...&#x27;, or a relation between two specific coefficients. There is no need to expand fully — only the targeted x^n contributions matter.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Multiplication of series distributes term-by-term, so the coefficient of x^n in (a_0 + a_1 x + ...)(b_0 + b_1 x + ...) is the convolution sum \sum_{i+j=n} a_i b_j. If only one or two coefficients are needed, only the corresponding convolution slices need to be computed. This saves time, reduces algebra, and minimises arithmetic slips that typically arise when expanding higher unused powers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the function is a product (linear/quadratic) × (binomial series) and the question only constrains specific low-order coefficients.</li><li>Rule out doing a full expansion to x^3 or x^4 — those higher powers are irrelevant to the stated condition.</li><li>Commit to the convolution view: coefficient of x^n equals the sum of products a_i b_j with i+j=n.</li><li>Bridge to action by first writing out the series terms up to x^n only, then assembling each required coefficient via the convolution rule.</li><li>Tactically factor out common surds or constants (e.g. \sqrt{2}) early to keep the algebra clean before forming or solving any equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Expand the binomial factor only up to the highest required power x^n.</li><li>Identify which coefficients of f(x) the question actually needs (e.g. constant and coefficient of x).</li><li>For each required coefficient of x^k, write the convolution: sum of (coefficient from polynomial of x^i) × (coefficient from series of x^{k-i}) for i+j=k.</li><li>Simplify each contribution, factoring out common constants/surds.</li><li>Substitute into the given condition or quoted value to form an equation in the unknown.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x)=(5-3x)(8-kx)^{1/2}$. Expanding $(8-kx)^{1/2}=2\sqrt{2}-\tfrac{\sqrt{2}\,k}{8}x+\cdots$. Constant of $f$: $5\cdot 2\sqrt{2}=10\sqrt{2}$. Coefficient of $x$: $5\cdot\left(-\tfrac{\sqrt{2}\,k}{8}\right)+(-3)(2\sqrt{2})=\sqrt{2}\left(-\tfrac{5k}{8}-6\right)$. The condition 'constant $=3\times$ coefficient of $x$' gives $10\sqrt{2}=3\sqrt{2}\left(-\tfrac{5k}{8}-6\right)$, solvable for $k$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quadratic × binomial series, asked for coefficient of x^2</div>
+<div class="adjustment">Use three convolution contributions: a_0 b_2 + a_1 b_1 + a_2 b_0; expand the series only to x^2.</div>
+</div><div class="variant-row">
+<div class="scenario">(1+ax+bx^2) × (1+x)^n with a stated coefficient of x^3</div>
+<div class="adjustment">Compute only b_3 + a·b_2 + b·b_1 from the binomial coefficients of (1+x)^n; ignore higher binomial terms.</div>
+</div><div class="variant-row">
+<div class="scenario">Two binomial series multiplied, asked for coefficient of x^k</div>
+<div class="adjustment">Expand each only up to x^k, then take the convolution sum \sum_{i=0}^{k} a_i b_{k-i}.</div>
+</div><div class="variant-row">
+<div class="scenario">Linear × series, asked to &#x27;show the expansion begins ...&#x27;</div>
+<div class="adjustment">Compute coefficients of x^0, x^1, x^2 only via convolution; do not expand beyond.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking the coefficient of x in the product comes solely from multiplying the x-term of one factor by the constant of the other, missing the second cross-product.</li><li>Believing a full expansion is required because both factors are visible, when in fact only a convolution slice is needed.</li><li>Confusing &#x27;constant term = 3 × coefficient of x&#x27; with &#x27;coefficient of x = 3 × constant term&#x27;, reversing the condition.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the minus sign on the linear factor&#x27;s x-coefficient (e.g. using +3 instead of -3 from (5-3x)).</li><li>Errors in the binomial coefficient when the bracket is not in standard form, e.g. forgetting to factor (8-kx)^{1/2}=2\sqrt{2}(1-kx/8)^{1/2} before expanding.</li><li>Mishandling the surd \sqrt{2} when combining contributions, especially when forming the final equation.</li><li>Including an x^2 contribution by accident when only constant and x are needed.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 binomial expansion for rational/negative indices, where |x|&lt; validity bound; convolution is used informally as &#x27;collecting like powers&#x27;.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2022-Q3.html" class="example-chip">P2 Jan 2022 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

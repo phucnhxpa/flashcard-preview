@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combine logs then equate arguments to strip to power form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Stripping</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Combine logs then equate arguments to strip to power form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Stripping</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when an equation has been manipulated into the shape $\log_{10} M = (\text{sum of }\log_{10}\text{ terms})$, or more generally $\log_a A = \log_a B$. Typical cues: a model question asking for $M = pr^q$ (or $y = ax^n$, $y = ab^x$) after working from a linearised log–log or log–linear relationship. Also fires when a constant on one side has been rewritten as $\log_{10}(10^c)$ to match the log on the other side. The target form is explicitly logarithm-free.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The function $\log_a$ is one-to-one on $(0,\infty)$, so $\log_a A = \log_a B \Rightarrow A = B$. The addition law $\log_a x + \log_a y = \log_a(xy)$ lets a sum of logs be written as a single log, after which both sides have the structure $\log_a(\cdot)$ and the logs can be removed. This converts an additive log-linear relationship into a multiplicative power-law form, which is exactly the shape $M = pr^q$ required.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice both sides are (or can be made into) a single $\log_{10}$ of an expression — the LHS is already $\log_{10} M$ and the RHS is a sum of $\log_{10}$ terms.</li><li>I rule out exponentiating each term separately or applying $10^{(\cdot)}$ to a sum of logs as written — that would invite errors; cleaner to consolidate the RHS first.</li><li>I commit to using the addition rule to merge the RHS into one logarithm, because then injectivity of $\log_{10}$ lets me strip logs cleanly.</li><li>Concrete first operation: rewrite any constant $c$ as $\log_{10}(10^c)$ if needed, then combine $\log_{10}(r^q) + \log_{10}(10^c) = \log_{10}(10^c r^q)$.</li><li>Tactically, I keep $p = 10^c$ symbolic until the end, then evaluate to the precision the question asks for (often 3 s.f.), and read off $q$ directly as the exponent of $r$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Ensure each side is a single $\log_{10}$: rewrite any constant $c$ as $\log_{10}(10^c)$.</li><li>Apply the addition rule: $\log_{10}(r^q) + \log_{10}(10^c) = \log_{10}(10^c \cdot r^q)$.</li><li>Equation now reads $\log_{10} M = \log_{10}(10^c \cdot r^q)$.</li><li>Use injectivity of $\log_{10}$ to equate arguments: $M = 10^c \cdot r^q$.</li><li>Identify $p = 10^c$ and $q$ from the exponent of $r$; evaluate $p$ numerically to required s.f.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\log_{10} M = 1.93\log_{10} r + 0.684$. Rewrite: $\log_{10} M = \log_{10}(r^{1.93}) + \log_{10}(10^{0.684})$. Combine: $\log_{10} M = \log_{10}(10^{0.684}\, r^{1.93})$. Strip logs: $M = 10^{0.684} r^{1.93} \approx 4.83\, r^{1.93}$, so $p \approx 4.83$, $q = 1.93$ (3 s.f.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Natural log relationship $\ln y = a\ln x + b$</div>
+<div class="adjustment">Rewrite $b = \ln(e^b)$, combine to $\ln y = \ln(e^b x^a)$, strip to $y = e^b x^a$.</div>
+</div><div class="variant-row">
+<div class="scenario">Exponential model $\log_{10} y = (\log_{10} b) x + \log_{10} a$</div>
+<div class="adjustment">Combine RHS as $\log_{10}(a b^x)$, strip to $y = a b^x$ (linearised exponential, not power, law).</div>
+</div><div class="variant-row">
+<div class="scenario">Reverse direction (linearising for a straight-line graph)</div>
+<div class="adjustment">Start from $M = pr^q$ and take $\log_{10}$ of both sides to obtain $\log_{10} M = q \log_{10} r + \log_{10} p$, identifying gradient and intercept.</div>
+</div><div class="variant-row">
+<div class="scenario">General base $\log_a A = \log_a B$</div>
+<div class="adjustment">Same injectivity argument gives $A = B$ provided $A,B&gt;0$ and $a&gt;0$, $a\neq 1$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $1.93 \log_{10} r + 0.684$ as already a single log and stripping prematurely to get $M = 1.93 r + 0.684$.</li><li>Reading the constant $0.684$ as $\log_{10}(0.684)$ rather than as a value that must be rewritten as $\log_{10}(10^{0.684})$.</li><li>Believing the relationship is exponential ($M = pq^r$) when the coefficient sits in front of $\log_{10} r$, which signals a power law $M = pr^q$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Misapplying the addition rule as $\log a + \log b = \log(a+b)$ instead of $\log(ab)$.</li><li>Stripping logs when only one side is a single log and the other is still a sum of logs plus a constant.</li><li>Leaving the answer as $p = 10^{0.684}$ when a numerical value to a stated accuracy is required.</li><li>Rounding $10^{0.684}$ too early in multi-part problems where $p$ is reused.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 logarithm content and the standard exponential-model/linearisation questions; uses only the laws of logarithms and injectivity of $\log_a$ for $a&gt;0$, $a\neq 1$.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch3/q-Oct_2021-Q7.html" class="example-chip">P3 Oct 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

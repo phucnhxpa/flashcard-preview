@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute one relation into another to collapse a two-variable system to one variable — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Substitution Bridge</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Substitute one relation into another to collapse a two-variable system to one variable</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Bridge</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever you have two equations in two unknowns where one equation is already (or trivially) solved for one variable in terms of the other. Typical visual cues: a line given as y = mx + c paired with a circle/conic equation; a directrix or focus condition giving e in terms of a (or vice versa) alongside the structural identity b² = a²(e² ± 1); any pairing of a &#x27;simple&#x27; linear/explicit relation with a &#x27;complicated&#x27; quadratic/polynomial relation. In short: when one equation is a clean isolation and the other is a degree-2 (or higher) constraint, substitute the clean one into the messy one.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Substitution converts a 2-variable simultaneous system into a single-variable polynomial equation, which can then be solved by standard quadratic/polynomial techniques. It works because any point satisfying both equations must in particular satisfy the messy one when the explicit relation is enforced — substitution simply enforces that constraint algebraically. Choosing which variable to eliminate is a tactical decision: keep the variable you ultimately want as your unknown, and substitute away the other. This is the &#x27;bridge&#x27; that links a geometric simultaneity problem to ordinary algebra.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the system has two equations in two unknowns and observe that one equation is already (or easily) solved for one variable — e.g. y = 3x − 1, or e = 3a/4.</li><li>Rule out alternatives: full elimination by addition/subtraction would mix degrees badly; rearranging the messy equation first doubles the algebra; expanding before substituting is wasteful.</li><li>Decide which variable to eliminate. Prefer to eliminate the one NOT asked for in the final answer, so the resulting single-variable equation is in your target unknown.</li><li>Commit: replace every occurrence of the eliminated variable in the messy equation with its expression from the clean equation. Use brackets to avoid sign errors.</li><li>Anticipate the degree of the result: substituting a linear into a quadratic gives a quadratic; substituting a linear in a into a²(e² − 1) gives a quartic in a. Knowing the expected degree is a sanity check.</li><li>Simplify the resulting single-variable equation, solve it, then back-substitute into the clean equation to recover the eliminated variable.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Label the two equations (1) and (2); identify (1) as the explicit/isolated one.</li><li>From (1), write the eliminated variable as an explicit expression, e.g. y = 3x − 1 or e = 3a/4.</li><li>In (2), replace every occurrence of the eliminated variable with that expression, keeping it in brackets.</li><li>Simplify any small inner cancellations BEFORE expanding (e.g. (3x − 1) + 1 = 3x).</li><li>Expand and collect terms to obtain a single polynomial equation in the remaining variable.</li><li>Solve the polynomial (factorise / quadratic formula); back-substitute solutions into (1) to obtain the paired values.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the intersections of $y = 3x - 1$ with $(x-2)^2 + (y+1)^2 = 10$. Substitute: $(x-2)^2 + (3x-1+1)^2 = 10 \Rightarrow (x-2)^2 + 9x^2 = 10$. Expand: $10x^2 - 4x - 6 = 0 \Rightarrow 5x^2 - 2x - 3 = 0 \Rightarrow (5x+3)(x-1)=0$. So $x = 1$ or $x = -3/5$, giving $y = 2$ or $y = -14/5$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Line given implicitly as ax + by = c (not solved for either variable)</div>
+<div class="adjustment">First rearrange for whichever variable is easier (avoiding fractions if possible), then substitute. Same strategy, one extra preliminary step.</div>
+</div><div class="variant-row">
+<div class="scenario">Two circles instead of line + circle</div>
+<div class="adjustment">Subtract the two circle equations first to obtain the linear radical axis, then substitute that line into one circle. Substitution still finishes the job; a preliminary elimination produces the line.</div>
+</div><div class="variant-row">
+<div class="scenario">Ellipse with directrix/eccentricity relation</div>
+<div class="adjustment">Use the structural identity $b^2 = a^2(1 - e^2)$ instead of $b^2 = a^2(e^2 - 1)$. Substitute e in terms of a (or vice versa) exactly as before; only the sign in the bracket changes.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve meeting a Cartesian curve</div>
+<div class="adjustment">Substitute the parametric expressions x(t), y(t) into the Cartesian equation to get a single equation in t.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the line and circle as independent and solving the circle alone, ignoring the constraint from the line.</li><li>Expanding the messy equation fully first, then trying to substitute — this multiplies the algebra unnecessarily.</li><li>Eliminating the wrong variable so the final equation is in the variable you don&#x27;t actually want.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign/bracket errors when substituting: e.g. writing $(3x - 1 + 1)^2 = (3x - 2)^2$ instead of $(3x)^2$.</li><li>Squaring errors on rational coefficients: $(3a/4)^2 = 9a^2/16$, not $9a/16$ or $3a^2/16$.</li><li>Using the wrong structural identity for the conic ($b^2 = a^2(1 - e^2)$ for ellipse vs $b^2 = a^2(e^2 - 1)$ for hyperbola) — sign error propagates everywhere.</li><li>Forgetting to back-substitute to find the second coordinate / second unknown after solving the single-variable equation.</li><li>Discarding a valid root because it &#x27;looks ugly&#x27; — both algebraic roots usually correspond to genuine geometric solutions.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL Pure (line–circle intersections, P2) and Further Pure (conic sections, FP1/FP3) using the formula booklet entries for circle equations and the conic identities $b^2 = a^2(1 \pm e^2)$. No need for resultants, Gröbner bases, or other out-of-scope elimination machinery — direct substitution is always sufficient at this level.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jun_2024-Q7.html" class="example-chip">P2 Jun 2024 Q7</a><a href="../FP3/ch2/q-Jan_2023-Q2.html" class="example-chip">FP3 Jan 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

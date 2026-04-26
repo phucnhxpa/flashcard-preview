@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use exponential-beats-polynomial dominance to extract horizontal asymptote — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Dominance Argument</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Use exponential-beats-polynomial dominance to extract horizontal asymptote</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Dominance Argument</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a limit as x → ∞ is required and the expression contains a product of a decaying exponential e^(-kx) (k &gt; 0) and a polynomial p(x). Common phrasings: &#x27;find the horizontal asymptote&#x27;, &#x27;long-term behaviour&#x27;, &#x27;limiting value of y&#x27;. Typical in solutions of linear ODEs (integrating-factor outputs) where the particular solution has form p(x)e^(-kx) plus a constant. Also triggers when reciprocal/quotient forms hide a polynomial × decaying exponential after rearrangement.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For any polynomial p(x) and constant k &gt; 0, lim_{x→∞} p(x)e^(-kx) = 0 because the exponential decays faster than any polynomial grows. This is a standard A-level limit (justifiable via repeated L&#x27;Hôpital but accepted as a known result). Hence such terms can be discarded in the limit, isolating the constant part as the asymptotic value. The principle is essentially that e^x grows faster than every x^n.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices a product of e^(-kx) (k&gt;0) with a polynomial in the expression for y or y², and the question asks for behaviour as x → ∞.</li><li>Rules out keeping the polynomial term — its growth cannot defeat exponential decay, so no algebraic cancellation is needed.</li><li>Commits to invoking the standard dominance result: polynomial × decaying exponential → 0.</li><li>Bridges by isolating the constant term that survives, since every x-dependent piece is multiplied by the decaying exponential.</li><li>Decides whether the surviving statement is for y or y², and selects the correct root using any sign restriction (e.g. y &gt; 0).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify all x-dependent terms and verify each is of the form (polynomial) × e^(-kx) with k &gt; 0.</li><li>Quote the standard limit: p(x)e^(-kx) → 0 as x → ∞ for any polynomial p.</li><li>Replace each such term by 0 in the expression.</li><li>Read off the surviving constant as the limiting value.</li><li>If the expression is for y² (or |y|), apply the stated sign condition to select the correct branch.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given y^2 = 649 - 36e^{-x/3}(x^2 + 6x + 18) with y > 0, find the horizontal asymptote as x → ∞.\nSince e^{-x/3}(x^2+6x+18) → 0 (exponential decay dominates polynomial growth), y^2 → 649.\nWith y > 0, the asymptote is y = √649.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Solution of dy/dx + ky = polynomial via integrating factor, asked for long-term value</div>
+<div class="adjustment">Particular solution form is p(x) + Ce^(-kx); the exponential term vanishes leaving p(x), and if p is itself constant that constant is the asymptote.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling / population models: T(t) = T_∞ + (polynomial)e^(-kt)</div>
+<div class="adjustment">Same dominance gives T → T_∞ as t → ∞.</div>
+</div><div class="variant-row">
+<div class="scenario">Limit as x → -∞ instead of +∞</div>
+<div class="adjustment">Decay reverses to growth; the dominance argument fails in that direction, so no horizontal asymptote there (or a different analysis is needed).</div>
+</div><div class="variant-row">
+<div class="scenario">Expression involves e^(-kx) × trigonometric × polynomial</div>
+<div class="adjustment">Bound the trig factor by 1 in modulus, then apply the same dominance to conclude the product → 0.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Believing the polynomial &#x27;wins&#x27; because it has unbounded degree or large coefficients.</li><li>Trying to apply L&#x27;Hôpital&#x27;s rule repeatedly when the standard dominance result is sufficient and expected.</li><li>Confusing decay direction: assuming e^(-kx) → 0 as x → -∞ (it actually blows up there).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Failing to justify the limit — examiners expect a brief statement that exponential decay dominates polynomial growth.</li><li>Reporting y² = 649 when the question asks for y, or quoting y = ±√649 without using the y &gt; 0 condition.</li><li>Discarding only some of the x-dependent terms and leaving stray polynomial pieces in the limit.</li><li>Misreading the sign of k in e^(kx); only k &gt; 0 in e^(-kx) gives decay.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only the standard A-level fact that e^x grows faster than any polynomial (P3/P4 limits and FP differential equations); no formal ε–N analysis is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jun_2021-Q8.html" class="example-chip">P4 Jun 2021 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

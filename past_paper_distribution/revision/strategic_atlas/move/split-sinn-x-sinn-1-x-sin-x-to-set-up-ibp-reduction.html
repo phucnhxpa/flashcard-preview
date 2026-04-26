@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split sin^n x = sin^(n-1) x · sin x to set up IBP reduction — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Reduction Formula Ibp</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Split sin^n x = sin^(n-1) x · sin x to set up IBP reduction</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Reduction Formula Ibp</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>You face an integral of the form $I_n = \int \sin^n x\, dx$ (typically $\int_0^{\pi/2}$) with a general integer power $n$, and the question asks you to derive a reduction formula linking $I_n$ to $I_{n-2}$. The cue is the phrase &#x27;show that $I_n = \tfrac{n-1}{n} I_{n-2}$&#x27; or similar, combined with a generic power that cannot be integrated directly. The same trigger applies to $\int \cos^n x\, dx$ by symmetry. Recognising &#x27;general power + need a recurrence&#x27; is the key.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A single application of integration by parts on $\sin^n x$ as a whole produces nothing useful, because there is no obvious $u, dv$ split. Rewriting $\sin^n x = \sin^{n-1} x \cdot \sin x$ creates an asymmetric product: $\sin^{n-1} x$ differentiates cleanly (lowering the power), and $\sin x$ integrates cleanly to $-\cos x$. Crucially, the resulting integral contains $\sin^{n-2} x \cos^2 x$, which is exactly the form needed to invoke the Pythagorean identity $\cos^2 x = 1 - \sin^2 x$ and produce the self-referential equation $I_n = (n-1)(I_{n-2} - I_n)$. This is the only split that makes both the IBP step and the subsequent identity work in tandem.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand has a generic power $\sin^n x$ — direct integration is impossible, so a recurrence relating $I_n$ to $I_{n-2}$ is required.</li><li>Rule out $u$-substitution ($u = \sin x$ leaves a stray $\cos x$ that doesn&#x27;t simplify the power) and rule out the symmetric split $\sin^{n-2}x \cdot \sin^2 x$ (because $\int \sin^2 x\, dx$ produces $x$ and $\sin 2x$, not a single clean term).</li><li>Rule out $u = \sin^n x, dv = dx$ — this gives $v = x$ and a worse integral $\int x \sin^{n-1}x \cos x\, dx$.</li><li>Commit to $u = \sin^{n-1} x$, $dv = \sin x\, dx$: differentiating $u$ drops the power and produces a $\cos x$ factor that pairs with $v = -\cos x$ to give $\cos^2 x$, ready for the Pythagorean identity.</li><li>Anticipate the boundary term: $[-\sin^{n-1} x \cos x]_0^{\pi/2}$ vanishes at both ends (cos kills the upper bound, sin kills the lower for $n \geq 2$), so only the integral term survives.</li><li>Plan ahead: after IBP, replace $\cos^2 x = 1 - \sin^2 x$ to express the new integral as $I_{n-2} - I_n$, then solve for $I_n$ algebraically.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rewrite $I_n = \int_0^{\pi/2} \sin^{n-1} x \cdot \sin x\, dx$.</li><li>Choose $u = \sin^{n-1} x$ and $dv = \sin x\, dx$.</li><li>Differentiate and integrate: $du = (n-1)\sin^{n-2} x \cos x\, dx$, $\;v = -\cos x$.</li><li>Apply IBP: $I_n = \bigl[-\sin^{n-1} x \cos x\bigr]_0^{\pi/2} + (n-1)\int_0^{\pi/2} \sin^{n-2} x \cos^2 x\, dx$.</li><li>Evaluate boundary: at $x = \pi/2$, $\cos(\pi/2) = 0$; at $x = 0$, $\sin^{n-1}(0) = 0$ (for $n \geq 2$). Boundary term $= 0$.</li><li>Apply $\cos^2 x = 1 - \sin^2 x$: $I_n = (n-1)(I_{n-2} - I_n)$, then solve to give $I_n = \tfrac{n-1}{n} I_{n-2}$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For $I_4 = \int_0^{\pi/2} \sin^4 x\, dx$: split as $\sin^3 x \cdot \sin x$, take $u = \sin^3 x$, $dv = \sin x\, dx$, so $du = 3\sin^2 x \cos x\, dx$, $v = -\cos x$. Then $I_4 = 0 + 3\int_0^{\pi/2} \sin^2 x \cos^2 x\, dx = 3(I_2 - I_4)$, giving $I_4 = \tfrac{3}{4} I_2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">For $I_n = \int_0^{\pi/2} \cos^n x\, dx$</div>
+<div class="adjustment">Split as $\cos^{n-1} x \cdot \cos x$ with $u = \cos^{n-1} x$, $dv = \cos x\, dx$, $v = \sin x$. Mirror logic; boundary term still vanishes.</div>
+</div><div class="variant-row">
+<div class="scenario">For $I_n = \int \tan^n x\, dx$</div>
+<div class="adjustment">Split as $\tan^{n-2} x \cdot \tan^2 x$ and use $\tan^2 x = \sec^2 x - 1$ — same self-referencing recurrence idea but no IBP needed.</div>
+</div><div class="variant-row">
+<div class="scenario">For $I_n = \int_0^1 x^n e^x\, dx$</div>
+<div class="adjustment">Same &#x27;differentiate the power, integrate the nice factor&#x27; principle: $u = x^n$, $dv = e^x\, dx$ gives $I_n = e - n I_{n-1}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying a $u$-substitution $u = \sin x$ on the whole integral — the leftover $\cos x$ doesn&#x27;t simplify the power.</li><li>Choosing the symmetric split $\sin^{n-2} x \cdot \sin^2 x$ — $\int \sin^2 x\, dx$ doesn&#x27;t give a single clean antiderivative.</li><li>Trying $u = \sin^n x$, $dv = dx$ — produces a worse integral involving $x$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the $(n-1)$ coefficient from the chain rule when differentiating $\sin^{n-1} x$.</li><li>Sign error: $v = -\cos x$, and the IBP formula has its own minus, so the surviving integral term is $+(n-1)\int \sin^{n-2} x \cos^2 x\, dx$.</li><li>Forgetting that the boundary term vanishing requires $n \geq 2$; the formula does not apply to $I_1$.</li><li>Failing to apply $\cos^2 x = 1 - \sin^2 x$ at the end and so not closing the recurrence.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure scope (FP2/FP3 reduction formulae). The IBP formula $\int u\, dv = uv - \int v\, du$ is in the formula booklet. Avoid generalising to non-integer $n$ or to complex-analytic methods — those are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jan_2024-Q8.html" class="example-chip">FP3 Jan 2024 Q8</a><a href="../FP3/ch4/q-Jun_2024-Q8.html" class="example-chip">FP3 Jun 2024 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

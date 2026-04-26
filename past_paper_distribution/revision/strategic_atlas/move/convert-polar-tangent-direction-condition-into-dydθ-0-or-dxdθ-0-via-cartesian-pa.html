@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert polar tangent-direction condition into dy/dθ = 0 or dx/dθ = 0 via Cartesian parametric form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../polar.html">Polar Coordinates</a> / <strong>Parametric Tangent Condition</strong></div>
+  <span class="domain-pill" style="background:#AB47BC;color:white">Polar Coordinates</span>
+  <h1>Convert polar tangent-direction condition into dy/dθ = 0 or dx/dθ = 0 via Cartesian parametric form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parametric Tangent Condition</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for points on a polar curve r = f(θ) where the tangent is parallel to the initial line (horizontal) or perpendicular to the initial line (vertical). Equivalent phrasings include &#x27;tangent parallel to the x-axis&#x27;, &#x27;tangent perpendicular to the initial line&#x27;, or &#x27;find where the curve has a horizontal/vertical tangent&#x27;. The trigger may also fire when a problem requires verifying that a stated tangent at a known point is horizontal or vertical (often as a setup for an area/triangle decomposition). The cue is geometric (a direction relative to the x-axis), but no Cartesian equation is given — only r(θ).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Polar form r(θ) does not give tangent direction directly; only Cartesian projections do. Writing x = r cos θ and y = r sin θ turns the curve into a parametric pair in θ, so dy/dx = (dy/dθ)/(dx/dθ). A horizontal tangent (parallel to initial line) needs dy/dθ = 0 with dx/dθ ≠ 0; a vertical tangent (perpendicular to initial line) needs dx/dθ = 0 with dy/dθ ≠ 0. The product rule applied to r(θ)sin θ and r(θ)cos θ then converts the geometric condition into a single trig equation in θ, which is the underlying mechanism.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the direction word: &#x27;parallel to the initial line&#x27; means horizontal (dy/dx = 0); &#x27;perpendicular to the initial line&#x27; means vertical (dy/dx → ∞).</li><li>Rule out using dr/dθ = 0 — that locates stationary values of r, not stationary tangent directions; also rule out the ψ-angle approach (tan ψ = r/(dr/dθ)) since that measures the angle between the tangent and the radius vector, not the initial line.</li><li>Commit to the parametric route: parametrise by θ via x = r cos θ, y = r sin θ, because dy/dx = (dy/dθ)/(dx/dθ) cleanly converts direction conditions into derivative-equals-zero equations.</li><li>Bridge to operation: pick the right component — y = r sin θ for parallel-to-initial-line, x = r cos θ for perpendicular-to-initial-line — and differentiate using the product rule (r is a function of θ, not a constant).</li><li>Tactical decision: substitute the given r(θ) only after writing the symbolic derivative, so the structure of the trig equation is visible; then solve over the appropriate θ-range, and finally check that the OTHER derivative is non-zero at each solution to rule out cusps.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>For tangent parallel to initial line: write y = r(θ) sin θ and apply the product rule: dy/dθ = (dr/dθ) sin θ + r cos θ.</li><li>Set dy/dθ = 0, substitute r and dr/dθ, and solve the resulting trig equation for θ in the required range (usually [0, 2π) or as restricted by the curve&#x27;s domain).</li><li>For tangent perpendicular to initial line: write x = r(θ) cos θ and apply the product rule: dx/dθ = (dr/dθ) cos θ − r sin θ (note the minus sign).</li><li>Set dx/dθ = 0 and solve similarly for θ.</li><li>For each candidate θ, check the other parametric derivative is non-zero (to exclude cusps/simultaneous zeros).</li><li>Substitute valid θ into r = f(θ) to obtain polar coordinates (r, θ); convert to Cartesian (r cos θ, r sin θ) if required.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve: $r = 1 + \sin\theta$. Find tangents perpendicular to the initial line. Set $x = (1+\sin\theta)\cos\theta$, so $\frac{dx}{d\theta} = \cos^2\theta - \sin\theta - \sin^2\theta = 1 - 2\sin^2\theta - \sin\theta$. Setting this to 0 and using $\cos 2\theta$ identities (or treating as a quadratic in $\sin\theta$): $2\sin^2\theta + \sin\theta - 1 = 0 \Rightarrow (2\sin\theta - 1)(\sin\theta + 1) = 0$, giving $\sin\theta = \tfrac12$ or $\sin\theta = -1$, hence $\theta = \pi/6, 5\pi/6$ (the value $3\pi/2$ gives $r=0$, a cusp at the pole, which must be checked separately).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Tangent at a general angle α to the initial line</div>
+<div class="adjustment">Use dy/dx = (dy/dθ)/(dx/dθ) = tan α and solve; same parametric framework, just non-zero target gradient.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent at the pole (r = 0)</div>
+<div class="adjustment">Solve r(θ) = 0 directly; the tangent direction at the pole is the value of θ satisfying r(θ) = 0 (no differentiation of x or y needed).</div>
+</div><div class="variant-row">
+<div class="scenario">Verifying a stated tangent at a known point Q (e.g. as setup for an area question)</div>
+<div class="adjustment">Substitute the given θ into dy/dθ (or dx/dθ) and confirm it equals zero, then read off the horizontal/vertical line as y = r sin θ or x = r cos θ.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Setting dr/dθ = 0 in the belief it gives horizontal tangents — it only finds stationary values of r.</li><li>Confusing &#x27;parallel to initial line&#x27; (horizontal, use dy/dθ = 0) with &#x27;perpendicular to initial line&#x27; (vertical, use dx/dθ = 0).</li><li>Confusing &#x27;perpendicular to the initial line&#x27; with &#x27;perpendicular to the radius vector&#x27; — the latter uses the angle ψ with tan ψ = r/(dr/dθ).</li><li>Confusing the tangent at the pole condition with the general parametric condition.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the product rule: r is a function of θ, so d/dθ (r sin θ) = (dr/dθ) sin θ + r cos θ, not just r cos θ.</li><li>Sign error in dx/dθ = (dr/dθ) cos θ − r sin θ (the minus sign is easy to drop).</li><li>Failing to check that the other derivative is non-zero at the candidate θ — simultaneous zeros indicate a cusp, not a genuine horizontal/vertical tangent.</li><li>Restricting θ to too narrow a range and missing solutions, or including θ values outside the curve&#x27;s stated domain.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL Further Pure (FP2/FP3) polar-curves content. Uses the parametric chain rule dy/dx = (dy/dθ)/(dx/dθ) (in the formula booklet under parametric differentiation) together with x = r cos θ, y = r sin θ. Avoid invoking the ψ-angle formula tan ψ = r/(dr/dθ) for direction relative to the initial line — that formula measures angle to the radius vector and is a different (and easily confused) tool.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../FP2/ch7/q-Jun_2023-Q8.html" class="example-chip">FP2 Jun 2023 Q8</a><a href="../FP2/ch7/q-Jun_2022-Q6.html" class="example-chip">FP2 Jun 2022 Q6</a><a href="../FP2/ch7/q-Oct_2021-Q8.html" class="example-chip">FP2 Oct 2021 Q8</a><a href="../FP2/ch7/q-Specimen_2018-Q7.html" class="example-chip">FP2 Specimen 2018 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

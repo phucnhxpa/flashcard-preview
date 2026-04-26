@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compute the trapezium-rule bracket fully before multiplying by h/2 — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Order Of Operations</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Compute the trapezium-rule bracket fully before multiplying by h/2</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Order Of Operations</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a numerical integration formula presents a multiplicative pre-factor (typically h/2 for the trapezium rule) acting on an additive bracket of tabulated y-values. Cues include: the question quoting the formula $\int_a^b y\,dx \approx \tfrac{h}{2}\big[(y_0+y_n)+2(y_1+\dots+y_{n-1})\big]$, a table of ordinates, and an instruction like &#x27;use the trapezium rule with n strips&#x27;. Also fires when Simpson&#x27;s rule is requested with prefactor h/3.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Evaluating the bracket B in full before scaling once by h/2 mirrors the printed formula exactly, so each mark-scheme mark (value of h, structure of bracket, correct substitution, final answer) is visibly earned. It collapses n potential multiplications into a single one, which reduces rounding and arithmetic slips. Keeping intermediate work as exact sums of tabulated values preserves accuracy until the last step. Crucially, even if the final multiplication is mis-keyed, the structural marks for the bracket are still awarded.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the formula has the shape (prefactor) × [bracket of y-values], so the natural unit of work is the bracket itself.</li><li>I rule out the strip-by-strip approach (computing each $\tfrac{h}{2}(y_i+y_{i+1})$ separately and summing) because it multiplies n times and invites rounding drift.</li><li>I commit to: first sum the endpoints, then sum the interior ordinates, then assemble B = S_ends + 2·S_mid, then multiply by h/2 exactly once.</li><li>Bridge: I write the formula line $A \approx \tfrac{h}{2}\big[(y_0+y_n)+2(y_1+\dots+y_{n-1})\big]$ and substitute symbolic sums before any decimal arithmetic.</li><li>Tactically, I keep ordinates to the precision given in the table, only round at the very end to the accuracy specified, and I write outer square brackets clearly so the h/2 visibly multiplies the entire bracket.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify h = (b−a)/n from the strip count and interval.</li><li>Compute S_ends = y_0 + y_n using exact table values.</li><li>Compute S_mid = y_1 + y_2 + … + y_{n−1} using exact table values.</li><li>Form the bracket B = S_ends + 2·S_mid (write this line explicitly).</li><li>Multiply once: Area ≈ (h/2) × B.</li><li>Round only at the final step to the accuracy requested (e.g. 3 s.f. or 4 d.p.).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>With $h=0.5$ and ordinates $y_0=1,\ y_1=1.284,\ y_2=1.649,\ y_3=2.117,\ y_4=2.718$: $S_{\text{ends}} = 1 + 2.718 = 3.718$; $S_{\text{mid}} = 1.284+1.649+2.117 = 5.050$; $B = 3.718 + 2(5.050) = 13.818$; Area $\approx \tfrac{0.5}{2}(13.818) = 0.25 \times 13.818 = 3.4545 \approx 3.45$ (3 s.f.).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Simpson&#x27;s rule (Further Maths)</div>
+<div class="adjustment">Same &#x27;bracket-first, scale-last&#x27; strategy, but the prefactor is h/3 and the bracket is $(y_0+y_n) + 4(y_{\text{odd}}) + 2(y_{\text{even}})$; compute the three weighted sums, assemble, then multiply by h/3.</div>
+</div><div class="variant-row">
+<div class="scenario">Trapezium rule applied to a transformed integrand (e.g. $\int \ln x\,dx$ via tabulated $\ln x_i$)</div>
+<div class="adjustment">Tabulate the transformed ordinates first, then apply identical bracket-first scaling — do not mix the transformation into each strip individually.</div>
+</div><div class="variant-row">
+<div class="scenario">Estimating area between a curve and a chord/line via two trapezium-rule applications</div>
+<div class="adjustment">Compute each estimate&#x27;s bracket separately, scale each by its own h/2, then subtract — keep the two scalings independent to avoid mixing prefactors.</div>
+</div><div class="variant-row">
+<div class="scenario">Question gives unequal x-values but states ordinates are evenly spaced</div>
+<div class="adjustment">Re-derive h from any two consecutive x-values before forming the bracket; the bracket-first strategy is unchanged.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the formula as a sum of strip areas and multiplying h/2 into each strip — wastes time and risks rounding error.</li><li>Reading &#x27;2(y_1+…+y_{n−1})&#x27; as &#x27;2y_1 + y_2 + … + y_{n−1}&#x27;, i.e. doubling only the first interior ordinate.</li><li>Forgetting the 1/2 in h/2 and using h as the prefactor — doubles the final answer.</li><li>Including y_0 or y_n inside the doubled interior sum.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Premature rounding of S_ends or S_mid when ordinates are given to 4+ decimal places, distorting the final answer beyond the required accuracy.</li><li>Writing &#x27;h/2 × y_0 + y_n + 2(…)&#x27; without the outer bracket, so order of operations multiplies only y_0 by h/2.</li><li>Using the wrong h when n counts ordinates (n+1 values) rather than strips (n values) — always compute h = (b−a)/(number of strips).</li><li>Mis-keying the final multiplication on the calculator; mitigated by writing the bracket value down before scaling.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (trapezium rule, P-unit numerical methods) and IAL Further Pure (Simpson&#x27;s rule). The formula is provided in the formula booklet, so reproducing its exact bracketed structure aligns directly with the published mark scheme.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Oct_2024-Q1.html" class="example-chip">P2 Oct 2024 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

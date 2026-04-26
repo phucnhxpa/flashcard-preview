@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split piecewise sum into AP block plus shifted GP partial sum — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Sum Decomposition</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Split piecewise sum into AP block plus shifted GP partial sum</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sum Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a sequence is defined piecewise across an index boundary (e.g. AP for the first M terms, then GP from term M+1 onward) and a question asks for a total or an inequality on the cumulative sum past that boundary. Cues include phrases like &#x27;after the 20th bounce/hit&#x27;, &#x27;from the kth term onwards the rule changes&#x27;, or two distinct recurrence rules joined at a fixed index. No single closed-form S_n covers both regimes, so a decomposition is forced.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Sums are additive over disjoint index ranges, so Total = S_AP(first M) + S_GP(remaining k = N − M). Re-indexing the GP block so its first term is the term immediately after the boundary lets the standard formula a(1 − r^k)/(1 − r) apply directly, with the AP portion frozen as a known constant. This converts a two-regime problem into one inequality or equation in the single unknown k, which is the form A-level techniques can solve.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the rule for successive terms changes at a fixed index, so no single AP or GP formula spans the whole range.</li><li>Rule out trying to force one closed form (e.g. treating the whole thing as a GP) — the first M terms genuinely follow a different rule.</li><li>Commit to additivity of sums: split the total at the boundary index and handle each block with its own formula.</li><li>Introduce a shifted counter k = N − M for the GP block so its &#x27;first term&#x27; is the term just after the AP ends, and r is the GP ratio.</li><li>Substitute the known AP block as a numerical constant, leaving a clean GP inequality/equation in k that can be solved by logarithms.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the boundary index M where the rule changes and compute S_AP for the first M terms as a number.</li><li>Let k = N − M count the terms in the second regime.</li><li>Identify the first term a&#x27; of the GP block (the term at index M+1) and the common ratio r.</li><li>Write S_GP = a&#x27;(1 − r^k)/(1 − r) using the partial-sum formula.</li><li>Form the equation/inequality S_AP + S_GP  ⋛  Target.</li><li>Isolate r^k, take logs (noting inequality flip if log of a number &lt; 1) to solve for k, then recover N = M + k.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>First 20 hits form an AP with sum 1620; from hit 21 the distances form a GP with first term 62 and ratio 30/31. Find smallest N with total > 3000. Let k = N − 20, so S_GP = 62(1 − (30/31)^k)/(1/31) = 1922(1 − (30/31)^k). Inequality: 1620 + 1922(1 − (30/31)^k) > 3000 ⇒ (30/31)^k < 271/961. Take logs: k > \ln(271/961)/\ln(30/31) ≈ 38.6, so k = 39 and N = 59.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">AP followed by a constant tail (terms become fixed after index M)</div>
+<div class="adjustment">Replace S_GP with k × c, where c is the constant value; inequality becomes linear in k.</div>
+</div><div class="variant-row">
+<div class="scenario">GP followed by a different GP at index M</div>
+<div class="adjustment">Use two GP partial-sum formulas; re-index the second GP so its first term sits at position M+1.</div>
+</div><div class="variant-row">
+<div class="scenario">Sum to infinity past the boundary (|r| &lt; 1, asking whether total ever exceeds T)</div>
+<div class="adjustment">Replace S_GP with a&#x27;/(1 − r) and test S_AP + a&#x27;/(1 − r) against T to decide if T is reachable at all.</div>
+</div><div class="variant-row">
+<div class="scenario">Two AP regimes joined at index M</div>
+<div class="adjustment">Use n/2(2a + (n−1)d) on each block separately with the second block&#x27;s own first term and common difference.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;from hit 21 the distances form a GP with first term 62&#x27; as meaning the GP starts at index 1 with a = 62 of the whole sum, rather than as a shifted block.</li><li>Assuming the question wants a sum to infinity because a GP with |r| &lt; 1 appears, when it actually wants a partial sum up to a finite N.</li><li>Treating the boundary index inclusively on both sides and double-counting the term at index M+1.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to add the AP block (e.g. 1620) back in and solving the GP inequality against the full target.</li><li>Using S_∞ = a/(1 − r) instead of the partial sum a(1 − r^k)/(1 − r).</li><li>Failing to flip the inequality when dividing by ln(r) with 0 &lt; r &lt; 1 (a negative number).</li><li>Mis-shifting the index: writing k = N − 19 or k = N − 21 instead of k = N − 20.</li><li>Rounding k down instead of up when seeking the smallest N satisfying a strict inequality.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only AP/GP sum formulas and logarithms from Edexcel IAL P1/P2 sequences and series; no calculus or generating functions required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2022-Q8.html" class="example-chip">P2 Jan 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

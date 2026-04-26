@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor shared parameter from adjugate entries to cancel against determinant — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Common Factor Cancellation</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Factor shared parameter from adjugate entries to cancel against determinant</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Common Factor Cancellation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when computing A⁻¹ = (1/det A)·adj(A) for a parametric matrix, and several adjugate entries visibly share a linear factor (e.g. (k−2), (k+1)) with det(A). Cues: det(A) factors as a constant times a linear expression in the parameter, and cofactor entries like 4−2k, 2k−4, 2k−2 appear. Equivalent phrasings: &#x27;simplify the parametric inverse&#x27;, &#x27;cancel common factor before dividing&#x27;. Particularly valuable when the question asks to express A⁻¹ in simplest form or to evaluate at a specific k.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The adjugate and determinant are polynomial in the matrix entries, so any linear factor of det(A) coming from a row/column structure of A often appears in cofactors too. Cancelling it produces entries that are either constants or simple rational functions of the parameter, which is the expected &#x27;clean&#x27; form of A⁻¹. Failing to cancel leaves the answer as an algebraically ugly matrix of fractions and obscures structural features (such as a fully parameter-free row). The cancellation also acts as a self-check: if a row entirely loses the parameter, this corroborates correct cofactor signs.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that det(A) has a linear factor in k (e.g. −2(k−2)) and that several adj(A) entries contain the same factor (e.g. 4−2k, 2k−4).</li><li>Rule out leaving the answer as a single fraction (1/det A)·adj(A) — the question wants simplest form, and unfactored entries hide cancellations.</li><li>Commit to factoring every adjugate entry over det(A) explicitly, because cofactor-by-cofactor simplification is reliable and exposes which entries become parameter-free.</li><li>Begin by rewriting each adj(A) entry to display the (k−2) factor, with care over signs (e.g. 4−2k = −2(k−2)).</li><li>Divide entry-by-entry: entries containing (k−2) reduce to constants; entries without it remain as fractions of the form (something)/(−2(k−2)). Record the implicit assumption k ≠ 2 from non-singularity.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Compute det(A) and factor it as c·(k−a) for constant c and root a.</li><li>Compute adj(A); rewrite every entry to expose any factor of (k−a), tracking signs carefully.</li><li>Divide each entry of adj(A) by det(A); cancel (k−a) wherever it appears.</li><li>Simplify constants and present A⁻¹ as a matrix whose entries are either numbers or simple rational functions of k.</li><li>State the validity condition k ≠ a inherited from det(A) ≠ 0.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let \(\det A = -2(k-2)\) and the second row of \(\operatorname{adj}(A)\) be \((4-2k,\ 2k-4,\ 0) = (-2(k-2),\ 2(k-2),\ 0)\). Dividing by \(-2(k-2)\) gives \((1,\ -1,\ 0)\), free of \(k\). Other rows, e.g. entry \(2k-2 = 2(k-1)\), become \(\dfrac{2(k-1)}{-2(k-2)} = -\dfrac{k-1}{k-2}\), valid for \(k\neq 2\).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2×2 parametric inverse where det = (k−a)(k−b) and one off-diagonal entry equals (k−a)</div>
+<div class="adjustment">Cancel the shared (k−a) so that entry simplifies to 1/(k−b); state k ≠ a, b.</div>
+</div><div class="variant-row">
+<div class="scenario">3×3 inverse with det = c·(k+1) and several cofactors divisible by (k+1)</div>
+<div class="adjustment">Same procedure with factor (k+1); the simplified row/column highlights structural symmetry of A.</div>
+</div><div class="variant-row">
+<div class="scenario">Solving A x = b parametrically via x = A⁻¹ b</div>
+<div class="adjustment">Factor (k−a) inside adj(A)·b before dividing by det(A); often x simplifies to a vector with no parameter in some components.</div>
+</div><div class="variant-row">
+<div class="scenario">Showing A⁻¹ tends to a finite limit as k → some value ≠ a</div>
+<div class="adjustment">After cancellation, substitute k directly into the simplified entries rather than into the unsimplified fraction.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating det(A) as a single number to divide at the end, instead of factoring it to expose cancellations.</li><li>Believing that because adj(A) entries look messy, the inverse must remain a messy fraction — missing the structural cancellation.</li><li>Confusing &#x27;cancel (k−2)&#x27; with &#x27;set k = 2&#x27;, which would make A singular.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when factoring linear expressions, e.g. writing 4−2k = 2(k−2) instead of −2(k−2).</li><li>Cancelling (k−2) without explicitly recording k ≠ 2 from the non-singularity condition.</li><li>Forgetting cofactor sign pattern, leading to an adj(A) that does not factor cleanly and masking the cancellation.</li><li>Dividing only some entries by det(A) and leaving others in fractional form inconsistently.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure scope: 3×3 matrix inverses via adjugate/determinant, with parameter-dependent entries and the standard non-singularity condition det(A) ≠ 0.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2021-Q3.html" class="example-chip">FP3 Jan 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

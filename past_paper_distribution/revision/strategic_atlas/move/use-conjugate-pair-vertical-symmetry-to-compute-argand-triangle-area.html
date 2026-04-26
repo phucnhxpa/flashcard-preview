@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use conjugate-pair vertical symmetry to compute Argand triangle area — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Argand Geometry</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Use conjugate-pair vertical symmetry to compute Argand triangle area</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Argand Geometry</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Three roots of a polynomial (typically a real cubic) are plotted on an Argand diagram and form a triangle. Two of the roots are a complex conjugate pair $a \pm bi$, and the third is real. Cues include: &#x27;find the area of the triangle formed by the roots&#x27;, &#x27;show on an Argand diagram&#x27;, or a cubic with real coefficients whose roots have already been found. The conjugate pair sits symmetrically across the real axis, instantly giving a vertical edge.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because the polynomial has real coefficients, non-real roots come in conjugate pairs $a+bi$ and $a-bi$, sharing real part $a$. In the Argand plane these are vertically aligned, so the segment joining them is vertical with length $2b$. The third (real) root lies on the real axis, so its perpendicular distance to the vertical line $\operatorname{Re}(z)=a$ is just $|a-x_3|$. The triangle therefore has a built-in right angle between base and height, reducing the area to $\tfrac{1}{2}\times 2b\times|a-x_3|$ with no shoelace or determinant work.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that two of the three plotted points share the same x-coordinate (real part) because they are a conjugate pair — the segment between them is vertical.</li><li>Rules out the shoelace formula and Heron&#x27;s formula as overkill; also rules out side-length computations since they are not needed.</li><li>Commits to base × height because the vertical conjugate segment is automatically perpendicular to the horizontal distance from the real root.</li><li>Bridges to operation: take the conjugate pair as the base of length $2|\operatorname{Im}(z)|$ and the real root&#x27;s horizontal offset as the height.</li><li>Tactically chooses which pair to call &#x27;base&#x27; (the vertical one is easiest), and is careful to subtract real parts (not imaginary parts) for the height.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Read off coordinates: conjugate pair at $(a, b)$ and $(a, -b)$; real root at $(x_3, 0)$.</li><li>Base = vertical segment between the conjugates, length $= 2|b|$.</li><li>Height = perpendicular distance from $(x_3,0)$ to the line $\operatorname{Re}(z)=a$, i.e. $|a-x_3|$.</li><li>Area $= \tfrac{1}{2}\times 2|b|\times|a-x_3| = |b|\,|a-x_3|$.</li><li>Sanity-check by confirming the configuration is isoceles (the real root is equidistant from the two conjugates).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>The cubic $2z^3-21z^2+82z-41=0$ has roots $z=\tfrac12,\;5+4i,\;5-4i$. Plot $A(5,4)$, $B(5,-4)$, $C(\tfrac12,0)$. Base $AB$ is vertical of length $4-(-4)=8$. Height from $C$ to the line $x=5$ is $|5-\tfrac12|=\tfrac92$. Area $=\tfrac12\times 8\times\tfrac92=18$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quartic with two conjugate pairs $a\pm bi$ and $c\pm di$ forming a quadrilateral</div>
+<div class="adjustment">Both diagonals (or one pair of opposite sides) are vertical; split into two triangles sharing a vertical edge, or use the trapezium formula $\tfrac12(2b+2d)|a-c|$ if the pairs sit on parallel vertical lines.</div>
+</div><div class="variant-row">
+<div class="scenario">Three roots all non-real (e.g. cube roots of a complex number)</div>
+<div class="adjustment">No automatic vertical edge; use $\tfrac12|\operatorname{Im}(\overline{z_1}z_2 + \overline{z_2}z_3 + \overline{z_3}z_1)|$ or the shoelace formula on $(\operatorname{Re},\operatorname{Im})$ coordinates.</div>
+</div><div class="variant-row">
+<div class="scenario">Roots of unity or $z^n=k$ giving a regular polygon</div>
+<div class="adjustment">Use rotational symmetry: area $=\tfrac{n}{2}r^2\sin(2\pi/n)$ rather than base × height.</div>
+</div><div class="variant-row">
+<div class="scenario">Triangle with one vertex at the origin and two conjugates</div>
+<div class="adjustment">Origin lies on the real axis, so the same vertical-base / horizontal-height shortcut applies with $x_3=0$, giving area $=|a|\,|b|$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the Argand point $a+bi$ as having coordinates $(b,a)$ instead of $(a,b)$, swapping real and imaginary axes.</li><li>Computing all three side lengths and applying Heron&#x27;s formula — correct but slow and error-prone.</li><li>Assuming the triangle is equilateral because it &#x27;looks symmetric&#x27;, and using $\tfrac{\sqrt3}{4}s^2$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Placing the real root $z=\tfrac12$ at $(0,\tfrac12)$ instead of $(\tfrac12,0)$.</li><li>Taking the base as $|b|$ instead of $2|b|$ (forgetting both endpoints contribute).</li><li>Computing height as $|a|+|x_3|$ when both have the same sign, instead of $|a-x_3|$.</li><li>Forgetting the leading factor $\tfrac12$ in the area formula.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard FP1/FP2 Argand-diagram material: conjugate-root theorem for real-coefficient polynomials and elementary triangle area. No vectors, determinants beyond $2\times2$, or complex-number area identities beyond what is implicit in $\tfrac12\times\text{base}\times\text{height}$ are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jan_2024-Q2.html" class="example-chip">FP1 Jan 2024 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

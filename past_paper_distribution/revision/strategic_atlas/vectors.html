@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Vectors</strong></div>
+  <h1><span class="dot" style="background:#7E57C2;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Vectors</h1>
+  <p>56 canonical strategic moves across 52 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Cross Product Normal</h2>
+  <div class="family-meta">2 canonical moves · 10 example questions</div>
+  <div class="move-list">
+<a href="move/cross-two-in-plane-or-direction-vectors-to-obtain-a-perpendicular-normal.html" class="move-row">
+  <div class="move-name">Cross two in-plane (or direction) vectors to obtain a perpendicular normal</div>
+  <div class="freq-pill">9 questions</div>
+</a>
+<a href="move/use-half-the-cross-product-magnitude-for-triangle-area-in-3d.html" class="move-row">
+  <div class="move-name">Use half the cross product magnitude for triangle area in 3D</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Substitution</h2>
+  <div class="family-meta">2 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-parametric-line-into-plane-equation-to-find-intersection-point.html" class="move-row">
+  <div class="move-name">Substitute parametric line into plane equation to find intersection point</div>
+  <div class="freq-pill">6 questions</div>
+</a>
+<a href="move/parametrise-symmetric-line-form-to-substitute-into-plane-equation.html" class="move-row">
+  <div class="move-name">Parametrise symmetric line form to substitute into plane equation</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Dot Product Angle</h2>
+  <div class="family-meta">2 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/apply-dot-product-formula-with-modulus-to-find-angle-between-directions-in-3d.html" class="move-row">
+  <div class="move-name">Apply dot product formula with modulus to find angle between directions in 3D</div>
+  <div class="freq-pill">5 questions</div>
+</a>
+<a href="move/take-absolute-value-of-normals-dot-product-for-acute-dihedral-angle.html" class="move-row">
+  <div class="move-name">Take absolute value of normals&#x27; dot product for acute dihedral angle</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Intersection Test</h2>
+  <div class="family-meta">2 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/equate-parametric-position-vectors-componentwise-to-test-3d-line-intersection.html" class="move-row">
+  <div class="move-name">Equate parametric position vectors componentwise to test 3D line intersection</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/equate-parametric-lines-with-distinct-parameters-to-test-3d-intersection.html" class="move-row">
+  <div class="move-name">Equate parametric lines with distinct parameters to test 3D intersection</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Scalar Projection Distance</h2>
+  <div class="family-meta">1 canonical moves · 5 example questions</div>
+  <div class="move-list">
+<a href="move/project-connecting-vector-onto-unit-normal-to-obtain-perpendicular-distance.html" class="move-row">
+  <div class="move-name">Project connecting vector onto unit normal to obtain perpendicular distance</div>
+  <div class="freq-pill">5 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Complement Angle Selection</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/use-sine-formula-directly-to-obtain-the-line-plane-angle.html" class="move-row">
+  <div class="move-name">Use sine formula directly to obtain the line-plane angle</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Angle Formula Selection</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/apply-sin-formula-with-direction-and-normal-to-get-line-plane-angle-directly.html" class="move-row">
+  <div class="move-name">Apply sin formula with direction and normal to get line-plane angle directly</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Perpendicular Foot Via Dot Product</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/parametrise-point-on-line-and-impose-dot-product-perpendicularity-to-find-foot.html" class="move-row">
+  <div class="move-name">Parametrise point on line and impose dot-product perpendicularity to find foot</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Scalar Multiple Test</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/test-parallelism-by-extracting-k-from-two-components-and-seeking-contradiction.html" class="move-row">
+  <div class="move-name">Test parallelism by extracting k from two components and seeking contradiction</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Back Substitution</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-the-known-parameter-into-its-own-line-equation-to-extract-the-interse.html" class="move-row">
+  <div class="move-name">Substitute the known parameter into its own line equation to extract the intersection point</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Acute Angle Adjustment</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/take-absolute-value-or-supplement-to-extract-the-acute-angle-for-lines.html" class="move-row">
+  <div class="move-name">Take absolute value or supplement to extract the acute angle for lines</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Distance Equation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/parametrise-point-on-line-and-square-distance-to-solve-for-parameter.html" class="move-row">
+  <div class="move-name">Parametrise point on line and square distance to solve for parameter</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direction Vector Angle</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-dot-product-formula-with-absolute-value-to-find-acute-angle-between-lines.html" class="move-row">
+  <div class="move-name">Apply dot-product formula with absolute value to find acute angle between lines</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Distance Formula</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-point-to-plane-perpendicular-distance-formula-to-compute-shortest-dist.html" class="move-row">
+  <div class="move-name">Apply the point-to-plane perpendicular distance formula to compute shortest distance</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Scalar Triple Product Volume</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-scalar-triple-product-to-compute-tetrahedron-volume.html" class="move-row">
+  <div class="move-name">Apply scalar triple product to compute tetrahedron volume</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Plane Construction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/build-plane-parametrically-from-anchor-on-contained-line-plus-two-spanning-direc.html" class="move-row">
+  <div class="move-name">Build plane parametrically from anchor on contained line plus two spanning directions</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Area Formula Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-½ab-sin-c-when-two-sides-and-included-angle-are-already-known.html" class="move-row">
+  <div class="move-name">Use ½ab sin C when two sides and included angle are already known</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Unit Vector Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/normalize-a-direction-vector-by-dividing-by-its-magnitude.html" class="move-row">
+  <div class="move-name">Normalize a direction vector by dividing by its magnitude</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Sign Interpretation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/retain-both-roots-when-solving-λ²-k-for-points-on-a-line.html" class="move-row">
+  <div class="move-name">Retain both ± roots when solving λ² = k for points on a line</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Inverse Trig Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/isolate-cosθ-via-division-then-apply-arccos-to-extract-the-angle.html" class="move-row">
+  <div class="move-name">Isolate cosθ via division then apply arccos to extract the angle</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direction Alignment</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reverse-one-vector-so-both-emanate-from-the-angles-vertex.html" class="move-row">
+  <div class="move-name">Reverse one vector so both emanate from the angle&#x27;s vertex</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Area Via Sine Product</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reuse-part-a-angle-in-absinθ-for-parallelogram-area.html" class="move-row">
+  <div class="move-name">Reuse part (a) angle in |a||b|sinθ for parallelogram area</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-given-parameter-value-into-line-equation-to-recover-a-specific-point.html" class="move-row">
+  <div class="move-name">Substitute given parameter value into line equation to recover a specific point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Shortcut Via Perpendicularity</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-right-angle-at-vertex-to-reduce-triangle-area-to-half-product-of-legs.html" class="move-row">
+  <div class="move-name">Exploit right angle at vertex to reduce triangle area to half-product of legs</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direction From Points</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/compute-direction-vector-as-displacement-between-two-given-points.html" class="move-row">
+  <div class="move-name">Compute direction vector as displacement between two given points</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Vector Path Chaining</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/chain-displacement-vectors-via-triangle-law-to-find-a-position-vector.html" class="move-row">
+  <div class="move-name">Chain displacement vectors via triangle law to find a position vector</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Displacement From Positions</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/subtract-position-vectors-to-obtain-a-displacement-vector.html" class="move-row">
+  <div class="move-name">Subtract position vectors to obtain a displacement vector</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Perpendicularity To Equation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-perpendicularity-condition-into-algebraic-equation-via-dot-product.html" class="move-row">
+  <div class="move-name">Convert perpendicularity condition into algebraic equation via dot product</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Magnitude From Components</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/find-shortest-distance-as-magnitude-of-foot-of-perpendicular-displacement.html" class="move-row">
+  <div class="move-name">Find shortest distance as magnitude of foot-of-perpendicular displacement</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Overdetermined System Check</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/solve-two-equations-then-verify-the-third-to-confirm-intersection.html" class="move-row">
+  <div class="move-name">Solve two equations then verify the third to confirm intersection</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Midpoint Reflection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/invert-midpoint-relation-to-reflect-a-point-via-its-foot-of-perpendicular.html" class="move-row">
+  <div class="move-name">Invert midpoint relation to reflect a point via its foot of perpendicular</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Proof By Definition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks.html" class="move-row">
+  <div class="move-name">Split skew-lines proof into non-parallel and non-intersecting checks</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Perpendicularity Condition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/impose-perpendicularity-via-dot-product-to-locate-foot-of-perpendicular.html" class="move-row">
+  <div class="move-name">Impose perpendicularity via dot product to locate foot of perpendicular</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strategic Elimination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/solve-parameter-free-equations-first-use-third-as-consistency-check.html" class="move-row">
+  <div class="move-name">Solve parameter-free equations first, use third as consistency check</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Representation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/parametrise-a-general-point-on-a-line-using-λ.html" class="move-row">
+  <div class="move-name">Parametrise a general point on a line using λ</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Vector Subtraction For Distance</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/form-displacement-vector-from-fixed-point-to-parametrised-point.html" class="move-row">
+  <div class="move-name">Form displacement vector from fixed point to parametrised point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Overdetermined Inconsistency</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/solve-two-equations-substitute-into-the-third-to-expose-contradiction.html" class="move-row">
+  <div class="move-name">Solve two equations, substitute into the third to expose contradiction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter To Coordinates</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/back-substitute-parameter-values-into-line-equation-to-recover-position-vectors.html" class="move-row">
+  <div class="move-name">Back-substitute parameter values into line equation to recover position vectors</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Elimination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-vector-parametric-forms-component-wise-to-test-intersection.html" class="move-row">
+  <div class="move-name">Equate vector parametric forms component-wise to test intersection</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Consistency Check</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/verify-parameters-in-the-unused-third-equation-to-confirm-intersection.html" class="move-row">
+  <div class="move-name">Verify parameters in the unused third equation to confirm intersection</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Squaring To Remove Root</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/square-magnitude-equation-to-obtain-quadratic-in-parameter.html" class="move-row">
+  <div class="move-name">Square magnitude equation to obtain quadratic in parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Scalar Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/divide-normal-vector-by-its-gcd-before-plane-and-distance-work.html" class="move-row">
+  <div class="move-name">Divide normal vector by its GCD before plane and distance work</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parallel Line Construction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reuse-direction-vector-to-build-parallel-line-through-new-point.html" class="move-row">
+  <div class="move-name">Reuse direction vector to build parallel line through new point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Proof Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks-vectors.html" class="move-row">
+  <div class="move-name">Split skew-lines proof into non-parallel and non-intersecting checks</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Projection Onto Normal</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-perpendicular-distance-formula-from-point-to-plane.html" class="move-row">
+  <div class="move-name">Apply perpendicular distance formula from point to plane</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Projection Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/find-triangle-area-by-dropping-a-perpendicular-onto-a-known-line.html" class="move-row">
+  <div class="move-name">Find triangle area by dropping a perpendicular onto a known line</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Common Origin Vectors</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/anchor-displacement-vectors-at-a-common-vertex-for-crosstriple-products.html" class="move-row">
+  <div class="move-name">Anchor displacement vectors at a common vertex for cross/triple products</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Constraint Encoding</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/encode-line-lies-in-plane-by-setting-direction-perpendicular-to-normal.html" class="move-row">
+  <div class="move-name">Encode line-lies-in-plane by setting direction perpendicular to normal</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Free Parameter Specialisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-one-coordinate-to-zero-to-find-a-point-on-a-planeplane-intersection-line.html" class="move-row">
+  <div class="move-name">Set one coordinate to zero to find a point on a plane–plane intersection line</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Homogeneous Reduction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reduce-homogeneous-direction-vector-equation-to-single-ratio-k-ab.html" class="move-row">
+  <div class="move-name">Reduce homogeneous direction-vector equation to single ratio k = a/b</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Scalar Equivalence</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rescale-normal-vector-by-its-gcd-to-match-target-plane-form.html" class="move-row">
+  <div class="move-name">Rescale normal vector by its GCD to match target plane form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Point On Plane Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-a-known-point-into-a-plane-equation-to-find-the-missing-constant-or-c.html" class="move-row">
+  <div class="move-name">Substitute a known point into a plane equation to find the missing constant or coordinate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

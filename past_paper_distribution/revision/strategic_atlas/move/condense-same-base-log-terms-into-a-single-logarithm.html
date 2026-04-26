@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condense same-base log terms into a single logarithm — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Log Condensation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Condense same-base log terms into a single logarithm</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Log Condensation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>An equation contains two or more logarithms with the same base on one side, often together with a constant or another isolated log. Cues include expressions like $\log_b A \pm \log_b B = c$ or $\log_b A = \log_b B + c$. The move also fires when coefficients sit in front of logs (e.g. $2\log_3 x$) that can be absorbed via the power rule before combining.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The log laws $\log_b A + \log_b B = \log_b(AB)$ and $\log_b A - \log_b B = \log_b(A/B)$ collapse multiple log terms into one, producing the canonical form $\log_b(\text{expression}) = \text{constant}$. From this form a single exponential conversion removes the logarithm and leaves a polynomial or rational equation in $x$. Without condensing first, one would need to exponentiate a sum/difference of logs, which is algebraically awkward and error-prone.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice multiple $\log_3$ terms plus a constant — this is a log equation, not an identity to verify.</li><li>I rule out exponentiating term-by-term (you cannot apply $3^{(\cdot)}$ across a sum of logs cleanly) and rule out equating arguments (no matching $\log = \log$ form yet).</li><li>I commit to condensing because the same base appears on every log term, so the product/quotient laws apply directly.</li><li>First concrete step: move all log terms to one side and the constant to the other, so the laws have a clean target.</li><li>Tactically, I check for coefficients (apply power rule first) and for sign (subtraction → quotient, addition → product) before combining.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Collect all log terms on one side and constants on the other.</li><li>If any log has a coefficient $k$, rewrite $k\log_b A = \log_b A^k$ using the power rule.</li><li>Apply $\log_b A + \log_b B = \log_b(AB)$ or $\log_b A - \log_b B = \log_b(A/B)$ to obtain a single log.</li><li>Convert $\log_b(\text{expr}) = c$ to exponential form $\text{expr} = b^c$.</li><li>Solve the resulting algebraic equation and check each candidate against the domain (arguments $&gt;0$).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $\log_3(x+5) - \log_3(2x-1) = 4$.
+Condense: $\log_3\!\left(\dfrac{x+5}{2x-1}\right) = 4$.
+Exponential form: $\dfrac{x+5}{2x-1} = 3^4 = 81$.
+Then $x+5 = 81(2x-1)$, giving $161x = 86$, so $x = \tfrac{86}{161}$.
+Check: $x+5>0$ and $2x-1>0$ must both hold (here the second fails, so reject and report no solution).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Sum of logs equal to a constant, e.g. $\log_2 x + \log_2(x-3) = 2$</div>
+<div class="adjustment">Use the product rule: $\log_2(x(x-3)) = 2$, then $x(x-3)=4$.</div>
+</div><div class="variant-row">
+<div class="scenario">Coefficient in front of a log, e.g. $2\log_5 x - \log_5(x+6) = 0$</div>
+<div class="adjustment">Apply power rule first: $\log_5(x^2/(x+6)) = 0$, so $x^2/(x+6) = 1$.</div>
+</div><div class="variant-row">
+<div class="scenario">Log equals log, e.g. $\log_b A = \log_b B$ after condensing both sides</div>
+<div class="adjustment">Skip exponential conversion; equate arguments $A = B$ directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Natural logs in calculus contexts, e.g. $\ln(2x) - \ln(x+1) = 1$</div>
+<div class="adjustment">Same condensation; convert via $e$ instead of $b$: argument $= e^1$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\log_b A - \log_b B$ as $\log_b(A-B)$ instead of $\log_b(A/B)$.</li><li>Trying to exponentiate each log term separately (e.g. $b^{\log_b A} - b^{\log_b B}$) rather than condensing first.</li><li>Ignoring a coefficient and combining $2\log_b A + \log_b B$ as $\log_b(2AB)$ instead of $\log_b(A^2 B)$.</li><li>Mistaking different-base logs as combinable (the rule requires the same base).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to check that all original log arguments are positive at the candidate solution; extraneous roots are common.</li><li>Sign errors when moving log terms across the equals sign (subtraction vs addition mismatch).</li><li>Misapplying the power rule when the coefficient multiplies only part of an expression (e.g. $2\log_b(x+1) \ne \log_b(2x+2)$; it equals $\log_b((x+1)^2)$).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 logarithm work: log laws, change to exponential form, and domain checks for log arguments. No use of complex logs or change-of-base beyond the standard A-level identities.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Oct_2020-Q9.html" class="example-chip">P2 Oct 2020 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

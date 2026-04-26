@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Truncate series early to control algebraic complexity — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Order Management</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Truncate series early to control algebraic complexity</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Order Management</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question specifies a definite truncation point such as &#x27;up to and including the term in x^n&#x27;, &#x27;first four non-zero terms&#x27;, or &#x27;in ascending powers of x as far as the term in x^4&#x27;. It also fires whenever a Maclaurin/binomial expansion is to be multiplied, substituted, or composed with another series. Any phrasing that fixes a target degree n upfront is the cue.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Computing terms beyond the required order is wasted effort and creates opportunities for arithmetic slips. By committing to a maximum degree n at the outset, every subsequent multiplication, substitution, or addition can immediately discard contributions of degree greater than n. This is especially important when multiplying or composing series, where cross-terms grow combinatorially. The principle relies on the fact that higher-order terms in one factor cannot lower the degree of their products with another factor&#x27;s terms.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the explicit phrase &#x27;up to and including x^n&#x27; or &#x27;first k non-zero terms&#x27; and translate it into a single integer N = target degree.</li><li>Rule out any approach that expands everything fully and simplifies later — that path multiplies error risk.</li><li>Commit to carrying &#x27;+ O(x^{N+1})&#x27; (or &#x27;+ ...&#x27;) through every line so truncation is visible and disciplined.</li><li>Bridge: rewrite each factor to its own minimal degree needed, then plan which cross-products (i,j) with i+j ≤ N are required.</li><li>Tactical decision: when raising a series to a power u^k, stop computing u^k once the lowest-degree term of u^k exceeds N.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the target degree N from the question (or convert &#x27;first k non-zero terms&#x27; to a degree).</li><li>Expand each component series only up to degree N, writing &#x27;+ ...&#x27; to signal truncation.</li><li>When multiplying two series A·B for target degree N, list only pairs (i,j) with i+j ≤ N and sum their products.</li><li>When substituting u = g(x) (with g(0)=0) into a series Σ a_k u^k, compute u^k only while k·(lowest degree of g) ≤ N.</li><li>Collect like powers, double-check no required cross-term has been dropped, then state the answer with the agreed truncation.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the expansion of $e^x \sin x$ up to and including $x^4$. Take $e^x = 1 + x + \tfrac{x^2}{2} + \tfrac{x^3}{6} + \tfrac{x^4}{24} + \dots$ and $\sin x = x - \tfrac{x^3}{6} + \dots$. Only keep products with total degree $\le 4$: $1\cdot x = x$, $x\cdot x = x^2$, $\tfrac{x^2}{2}\cdot x = \tfrac{x^3}{2}$, $1\cdot(-\tfrac{x^3}{6}) = -\tfrac{x^3}{6}$, $\tfrac{x^3}{6}\cdot x = \tfrac{x^4}{6}$, $x\cdot(-\tfrac{x^3}{6}) = -\tfrac{x^4}{6}$. Sum: $x + x^2 + \tfrac{x^3}{3} + 0\cdot x^4 + \dots$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Binomial expansion (1+ax)^n multiplied by a polynomial</div>
+<div class="adjustment">Decide how many binomial terms are needed: if multiplied by a polynomial of degree d and target is N, take binomial terms up to degree N − 0 (since constant in poly pairs with degree N in binomial), but stop at degree N overall in any product.</div>
+</div><div class="variant-row">
+<div class="scenario">Composing series, e.g. ln(1 + sin x) up to x^n</div>
+<div class="adjustment">Substitute u = sin x truncated to degree N, then in ln(1+u) = u − u^2/2 + u^3/3 − ... only compute u^k while the leading degree of u^k ≤ N.</div>
+</div><div class="variant-row">
+<div class="scenario">Integrating/differentiating a Maclaurin series</div>
+<div class="adjustment">Differentiation lowers all degrees by 1, integration raises by 1; adjust the working truncation degree accordingly so the final answer still reaches degree N.</div>
+</div><div class="variant-row">
+<div class="scenario">Using truncated series to estimate a definite integral to given d.p.</div>
+<div class="adjustment">Choose N so that the first discarded term, after integration, is bounded below the required accuracy (e.g. &lt; 0.00005 for 4 d.p.).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing &#x27;first four non-zero terms&#x27; with &#x27;up to x^4&#x27; — for an odd-only series like sin x, four non-zero terms reach x^7.</li><li>Confusing &#x27;up to and including x^3&#x27; with &#x27;up to but not including x^3&#x27;.</li><li>Treating &#x27;in ascending powers of x as far as the term in x^n&#x27; as &#x27;exactly n+1 terms&#x27; rather than &#x27;all powers ≤ n&#x27;.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Truncating a factor too early so a needed cross-term is missing — e.g. dropping the x^3 term of one series when it pairs with the constant term of the other to give x^3 in the product.</li><li>Forgetting that u = g(x) must have g(0)=0 before bounding u^k by leading-degree arguments; otherwise infinitely many u^k contribute to each degree.</li><li>Carrying inconsistent truncation across lines (some terms kept to x^4, others to x^3), causing missing or spurious final coefficients.</li><li>Using a binomial expansion outside its radius of convergence after truncation, then trusting the truncated polynomial outside |x| &lt; 1.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Applies throughout Edexcel IAL Pure (binomial series for rational/negative indices, Maclaurin/Taylor series in Further Pure) whenever an expansion is requested to a stated order or used inside a product, quotient, composition, or integration.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch6/q-Specimen_2018-Q5.html" class="example-chip">FP2 Specimen 2018 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

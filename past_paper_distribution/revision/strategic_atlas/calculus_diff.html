@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiation — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Differentiation</strong></div>
+  <h1><span class="dot" style="background:#FF6B35;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Differentiation</h1>
+  <p>113 canonical strategic moves across 80 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Implicit Differentiation</h2>
+  <div class="family-meta">9 canonical moves · 43 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-implicitly-to-obtain-dydx-without-isolating-y.html" class="move-row">
+  <div class="move-name">Differentiate implicitly to obtain dy/dx without isolating y</div>
+  <div class="freq-pill">14 questions</div>
+</a>
+<a href="move/differentiate-implicitly-when-y-cannot-be-cleanly-isolated.html" class="move-row">
+  <div class="move-name">Differentiate implicitly when y cannot be cleanly isolated</div>
+  <div class="freq-pill">13 questions</div>
+</a>
+<a href="move/implicitly-differentiate-a-conics-cartesian-equation-to-obtain-dydx-for-a-tangen.html" class="move-row">
+  <div class="move-name">Implicitly differentiate a conic&#x27;s Cartesian equation to obtain dy/dx for a tangent/normal at a parametric point</div>
+  <div class="freq-pill">6 questions</div>
+</a>
+<a href="move/apply-implicit-differentiation-to-obtain-dydx-on-a-curve-given-by-fxy0.html" class="move-row">
+  <div class="move-name">Apply implicit differentiation to obtain dy/dx on a curve given by F(x,y)=0</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/differentiate-implicitly-treating-y-as-a-function-of-x-to-extract-dydx.html" class="move-row">
+  <div class="move-name">Differentiate implicitly treating y as a function of x to extract dy/dx</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/differentiate-implicitly-term-by-term-using-product-and-chain-rules-to-obtain-dy.html" class="move-row">
+  <div class="move-name">Differentiate implicitly term-by-term using product and chain rules to obtain dy/dx</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/choose-expanded-polynomial-form-over-factored-form-before-differentiating.html" class="move-row">
+  <div class="move-name">Choose expanded polynomial form over factored form before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/differentiate-implicitly-attaching-dydx-to-every-y-term-via-chain-rule.html" class="move-row">
+  <div class="move-name">Differentiate implicitly, attaching dy/dx to every y-term via chain rule</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/choose-quotient-rule-over-logarithmic-differentiation-when-iterating-derivatives.html" class="move-row">
+  <div class="move-name">Choose quotient rule over logarithmic differentiation when iterating derivatives</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Product Rule Selection</h2>
+  <div class="family-meta">6 canonical moves · 31 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-product-rule-with-chain-rule-on-composite-factors-to-differentiate-uv.html" class="move-row">
+  <div class="move-name">Apply the product rule (with chain rule on composite factors) to differentiate uv</div>
+  <div class="freq-pill">17 questions</div>
+</a>
+<a href="move/apply-the-product-rule-when-two-x-dependent-factors-are-multiplied.html" class="move-row">
+  <div class="move-name">Apply the product rule when two x-dependent factors are multiplied</div>
+  <div class="freq-pill">6 questions</div>
+</a>
+<a href="move/apply-the-product-rule-when-a-term-is-two-x-dependent-factors-multiplied.html" class="move-row">
+  <div class="move-name">Apply the product rule when a term is two x-dependent factors multiplied</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/select-the-product-rule-to-differentiate-a-product-of-two-non-trivial-functions.html" class="move-row">
+  <div class="move-name">Select the product rule to differentiate a product of two non-trivial functions</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-the-product-rule-to-mixed-xy-terms-during-implicit-differentiation.html" class="move-row">
+  <div class="move-name">Apply the product rule to mixed x–y terms during implicit differentiation</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-product-rule-to-polynomial-times-exponential-with-internal-chain-rules.html" class="move-row">
+  <div class="move-name">Apply product rule to polynomial-times-exponential with internal chain rules</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Differentiation</h2>
+  <div class="family-meta">3 canonical moves · 10 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-parametrically-via-chain-rule-to-obtain-dydx-in-the-parameter.html" class="move-row">
+  <div class="move-name">Differentiate parametrically via chain rule to obtain dy/dx in the parameter</div>
+  <div class="freq-pill">6 questions</div>
+</a>
+<a href="move/apply-the-parametric-chain-rule-dydx-dydtdxdt-to-find-a-gradient.html" class="move-row">
+  <div class="move-name">Apply the parametric chain rule dy/dx = (dy/dt)/(dx/dt) to find a gradient</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/differentiate-parametrically-instead-of-eliminating-the-parameter.html" class="move-row">
+  <div class="move-name">Differentiate parametrically instead of eliminating the parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Stationary Point Condition</h2>
+  <div class="family-meta">5 canonical moves · 9 example questions</div>
+  <div class="move-list">
+<a href="move/set-derivative-equal-to-zero-to-locate-stationary-points.html" class="move-row">
+  <div class="move-name">Set derivative equal to zero to locate stationary points</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/set-the-numerator-of-dydx-to-zero-to-locate-stationary-points.html" class="move-row">
+  <div class="move-name">Set the numerator of dy/dx to zero to locate stationary points</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/differentiate-quadratic-and-solve-dydx-0-to-locate-vertex.html" class="move-row">
+  <div class="move-name">Differentiate quadratic and solve dy/dx = 0 to locate vertex</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/find-range-via-interior-minimum-when-both-endpoints-diverge-to.html" class="move-row">
+  <div class="move-name">Find range via interior minimum when both endpoints diverge to +∞</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/differentiate-composite-trig-via-chain-rule-and-set-derivative-to-zero.html" class="move-row">
+  <div class="move-name">Differentiate composite trig via chain rule and set derivative to zero</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Chain Rule</h2>
+  <div class="family-meta">5 canonical moves · 9 example questions</div>
+  <div class="move-list">
+<a href="move/apply-chain-rule-to-differentiate-composite-function-as-outerinner-derivative.html" class="move-row">
+  <div class="move-name">Apply chain rule to differentiate composite function as outer×inner derivative</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/apply-chain-rule-to-differentiate-composite-functions-with-linear-inner-argument.html" class="move-row">
+  <div class="move-name">Apply chain rule to differentiate composite functions with linear inner argument</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-layered-chain-rule-preserving-structure-useful-for-back-substitution.html" class="move-row">
+  <div class="move-name">Apply layered chain rule preserving structure useful for back-substitution</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/bridge-volume-and-depth-rates-via-chain-rule-dhdt-dvdtdvdh.html" class="move-row">
+  <div class="move-name">Bridge volume and depth rates via chain rule dh/dt = (dV/dt)/(dV/dh)</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/differentiate-dydx²-via-chain-rule-as-2yy.html" class="move-row">
+  <div class="move-name">Differentiate (dy/dx)² via chain rule as 2y&#x27;·y&#x27;&#x27;</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Gradient Evaluation</h2>
+  <div class="family-meta">2 canonical moves · 8 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-point-coordinates-into-dydx-to-obtain-numerical-tangent-gradient.html" class="move-row">
+  <div class="move-name">Substitute point coordinates into dy/dx to obtain numerical tangent gradient</div>
+  <div class="freq-pill">7 questions</div>
+</a>
+<a href="move/evaluate-derivative-at-given-x-to-obtain-gradient-at-a-point.html" class="move-row">
+  <div class="move-name">Evaluate derivative at given x to obtain gradient at a point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Product Rule Within Implicit</h2>
+  <div class="family-meta">1 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-product-rule-to-a-mixed-xy-term-during-implicit-differentiation.html" class="move-row">
+  <div class="move-name">Apply the product rule to a mixed x·y term during implicit differentiation</div>
+  <div class="freq-pill">7 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Index Law Rewrite</h2>
+  <div class="family-meta">3 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-surds-and-reciprocals-as-index-powers-before-applying-the-power-rule.html" class="move-row">
+  <div class="move-name">Rewrite surds and reciprocals as index powers before applying the power rule</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/rewrite-surd-as-fractional-exponent-to-enable-power-chain-differentiation.html" class="move-row">
+  <div class="move-name">Rewrite surd as fractional exponent to enable power-chain differentiation</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/rewrite-roots-and-reciprocal-terms-as-xn-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite roots and reciprocal terms as x^n before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reciprocal Derivative</h2>
+  <div class="family-meta">3 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-x-with-respect-to-y-then-reciprocate-to-obtain-dydx.html" class="move-row">
+  <div class="move-name">Differentiate x with respect to y then reciprocate to obtain dy/dx</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/invert-dydx-to-get-dxdy-via-reciprocal-identity.html" class="move-row">
+  <div class="move-name">Invert dy/dx to get dx/dy via reciprocal identity</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/differentiate-inverse-trig-via-x-siny-form-and-reciprocate.html" class="move-row">
+  <div class="move-name">Differentiate inverse trig via x = sin(y) form and reciprocate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Analysis</h2>
+  <div class="family-meta">6 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/convert-f-is-increasing-into-the-inequality-fx-0.html" class="move-row">
+  <div class="move-name">Convert &#x27;f is increasing&#x27; into the inequality f&#x27;(x) &gt; 0</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/sign-analyze-derivative-components-to-conclude-monotonicity.html" class="move-row">
+  <div class="move-name">Sign-analyze derivative components to conclude monotonicity</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/reduce-fraction-equals-zero-to-numerator-equals-zero-via-positive-denominator.html" class="move-row">
+  <div class="move-name">Reduce fraction-equals-zero to numerator-equals-zero via positive denominator</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/classify-a-stationary-point-via-first-derivative-sign-change.html" class="move-row">
+  <div class="move-name">Classify a stationary point via first-derivative sign change</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/deduce-monotonicity-of-ff-from-sign-of-f-via-chain-rule.html" class="move-row">
+  <div class="move-name">Deduce monotonicity of f∘f from sign of f&#x27; via chain rule</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/discard-strictly-positive-factors-when-solving-product-0.html" class="move-row">
+  <div class="move-name">Discard strictly-positive factors when solving product = 0</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Expand Then Differentiate</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/expand-product-of-polynomial-factors-before-applying-the-power-rule-term-by-term.html" class="move-row">
+  <div class="move-name">Expand product of polynomial factors before applying the power rule term-by-term</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Newton Raphson Iteration</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/apply-newton-raphson-iteration-via-x-n1-x-n-fx-nfx-n-to-refine-a-root-estimate.html" class="move-row">
+  <div class="move-name">Apply Newton-Raphson iteration via x_{n+1} = x_n − f(x_n)/f&#x27;(x_n) to refine a root estimate</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Pre Differentiation Simplification</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-into-sum-of-simple-terms-form-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite into sum-of-simple-terms form before differentiating</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Gradient At Point</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-then-substitute-x-coordinate-to-get-gradient-at-a-point.html" class="move-row">
+  <div class="move-name">Differentiate then substitute x-coordinate to get gradient at a point</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-sum-of-axn-terms.html" class="move-row">
+  <div class="move-name">Differentiate term-by-term using the power rule on a sum of ax^n terms</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Derivative As Gradient</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-curve-and-substitute-x-coordinate-to-obtain-tangent-gradient.html" class="move-row">
+  <div class="move-name">Differentiate curve and substitute x-coordinate to obtain tangent gradient</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Never Zero</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/discard-the-exponential-factor-since-efx-0-to-reduce-to-an-algebraic-equation.html" class="move-row">
+  <div class="move-name">Discard the exponential factor since e^{f(x)} &gt; 0 to reduce to an algebraic equation</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Gradient Equation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/equate-derivative-to-given-gradient-to-form-solvable-equation.html" class="move-row">
+  <div class="move-name">Equate derivative to given gradient to form solvable equation</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Evaluate At Point</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-the-given-point-into-dydx-to-obtain-the-tangent-gradient.html" class="move-row">
+  <div class="move-name">Substitute the given point into dy/dx to obtain the tangent gradient</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Fraction Zero Condition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/set-numerator-of-dydx-fraction-to-zero-to-locate-stationary-points.html" class="move-row">
+  <div class="move-name">Set numerator of dy/dx fraction to zero to locate stationary points</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>First Principles Setup</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/parametrize-q-as-ah-fah-to-form-the-chord-gradient-difference-quotient.html" class="move-row">
+  <div class="move-name">Parametrize Q as (a+h, f(a+h)) to form the chord-gradient difference quotient</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Application</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-prepared-sum.html" class="move-row">
+  <div class="move-name">Differentiate term-by-term using the power rule on a prepared sum</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangent Line Construction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-derivative-at-given-x-to-construct-tangent-line-equation.html" class="move-row">
+  <div class="move-name">Evaluate derivative at given x to construct tangent line equation</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Asymptotic Analysis</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/take-t-limit-of-decaying-exponential-to-identify-horizontal-asymptotemodel-ceili.html" class="move-row">
+  <div class="move-name">Take t→∞ limit of decaying exponential to identify horizontal asymptote/model ceiling</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Domain Validation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/validate-candidate-values-against-the-functions-domain-and-range-to-reject-extra.html" class="move-row">
+  <div class="move-name">Validate candidate values against the function&#x27;s domain and range to reject extraneous cases</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangent Via Derivative</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-and-evaluate-at-the-given-point-to-obtain-the-tangent-gradient.html" class="move-row">
+  <div class="move-name">Differentiate and evaluate at the given point to obtain the tangent gradient</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution Bridge</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/bridge-between-variables-using-the-defining-equation-or-a-shared-parameter.html" class="move-row">
+  <div class="move-name">Bridge between variables using the defining equation or a shared parameter</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Systematic Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-repeatedly-and-evaluate-at-the-expansion-point-to-obtain-taylormac.html" class="move-row">
+  <div class="move-name">Differentiate repeatedly and evaluate at the expansion point to obtain Taylor/Maclaurin coefficients</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangent Gradient Matching</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/match-curves-derivative-to-required-line-gradient-to-locate-tangent-point.html" class="move-row">
+  <div class="move-name">Match curve&#x27;s derivative to required line gradient to locate tangent point</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Inverse Function Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-the-inverse-relation-and-reciprocate-to-obtain-dydx.html" class="move-row">
+  <div class="move-name">Differentiate the inverse relation and reciprocate to obtain dy/dx</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Quotient Rule</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-quotient-rule-to-differentiate-a-ratio-of-two-functions.html" class="move-row">
+  <div class="move-name">Apply the quotient rule to differentiate a ratio of two functions</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Of Derivative</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/analyse-sign-of-fx-to-prove-monotonicity-or-classify-stationary-points.html" class="move-row">
+  <div class="move-name">Analyse sign of f&#x27;(x) to prove monotonicity or classify stationary points</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Curve Sketching For Solutions</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/sketch-curve-via-end-behaviour-and-turning-points-to-count-solutions-of-fxk.html" class="move-row">
+  <div class="move-name">Sketch curve via end-behaviour and turning points to count solutions of f(x)=k</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric To Algebraic Translation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/translate-tangent-gradient-conditions-into-algebraic-equations-on-dydx.html" class="move-row">
+  <div class="move-name">Translate tangent gradient conditions into algebraic equations on dy/dx</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Related Rates Chain Rule Bridge</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/bridge-known-and-target-rates-via-the-chain-rule-through-a-shared-variable.html" class="move-row">
+  <div class="move-name">Bridge known and target rates via the chain rule through a shared variable</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Gradient Condition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-derivative-equal-to-given-gradient-to-locate-tangent-point.html" class="move-row">
+  <div class="move-name">Set derivative equal to given gradient to locate tangent point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-polynomial-and-evaluate-to-find-tangent-gradient-at-a-point.html" class="move-row">
+  <div class="move-name">Differentiate polynomial and evaluate to find tangent gradient at a point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Extension</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-power-rule-directly-to-fractional-and-negative-exponents.html" class="move-row">
+  <div class="move-name">Apply the power rule directly to fractional and negative exponents</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Form Conversion For Power Rule</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-factored-polynomial-before-differentiating-term-by-term.html" class="move-row">
+  <div class="move-name">Expand factored polynomial before differentiating term by term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Preparation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-polynomial-over-power-of-x-fraction-into-separate-xn-terms-before-differen.html" class="move-row">
+  <div class="move-name">Split polynomial-over-power-of-x fraction into separate x^n terms before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter Elimination Via Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-that-additive-constants-vanish-under-differentiation-to-bypass-unknowns.html" class="move-row">
+  <div class="move-name">Exploit that additive constants vanish under differentiation to bypass unknowns</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponent Rewrite</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-surds-and-reciprocals-as-powers-of-x-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite surds and reciprocals as powers of x before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangent Form Interpretation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/read-tangent-form-y-k-as-a-zero-gradient-condition.html" class="move-row">
+  <div class="move-name">Read tangent form y = k as a zero-gradient condition</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sequential Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-the-first-derivative-to-obtain-the-second-derivative.html" class="move-row">
+  <div class="move-name">Differentiate the first derivative to obtain the second derivative</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Tangency Gradient Match</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-derivative-to-lines-gradient-to-locate-tangent-point.html" class="move-row">
+  <div class="move-name">Equate derivative to line&#x27;s gradient to locate tangent point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter Determination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-the-given-x-value-into-both-derivatives-then-equate-to-solve-for-the-.html" class="move-row">
+  <div class="move-name">Substitute the given x-value into both derivatives, then equate to solve for the parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Derivative Equation Formation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-fx-and-fx-generally-to-form-a-quadratic-in-x.html" class="move-row">
+  <div class="move-name">Equate f&#x27;(x) and f&#x27;&#x27;(x) generally to form a quadratic in x</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Preparation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-fractional-terms-as-negative-powers-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite fractional terms as negative powers before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Verify By Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-given-x-value-into-derivative-to-verify-stationary-point.html" class="move-row">
+  <div class="move-name">Substitute given x-value into derivative to verify stationary point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strategic Form Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-the-simplified-show-that-form-not-the-original-expression.html" class="move-row">
+  <div class="move-name">Differentiate the simplified show-that form, not the original expression</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linearity Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-or-integrate-term-by-term-using-linearity-on-a-sum-of-power-terms.html" class="move-row">
+  <div class="move-name">Differentiate or integrate term-by-term using linearity on a sum of power terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Counter Example By Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-derivative-at-given-x-values-to-disprove-stationarity.html" class="move-row">
+  <div class="move-name">Evaluate derivative at given x-values to disprove stationarity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Preprocessing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-constant-over-linear-as-negative-power-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite constant-over-linear as negative power before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Physical Interpretation Of Derivative</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-exponential-model-and-evaluate-derivative-as-instantaneous-rate.html" class="move-row">
+  <div class="move-name">Differentiate exponential model and evaluate derivative as instantaneous rate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Structured Factorisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/extract-common-bracket-from-quotient-rule-numerator-to-fully-factorise.html" class="move-row">
+  <div class="move-name">Extract common bracket from quotient-rule numerator to fully factorise</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Index Form Preparation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-roots-and-reciprocals-as-index-powers-before-differentiating.html" class="move-row">
+  <div class="move-name">Rewrite roots and reciprocals as index powers before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Factor Before Solving</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-common-power-before-solving-derivative-equal-to-zero.html" class="move-row">
+  <div class="move-name">Factor common power before solving derivative equal to zero</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Rule Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/select-quotient-rule-when-target-form-shows-v²-in-denominator.html" class="move-row">
+  <div class="move-name">Select quotient rule when target form shows v² in denominator</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Second Derivative Classification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-second-derivative-test-to-filter-minima-from-multiple-stationary-points.html" class="move-row">
+  <div class="move-name">Use second derivative test to filter minima from multiple stationary points</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Condition Recycling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recycle-the-stationarity-equation-to-simplify-back-substitution.html" class="move-row">
+  <div class="move-name">Recycle the stationarity equation to simplify back-substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Factor Then Analyse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-derivative-to-expose-zero-product-structure.html" class="move-row">
+  <div class="move-name">Factor derivative to expose zero-product structure</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Extreme Value Theorem</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/find-range-on-closed-interval-via-endpoints-and-interior-critical-points.html" class="move-row">
+  <div class="move-name">Find range on closed interval via endpoints and interior critical points</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Zero Product Elimination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/eliminate-always-nonzero-factors-to-reduce-a-stationary-point-equation.html" class="move-row">
+  <div class="move-name">Eliminate always-nonzero factors to reduce a stationary-point equation</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Back Substitution Into Original</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-stationary-x-value-into-original-equation-for-y-coordinate.html" class="move-row">
+  <div class="move-name">Substitute stationary x-value into original equation for y-coordinate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Range From Turning Point</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/combine-derivative-sign-change-with-end-behaviour-to-state-range.html" class="move-row">
+  <div class="move-name">Combine derivative sign change with end-behaviour to state range</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-at-via-the-rule-ddtat-at-ln-a.html" class="move-row">
+  <div class="move-name">Differentiate a^t via the rule d/dt(a^t) = a^t ln a</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Common Factor Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-the-lowest-fractional-power-to-merge-product-rule-terms.html" class="move-row">
+  <div class="move-name">Factor out the lowest fractional power to merge product-rule terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Dominance Argument</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-exponential-beats-polynomial-dominance-to-extract-horizontal-asymptote.html" class="move-row">
+  <div class="move-name">Use exponential-beats-polynomial dominance to extract horizontal asymptote</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Connected Rates Of Change</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/bridge-drdt-via-chain-rule-using-dvdt-and-dvdr.html" class="move-row">
+  <div class="move-name">Bridge dr/dt via chain rule using dV/dt and dV/dr</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Point Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-given-point-coordinates-into-implicit-dydx-for-numerical-gradient.html" class="move-row">
+  <div class="move-name">Substitute given point coordinates into implicit dy/dx for numerical gradient</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Constant Rate Inversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/invert-constant-rate-by-dividing-total-volume-by-flow-rate.html" class="move-row">
+  <div class="move-name">Invert constant rate by dividing total volume by flow rate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Evaluate Implicit Derivative</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-point-coordinates-into-implicit-derivative-to-find-tangent-gradient.html" class="move-row">
+  <div class="move-name">Substitute point coordinates into implicit derivative to find tangent gradient</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Explicit Rearrangement</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rearrange-implicit-product-to-explicit-y-fx-before-differentiating.html" class="move-row">
+  <div class="move-name">Rearrange implicit product to explicit y = f(x) before differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Logarithmic Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/take-ln-of-both-sides-to-differentiate-variable-base-variable-exponent-forms.html" class="move-row">
+  <div class="move-name">Take ln of both sides to differentiate variable-base variable-exponent forms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Derivative As Tool</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/differentiate-f-to-prepare-the-newton-raphson-denominator.html" class="move-row">
+  <div class="move-name">Differentiate f to prepare the Newton-Raphson denominator</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Intermediate Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/simplify-derivative-via-pythagorean-identity-before-differentiating-again.html" class="move-row">
+  <div class="move-name">Simplify derivative via Pythagorean identity before differentiating again</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Domain Range Analysis</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/trace-parameter-domain-through-asymptotes-to-find-cartesian-range.html" class="move-row">
+  <div class="move-name">Trace parameter domain through asymptotes to find Cartesian range</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Differentiation Pathway Choice</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/choose-implicit-differentiation-over-parametric-for-tangent-gradient.html" class="move-row">
+  <div class="move-name">Choose implicit differentiation over parametric for tangent gradient</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Repeated Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/build-maclaurintaylor-series-by-repeated-differentiation-at-the-expansion-point.html" class="move-row">
+  <div class="move-name">Build Maclaurin/Taylor series by repeated differentiation at the expansion point</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Nested Differentiation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-product-rule-with-chain-rule-inside-an-outer-quotient-rule.html" class="move-row">
+  <div class="move-name">Apply product rule with chain rule inside an outer quotient rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

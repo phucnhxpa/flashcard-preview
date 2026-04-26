@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read vertex coordinates directly from completed-square form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Vertex Form Interpretation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Read vertex coordinates directly from completed-square form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Vertex Form Interpretation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a quadratic has already been written (or just been written in a previous part) in completed-square form $y = a(x \pm b)^2 + c$, and the question asks for the minimum point, maximum point, vertex, turning point, or range of the function. Watch for the verb &#x27;deduce&#x27; or &#x27;hence&#x27; immediately after a &#x27;complete the square&#x27; part — this is the strongest signal that no calculus is intended. Also fires when only the minimum/maximum value (not the full point) is requested, or when the question asks for the line of symmetry $x = -b$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Because $(x \pm b)^2 \geq 0$ for all real $x$ with equality precisely when the bracket is zero, the term $a(x \pm b)^2$ contributes its extreme value (zero) at exactly one $x$. The sign of $a$ then determines whether this extreme is a minimum (if $a &gt; 0$) or a maximum (if $a &lt; 0$), and the constant $c$ is the corresponding $y$-value. This converts an optimisation question into a single sign check plus reading two numbers off the page — strictly faster and more reliable than differentiating, and it is the method the examiner is signalling with the word &#x27;deduce&#x27;.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the quadratic is already (or has just been written) in the form $a(x \pm b)^2 + c$, and the question asks for a turning point, minimum/maximum value, or range.</li><li>Rule out differentiation ($\tfrac{dy}{dx}=0$) and the symmetry-axis formula $x = -B/(2A)$: they would produce the same answer but cost extra work, and &#x27;deduce&#x27;/&#x27;hence&#x27; indicates the examiner wants the algebraic reading.</li><li>Commit to reading the vertex off directly, because $(x \pm b)^2 \geq 0$ pins the extreme down at one value of $x$.</li><li>Bridge to action: check the sign of $a$ — if $a &gt; 0$ the vertex is a minimum, if $a &lt; 0$ it is a maximum. State this explicitly so the answer is justified, not just quoted.</li><li>Set the squared bracket to zero to get the $x$-coordinate; be careful with the sign flip ($(x+b)^2=0 \Rightarrow x=-b$, while $(x-b)^2=0 \Rightarrow x=+b$).</li><li>Substitute back (or just read off $c$) for the $y$-coordinate, and state the vertex as an ordered pair.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify $a$, $b$, $c$ in $y = a(x \pm b)^2 + c$ and check the sign of $a$ to decide minimum vs maximum.</li><li>Set the squared bracket equal to zero: $(x \pm b) = 0 \Rightarrow x = \mp b$.</li><li>Read $y = c$ directly (or substitute the $x$-value to verify).</li><li>State the turning point as $(\mp b,\; c)$, declaring it as a minimum (if $a&gt;0$) or maximum (if $a&lt;0$).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $y = 3(x+1)^2 + 6$: since $a=3>0$, a minimum occurs where $(x+1)^2=0$, i.e. $x=-1$. Then $y = 3(0)+6 = 6$, so the minimum point is $(-1,\,6)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Coefficient $a &lt; 0$, e.g. $y = -2(x-4)^2 + 5$</div>
+<div class="adjustment">Same reading-off, but the vertex is a MAXIMUM. Here max point is $(4,\,5)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Only the minimum/maximum VALUE is asked for (not the point)</div>
+<div class="adjustment">Quote $c$ alone (with sign-of-$a$ justification); no need to state the $x$-coordinate.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric quadratic, e.g. $2(\sin\theta - 1)^2 - 4$</div>
+<div class="adjustment">Same logic gives minimum when $\sin\theta = 1$, but check the achievable range $\sin\theta \in [-1,1]$ before declaring the extreme attainable.</div>
+</div><div class="variant-row">
+<div class="scenario">Two-variable form $a(x+b)^2 + c(y+d)^2 + e$ (circles/ellipses in P2/P3)</div>
+<div class="adjustment">The same reasoning identifies the CENTRE $(-b,-d)$, not a turning point.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;deduce&#x27; as &#x27;differentiate&#x27; and wasting time finding $\tfrac{dy}{dx}=0$.</li><li>Confusing the vertex with the $y$-intercept (substituting $x=0$ instead of solving the bracket=0).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error: writing the vertex of $a(x+b)^2+c$ as $(b,c)$ instead of $(-b,c)$ — the bracket zero gives $x=-b$.</li><li>Declaring &#x27;minimum&#x27; without checking that $a&gt;0$ (or vice versa for maximum).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P1 (completing the square, quadratic functions). No formula booklet entry is needed — the move is purely algebraic. Avoid invoking calculus justifications (second derivative test) at this stage; the inequality $(x \pm b)^2 \geq 0$ is the intended rigour.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2021-Q8.html" class="example-chip">P1 Jun 2021 Q8</a><a href="../P1/ch3/q-Oct_2023-Q9.html" class="example-chip">P1 Oct 2023 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

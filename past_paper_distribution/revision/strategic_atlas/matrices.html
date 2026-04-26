@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrices — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Matrices</strong></div>
+  <h1><span class="dot" style="background:#8D6E63;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Matrices</h1>
+  <p>32 canonical strategic moves across 28 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Null Space Extraction</h2>
+  <div class="family-meta">1 canonical moves · 11 example questions</div>
+  <div class="move-list">
+<a href="move/row-reduce-a-λi-to-extract-eigenvectors-from-the-null-space.html" class="move-row">
+  <div class="move-name">Row-reduce (A − λI) to extract eigenvectors from the null space</div>
+  <div class="freq-pill">11 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Diagonalisation</h2>
+  <div class="family-meta">5 canonical moves · 9 example questions</div>
+  <div class="move-list">
+<a href="move/diagonalise-a-pdp¹-to-reduce-matrix-powers-to-scalar-powers.html" class="move-row">
+  <div class="move-name">Diagonalise A = PDP⁻¹ to reduce matrix powers to scalar powers</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/assemble-p-from-eigenvectors-and-d-from-eigenvalues-to-write-a-pdp¹.html" class="move-row">
+  <div class="move-name">Assemble P from eigenvectors and D from eigenvalues to write A = PDP⁻¹</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/assemble-a-pdp¹-with-matched-eigenvectoreigenvalue-column-ordering.html" class="move-row">
+  <div class="move-name">Assemble A = PDP⁻¹ with matched eigenvector–eigenvalue column ordering</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/diagonalise-a-as-pdp¹-using-eigenvector-columns.html" class="move-row">
+  <div class="move-name">Diagonalise A as PDP⁻¹ using eigenvector columns</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/compute-matrix-powers-via-an-pdnp-1.html" class="move-row">
+  <div class="move-name">Compute matrix powers via A^n = PD^nP^{-1}</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cofactor Expansion Choice</h2>
+  <div class="family-meta">1 canonical moves · 5 example questions</div>
+  <div class="move-list">
+<a href="move/choose-row-or-column-with-most-zeros-for-cofactor-expansion-to-minimise-work.html" class="move-row">
+  <div class="move-name">Choose row or column with most zeros for cofactor expansion to minimise work</div>
+  <div class="freq-pill">5 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Characteristic Equation</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/form-characteristic-equation-deta-λi-0-to-find-eigenvalues.html" class="move-row">
+  <div class="move-name">Form characteristic equation det(A − λI) = 0 to find eigenvalues</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Adjugate Inverse</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-adjugate-over-determinant-formula-to-invert-a-parametric-33-matrix.html" class="move-row">
+  <div class="move-name">Apply the adjugate-over-determinant formula to invert a parametric 3×3 matrix</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Verification Strategy</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/verify-diagonalisation-by-checking-ap-pd-column-by-column.html" class="move-row">
+  <div class="move-name">Verify diagonalisation by checking AP = PD column-by-column</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Characteristic Polynomial</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/form-deta-λi-0-to-extract-eigenvalues.html" class="move-row">
+  <div class="move-name">Form det(A − λI) = 0 to extract eigenvalues</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cayley Hamilton Reduction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-cayley-hamilton-to-reduce-high-matrix-powers-and-polynomials.html" class="move-row">
+  <div class="move-name">Apply Cayley-Hamilton to reduce high matrix powers and polynomials</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Diagonal Power Shortcut</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-an-pdnp-1-to-reduce-matrix-powers-to-scalar-powers.html" class="move-row">
+  <div class="move-name">Apply A^n = PD^nP^(-1) to reduce matrix powers to scalar powers</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Eigenvalue Extraction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/form-the-characteristic-equation-deta-λi-0-to-extract-eigenvalues.html" class="move-row">
+  <div class="move-name">Form the characteristic equation det(A − λI) = 0 to extract eigenvalues</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polynomial Factor Theorem</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/divide-characteristic-polynomial-by-known-eigenvalue-factor-to-find-remaining-ei.html" class="move-row">
+  <div class="move-name">Divide characteristic polynomial by known eigenvalue factor to find remaining eigenvalues</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Eigenvalue Condition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-detm-λi-0-to-solve-for-unknown-matrix-entry.html" class="move-row">
+  <div class="move-name">Use det(M − λI) = 0 to solve for unknown matrix entry</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Singularity Determinant</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-determinant-to-zero-to-find-singular-parameter-values.html" class="move-row">
+  <div class="move-name">Set determinant to zero to find singular parameter values</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Expansion Row Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-along-the-row-or-column-whose-entries-are-parameter-free.html" class="move-row">
+  <div class="move-name">Expand along the row or column whose entries are parameter-free</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Common Factor Cancellation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-shared-parameter-from-adjugate-entries-to-cancel-against-determinant.html" class="move-row">
+  <div class="move-name">Factor shared parameter from adjugate entries to cancel against determinant</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polynomial Factorisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-cubic-characteristic-polynomial-via-rational-root-theorem.html" class="move-row">
+  <div class="move-name">Factor cubic characteristic polynomial via rational root theorem</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trace Constraint</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-trace-as-sum-of-eigenvalues-to-constrain-or-sanity-check.html" class="move-row">
+  <div class="move-name">Use trace as sum-of-eigenvalues to constrain or sanity-check</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Eigenvalue Shortcut</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-trace-and-determinant-to-reduce-remaining-eigenvalues-to-a-quadratic.html" class="move-row">
+  <div class="move-name">Use trace and determinant to reduce remaining eigenvalues to a quadratic</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Orthogonal Diagonalisation Assembly</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/normalise-eigenvectors-and-assemble-orthogonal-p-with-matching-d.html" class="move-row">
+  <div class="move-name">Normalise eigenvectors and assemble orthogonal P with matching D</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Eigendecomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/assemble-modal-matrix-p-and-diagonal-d-to-write-a-pdp¹.html" class="move-row">
+  <div class="move-name">Assemble modal matrix P and diagonal D to write A = PDP⁻¹</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polynomial Root Finding</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-a-cubic-characteristic-polynomial-via-the-factor-theorem.html" class="move-row">
+  <div class="move-name">Factor a cubic characteristic polynomial via the factor theorem</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Singularity Condition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-determinant-to-zero-to-find-singular-parameter-values-matrices.html" class="move-row">
+  <div class="move-name">Set determinant to zero to find singular parameter values</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Spectral Theorem Application</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-symmetry-to-guarantee-orthogonal-eigenvectors.html" class="move-row">
+  <div class="move-name">Exploit symmetry to guarantee orthogonal eigenvectors</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Eigenvalue Setup</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/form-the-characteristic-equation-via-deta-λi-0.html" class="move-row">
+  <div class="move-name">Form the characteristic equation via det(A − λI) = 0</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Strategic Expansion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-33-determinant-along-the-row-or-column-richest-in-zeros.html" class="move-row">
+  <div class="move-name">Expand 3×3 determinant along the row or column richest in zeros</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Determinant Volume Scaling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-image-volume-to-det-m-times-original-volume.html" class="move-row">
+  <div class="move-name">Equate image volume to |det M| times original volume</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Root Spotting Then Deflation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/spot-integer-eigenvalue-by-trial-then-deflate-cubic-via-division.html" class="move-row">
+  <div class="move-name">Spot integer eigenvalue by trial then deflate cubic via division</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Via Diagonalisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/compute-matrix-powers-via-aⁿ-pdⁿp¹.html" class="move-row">
+  <div class="move-name">Compute matrix powers via Aⁿ = PDⁿP⁻¹</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

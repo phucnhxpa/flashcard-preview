@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recycle the stationarity equation to simplify back-substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Condition Recycling</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Recycle the stationarity equation to simplify back-substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Condition Recycling</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a stationary point has been located by solving f&#x27;(x) = 0, the x-value is algebraically messy (e.g. involves logarithms or fractions), and f(x) contains two or more terms that the equation f&#x27;(x) = 0 algebraically links. Typical cues: f(x) is a sum of exponentials/logs/trig terms, and f&#x27;(x) = 0 produced a relation like e^{ax} = k·e^{bx} or sin x = k cos x. Phrased alternatively as &#x27;use the condition to eliminate one term before substituting&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The equation f&#x27;(x) = 0 is itself an algebraic identity at the critical point, so any term in f(x) that appears (up to a constant) in f&#x27;(x) can be rewritten in terms of the others. Combining like terms in f then collapses the expression to a single transcendental quantity, giving a cleaner exact form and only one numerical evaluation. This reduces rounding error, makes the exact answer presentable, and often reveals structure (e.g. a clean coefficient like 7/3) that direct substitution would hide.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice f(x*) requires substituting a messy critical value into a sum of two exponentials/transcendentals.</li><li>I rule out direct numerical substitution: it needs two independent evaluations and compounds rounding error, and it gives no exact form.</li><li>I commit to recycling f&#x27;(x*) = 0 because it relates the two transcendental terms to each other algebraically.</li><li>I rearrange the stationarity equation to express one term as a constant multiple of the other.</li><li>I substitute into f(x), combine coefficients carefully, and only then evaluate the single remaining transcendental.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write down the stationarity equation f&#x27;(x*) = 0 in a form that equates two transcendental terms.</li><li>Solve it for one term in terms of the other (e.g. e^{-0.75t} = (1/9)e^{t-10}).</li><li>Substitute this into f(x), replacing the chosen term so that only one transcendental remains.</li><li>Combine the coefficients of the surviving term over a common denominator.</li><li>Evaluate the single remaining transcendental at x* (exactly if possible, then numerically).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Maximise $v(t) = 12 - e^{t-10} - 12e^{-0.75t}$. Setting $v'(t)=0$ gives $e^{t-10} = 9e^{-0.75t}$, i.e. $e^{-0.75t} = \tfrac{1}{9}e^{t-10}$. Then $v_{\max} = 12 - e^{t-10} - 12\cdot\tfrac{1}{9}e^{t-10} = 12 - \tfrac{7}{3}e^{t-10}$. With $t-10 = \tfrac{4\ln 9 - 30}{7}$, this gives $v_{\max} \approx 12 - \tfrac{7}{3}(0.04833) \approx 11.9\,\text{m/s}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Turning point of $y = a\sin x + b\cos x$</div>
+<div class="adjustment">From $y&#x27; = 0$ obtain $\tan x = a/b$ (or the reciprocal); use this to express $\sin x$ and $\cos x$ via a right-triangle, avoiding substitution of the messy $x$-value.</div>
+</div><div class="variant-row">
+<div class="scenario">Stationary point of $y = x\ln x - kx$</div>
+<div class="adjustment">From $y&#x27; = \ln x + 1 - k = 0$ get $\ln x = k-1$; substitute into $y$ to get $y = x(k-1) - kx = -x$, eliminating the logarithm entirely.</div>
+</div><div class="variant-row">
+<div class="scenario">Optimisation with a constraint $g(x,y)=0$ (Further Maths)</div>
+<div class="adjustment">After locating the critical point, use the constraint to eliminate one variable in the objective rather than substituting both messy coordinates.</div>
+</div><div class="variant-row">
+<div class="scenario">Maximum of $y = Ae^{kx} + Be^{-kx}$-type expressions</div>
+<div class="adjustment">From $y&#x27;=0$, $e^{2kx} = B/A$; substitute back so that $y_{\max}$ becomes a single surd $2\sqrt{AB}$ rather than two exponentials.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating f&#x27;(x*) = 0 as merely a tool to find x*, not realising it is a usable identity at that point.</li><li>Believing exact form is impossible because x* is irrational, when in fact recycling the condition often yields a clean coefficient.</li><li>Confusing this with implicit differentiation; here we are not differentiating again, only reusing an established equation.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slip when combining coefficients (e.g. writing $12/9 = 3/4$ instead of $4/3$).</li><li>Using the stationarity equation with a sign error inherited from a faulty derivative.</li><li>Solving the rearranged equation for the wrong term, leaving the messier exponential in the final expression.</li><li>Forgetting to verify it is a maximum (not just a stationary point) before stating $v_{\max}$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2/P3 differentiation of exponentials, logs, trig) and applied mechanics; the Lagrange-multiplier variant is Further Maths only. No techniques beyond standard A-level differentiation and algebraic manipulation are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2022-Q8.html" class="example-chip">P3 Jun 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

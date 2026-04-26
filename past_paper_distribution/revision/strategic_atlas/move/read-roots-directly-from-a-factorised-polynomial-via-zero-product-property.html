@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read roots directly from a factorised polynomial via zero product property — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Root Selection</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Read roots directly from a factorised polynomial via zero product property</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Selection</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a polynomial equation $f(x)=0$ is presented (or has just been written) as a product of linear or low-degree factors, e.g. $(2x+5)(x-3)^2=0$ or $(x-a)(x-b)(x-c)=0$. Typical cues: the question says &#x27;hence find the roots/zeros&#x27;, &#x27;state the values of $x$ for which $f(x)=0$&#x27;, or asks where a curve meets the $x$-axis after factorising. Also fires after a successful factor-theorem extraction has reduced the polynomial to factored form.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Over the real (or complex) numbers, a product equals zero iff at least one factor is zero — this is the zero product property, valid because $\mathbb{R}$ has no zero divisors. So solving $\prod_i g_i(x)=0$ reduces to solving each $g_i(x)=0$ separately. For linear factors this is instantaneous; for repeated factors it just records the root with its multiplicity. No expansion, formula, or numerical work is required.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the equation is already a product of factors set equal to zero — no algebraic manipulation is needed before extracting roots.</li><li>Rule out expanding to a polynomial in standard form and applying the quadratic/cubic formula or trial roots — that destroys the structure already given.</li><li>Commit to the zero product property: solve each factor $=0$ in turn, since the product vanishes iff some factor vanishes.</li><li>Translate each factor into a simple linear equation; for a repeated factor $(x-a)^k$ just record $x=a$ (with multiplicity $k$ if asked).</li><li>Decide on presentation: list distinct roots if the question asks for &#x27;values of $x$&#x27;, or list with multiplicity if it asks about the factorised structure / sketch behaviour.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify each distinct factor in the product equal to zero.</li><li>Set each factor equal to 0 in turn, e.g. $2x+5=0$ and $(x-3)^2=0$.</li><li>Solve each linear equation: $x=-\tfrac{5}{2}$ and $x=3$.</li><li>Note the multiplicity of any repeated factor (here $x=3$ has multiplicity 2).</li><li>State the solution set, matching the form requested (distinct roots vs roots with multiplicity).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(2x+5)(x-3)^2 = 0$.\\ By the zero product property: $2x+5=0$ or $(x-3)^2=0$.\\ From $2x+5=0$: $x=-\tfrac{5}{2}$.\\ From $(x-3)^2=0$: $x=3$ (repeated root).\\ Hence $x=-\tfrac{5}{2}$ or $x=3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quartic in fully factorised form, e.g. $(x-1)^2(x+2)(3x-4)=0$.</div>
+<div class="adjustment">Set each distinct factor to zero: $x=1$ (double), $x=-2$, $x=\tfrac{4}{3}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Factor is an irreducible quadratic over $\mathbb{R}$, e.g. $(x^2+1)(x-2)=0$.</div>
+<div class="adjustment">The factor $x^2+1=0$ contributes no real roots (only $x=\pm i$ in FP scope); only $x=2$ is real.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation arises after factor theorem, e.g. $(x-2)(x^2-x-6)=0$ then refactor to $(x-2)(x-3)(x+2)=0$.</div>
+<div class="adjustment">First fully factorise the quadratic factor, then apply the zero product property to all three linear factors.</div>
+</div><div class="variant-row">
+<div class="scenario">Curve sketching: finding $x$-axis intercepts from $y=(x+1)(x-2)^2$.</div>
+<div class="adjustment">Same move; multiplicities now inform shape — odd multiplicity crosses the axis, even multiplicity touches it.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric/exponential product, e.g. $\sin x \,(2\cos x-1)=0$.</div>
+<div class="adjustment">Same principle: solve $\sin x=0$ and $2\cos x-1=0$ separately within the given range.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking the product must be expanded before roots can be found.</li><li>Believing a squared factor $(x-a)^2$ does not give a root because the curve only touches the $x$-axis.</li><li>Confusing the constant inside a factor: reading $(2x+5)=0$ as $x=5/2$ or $x=-5$ instead of $x=-5/2$.</li><li>Treating $(x+a)(x+b)=c$ (with $c\ne 0$) as if zero product property applies — it only applies when the product equals zero.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Listing the repeated root twice when the question asks for &#x27;the values of $x$&#x27; (distinct roots only).</li><li>Omitting the repeated root entirely, thinking it is not a &#x27;real&#x27; solution.</li><li>Sign slips when solving $ax+b=0$, especially with negative $b$.</li><li>Forgetting to check that all factors have been considered when more than two are present.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (P1–P4): the zero product property underpins all root-finding from factorised cubics/quartics, and links to multiplicity for curve sketching. Complex roots from irreducible quadratic factors are treated in FP1.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2019-Q10.html" class="example-chip">P1 Oct 2019 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

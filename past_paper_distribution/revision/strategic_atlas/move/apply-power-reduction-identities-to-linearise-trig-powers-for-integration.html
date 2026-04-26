@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply power-reduction identities to linearise trig powers for integration — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Power Reduction Linearisation</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Apply power-reduction identities to linearise trig powers for integration</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Power Reduction Linearisation</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The integrand contains a power of a trig function — typically sin²(kx), cos²(kx), sin³(kx) or cos³(kx) — which has no entry in the formula book and cannot be integrated directly. Visual cues: a squared bracket like (1 + cos θ)² that expands to give cos²θ; an explicit cos²(3x) or sin³x term; or a &#x27;hence&#x27; instruction following a part (a) that proved a multiple-angle identity such as cos 2A = 2cos²A − 1 or sin 3x = 3 sin x − 4 sin³x. Whenever the student sees an even or odd integer power of sin or cos sitting inside a definite integral, the antiderivative does not exist in elementary closed form until the power is reduced to a linear combination of sin(kx) and cos(kx).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Linearisation rewrites sinⁿx or cosⁿx as a sum of constants and first-power sines/cosines of multiple angles, each of which integrates to ±(1/k)cos(kx) or ±(1/k)sin(kx) by reverse chain rule. The two workhorse identities are cos²A = (1 + cos 2A)/2 and sin²A = (1 − cos 2A)/2 (both rearrangements of cos 2A = 2cos²A − 1 = 1 − 2sin²A), plus the cubic identities sin 3x = 3 sin x − 4 sin³x and cos 3x = 4cos³x − 3cos x for odd cubes. The mathematical principle is the same in every case: trade a non-integrable power for a sum of integrable single-frequency harmonics.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand contains a power of a trig function (sin²θ, cos²(3x), sin³x, or a bracket like (1+cosθ)² that will expand into one). Standard antiderivative tables don&#x27;t cover these directly.</li><li>Rule out alternatives: u-substitution u = cos(kx) only works if a matching sin(kx) factor is present (it isn&#x27;t, for even powers); integration by parts loops on cos²; the Weierstrass t = tan(θ/2) substitution is overkill for a single squared term.</li><li>Look for a signpost: a &#x27;hence&#x27; clause referencing part (a), or simply recognise that the formula book / standard identities give cos²A = (1+cos 2A)/2, sin²A = (1−cos 2A)/2, sin³x = ¼(3 sin x − sin 3x), cos³x = ¼(cos 3x + 3 cos x).</li><li>Commit to power-reduction. Match the angle inside the power to the identity&#x27;s variable: e.g. for cos²(3x), set A = 3x so the doubled angle becomes 6x (NOT 3x).</li><li>Substitute the identity into the integrand, expand and collect: every term should now be a constant or a single sin(kx)/cos(kx). Confirm this before integrating.</li><li>Integrate term-by-term using ∫cos(kx)dx = sin(kx)/k and ∫sin(kx)dx = −cos(kx)/k, then evaluate the limits carefully.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the offending power (e.g. cos²(3x), sin³x, or a squared bracket that will expand to one).</li><li>Select the identity: cos²A = (1+cos 2A)/2, sin²A = (1−cos 2A)/2, sin³x = ¼(3 sin x − sin 3x), or cos³x = ¼(cos 3x + 3 cos x).</li><li>Substitute with the correct inner angle: e.g. cos²(3x) = (1 + cos 6x)/2 — the angle doubles.</li><li>Distribute any external coefficients and collect constants (e.g. 5 − 4·(1+cos 6x)/2 = 3 − 2cos 6x).</li><li>Integrate term-by-term: ∫cos(kx)dx = (1/k)sin(kx), ∫sin(kx)dx = −(1/k)cos(kx), ∫c dx = cθ.</li><li>Substitute the limits and simplify, taking care with surds and any external factor (e.g. the ½ in polar area).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Evaluate $\int_0^{\pi/3} \sin^3 x\,dx$. Using $\sin 3x = 3\sin x - 4\sin^3 x$, rearrange to $\sin^3 x = \tfrac{1}{4}(3\sin x - \sin 3x)$. Then $\int \sin^3 x\,dx = \tfrac{1}{4}\bigl[-3\cos x + \tfrac{1}{3}\cos 3x\bigr]$. Evaluating from $0$ to $\pi/3$ gives $\tfrac{1}{4}\bigl[(-3\cdot\tfrac{1}{2} + \tfrac{1}{3}(-1)) - (-3 + \tfrac{1}{3})\bigr] = \tfrac{5}{24}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Even power sin²(kx) in the integrand</div>
+<div class="adjustment">Use sin²A = (1 − cos 2A)/2 with A = kx; the doubled angle becomes 2kx.</div>
+</div><div class="variant-row">
+<div class="scenario">Even power cos²(kx) in the integrand</div>
+<div class="adjustment">Use cos²A = (1 + cos 2A)/2 with A = kx; the doubled angle becomes 2kx.</div>
+</div><div class="variant-row">
+<div class="scenario">Fourth power cos⁴x or sin⁴x</div>
+<div class="adjustment">Apply the identity twice: first cos⁴x = ((1+cos 2x)/2)², then expand and reduce the resulting cos²(2x) using cos²A = (1+cos 4x)/2.</div>
+</div><div class="variant-row">
+<div class="scenario">Odd cube sin³x or cos³x with a &#x27;hence&#x27; from a triple-angle identity</div>
+<div class="adjustment">Rearrange sin 3x = 3 sin x − 4 sin³x to sin³x = ¼(3 sin x − sin 3x), or cos 3x = 4cos³x − 3cos x to cos³x = ¼(cos 3x + 3 cos x).</div>
+</div><div class="variant-row">
+<div class="scenario">Odd cube without a signposted identity</div>
+<div class="adjustment">Strip one factor: sin³x = sin x(1 − cos²x), then substitute u = cos x. Power-reduction is not needed for odd powers when substitution is available.</div>
+</div><div class="variant-row">
+<div class="scenario">Squared bracket like (1 + cos θ)² in a polar area integral</div>
+<div class="adjustment">Expand first to 1 + 2cos θ + cos²θ, then apply cos²θ = (1+cos 2θ)/2 to the surviving square.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying u-substitution u = cos(kx) on cos²(kx) — fails because no compensating sin(kx)dx factor is present.</li><li>Attempting integration by parts on cos²x or sin²x — produces a circular equation rather than progress.</li><li>Pattern-matching cos²θ with cos 2θ and writing ∫cos²θ dθ = (sin 2θ)/2 — confusing the square with the double angle.</li><li>Ignoring a signposted part (a) identity and reaching for an independent (longer) method.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the angle doubles: writing cos²(3x) = (1 + cos 3x)/2 instead of (1 + cos 6x)/2.</li><li>Sign error when rearranging the cube identity: writing sin³x = ¼(sin 3x − 3 sin x) instead of ¼(3 sin x − sin 3x).</li><li>Forgetting the 1/k factor when integrating sin(kx) or cos(kx) (reverse chain rule), e.g. ∫sin 3x dx = −⅓cos 3x not −cos 3x.</li><li>Dropping or mishandling external coefficients when distributing, e.g. losing the factor of 2 in 4·(1+cos 6x)/2 = 2 + 2cos 6x.</li><li>Forgetting the leading ½ in the polar area formula A = ½∫r² dθ after evaluating the inner integral.</li><li>Arithmetic slips evaluating cos π, cos(π/3), sin(2π/3) at the bounds, particularly with surds.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays within Edexcel IAL P3/P4 (Pure 3/4) and Further Pure. The double-angle identities cos 2A = 2cos²A − 1 = 1 − 2sin²A appear in the formula booklet; the rearranged power-reduction forms cos²A = (1+cos 2A)/2 and sin²A = (1−cos 2A)/2 are expected to be quoted from these. Triple-angle identities (sin 3x, cos 3x) are NOT in the booklet and must either be derived or supplied by an earlier part. Avoid invoking complex exponentials (e^{ikx}) or Fourier methods — out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P3/ch2/q-Oct_2020-Q5.html" class="example-chip">P3 Oct 2020 Q5</a><a href="../P3/ch2/q-Oct_2023-Q3.html" class="example-chip">P3 Oct 2023 Q3</a><a href="../FP2/ch7/q-Jun_2021-Q3.html" class="example-chip">FP2 Jun 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

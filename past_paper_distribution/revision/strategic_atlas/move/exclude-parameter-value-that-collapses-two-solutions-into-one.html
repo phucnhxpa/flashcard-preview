@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exclude parameter value that collapses two solutions into one — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Distinctness Enforcement</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Exclude parameter value that collapses two solutions into one</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Distinctness Enforcement</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem demands two distinct solutions/intersections and a parameter k controls both candidates simultaneously. Typical cues: &#x27;find values of k for which the equation has two distinct solutions&#x27;, &#x27;the line meets the curve at two distinct points&#x27;, or modulus/absolute-value equations producing two case-solutions both depending on k. The danger is a boundary k at which the two cases coincide, yielding only one solution. Also signalled when squaring/cross-multiplying produces a discriminant or rational equation in k whose equality case must be tested.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Distinctness is a strict condition: two case-solutions x_1(k) and x_2(k) must differ. The collision value is found by solving x_1(k) = x_2(k); at that k the geometry degenerates (a tangency, a vertex-meeting, or a repeated root). Including this boundary would mis-count one intersection as two. Excluding it converts a non-strict inequality k \ge k_0 into the strict k &gt; k_0 (or removes an isolated value from a range).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the working has produced two candidate x-values, both depending on k, and the question asks for two distinct solutions.</li><li>Rule out the lazy answer &#x27;k \ge k_0&#x27; that comes from existence conditions alone — existence is necessary but not sufficient for distinctness.</li><li>Commit to checking when the two candidates coincide, because that is precisely the configuration distinctness forbids.</li><li>Bridge: equate the two expressions for x (or set discriminant = 0) and solve for the offending k.</li><li>Tactical: verify geometrically/algebraically what happens at the boundary (tangency, vertex hit, RHS = 0), then write the final answer with strict inequality, removing the boundary point.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two case-solutions x_1(k) and x_2(k) (e.g. from |...| = ... split into ± cases).</li><li>Set x_1(k) = x_2(k) and solve for k to find the collision value k_0.</li><li>Substitute k_0 back to confirm both cases yield the same x and check the geometric meaning (tangency / single intersection).</li><li>Combine with the existence condition: if existence gave k \ge k_0, distinctness sharpens this to k &gt; k_0.</li><li>State the final parameter range with strict inequality, explicitly excluding k_0.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $|5-2x| = k$ intersected with a line giving cases $x = \tfrac{14}{k+2}$ and $x = \tfrac{4}{k-2}$. Existence needs $k \ge \tfrac{18}{5}$. Setting $\tfrac{14}{k+2} = \tfrac{4}{k-2}$ gives $14(k-2) = 4(k+2) \Rightarrow 10k = 36 \Rightarrow k = \tfrac{18}{5}$. At $k = \tfrac{18}{5}$ both yield $x = \tfrac{5}{2}$ with $5 - 2(\tfrac{5}{2}) = 0$ — a single tangential meeting. Hence two distinct intersections require $k > \tfrac{18}{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quadratic with parameter: &#x27;two distinct real roots&#x27;</div>
+<div class="adjustment">Use discriminant &gt; 0 (strict), not \ge 0; the equality \Delta = 0 is the collision case to exclude.</div>
+</div><div class="variant-row">
+<div class="scenario">Line y = mx + c meeting a curve in two distinct points</div>
+<div class="adjustment">Form the intersection quadratic in x and require its discriminant strictly positive; tangency is the excluded boundary.</div>
+</div><div class="variant-row">
+<div class="scenario">Modulus equation |f(x)| = g(x;k) with two case-branches</div>
+<div class="adjustment">Equate the two branch solutions to find the parameter at which they merge at f(x) = 0 (vertex of the V-shape).</div>
+</div><div class="variant-row">
+<div class="scenario">Simultaneous equations with parameter giving two solution pairs</div>
+<div class="adjustment">Equate the two x- (or y-) coordinates as functions of k and exclude the merging value.</div>
+</div><div class="variant-row">
+<div class="scenario">Circle-line intersection, two distinct points</div>
+<div class="adjustment">Distance from centre to line strictly less than radius; equality is tangency, excluded.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;two solutions&#x27; as merely &#x27;solutions exist&#x27;, so stopping at the existence inequality \ge.</li><li>Believing each algebraic case automatically delivers a distinct geometric point, without testing whether the two cases can coincide.</li><li>Confusing &#x27;distinct real roots&#x27; with &#x27;real roots&#x27;, leading to \Delta \ge 0 instead of \Delta &gt; 0.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Writing k \ge \tfrac{18}{5} instead of k &gt; \tfrac{18}{5} by not checking the boundary explicitly.</li><li>Cross-multiplying without noting sign of (k-2) or (k+2), causing spurious solutions.</li><li>Forgetting to combine the distinctness condition with the original existence/domain condition, producing an incomplete final range.</li><li>Failing to verify geometrically that the boundary k yields a tangency/single point rather than a crossing.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure scope: modulus equations (P2/P3), discriminant conditions for quadratics (P1), and line–curve intersection problems. No tools beyond standard algebraic manipulation are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jun_2022-Q5.html" class="example-chip">P3 Jun 2022 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

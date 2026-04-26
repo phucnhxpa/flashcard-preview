@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor out the lowest common power to leave a simple linear residual — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Strategic Factorisation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Factor out the lowest common power to leave a simple linear residual</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Factorisation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever an expression is a sum/difference of two terms that share a non-trivial common factor — typically two powers of the same bracket (e.g. $(2x+1)^2$ and $(2x+1)^3$, or $u^{3/2}$ and $u^{5/2}$) together with a shared exponential, surd, or numerical factor. Visual cues: derivative output from a product/chain rule that contains repeated brackets to different powers; an integrated expression in $u$ before back-substitution; the question explicitly asks for a &#x27;fully factorised&#x27; answer or for solving $f&#x27;(x)=0$. Equivalent phrasings: &#x27;extract the highest common factor&#x27;, &#x27;pull out the lowest power&#x27;, &#x27;collect a common bracket&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Factoring out the LOWEST common power (not the highest) of every shared object reduces the remaining bracket to something linear (or at worst very simple), because the difference in exponents is then 1. This exploits the identity $a^{m} \pm a^{n} = a^{\min(m,n)}(a^{|m-n|} \pm 1\text{-type residual})$. The payoff is twofold: (i) solving &#x27;expression = 0&#x27; becomes trivial since each factor gives a root directly, and (ii) the answer is delivered in the simplest factored form that mark schemes reward. Taking out too little leaves a quadratic; taking out too much introduces fractions or negative powers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that both terms share structural objects — for instance, both contain a power of $(2x+1)$ and an exponential $e^{-4x}$, or both contain a power of $u$.</li><li>Consider the alternative of expanding everything: this would multiply out brackets to high powers, collect like terms, then attempt to refactor — error-prone and obscures structure. Rule it out.</li><li>Identify the LOWEST power of each shared object: if powers are 2 and 3, take out power 2; if powers are $3/2$ and $5/2$, take out $3/2$. Also extract the numerical HCF of the coefficients.</li><li>Commit to factoring because the residual bracket will then be linear in the remaining variable — exactly what is needed for root-finding (part (b) of differentiation questions) or for clean back-substitution (in integration).</li><li>Execute the division term-by-term, then simplify the residual bracket carefully: distribute any negative signs across the linear factor, e.g. $3 - 2(2x+1) = 3 - 4x - 2 = 1 - 4x$.</li><li>If integrating, combine the residual fractions over a common denominator AFTER back-substitution to reach the cleanest closed form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the HCF: numerical HCF of coefficients × lowest power of each shared bracket × any shared exponential/surd.</li><li>Divide each term of the original expression by this HCF to obtain the residual bracket.</li><li>Write expression = HCF × [residual].</li><li>Simplify the residual: distribute signs, collect like terms, aiming for a linear factor such as $(1-4x)$ or $(6x-1)$.</li><li>If fractions appear in the residual, combine over a common denominator and absorb any constant into the outer coefficient.</li><li>Present the final form as a product of simple factors — this is the &#x27;fully factorised&#x27; form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $f'(x) = 6(2x+1)^2 e^{-4x} - 4(2x+1)^3 e^{-4x}$. HCF $= 2(2x+1)^2 e^{-4x}$. Dividing: $f'(x) = 2(2x+1)^2 e^{-4x}\,[3 - 2(2x+1)] = 2(2x+1)^2 e^{-4x}(1-4x)$. Roots of $f'(x)=0$ are now read off directly: $x = -\tfrac{1}{2}$ and $x = \tfrac{1}{4}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Integration result in $u$ before back-substitution, e.g. $\tfrac{2}{5}u^{5/2} - \tfrac{2}{3}u^{3/2}$ with $u = 4x+1$.</div>
+<div class="adjustment">Factor out $u^{3/2}$ first to get $u^{3/2}\left[\tfrac{u}{5} - \tfrac{1}{3}\right]$; substitute, then combine the bracket over LCD 15 to obtain $\tfrac{1}{60}(4x+1)^{3/2}(6x-1)+C$.</div>
+</div><div class="variant-row">
+<div class="scenario">Definite integrals where the result is evaluated numerically.</div>
+<div class="adjustment">Factoring is optional — direct substitution of bounds is acceptable, though factoring can still reduce arithmetic.</div>
+</div><div class="variant-row">
+<div class="scenario">Expressions with shared logarithm or trig factors, e.g. $x^2\ln x - x\ln x$.</div>
+<div class="adjustment">Factor out $x\ln x$ to leave the linear residual $(x-1)$ — same lowest-power principle.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Expanding $(2x+1)^3$ and $(2x+1)^2$ in full and then trying to refactor — vastly more error-prone.</li><li>Factoring out the HIGHEST power $(2x+1)^3$ instead of the lowest, producing fractional/negative-power terms.</li><li>Skipping the factor step entirely after integration and leaving two separate surd terms, missing the &#x27;simplest form&#x27; accuracy mark.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when distributing $-2$ across $(2x+1)$: must give $-4x-2$, not $-4x+2$.</li><li>Losing a numerical factor — e.g. writing $(2x+1)^2 e^{-4x}[6 - 4(2x+1)]$ (correct but not fully factorised; the 2 was not pulled out).</li><li>Miscombining the outer constant with the residual fractions: forgetting to multiply $\tfrac{1}{8}$ by $\tfrac{2}{15}$ to get $\tfrac{1}{60}$.</li><li>Arithmetic in $3(4x+1) - 5 = 12x - 2$ — students often write $12x - 8$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3/P4 scope. Used routinely after applying the product rule (P3 differentiation) and after integration by substitution (P4). No formula booklet entry is invoked — this is a pure algebraic manipulation. Avoid generalising to factoring multivariate polynomials or to non-integer/non-rational exponent algebra beyond what appears in standard surd/exponential simplification.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2023-Q8.html" class="example-chip">P3 Jun 2023 Q8</a><a href="../P2/ch8/q-Jun_2024-Q9.html" class="example-chip">P2 Jun 2024 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

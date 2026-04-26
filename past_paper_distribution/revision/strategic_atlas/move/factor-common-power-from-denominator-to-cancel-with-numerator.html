@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor common power from denominator to cancel with numerator — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Strategic Cancellation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Factor common power from denominator to cancel with numerator</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Cancellation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a rational expression — typically produced by a substitution inside an integral — has numerator and every term of the denominator sharing a common factor (often a power of the substitution variable u). Cues: numerator is a single monomial like 8u, denominator is a polynomial like u³ + 2u² where every term has u² as a factor. Equivalent phrasings: &#x27;pull out the highest common power before partial fractions&#x27; or &#x27;reduce the rational function before decomposing&#x27;. Especially common right before a partial-fractions step where you want the lowest-degree denominator possible.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Cancelling a common factor before partial fractions reduces the number of unknowns in the decomposition and avoids spurious repeated-factor cases. The underlying identity is simply (k·f)/(k·g) = f/g on the domain where k ≠ 0. By extracting u² from u³ + 2u² = u²(u+2) and cancelling one u from 8u, the integrand collapses from a degree-3 denominator with a repeated factor into two distinct linear factors — the cleanest possible setup for the Edexcel partial-fractions toolkit.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the numerator 8u and every term of the denominator u³ + 2u² contain u as a factor.</li><li>Rule out jumping straight into partial fractions on 8u/(u³ + 2u²) — that would force a decomposition over a repeated factor u² and a linear factor (u+2), giving three unknowns instead of two.</li><li>Commit to factoring because cancelling will lower the denominator&#x27;s degree and remove the repeated factor entirely.</li><li>Bridge: rewrite the denominator as u²(u+2), then cancel one power of u against the numerator&#x27;s u.</li><li>Tactical decision: cancel only one factor of u (not two), since the numerator carries only u¹; check that u ≠ 0 on the integration interval before cancelling.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the common factor: numerator 8u and denominator u³ + 2u² both contain u.</li><li>Factor the denominator: u³ + 2u² = u²(u + 2).</li><li>Write the quotient: 8u / [u²(u + 2)].</li><li>Cancel one factor of u (valid since u ≠ 0 on the domain): result is 8 / [u(u + 2)].</li><li>Proceed with partial fractions on the simplified form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>After substituting u = 1 + x² (so du = 2x dx) into ∫ 4x/((1+x²)³ + 2(1+x²)²) dx, the integrand becomes 8u/(u³+2u²). Factor: u³ + 2u² = u²(u+2), so the integrand is 8u/[u²(u+2)] = 8/[u(u+2)]. This is now ready for partial fractions: 8/[u(u+2)] = 4/u − 4/(u+2).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Substitution leaves numerator ku² and denominator u⁴ + au³</div>
+<div class="adjustment">Factor u³ from the denominator, cancel u² from numerator against u² of the u³, leaving k/[u(u+a)].</div>
+</div><div class="variant-row">
+<div class="scenario">Common factor is (u+1) rather than a power of u, e.g. (u+1)/[(u+1)²(u−3)]</div>
+<div class="adjustment">Cancel one (u+1) to obtain 1/[(u+1)(u−3)] before partial fractions, noting u ≠ −1.</div>
+</div><div class="variant-row">
+<div class="scenario">Rational function in x (no substitution), e.g. (3x² )/(x⁴ + 5x³)</div>
+<div class="adjustment">Factor x³ from denominator, cancel x² from numerator, giving 3/[x(x+5)].</div>
+</div><div class="variant-row">
+<div class="scenario">Algebraic simplification before differentiation rather than integration</div>
+<div class="adjustment">Same cancellation principle reduces the quotient before applying the quotient/chain rule.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading u³ + 2u² as already factorised and going straight to partial fractions over a repeated factor.</li><li>Believing the cancellation &#x27;changes&#x27; the function — it only changes the form on the valid domain.</li><li>Treating 8u/u² as 8 (forgetting one u remains in the denominator).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Cancelling u when u = 0 is in the integration interval — must check bounds first.</li><li>Cancelling too many powers (e.g. writing 8u/u² as 8/u·... incorrectly) — count carefully.</li><li>Forgetting to factor fully before cancelling, leading to missed simplifications.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths: rational-function simplification, factorisation, and partial fractions over distinct linear factors are core C34/P3–P4 techniques. Domain checks for cancellation align with standard A-level rigour.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jun_2021-Q4.html" class="example-chip">P4 Jun 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

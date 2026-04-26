@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set discriminant to zero to enforce line-curve tangency — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Discriminant Tangency</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Set discriminant to zero to enforce line-curve tangency</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Discriminant Tangency</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a line is required to be tangent to a curve (circle, parabola, ellipse, or any conic) — equivalently, the line meets the curve at exactly one point. Cue phrases include &#x27;l is a tangent to C&#x27;, &#x27;find the values of k for which y = mx + c touches the curve&#x27;, &#x27;horizontal tangent y = k&#x27;, or &#x27;find the radius for which the line just touches&#x27;. Structurally: substituting the line into the curve produces a quadratic in one variable. Also fires for horizontal tangents y = k or vertical tangents x = c on implicit conics, where fixing one coordinate yields a quadratic in the other.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A quadratic ax² + bx + c = 0 has exactly one (repeated) root precisely when Δ = b² − 4ac = 0. Geometric tangency — a single contact point with multiplicity two — is therefore algebraically equivalent to the discriminant of the substitution quadratic vanishing. Imposing Δ = 0 converts a geometric constraint into a clean algebraic relation between the parameters of the line and the curve (e.g. between k and r, or m and c). This route avoids implicit differentiation and the perpendicular-distance formula, both of which are valid alternatives but typically involve more steps.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the keyword &#x27;tangent&#x27; (or equivalent: &#x27;touches at exactly one point&#x27;, &#x27;horizontal/vertical tangent y = k&#x27;): tangency ↔ one repeated intersection.</li><li>Check that substituting the line into the curve produces a genuine quadratic in one variable — confirm the leading coefficient is non-zero.</li><li>Rule out alternatives: implicit differentiation (dy/dx = 0) is heavier and brings a simultaneous system; the perpendicular-distance d = r formula works for circles only. The discriminant route handles all conics uniformly.</li><li>Commit to Δ = 0 because the question often already supplies, or strongly hints at, the substitution quadratic (e.g. part (a) sets it up).</li><li>Identify a, b, c carefully from the quadratic — paying attention to signs and parameter dependence — then expand b² − 4ac.</li><li>Anticipate the target form: if the answer is to look like 5r² = (k + p)², expect the parameter terms to collapse into a perfect square; this guides your simplification.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Substitute the line equation into the curve equation to obtain a quadratic in one variable, ax² + bx + c = 0.</li><li>Read off a, b, c (often functions of the line/curve parameters such as k, m, r).</li><li>Form the discriminant Δ = b² − 4ac and set Δ = 0.</li><li>Expand and simplify, watching cross-term signs (e.g. middle term of (4k − 26)² is −208k).</li><li>Recognise and factor any perfect square in the parameters to reach the required form.</li><li>If needed, verify the leading coefficient is non-zero for the parameter values found, and check the contact point lies on the curve.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Line y = 2x + c is tangent to circle x² + y² = 5. Substitute: x² + (2x + c)² = 5 ⇒ 5x² + 4cx + (c² − 5) = 0. Set Δ = 0: (4c)² − 4·5·(c² − 5) = 0 ⇒ 16c² − 20c² + 100 = 0 ⇒ −4c² + 100 = 0 ⇒ c² = 25 ⇒ c = ±5.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Line tangent to a parabola y² = 4ax</div>
+<div class="adjustment">Substitute y = mx + c into y² = 4ax to get a quadratic in x; set Δ = 0 to obtain the tangency condition c = a/m.</div>
+</div><div class="variant-row">
+<div class="scenario">Horizontal tangent y = k to an implicit conic</div>
+<div class="adjustment">Substitute y = k to get a quadratic in x; setting Δ(k) = 0 yields the y-coordinates of horizontal tangent points without implicit differentiation.</div>
+</div><div class="variant-row">
+<div class="scenario">Vertical tangent x = c</div>
+<div class="adjustment">Substitute x = c to obtain a quadratic in y; set its discriminant to zero.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent to a circle, alternative method</div>
+<div class="adjustment">Use the perpendicular-distance formula d = |ax₀ + by₀ + c|/√(a² + b²) = r; equivalent to Δ = 0 but avoids forming the quadratic.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Setting Δ &gt; 0 (two intersections) instead of Δ = 0, confusing tangency with the secant case.</li><li>Setting Δ &lt; 0 (no intersections), confusing tangency with non-intersection.</li><li>Confusing &#x27;horizontal tangent&#x27; with &#x27;tangent at the origin&#x27; or &#x27;tangent at a given point&#x27;, leading to a point-based rather than parameter-based approach.</li><li>Reaching for implicit differentiation when the discriminant route is shorter.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic errors in expanding b², especially the middle term in (4k − 26)² = 16k² − 208k + 676.</li><li>Dropping the −4ac term or mishandling its sign — e.g. forgetting that −4·5·(−r²) = +20r².</li><li>Failing to recognise a perfect square such as k² + 2k + 1 = (k + 1)², leaving the answer in unsimplified form.</li><li>Assuming the substitution is quadratic when the leading coefficient depends on a parameter and may vanish — check it is non-zero.</li><li>Forgetting to verify that the resulting contact point actually lies on the curve, particularly after squaring steps.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (P1–P4) and Further Pure scope. Uses the discriminant b² − 4ac (no formula booklet entry needed) and standard conic equations from FP1/FP3. Avoid generalising to higher-degree curves where &#x27;tangency = repeated root&#x27; still holds algebraically but the discriminant of a quadratic no longer captures it.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jun_2022-Q10.html" class="example-chip">P2 Jun 2022 Q10</a><a href="../P4/ch5/q-Jan_2023-Q5.html" class="example-chip">P4 Jan 2023 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

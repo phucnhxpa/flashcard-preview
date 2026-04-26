@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unroll reduction formula iteratively to a base case — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Reduction Descent</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Unroll reduction formula iteratively to a base case</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Reduction Descent</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Part (b) of an integration question asks you to evaluate a specific definite integral $I_n$ for a particular numerical value of $n$ (e.g. $I_4$, $I_6$), immediately after part (a) has asked you to derive a reduction formula linking $I_n$ to $I_{n-2}$ (or $I_{n-1}$). The cue is the explicit pairing: &#x27;Hence, find $I_4$&#x27; or &#x27;Use your result in (a) to evaluate $\int_0^{\pi/4}\sec^6 x\,dx$&#x27;. The word &#x27;Hence&#x27; is the structural signal — the reduction formula is not just a derivation exercise; it is the engine for part (b). The same trigger fires whenever you have a recurrence relation in $I_n$ and a target index that can be reached in finitely many steps.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A reduction formula has no value standing alone — it must be unrolled by repeatedly substituting smaller indices until you hit a base integral that integrates directly. For step-by-2 recurrences, even $n$ descends to $I_0$ and odd $n$ descends to $I_1$; for step-by-1 recurrences, descent terminates at $I_0$. The base case is always a standard integral ($\int\cos x$, $\int\sec^2 x$, $\int 1\,dx$, $\int e^x\,dx$, etc.) computed in one line. Each application of the recurrence is pure arithmetic, so the entire payoff of deriving the formula is realised by this mechanical descent.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the structure: part (a) gave a recurrence $I_n = f(n)\cdot I_{n-2} + g(n)$ (or similar), and part (b) names a specific $n$. The word &#x27;Hence&#x27; confirms the recurrence is the intended tool.</li><li>Rule out direct integration: expanding $\sin^6 x$ or $\sec^6 x$ via identities is possible but tedious and error-prone, and the question structure is steering you away from it.</li><li>Determine the descent chain by parity. For step-by-2: even $n \to I_0$, odd $n \to I_1$. For $\int_0^{\pi/2}\sin^n x\,dx$ the bases are $I_0=\pi/2$, $I_1=1$; for $\int_0^{\pi/2}\cos x \cdot x^n$ type problems it may be $I_0=1$ or require a one-off IBP at $I_1$.</li><li>Compute the base case directly and exactly, keeping $\pi$ and surds in symbolic form (do not decimal-approximate).</li><li>Apply the recurrence bottom-up: compute $I_2$ from $I_0$, then $I_4$ from $I_2$, etc. This is cleaner than top-down substitution because each $I_k$ is a concrete number before being used.</li><li>At each step, evaluate any boundary terms $[\,\cdot\,]_a^b$ using exact trig values (e.g. $\sec(\pi/4)=\sqrt 2$, $\tan(\pi/4)=1$), and combine fractions carefully before the next step.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the target index $n$ and the parity of the descent chain.</li><li>Compute the base case directly: e.g. $I_0 = \int_0^{\pi/2}\cos x\,dx = 1$, or $I_2 = [\tan x]_0^{\pi/4} = 1$, or $I_0 = \pi/2$, as appropriate.</li><li>Substitute into the recurrence with the next index up. Evaluate any boundary term $[\,\cdot\,]_a^b$ using exact values at this stage.</li><li>Simplify to a single closed-form value before proceeding (combine fractions, collect $\pi$ powers).</li><li>Repeat: feed the result into the recurrence at the next index, until you reach the target $I_n$.</li><li>Multiply in any external constant (e.g. from an arc-length, surface-area, or volume formula) at the end.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $5I_6 = [\tan x\sec^4 x]_0^{\pi/4} + 4I_4$ and $3I_4 = [\tan x\sec^2 x]_0^{\pi/4} + 2I_2$ with $I_2=1$: first $3I_4 = (1)(\sqrt 2)^2 - 0 + 2(1) = 4$, so $I_4 = 4/3$. Then $5I_6 = (1)(\sqrt 2)^4 - 0 + 4(4/3) = 4 + 16/3 = 28/3$, giving $I_6 = 28/15$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Even target index with step-by-2 recurrence on $\int_0^{\pi/2}\sin^n x\,dx$ or $\int_0^{\pi/2}\cos^n x\,dx$</div>
+<div class="adjustment">Descend to $I_0 = \pi/2$; the answer will contain $\pi$.</div>
+</div><div class="variant-row">
+<div class="scenario">Odd target index on the same Wallis-type integral</div>
+<div class="adjustment">Descend to $I_1 = 1$; the answer is purely rational.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence steps by 1 (e.g. $I_n = nI_{n-1} + \text{boundary}$ from $\int x^n e^x$)</div>
+<div class="adjustment">More steps in the chain but each is simpler; descend to $I_0 = \int e^x\,dx$.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed integrand $\int_0^{\pi/2} x^n\cos x\,dx$ where odd descent ends at $I_1$</div>
+<div class="adjustment">Compute $I_1$ via a single IBP rather than direct integration.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Applying the recurrence only once and leaving an intermediate $I_k$ unevaluated, not realising a second or third application is required.</li><li>Treating part (b) as a fresh integration problem and ignoring the &#x27;Hence&#x27; link to part (a)&#x27;s formula.</li><li>Using the indefinite form of the formula and forgetting to evaluate the boundary term at each stage.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using the wrong base case: e.g. $I_0 = 1$ when the integrand is $\sin^0 x = 1$ on $[0,\pi/2]$ gives $\pi/2$, not $1$.</li><li>Confusing $\sec(\pi/4) = \sqrt 2$ with $\cos(\pi/4) = 1/\sqrt 2$, leading to wrong boundary values.</li><li>Arithmetic slips combining fractions with $\pi$ powers (e.g. $\pi^4/16 - 12(\pi^2/4 - 2)$ must be expanded carefully to $\pi^4/16 - 3\pi^2 + 24$).</li><li>Forgetting a constant prefactor from the geometric formula that wraps the integral (arc length $2\pi$, surface area, etc.).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP2/FP3) reduction-formula questions. No formula-booklet entry — students must derive the recurrence in part (a) (typically via integration by parts) and then apply it. Avoid invoking generalised Wallis product results or Beta/Gamma functions; stay with finite explicit descent.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jun_2023-Q3.html" class="example-chip">FP3 Jun 2023 Q3</a><a href="../FP3/ch4/q-Jun_2023-Q8.html" class="example-chip">FP3 Jun 2023 Q8</a><a href="../FP3/ch4/q-Jun_2021-Q5.html" class="example-chip">FP3 Jun 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

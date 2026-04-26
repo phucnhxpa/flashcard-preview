@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancel matching surd factors in surface-area integrand before integrating — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Integrand Collapse</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Cancel matching surd factors in surface-area integrand before integrating</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Integrand Collapse</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires in surface-area-of-revolution problems where y itself contains a surd that also appears in the arc-length factor √(1 + (dy/dx)²). Concrete cue: after substituting y and simplifying 1 + (dy/dx)², the same surd √(a² − x²) (or similar) appears in both numerator (from y) and denominator (from the arc-length factor). Equivalently, when the curve is a circle/ellipse arc, the product y·√(1+(dy/dx)²) often collapses to a constant or a simple polynomial. Always multiply y into the arc-length factor before reaching for substitution.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a circle x² + y² = r², differentiating gives dy/dx = −x/y, so 1 + (dy/dx)² = (x² + y²)/y² = r²/y², hence √(1 + (dy/dx)²) = r/y. The product y · r/y = r is constant — this reflects the fact that a sphere has uniform surface density along its axis (Archimedes&#x27; hat-box theorem). Recognising this collapse turns a seemingly hard integral into S = 2π ∫ r dx, a one-line computation. The same mechanism produces clean answers whenever the curve has a quadratic-in-y implicit form.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice y = √(9 − x²) and the arc-length factor evaluates to 3/√(9 − x²) — the same surd appears top and bottom.</li><li>I rule out trig substitution x = 3 sin θ: it would work but is unnecessary once the cancellation is spotted.</li><li>I commit to algebraic simplification first because the matching surds guarantee a clean reduction; the geometric sanity check (hemisphere area 2πr²) confirms it.</li><li>I write the full integrand y · √(1 + (dy/dx)²) explicitly, substitute both expressions, and cancel.</li><li>Tactically I keep the 2π prefactor outside the integral and only insert numerical limits at the very end.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>From y² = 9 − x², differentiate implicitly: 2y(dy/dx) = −2x, so dy/dx = −x/y.</li><li>Compute 1 + (dy/dx)² = 1 + x²/y² = (y² + x²)/y² = 9/(9 − x²).</li><li>Take the square root: √(1 + (dy/dx)²) = 3/√(9 − x²).</li><li>Form the integrand y · 3/√(9 − x²) = √(9 − x²) · 3/√(9 − x²) = 3.</li><li>Evaluate S = 2π ∫₀³ 3 dx = 2π · 9 = 18π.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Rotate y = √(9 − x²), 0 ≤ x ≤ 3, about the x-axis. Then dy/dx = −x/√(9 − x²), so 1 + (dy/dx)² = 9/(9 − x²). Hence S = 2π ∫₀³ √(9 − x²) · 3/√(9 − x²) dx = 2π ∫₀³ 3 dx = 18π, matching the hemisphere formula 2πr².</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Full sphere from y = √(r² − x²) on [−r, r]</div>
+<div class="adjustment">Same cancellation gives integrand r; S = 2π ∫_{−r}^{r} r dx = 4πr².</div>
+</div><div class="variant-row">
+<div class="scenario">Curve given parametrically as x = r cos t, y = r sin t</div>
+<div class="adjustment">Use S = 2π ∫ y √((dx/dt)² + (dy/dt)²) dt; the bracket simplifies to r, again giving y · r and a clean integral.</div>
+</div><div class="variant-row">
+<div class="scenario">Catenary y = cosh x rotated about x-axis</div>
+<div class="adjustment">Here 1 + (dy/dx)² = cosh²x, so √(...) = cosh x and y·cosh x = cosh²x — collapses to ½(1 + cosh 2x), still a clean integrand though not constant.</div>
+</div><div class="variant-row">
+<div class="scenario">Ellipse arc y = b√(1 − x²/a²)</div>
+<div class="adjustment">The surds no longer match exactly because of the a, b mismatch; expect partial simplification rather than full cancellation.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Leaving y as a symbol rather than substituting √(9 − x²), so the cancellation is invisible.</li><li>Treating the problem as a volume of revolution (πy² instead of 2πy√(1+(dy/dx)²)) and missing the surface-area structure entirely.</li><li>Reaching immediately for x = 3 sin θ before simplifying algebraically.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Cancelling √(9 − x²) when the two occurrences are not at the same algebraic level (e.g. one squared, one not).</li><li>Forgetting the 2π prefactor in the surface-area formula.</li><li>Sign error in dy/dx leading to a wrong 1 + (dy/dx)² before squaring saves you.</li><li>Using limits 0 to 3 but reporting half the value when the question asked for a full sphere (or vice versa).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Surface area of revolution S = 2π ∫ y √(1 + (dy/dx)²) dx is in Edexcel IAL Further Pure; the algebraic cancellation and verification against 2πr² for a hemisphere are entirely within syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jun_2021-Q2.html" class="example-chip">FP3 Jun 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

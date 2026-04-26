@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply Cayley-Hamilton to reduce high matrix powers and polynomials — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Cayley Hamilton Reduction</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Apply Cayley-Hamilton to reduce high matrix powers and polynomials</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Cayley Hamilton Reduction</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the question (i) asks you to verify a matrix satisfies its own characteristic equation, (ii) asks for a high matrix power such as A^4, A^5 or A^{-1}, or (iii) asks to evaluate a matrix polynomial like A^4 - 3A^2 + I. The characteristic polynomial (or the eigenvalues from which it is built) is typically already known from an earlier part of the question. Visual cues: a 2×2 or 3×3 matrix together with a request for a power higher than 2 or 3, or the explicit instruction &#x27;using the Cayley-Hamilton theorem&#x27; or &#x27;hence find...&#x27;. Equivalent phrasings include &#x27;show that A satisfies p(A) = 0&#x27; or &#x27;use the result of part (a) to find A^n&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The Cayley-Hamilton theorem says that every square matrix satisfies its own characteristic polynomial: if p(λ) = det(λI − A) is the characteristic polynomial, then p(A) = 0 (the zero matrix). For a 3×3 matrix this gives a cubic relation A^3 + aA^2 + bA + cI = 0, which can be rearranged so that A^3 — and by induction every higher power — is expressible as a linear combination of I, A and A^2. This collapses any matrix polynomial to degree at most n−1, and avoids the heavier machinery of diagonalisation (which needs P^{-1}). Rearranging the same identity also gives a clean route to A^{-1} when c ≠ 0.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the question demands a high power of A, an inverse, or verification of p(A) = 0 — and that the characteristic polynomial is either given or just computed in a previous part.</li><li>Rule out brute-force multiplication (computing A^4 directly is three matrix multiplications and error-prone) and rule out diagonalisation if P^{-1} would be awkward to compute.</li><li>Commit to Cayley-Hamilton because it converts a degree problem into a single matrix multiplication (A^2) plus scalar arithmetic, which is much cheaper.</li><li>Bridge to operation: write down the scalar characteristic equation p(λ) = 0, then carefully replace λ^k by A^k and the constant term by (constant)·I — never by a bare scalar — to obtain the matrix identity p(A) = 0.</li><li>Tactical choice: rearrange to isolate the highest power (A^3 = −aA^2 − bA − cI) so that substitution is mechanical, and decide whether the goal is verification (compute A^2, A^3, plug in) or reduction (recursively replace high powers).</li><li>For A^n with n large, multiply the isolating relation by A and substitute repeatedly, keeping the running expression in the form αI + βA + γA^2.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the characteristic polynomial p(λ) = λ^3 + aλ^2 + bλ + c (or λ^2 − tr(A)λ + det(A) for 2×2).</li><li>State Cayley-Hamilton: p(A) = A^3 + aA^2 + bA + cI = 0, with cI (not c) as the constant term.</li><li>Rearrange to A^3 = −aA^2 − bA − cI.</li><li>If verifying: compute A^2, then A^3 = A·A^2, substitute into p(A), and confirm it equals the zero matrix.</li><li>If finding A^4 (or higher): multiply the rearranged identity by A to get A^4 = −aA^3 − bA^2 − cA, then substitute the expression for A^3 to land in span{I, A, A^2}.</li><li>If finding A^{-1}: rearrange p(A) = 0 to I = −(1/c)(A^2 + aA + bI), so A^{-1} = −(1/c)(A^2 + aA + bI), provided c = (−1)^n det(A) ≠ 0.</li><li>Compute A^2 once (the only matrix multiplication needed) and assemble the final αI + βA + γA^2.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let A be 2×2 with tr(A) = 4 and det(A) = 3, so the characteristic equation is $\lambda^2 - 4\lambda + 3 = 0$. Cayley-Hamilton gives $A^2 - 4A + 3I = 0$, hence $A^2 = 4A - 3I$. Then $A^3 = A\cdot A^2 = 4A^2 - 3A = 4(4A - 3I) - 3A = 13A - 12I$, reducing a cubic in A to a linear combination of A and I.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2×2 matrix</div>
+<div class="adjustment">Characteristic equation is quadratic: $A^2 = \operatorname{tr}(A)\,A - \det(A)\,I$. Every higher power reduces to αI + βA.</div>
+</div><div class="variant-row">
+<div class="scenario">Finding A^{-1} via Cayley-Hamilton</div>
+<div class="adjustment">Isolate I in p(A) = 0 and divide by the constant term: $A^{-1} = -\tfrac{1}{c}(A^2 + aA + bI)$ for 3×3. Avoids row-reduction.</div>
+</div><div class="variant-row">
+<div class="scenario">Verifying p(A) = 0 directly</div>
+<div class="adjustment">No reduction needed — just compute A^2 and A^3 explicitly and substitute, showing the result is the zero matrix.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the question as requiring diagonalisation when the characteristic polynomial is already provided — a clear signal that Cayley-Hamilton is the intended route.</li><li>Reading &#x27;satisfies its characteristic equation&#x27; as a scalar identity for the eigenvalues, rather than the matrix identity p(A) = 0.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting that the constant term c must become cI (the identity matrix scaled), not the scalar c, when passing from p(λ) = 0 to p(A) = 0.</li><li>Sign errors when rearranging: the characteristic polynomial sign convention matters — write p(λ) = det(λI − A) carefully before substituting.</li><li>Trying to &#x27;divide&#x27; matrices in the Cayley-Hamilton identity; only rearrangement and (for invertibility) multiplication by A^{-1} are legitimate.</li><li>Arithmetic slips when computing A^2 — every entry feeds the rest of the calculation, so check it before substituting.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP1/FP2) for 2×2 and 3×3 matrices; the Cayley-Hamilton theorem and the characteristic equation are explicitly in scope. Do not generalise to minimal polynomials, Jordan forms, or n×n with n ≥ 4 — these are beyond IAL.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2023-Q5.html" class="example-chip">FP3 Jan 2023 Q5</a><a href="../FP3/ch6/q-Jun_2023-Q2.html" class="example-chip">FP3 Jun 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

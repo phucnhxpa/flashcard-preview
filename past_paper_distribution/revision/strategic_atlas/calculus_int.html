@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integration — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="index.html">Strategic Atlas</a> / <strong>Integration</strong></div>
+  <h1><span class="dot" style="background:#FFA726;display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:10px;vertical-align:middle"></span>Integration</h1>
+  <p>183 canonical strategic moves across 147 families.</p>
+</div></header>
+<div class="container">
+
+<section class="family">
+  <h2>Substitution Bridge</h2>
+  <div class="family-meta">12 canonical moves · 14 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-u-inner-function-to-collapse-a-composite-power-into-an-integrable-for.html" class="move-row">
+  <div class="move-name">Substitute u = inner function to collapse a composite power into an integrable form</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/substitute-u-equal-to-the-inner-expression-to-absorb-its-derivative.html" class="move-row">
+  <div class="move-name">Substitute u equal to the inner expression to absorb its derivative</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/convert-x-surd-and-dx-to-u-via-squaring-and-differentiating.html" class="move-row">
+  <div class="move-name">Convert x, surd, and dx to u via squaring and differentiating</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/use-hence-to-reverse-part-as-derivative-as-an-antiderivative.html" class="move-row">
+  <div class="move-name">Use &#x27;hence&#x27; to reverse part (a)&#x27;s derivative as an antiderivative</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/substitute-u-x-to-rationalise-surd-integrand.html" class="move-row">
+  <div class="move-name">Substitute u = √x to rationalise surd integrand</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/differentiate-the-given-substitution-to-express-dx-in-terms-of-du.html" class="move-row">
+  <div class="move-name">Differentiate the given substitution to express dx in terms of du</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/substitute-u-inner-function-to-absorb-its-derivative-from-the-numerator.html" class="move-row">
+  <div class="move-name">Substitute u = inner function to absorb its derivative from the numerator</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/convert-x-limits-to-u-limits-immediately-on-substitution.html" class="move-row">
+  <div class="move-name">Convert x-limits to u-limits immediately on substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/rearrange-the-substitution-equation-to-rewrite-leftover-integrand-pieces-in-u.html" class="move-row">
+  <div class="move-name">Rearrange the substitution equation to rewrite leftover integrand pieces in u</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/re-express-x-dx-and-all-radical-parts-in-the-new-variable-u.html" class="move-row">
+  <div class="move-name">Re-express x, dx, and all radical parts in the new variable u</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/split-odd-power-to-pair-one-factor-with-du-in-radical-substitution.html" class="move-row">
+  <div class="move-name">Split odd power to pair one factor with du in radical substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/invert-the-substitution-to-rewrite-orphan-x-factors-in-u.html" class="move-row">
+  <div class="move-name">Invert the substitution to rewrite orphan x-factors in u</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integration By Parts</h2>
+  <div class="family-meta">8 canonical moves · 13 example questions</div>
+  <div class="move-list">
+<a href="move/choose-u-as-the-polynomial-factor-in-ibp-to-reduce-its-degree.html" class="move-row">
+  <div class="move-name">Choose u as the polynomial factor in IBP to reduce its degree</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/apply-integration-by-parts-when-integrand-is-a-product-of-unlike-functions-or-a-.html" class="move-row">
+  <div class="move-name">Apply integration by parts when integrand is a product of unlike functions or a lone log/inverse-trig</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-liate-priority-to-choose-u-in-integration-by-parts.html" class="move-row">
+  <div class="move-name">Apply LIATE priority to choose u in integration by parts</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-integration-by-parts-repeatedly-until-the-logpolynomial-factor-is-exhauste.html" class="move-row">
+  <div class="move-name">Apply integration by parts repeatedly until the log/polynomial factor is exhausted</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/multiply-integrand-by-1-to-manufacture-ibp-product-structure.html" class="move-row">
+  <div class="move-name">Multiply integrand by 1 to manufacture IBP product structure</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/assign-u-to-the-polynomial-factor-in-polynomialexponential-integrals-via-liateli.html" class="move-row">
+  <div class="move-name">Assign u to the polynomial factor in polynomial×exponential integrals via LIATE/LIPET</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/assign-u-to-the-logarithmic-factor-by-liate-priority.html" class="move-row">
+  <div class="move-name">Assign u to the logarithmic factor by LIATE priority</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/integrate-polynomial-times-exponential-using-integration-by-parts.html" class="move-row">
+  <div class="move-name">Integrate polynomial times exponential using integration by parts</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reduction Formula Ibp</h2>
+  <div class="family-meta">7 canonical moves · 10 example questions</div>
+  <div class="move-list">
+<a href="move/split-sinn-x-sinn-1-x-sin-x-to-set-up-ibp-reduction.html" class="move-row">
+  <div class="move-name">Split sin^n x = sin^(n-1) x · sin x to set up IBP reduction</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-integration-by-parts-twice-to-close-a-polynomial-times-trig-reduction-form.html" class="move-row">
+  <div class="move-name">Apply integration by parts twice to close a polynomial-times-trig reduction formula</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/set-u-polynomial-factor-in-ibp-to-drive-a-reduction-formula.html" class="move-row">
+  <div class="move-name">Set u = (polynomial factor) in IBP to drive a reduction formula</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/apply-integration-by-parts-twice-to-close-a-trig-polynomial-reduction.html" class="move-row">
+  <div class="move-name">Apply integration by parts twice to close a trig-polynomial reduction</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/iterate-a-reduction-formula-along-the-parity-chain-to-the-matching-base-case.html" class="move-row">
+  <div class="move-name">Iterate a reduction formula along the parity chain to the matching base case</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/split-xn-as-xn-1x-to-enable-ibp-against-a-surd-denominator.html" class="move-row">
+  <div class="move-name">Split x^n as x^{n-1}·x to enable IBP against a surd denominator</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/peel-off-one-factor-of-sin-x-to-set-up-ibp-for-reduction.html" class="move-row">
+  <div class="move-name">Peel off one factor of sin x to set up IBP for reduction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Formula Selection</h2>
+  <div class="family-meta">4 canonical moves · 8 example questions</div>
+  <div class="move-list">
+<a href="move/select-the-correct-arc-length-or-surface-area-integral-formula-to-frame-the-prob.html" class="move-row">
+  <div class="move-name">Select the correct arc length or surface area integral formula to frame the problem</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/select-the-appropriate-revolution-integral-formula-matching-axis-and-curve-repre.html" class="move-row">
+  <div class="move-name">Select the appropriate revolution integral formula matching axis and curve representation</div>
+  <div class="freq-pill">2 questions</div>
+</a>
+<a href="move/classify-ordinates-as-end-pair-versus-interior-for-trapezium-rule.html" class="move-row">
+  <div class="move-name">Classify ordinates as end-pair versus interior for trapezium rule</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/partition-ordinates-into-endpoints-versus-interior-values-for-the-trapezium-rule.html" class="move-row">
+  <div class="move-name">Partition ordinates into endpoints versus interior values for the trapezium rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Partial Fractions Then Integrate</h2>
+  <div class="family-meta">5 canonical moves · 7 example questions</div>
+  <div class="move-list">
+<a href="move/decompose-proper-rational-integrand-via-partial-fractions-to-reduce-to-logpower-.html" class="move-row">
+  <div class="move-name">Decompose proper rational integrand via partial fractions to reduce to log/power integrals</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/integrate-divided-rational-form-using-ln-for-kxa-term.html" class="move-row">
+  <div class="move-name">Integrate divided rational form using ln for k/(x−a) term</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/expand-polynomial-product-directly-instead-of-parts-or-substitution.html" class="move-row">
+  <div class="move-name">Expand polynomial product directly instead of parts or substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/apply-given-multi-angle-linearisation-to-integrate-cosn-θ-term-by-term.html" class="move-row">
+  <div class="move-name">Apply given multi-angle linearisation to integrate cos^n θ term-by-term</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/integrate-each-partial-fraction-term-using-standard-log-and-power-rules.html" class="move-row">
+  <div class="move-name">Integrate each partial fraction term using standard log and power rules</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Numerical Integration</h2>
+  <div class="family-meta">3 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/apply-trapezium-rule-to-tabulated-ordinates-to-estimate-a-definite-integral.html" class="move-row">
+  <div class="move-name">Apply trapezium rule to tabulated ordinates to estimate a definite integral</div>
+  <div class="freq-pill">4 questions</div>
+</a>
+<a href="move/set-up-trapezium-rule-strip-width-from-ordinate-count.html" class="move-row">
+  <div class="move-name">Set up trapezium rule strip width from ordinate count</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/set-up-strip-width-and-ordinate-table-for-trapezium-rule.html" class="move-row">
+  <div class="move-name">Set up strip width and ordinate table for trapezium rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Repeated Ibp</h2>
+  <div class="family-meta">4 canonical moves · 6 example questions</div>
+  <div class="move-list">
+<a href="move/apply-integration-by-parts-repeatedly-to-reduce-polynomial-exponential.html" class="move-row">
+  <div class="move-name">Apply integration by parts repeatedly to reduce polynomial × exponential</div>
+  <div class="freq-pill">3 questions</div>
+</a>
+<a href="move/iterate-ibp-until-the-polynomial-factor-reduces-to-a-constant.html" class="move-row">
+  <div class="move-name">Iterate IBP until the polynomial factor reduces to a constant</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/apply-repeated-integration-by-parts-with-u-polynomial-to-drain-its-degree.html" class="move-row">
+  <div class="move-name">Apply repeated integration by parts with u = polynomial to drain its degree</div>
+  <div class="freq-pill">1 questions</div>
+</a>
+<a href="move/iterate-integration-by-parts-to-eliminate-the-polynomial-factor.html" class="move-row">
+  <div class="move-name">Iterate integration by parts to eliminate the polynomial factor</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Definite Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 5 example questions</div>
+  <div class="move-list">
+<a href="move/apply-fundamental-theorem-of-calculus-using-a-given-antiderivative-at-the-stated.html" class="move-row">
+  <div class="move-name">Apply Fundamental Theorem of Calculus using a given antiderivative at the stated limits</div>
+  <div class="freq-pill">5 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reverse Substitution</h2>
+  <div class="family-meta">1 canonical moves · 5 example questions</div>
+  <div class="move-list">
+<a href="move/reverse-the-substitution-to-express-the-antiderivative-in-the-original-variable.html" class="move-row">
+  <div class="move-name">Reverse the substitution to express the antiderivative in the original variable</div>
+  <div class="freq-pill">5 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Area Between Curves</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-upper-minus-lower-between-intersection-limits-to-find-enclosed-area.html" class="move-row">
+  <div class="move-name">Integrate upper-minus-lower between intersection limits to find enclosed area</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Conversion</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/convert-integration-limits-to-the-new-variable-to-avoid-back-substitution.html" class="move-row">
+  <div class="move-name">Convert integration limits to the new variable to avoid back-substitution</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Identity Selection</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/apply-power-reduction-or-pythagorean-identity-to-linearise-squared-trighyperboli.html" class="move-row">
+  <div class="move-name">Apply power-reduction or Pythagorean identity to linearise squared trig/hyperbolic terms</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Recursive Descent</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/cascade-reduction-formula-down-to-a-known-base-case-to-extract-a-numerical-value.html" class="move-row">
+  <div class="move-name">Cascade reduction formula down to a known base case to extract a numerical value</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Splitting</h2>
+  <div class="family-meta">1 canonical moves · 4 example questions</div>
+  <div class="move-list">
+<a href="move/split-a-trig-power-as-fn-1f-or-fn-2f²-to-set-up-a-clean-reduction-formula-ibp.html" class="move-row">
+  <div class="move-name">Split a trig power as f^(n-1)·f (or f^(n-2)·f²) to set up a clean reduction-formula IBP</div>
+  <div class="freq-pill">4 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Logarithmic Recognition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-fxfx-pattern-to-integrate-as-lnfx.html" class="move-row">
+  <div class="move-name">Recognise f&#x27;(x)/f(x) pattern to integrate as ln|f(x)|</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/split-a-rational-fraction-term-by-term-into-standard-integrable-pieces.html" class="move-row">
+  <div class="move-name">Split a rational fraction term-by-term into standard integrable pieces</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linearity Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/split-integrand-by-linearity-to-reuse-a-known-integral.html" class="move-row">
+  <div class="move-name">Split integrand by linearity to reuse a known integral</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linear Substitution</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-u-axb-to-linearise-composite-integrand.html" class="move-row">
+  <div class="move-name">Substitute u = ax+b to linearise composite integrand</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Pre Integration Simplification</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/simplify-the-integrand-algebraically-before-integrating-to-reduce-term-count-and.html" class="move-row">
+  <div class="move-name">Simplify the integrand algebraically before integrating to reduce term count and complexity</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Boundary Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-ibp-boundary-brackets-at-engineered-limits-to-kill-or-simplify-them.html" class="move-row">
+  <div class="move-name">Evaluate IBP boundary brackets at engineered limits to kill or simplify them</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Base Case Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/anchor-the-recursion-by-evaluating-the-lowest-index-integral-directly.html" class="move-row">
+  <div class="move-name">Anchor the recursion by evaluating the lowest-index integral directly</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Arc Length Simplification</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/collapse-1dydx²-into-a-perfect-square-to-kill-the-arc-length-radical.html" class="move-row">
+  <div class="move-name">Collapse 1+(dy/dx)² into a perfect square to kill the arc-length radical</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Initial Condition Substitution</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-known-point-into-antiderivative-to-determine-constant-of-integration.html" class="move-row">
+  <div class="move-name">Substitute known point into antiderivative to determine constant of integration</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reduction Descent</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/unroll-reduction-formula-iteratively-to-a-base-case.html" class="move-row">
+  <div class="move-name">Unroll reduction formula iteratively to a base case</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Standard Form Recognition</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/match-integrand-to-a-formula-booklet-standard-form-for-direct-antidifferentiatio.html" class="move-row">
+  <div class="move-name">Match integrand to a formula-booklet standard form for direct antidifferentiation</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Assignment Consistency</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/keep-ibp-role-assignment-consistent-across-repeated-applications-to-close-the-lo.html" class="move-row">
+  <div class="move-name">Keep IBP role assignment consistent across repeated applications to close the loop</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Reduction Linearisation</h2>
+  <div class="family-meta">1 canonical moves · 3 example questions</div>
+  <div class="move-list">
+<a href="move/apply-power-reduction-identities-to-linearise-trig-powers-for-integration.html" class="move-row">
+  <div class="move-name">Apply power-reduction identities to linearise trig powers for integration</div>
+  <div class="freq-pill">3 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Antidifferentiation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-fx-term-by-term-to-recover-fx-with-constant-of-integration.html" class="move-row">
+  <div class="move-name">Integrate f&#x27;(x) term-by-term to recover f(x) with constant of integration</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trapezium Rule Application</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/classify-ordinates-as-endpoints-vs-interior-to-apply-the-trapezium-rule.html" class="move-row">
+  <div class="move-name">Classify ordinates as endpoints vs interior to apply the trapezium rule</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Reversal</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/flip-integration-limits-to-absorb-a-leading-negative-sign.html" class="move-row">
+  <div class="move-name">Flip integration limits to absorb a leading negative sign</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Transformation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/convert-x-limits-to-u-limits-to-keep-the-definite-integral-in-u-space.html" class="move-row">
+  <div class="move-name">Convert x-limits to u-limits to keep the definite integral in u-space</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trapezium Rule Setup</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/set-up-trapezium-rule-by-reading-h-and-labelling-ordinates-correctly.html" class="move-row">
+  <div class="move-name">Set up trapezium rule by reading h and labelling ordinates correctly</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Sign Analysis</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/verify-integrand-sign-on-the-interval-to-remove-absolute-values.html" class="move-row">
+  <div class="move-name">Verify integrand sign on the interval to remove absolute values</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Power Rule Integration</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/apply-reverse-power-rule-term-by-term-to-integrate-non-integer-powers.html" class="move-row">
+  <div class="move-name">Apply reverse power rule term-by-term to integrate non-integer powers</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cross Part Linkage</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/reuse-an-earlier-parts-integral-result-by-matching-structural-form.html" class="move-row">
+  <div class="move-name">Reuse an earlier part&#x27;s integral result by matching structural form</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Preparation</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/algebraically-pre-process-the-integrand-into-a-sum-of-standard-xn-or-ekx-terms.html" class="move-row">
+  <div class="move-name">Algebraically pre-process the integrand into a sum of standard x^n or e^{kx} terms</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integration Constant</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/append-c-to-indefinite-integrals-to-capture-the-full-antiderivative-family.html" class="move-row">
+  <div class="move-name">Append +C to indefinite integrals to capture the full antiderivative family</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parts Assignment</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/assign-u-to-the-algebraic-factor-via-liate-for-integration-by-parts.html" class="move-row">
+  <div class="move-name">Assign u to the algebraic factor via LIATE for integration by parts</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reverse Chain Rule</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/spot-fxfx-or-fxfxn-pattern-to-integrate-by-inspection.html" class="move-row">
+  <div class="move-name">Spot f&#x27;(x)/f(x) or f&#x27;(x)·f(x)^n pattern to integrate by inspection</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Direct Integration</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-both-sides-of-ddxμyμq-to-obtain-the-general-solution.html" class="move-row">
+  <div class="move-name">Integrate both sides of d/dx[μy]=μQ to obtain the general solution</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Volume Of Revolution Setup</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/set-up-washerdisc-volume-by-squaring-y-to-eliminate-surds.html" class="move-row">
+  <div class="move-name">Set up washer/disc volume by squaring y to eliminate surds</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integral Linearity Reuse</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/split-integral-by-linearity-to-reuse-a-previous-numerical-estimate.html" class="move-row">
+  <div class="move-name">Split integral by linearity to reuse a previous numerical estimate</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Boundary Identification</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/deduce-missing-integration-limit-from-curve-axis-or-curve-domain-constraints.html" class="move-row">
+  <div class="move-name">Deduce missing integration limit from curve-axis or curve-domain constraints</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Constant Factor Extraction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/pull-constant-multiplier-outside-the-integral-to-simplify-or-reuse-a-known-resul.html" class="move-row">
+  <div class="move-name">Pull constant multiplier outside the integral to simplify or reuse a known result</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Rewrite Before Integration</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-the-integrand-into-power-rule-ready-form-before-integrating.html" class="move-row">
+  <div class="move-name">Rewrite the integrand into power-rule-ready form before integrating</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Area Conversion</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/convert-parametric-area-y-dx-into-ydxdtdt-with-sign-aware-limits.html" class="move-row">
+  <div class="move-name">Convert parametric area ∫y dx into ∫y(dx/dt)dt with sign-aware limits</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trapezium Rule Error Analysis</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/use-concavity-and-strip-width-to-judge-and-improve-trapezium-rule-accuracy.html" class="move-row">
+  <div class="move-name">Use concavity and strip-width to judge and improve trapezium-rule accuracy</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Repeated Parts Reduction</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/repeat-integration-by-parts-n-times-to-eliminate-a-degree-n-polynomial-factor.html" class="move-row">
+  <div class="move-name">Repeat integration by parts n times to eliminate a degree-n polynomial factor</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Log Law Then Exponentiate</h2>
+  <div class="family-meta">1 canonical moves · 2 example questions</div>
+  <div class="move-list">
+<a href="move/combine-logarithms-via-log-laws-then-exponentiate-or-evaluate-to-simplify.html" class="move-row">
+  <div class="move-name">Combine logarithms via log laws then exponentiate or evaluate to simplify</div>
+  <div class="freq-pill">2 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Preprocessing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-reciprocal-and-root-terms-as-negative-or-fractional-powers-before-integr.html" class="move-row">
+  <div class="move-name">Rewrite reciprocal and root terms as negative or fractional powers before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exact Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-the-standard-form-remainder-exactly-after-splitting.html" class="move-row">
+  <div class="move-name">Evaluate the standard-form remainder exactly after splitting</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Term By Term Power Rule</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-term-by-term-using-linearity-and-the-power-rule.html" class="move-row">
+  <div class="move-name">Integrate term-by-term using linearity and the power rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Index Law Preprocessing</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-roots-and-reciprocals-as-fractional-indices-before-integrating.html" class="move-row">
+  <div class="move-name">Rewrite roots and reciprocals as fractional indices before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Top Minus Bottom</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/subtract-lower-from-upper-to-find-area-between-curves-splitting-where-they-cross.html" class="move-row">
+  <div class="move-name">Subtract lower from upper to find area between curves, splitting where they cross</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Bridge</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-follow-up-integrand-as-linear-combination-of-original-integrand.html" class="move-row">
+  <div class="move-name">Rewrite follow-up integrand as linear combination of original integrand</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Units Dimensional Modelling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-cross-sectional-area-to-volume-via-v-avt.html" class="move-row">
+  <div class="move-name">Convert cross-sectional area to volume via V = A·v·t</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Region Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/partition-region-using-geometric-boundaries-to-assign-per-piece-integration-limi.html" class="move-row">
+  <div class="move-name">Partition region using geometric boundaries to assign per-piece integration limits</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Special Case Recognition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-1x-as-the-logarithmic-special-case-of-integration.html" class="move-row">
+  <div class="move-name">Recognise 1/x as the logarithmic special case of integration</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polynomial Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-polynomial-term-by-term-and-evaluate-at-bounds-for-definite-area.html" class="move-row">
+  <div class="move-name">Integrate polynomial term-by-term and evaluate at bounds for definite area</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Reduction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/distribute-fractional-power-across-polynomial-factor-before-applying-power-rule.html" class="move-row">
+  <div class="move-name">Distribute fractional power across polynomial factor before applying power rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Coefficient Comparison</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-lhs-and-match-coefficients-to-determine-unknown-constant.html" class="move-row">
+  <div class="move-name">Integrate LHS and match coefficients to determine unknown constant</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Deferred Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/assemble-full-antiderivative-before-applying-definite-limits.html" class="move-row">
+  <div class="move-name">Assemble full antiderivative before applying definite limits</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Area Sign Correction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/take-absolute-value-of-negative-definite-integral-to-report-geometric-area.html" class="move-row">
+  <div class="move-name">Take absolute value of negative definite integral to report geometric area</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Area Complement</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-total-area-decomposition-to-replace-awkward-sub-region-with-complement.html" class="move-row">
+  <div class="move-name">Use total-area decomposition to replace awkward sub-region with complement</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Curve Sketching Checklist</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/sketch-y-eˣ-by-labelling-intercept-asymptote-and-concavity.html" class="move-row">
+  <div class="move-name">Sketch y = eˣ by labelling intercept, asymptote, and concavity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/determine-trapezium-rule-strip-width-h-from-limits-and-ordinate-count.html" class="move-row">
+  <div class="move-name">Determine trapezium-rule strip width h from limits and ordinate count</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parameter Extraction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/determine-trapezium-rule-strip-width-h-from-a-table-of-x-values.html" class="move-row">
+  <div class="move-name">Determine trapezium-rule strip width h from a table of x-values</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Rewrite</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-1uⁿ-as-uⁿ-to-apply-the-reverse-power-rule.html" class="move-row">
+  <div class="move-name">Rewrite 1/uⁿ as u⁻ⁿ to apply the reverse power rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linearity Of Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-integral-into-exact-constant-part-and-approximate-function-part.html" class="move-row">
+  <div class="move-name">Split integral into exact constant part and approximate function part</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Precision Management</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/preserve-full-decimal-precision-through-trapezium-rule-arithmetic.html" class="move-row">
+  <div class="move-name">Preserve full decimal precision through trapezium-rule arithmetic</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Early Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/evaluate-boundary-brackets-immediately-after-each-ibp-round.html" class="move-row">
+  <div class="move-name">Evaluate boundary brackets immediately after each IBP round</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Order Of Operations</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/compute-the-trapezium-rule-bracket-fully-before-multiplying-by-h2.html" class="move-row">
+  <div class="move-name">Compute the trapezium-rule bracket fully before multiplying by h/2</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Structural Labelling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/label-sub-integrals-with-letters-to-manage-repeated-ibp-cleanly.html" class="move-row">
+  <div class="move-name">Label sub-integrals with letters to manage repeated IBP cleanly</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linear Argument Adjustment</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-coskx-by-reverse-chain-rule-with-1k-factor.html" class="move-row">
+  <div class="move-name">Integrate cos(kx) by reverse chain rule with 1/k factor</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Show That As Tool</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-the-show-that-linearised-identity-before-integrating.html" class="move-row">
+  <div class="move-name">Substitute the show-that linearised identity before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cyclic Ibp</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/label-integral-as-i-to-close-cyclic-ibp-algebraically.html" class="move-row">
+  <div class="move-name">Label integral as I to close cyclic IBP algebraically</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Zero Analysis For Limits</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-positivity-of-one-factor-to-reduce-a-product-equals-zero-to-a-single-equatio.html" class="move-row">
+  <div class="move-name">Use positivity of one factor to reduce a product-equals-zero to a single equation</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/convert-cartesian-volume-of-revolution-to-parametric-integral-via-dx-dxdθdθ.html" class="move-row">
+  <div class="move-name">Convert Cartesian volume of revolution to parametric integral via dx = (dx/dθ)dθ</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Rearrange To Iteration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-to-displacement-equation-then-isolate-linear-t-term-for-iteration.html" class="move-row">
+  <div class="move-name">Integrate to displacement equation then isolate linear-T term for iteration</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution Cancellation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/cancel-matching-x-factors-between-integrand-and-dx-after-substitution.html" class="move-row">
+  <div class="move-name">Cancel matching √x factors between integrand and dx after substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution Inversion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/invert-a-rational-substitution-to-write-x-and-dx-in-terms-of-u.html" class="move-row">
+  <div class="move-name">Invert a rational substitution to write x and dx in terms of u</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Separation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-polynomial-over-single-power-fraction-into-term-by-term-powers.html" class="move-row">
+  <div class="move-name">Split polynomial-over-single-power fraction into term-by-term powers</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exponential Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/square-ex2-via-index-law-to-collapse-to-ex.html" class="move-row">
+  <div class="move-name">Square e^{x/2} via index law to collapse to e^x</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trig Standard Integral</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-tanax-as-1alncosax-via-ff-recognition.html" class="move-row">
+  <div class="move-name">Integrate tan(ax) as −(1/a)ln|cos(ax)| via f&#x27;/f recognition</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linear Shift Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-secondary-linear-shift-to-bypass-partial-fractions-on-repeated-linear-deno.html" class="move-row">
+  <div class="move-name">Apply secondary linear shift to bypass partial fractions on repeated linear denominators</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Modelling</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/double-a-single-revolution-volume-to-model-a-symmetric-composite-solid.html" class="move-row">
+  <div class="move-name">Double a single-revolution volume to model a symmetric composite solid</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Term By Term Division</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-polynomial-over-monomial-fraction-into-separate-power-terms.html" class="move-row">
+  <div class="move-name">Split polynomial-over-monomial fraction into separate power terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Surd Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-u-linear-to-convert-surd-integrand-into-polynomial.html" class="move-row">
+  <div class="move-name">Substitute u = √(linear) to convert surd integrand into polynomial</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Substitution By Recognition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/spot-ftn-ft-and-integrate-by-reverse-chain-rule.html" class="move-row">
+  <div class="move-name">Spot [f(t)]^n · f&#x27;(t) and integrate by reverse chain rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Result Chaining</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/factor-out-constant-scalar-to-reuse-part-a-antiderivative.html" class="move-row">
+  <div class="move-name">Factor out constant scalar to reuse part (a) antiderivative</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Limit Finding</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/map-cartesian-region-boundaries-to-parameter-t-limits.html" class="move-row">
+  <div class="move-name">Map Cartesian region boundaries to parameter t-limits</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Form Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/choose-unfactored-power-form-when-bounds-give-perfect-square-radicands.html" class="move-row">
+  <div class="move-name">Choose unfactored power form when bounds give perfect-square radicands</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Hence Chain</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-ftc-with-part-1-antiderivative-on-a-hence-evaluate-definite-integral.html" class="move-row">
+  <div class="move-name">Apply FTC with Part 1 antiderivative on a &#x27;Hence evaluate&#x27; definite integral</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Structured Exam Linkage</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reuse-part-a-antiderivative-inside-fundamental-theorem-for-part-b.html" class="move-row">
+  <div class="move-name">Reuse part (a) antiderivative inside Fundamental Theorem for part (b)</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Standard Form Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-ekx-via-standard-result-with-reciprocal-coefficient-1k.html" class="move-row">
+  <div class="move-name">Integrate e^{kx} via standard result with reciprocal coefficient 1/k</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Liate Assignment</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/assign-u-to-the-algebraic-factor-by-liate-priority.html" class="move-row">
+  <div class="move-name">Assign u to the algebraic factor by LIATE priority</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Domain Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/drop-absolute-value-in-ln-when-domain-forces-positivity.html" class="move-row">
+  <div class="move-name">Drop absolute value in ln when domain forces positivity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Preparation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/expand-squared-exponential-binomial-using-index-law-before-integrating.html" class="move-row">
+  <div class="move-name">Expand squared exponential binomial using index law before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Definite Integral Deferral</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/defer-limit-substitution-until-full-antiderivative-is-found.html" class="move-row">
+  <div class="move-name">Defer limit substitution until full antiderivative is found</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Fractional Exponent Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-fractional-negative-power-via-reverse-power-rule.html" class="move-row">
+  <div class="move-name">Integrate fractional negative power via reverse power rule</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Region Identification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/find-missing-integration-limit-from-curve-axis-intersection.html" class="move-row">
+  <div class="move-name">Find missing integration limit from curve-axis intersection</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Division Then Integrate</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-improper-rational-fraction-by-numerator-surgery-before-integrating.html" class="move-row">
+  <div class="move-name">Split improper rational fraction by numerator surgery before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integral Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-integrand-by-linearity-to-isolate-the-ibp-needing-term.html" class="move-row">
+  <div class="move-name">Split integrand by linearity to isolate the IBP-needing term</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Numerator Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-linear-over-quadratic-numerator-into-ff-part-plus-constant-part.html" class="move-row">
+  <div class="move-name">Split linear-over-quadratic numerator into f&#x27;/f part plus constant part</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exam Scaffolding Reuse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-integral-by-linearity-to-reuse-earlier-part-antiderivative.html" class="move-row">
+  <div class="move-name">Split integral by linearity to reuse earlier-part antiderivative</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exact Value Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-ln-1-0-and-ln-e-1-at-integration-limits-to-collapse-log-terms.html" class="move-row">
+  <div class="move-name">Exploit ln 1 = 0 and ln e = 1 at integration limits to collapse log terms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Iterated Ibp</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-iterated-ibp-to-reduce-powers-of-ln-x-against-polynomial.html" class="move-row">
+  <div class="move-name">Apply iterated IBP to reduce powers of ln x against polynomial</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Manipulation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/swap-integration-limits-to-absorb-a-leading-negative-sign.html" class="move-row">
+  <div class="move-name">Swap integration limits to absorb a leading negative sign</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Polar Area Formula</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-the-polar-area-formula-½r²dθ-with-correct-limits.html" class="move-row">
+  <div class="move-name">Apply the polar area formula ½∫r²dθ with correct limits</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Linear Chain Rule</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/divide-by-inner-linear-coefficient-when-integrating-1axb-forms.html" class="move-row">
+  <div class="move-name">Divide by inner linear coefficient when integrating 1/(ax+b) forms</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Log Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/combine-logarithmic-terms-using-log-laws-for-compact-exact-answer.html" class="move-row">
+  <div class="move-name">Combine logarithmic terms using log laws for compact exact answer</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Orthogonality Shortcut</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/annihilate-cosine-and-sine-harmonics-over-a-full-period.html" class="move-row">
+  <div class="move-name">Annihilate cosine and sine harmonics over a full period</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Limit Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/kill-sinkπ-terms-when-polarintegration-limits-are-multiples-of-π.html" class="move-row">
+  <div class="move-name">Kill sin(kπ) terms when polar/integration limits are multiples of π</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reverse Problem Setup</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/equate-evaluated-definite-integral-to-given-value-to-solve-for-unknown-limit.html" class="move-row">
+  <div class="move-name">Equate evaluated definite integral to given value to solve for unknown limit</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Double Angle Linearisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/linearise-sin²θ-via-sin²θ-1-cos2θ2-to-integrate.html" class="move-row">
+  <div class="move-name">Linearise sin²θ via sin²θ = (1 − cos2θ)/2 to integrate</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Long Division Reduction</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/reduce-improper-rational-integrand-by-polynomial-long-division-first.html" class="move-row">
+  <div class="move-name">Reduce improper rational integrand by polynomial long division first</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/cancel-cosθ-against-tanθ-to-reduce-integrand-to-sinθ.html" class="move-row">
+  <div class="move-name">Cancel cosθ against tanθ to reduce integrand to sinθ</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Exact Derivative Integration</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/integrate-both-sides-after-recognising-exact-derivative-lhs.html" class="move-row">
+  <div class="move-name">Integrate both sides after recognising exact-derivative LHS</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cross Reference Reuse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/carry-forward-part-a-simplified-1dydx²-into-part-b-surface-area-integral.html" class="move-row">
+  <div class="move-name">Carry forward part (a) simplified √(1+(dy/dx)²) into part (b) surface area integral</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Numerator Manipulation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-linear-numerator-as-afx-b-over-irreducible-quadratic.html" class="move-row">
+  <div class="move-name">Split linear numerator as A·f&#x27;(x) + B over irreducible quadratic</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Hyperbolic Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-x-a-cosh-θ-to-eliminate-x²-a²n2-surds.html" class="move-row">
+  <div class="move-name">Substitute x = a cosh θ to eliminate (x² − a²)^{n/2} surds</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parts Decomposition</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-sinⁿx-as-sinⁿ¹x-sinx-to-seed-reduction-by-parts.html" class="move-row">
+  <div class="move-name">Split sinⁿx as sinⁿ⁻¹x · sinx to seed reduction by parts</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Completing The Square</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/complete-the-square-to-reach-standard-1u²a²-form.html" class="move-row">
+  <div class="move-name">Complete the square to reach standard ∫1/(u²−a²) form</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Algebraic Collapse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/combine-1-dydx²-over-common-denominator-to-collapse-the-arc-length-integrand.html" class="move-row">
+  <div class="move-name">Combine 1 + (dy/dx)² over common denominator to collapse the arc-length integrand</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Collapse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/cancel-matching-surd-factors-in-surface-area-integrand-before-integrating.html" class="move-row">
+  <div class="move-name">Cancel matching surd factors in surface-area integrand before integrating</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Split Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-xn-with-surd-to-pair-derivative-factor-into-dv.html" class="move-row">
+  <div class="move-name">Split x^n with surd to pair derivative-factor into dv</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Reduction Self Reference</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-x³132-as-x³1x³112-to-recover-i-n-and-i-n-3.html" class="move-row">
+  <div class="move-name">Split (x³+1)^{3/2} as (x³+1)·(x³+1)^{1/2} to recover I_n and I_{n-3}</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Partitioning</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-derive-a-reduction-formula.html" class="move-row">
+  <div class="move-name">Split sin^n x as sin^(n-1)x · sin x to derive a reduction formula</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Pattern Recognition Recursion</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-residual-integral-as-lower-index-i-k-to-close-reduction-recurrence.html" class="move-row">
+  <div class="move-name">Recognise residual integral as lower-index I_k to close reduction recurrence</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Identity Driven Recurrence</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-cos²x-1sin²x-to-force-self-referencing-reduction.html" class="move-row">
+  <div class="move-name">Substitute cos²x = 1−sin²x to force self-referencing reduction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Parametric Formulation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/use-the-parametric-ds-element-instead-of-eliminating-the-parameter.html" class="move-row">
+  <div class="move-name">Use the parametric ds element instead of eliminating the parameter</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Formula Application And Simplification</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-arc-lengthsurface-area-formula-and-collapse-integrand-to-reduction-family.html" class="move-row">
+  <div class="move-name">Apply arc-length/surface-area formula and collapse integrand to reduction family</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Radical Elimination</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/collapse-square-root-of-perfect-square-to-linearise-integrand.html" class="move-row">
+  <div class="move-name">Collapse square root of perfect square to linearise integrand</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Arithmetic Management</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/combine-each-limits-terms-into-one-fraction-before-subtracting.html" class="move-row">
+  <div class="move-name">Combine each limit&#x27;s terms into one fraction before subtracting</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Self Referencing Ibp</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/apply-ibp-twice-to-recover-the-original-integral-and-solve-algebraically.html" class="move-row">
+  <div class="move-name">Apply IBP twice to recover the original integral and solve algebraically</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Factorisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-set-up-ibp-reduction.html" class="move-row">
+  <div class="move-name">Split sin^n x as sin^(n-1)x · sin x to set up IBP reduction</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Cross Referencing Parts</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/recognise-part-b-integrand-as-i-n-from-part-as-reduction-formula.html" class="move-row">
+  <div class="move-name">Recognise part (b) integrand as I_n from part (a)&#x27;s reduction formula</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Pattern Matching Linkage</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/link-arc-length-or-surface-area-integrand-to-a-previously-derived-reduction-form.html" class="move-row">
+  <div class="move-name">Link arc length or surface area integrand to a previously derived reduction formula</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Rationalisation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/rewrite-a-surd-numerator-as-radicandsurd-to-close-a-reduction-recurrence.html" class="move-row">
+  <div class="move-name">Rewrite a surd numerator as (radicand)/surd to close a reduction recurrence</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Wallis Type Descent</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/iterate-two-step-reduction-formula-down-to-base-case.html" class="move-row">
+  <div class="move-name">Iterate two-step reduction formula down to base case</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Trig Substitution</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/substitute-x-½cos-θ-to-linearise-14x²-via-sin²θ-identity.html" class="move-row">
+  <div class="move-name">Substitute x = ½cos θ to linearise √(1−4x²) via sin²θ identity</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Integrand Restructuring</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/peel-off-one-x-to-pair-with-cosx²-as-exact-derivative.html" class="move-row">
+  <div class="move-name">Peel off one x to pair with cos(x²) as exact derivative</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Ibp Factor Selection</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/pick-the-polynomial-factor-as-u-in-ibp-to-drive-a-reduction-formula.html" class="move-row">
+  <div class="move-name">Pick the polynomial factor as u in IBP to drive a reduction formula</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Boundary Term Exploitation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/exploit-vanishing-boundary-terms-at-0-and-π2-in-ibp.html" class="move-row">
+  <div class="move-name">Exploit vanishing boundary terms at 0 and π/2 in IBP</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Surd Collapse</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/collapse-the-arc-length-surd-into-a-clean-trig-or-hyperbolic-integrand.html" class="move-row">
+  <div class="move-name">Collapse the arc-length surd into a clean trig or hyperbolic integrand</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Recursive Evaluation</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/anchor-reduction-formula-at-base-case-then-iterate-upward.html" class="move-row">
+  <div class="move-name">Anchor reduction formula at base case then iterate upward</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+<section class="family">
+  <h2>Geometric Integral Setup</h2>
+  <div class="family-meta">1 canonical moves · 1 example questions</div>
+  <div class="move-list">
+<a href="move/set-up-arc-length-or-surface-area-integral-via-dydx-substitution.html" class="move-row">
+  <div class="move-name">Set up arc-length or surface-area integral via dy/dx substitution</div>
+  <div class="freq-pill">1 questions</div>
+</a></div>
+</section>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

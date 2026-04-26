@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reject non-negative-violating root after squared substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Domain Filtering</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reject non-negative-violating root after squared substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Filtering</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires after a substitution y = t² (or u = x², w = sin²θ, etc.) has reduced an equation to a quadratic in y, and solving that quadratic produces a negative value for y. Cue phrases: &#x27;let y = t²&#x27;, &#x27;let u = x²&#x27;, &#x27;this is a quadratic in t²&#x27;. Also fires whenever a solved-for variable is structurally a square, modulus, or other non-negative quantity. The move must be made explicit when the question says &#x27;show each stage of your working&#x27; or awards a method mark for justification.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For any real t, t² ≥ 0, so the equation t² = c has no real solutions when c &lt; 0. Carrying the negative root forward would force the student to take √(negative), producing no valid real t and wasting time. Stating the rejection with its reason secures the justification mark and cleanly halves the remaining casework. This is the standard A-level convention for domain-filtering after a hidden-quadratic substitution.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the quadratic in y = t² has been solved and one root is negative (e.g. y = −1/5).</li><li>Rules out that root because t² cannot be negative for real t — there is no real t to recover.</li><li>Commits to keeping only the non-negative root and writing the rejection explicitly so the examiner sees the validity check.</li><li>Bridges to the next step: take the positive root y = 5 and solve t² = 5 for t.</li><li>Decides to record both signs of t (±√5) since t itself is unrestricted — only t² is constrained.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Solve the quadratic in y = t² to obtain two values, e.g. y = −1/5 and y = 5.</li><li>Write: &#x27;Reject y = −1/5 since t² ≥ 0 for real t.&#x27;</li><li>Set t² equal to the surviving non-negative root.</li><li>Take square roots, keeping both signs: t = ±√(root).</li><li>Continue with these t-values into any onward working (e.g. back-substitute, find x, etc.).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $5t^4 - 24t^2 - 5 = 0$. Let $y = t^2$: $5y^2 - 24y - 5 = 0 \Rightarrow (5y+1)(y-5) = 0$, giving $y = -\tfrac{1}{5}$ or $y = 5$. Reject $y = -\tfrac{1}{5}$ since $t^2 \ge 0$ for real $t$. Hence $t^2 = 5$, so $t = \pm\sqrt{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Hidden quadratic in $x^2$ from a quartic such as $x^4 - 3x^2 - 4 = 0$</div>
+<div class="adjustment">Reject the negative value of $u = x^2$; solve $x^2 = $ positive root for $x = \pm\sqrt{\cdot}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in $\sin^2\theta$ or $\cos^2\theta$ from a trig equation</div>
+<div class="adjustment">Reject any root that is negative or exceeds 1, since $\sin^2\theta, \cos^2\theta \in [0,1]$.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in $e^x$ via $u = e^x$</div>
+<div class="adjustment">Reject any non-positive root since $e^x &gt; 0$ for all real $x$ (strict inequality, not just $\ge 0$).</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in $\sqrt{x}$ via $u = \sqrt{x}$</div>
+<div class="adjustment">Reject negative roots since $\sqrt{x} \ge 0$ by convention.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in $\ln x$ — no rejection needed</div>
+<div class="adjustment">$\ln x$ can be any real number, so neither root is filtered on sign grounds; only $x&gt;0$ is required at the end.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing the constraint on t² with a constraint on t itself, and discarding negative values of t.</li><li>Thinking the rejection is optional &#x27;common sense&#x27; rather than a marked step in &#x27;show each stage&#x27; questions.</li><li>Applying the same rejection to $u = e^x$ but using $\ge 0$ instead of $&gt; 0$, accidentally accepting $u = 0$.</li><li>Forgetting that even after rejecting one root, the surviving square still produces two values of t (±).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Silently dropping the negative root without stating the reason — loses the justification mark on Edexcel papers that say &#x27;show each stage&#x27;.</li><li>Accidentally discarding a valid negative value of t (not t²) — here t itself can be negative, only t² cannot.</li><li>Writing &#x27;t = ±√(−1/5)&#x27; and then &#x27;no solutions&#x27; instead of rejecting at the y-stage — wastes time and risks arithmetic slips.</li><li>Forgetting to take both ± when square-rooting the surviving root, missing half the solutions.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure technique appearing in disguised quadratics (P1–P3) and trig equations (P2/P3). Justification phrasing &#x27;since t² ≥ 0&#x27; is exactly what mark schemes expect; complex roots are out of scope here.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch2/q-Jan_2020-Q5.html" class="example-chip">P3 Jan 2020 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

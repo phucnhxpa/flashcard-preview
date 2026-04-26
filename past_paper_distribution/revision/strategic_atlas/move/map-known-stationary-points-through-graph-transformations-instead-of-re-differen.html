@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map known stationary points through graph transformations instead of re-differentiating — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Transformation Of Points</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Map known stationary points through graph transformations instead of re-differentiating</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Transformation Of Points</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A later part of a question gives a transformed curve such as $y = af(x-b)+c$ or $y = af(bx)$ and asks for its stationary points (or roots, turning points, asymptotes), after an earlier part already located these features on $y=f(x)$. Cues include phrases like &#x27;hence find&#x27;, &#x27;state the coordinates of the stationary points of&#x27;, or &#x27;using your answer to part (b)&#x27;. The original $f(x)$ is typically messy (product, quotient, exponential, logarithmic) so re-differentiating would be costly. This is the signal to use transformation geometry rather than calculus a second time.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Stationary points are specific $(x,y)$ pairs whose location moves predictably under graph transformations: replacing $x$ by $x-b$ shifts $x$-coordinates by $+b$, multiplying the output by $a$ scales $y$-coordinates by $a$, and these operations preserve the stationary property because $\frac{d}{dx}[af(x-b)] = af&#x27;(x-b)$ vanishes exactly where $f&#x27;$ vanished. The chain factor is a non-zero constant, so no new stationary points appear and none disappear. This converts a calculus problem into pure coordinate arithmetic, saving time and reducing algebraic error.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the new curve is written explicitly as a transformation of $f$, and the previous part already gave stationary points of $y=f(x)$.</li><li>Rule out re-differentiating: substituting and applying product/chain rule to a messy $f$ would duplicate work already done.</li><li>Commit to the transformation route once you confirm the outer constant is non-zero (so stationary points are preserved, not destroyed) and the inner change of variable is linear.</li><li>Bridge: decode each piece of the expression as a single geometric operation — inner $x\mapsto x-b$ is a horizontal translation, outer $\times a$ is a vertical stretch.</li><li>Tactically, apply horizontal changes to $x$-coordinates only and vertical changes to $y$-coordinates only; check any cancellations (e.g. an outer $8$ against a denominator $8$) as a self-verification.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Decode the transformation: identify the horizontal shift/stretch from the inner argument and the vertical shift/stretch from the outer operations.</li><li>For each known stationary point $(x_0,y_0)$, compute the new $x$-coordinate by applying only the horizontal transformation.</li><li>Compute the new $y$-coordinate by applying only the vertical transformation to $y_0$.</li><li>Simplify and check that any obvious cancellations occur as expected.</li><li>State the transformed coordinates as the stationary points of the new curve.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose $y=f(x)$ has stationary points $(-\tfrac12,0)$ and $(\tfrac14,\tfrac{27}{8e})$. For $y=8f(x-2)$: shift $x$ by $+2$ and multiply $y$ by $8$. First point: $(-\tfrac12+2,\,8\cdot 0)=(\tfrac32,0)$. Second point: $(\tfrac14+2,\,8\cdot\tfrac{27}{8e})=(\tfrac94,\tfrac{27}{e})$, with the $8$ cancelling cleanly.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">$y = f(x+b)+c$</div>
+<div class="adjustment">Shift $x$-coordinates by $-b$ and add $c$ to $y$-coordinates.</div>
+</div><div class="variant-row">
+<div class="scenario">$y = f(kx)$ with $k&gt;0$</div>
+<div class="adjustment">Divide $x$-coordinates by $k$ (horizontal stretch by factor $1/k$); leave $y$-coordinates unchanged.</div>
+</div><div class="variant-row">
+<div class="scenario">$y = -f(x)$ or $y = f(-x)$</div>
+<div class="adjustment">Negate $y$-coordinates, or negate $x$-coordinates, respectively; stationary points stay stationary.</div>
+</div><div class="variant-row">
+<div class="scenario">Roots/asymptotes/intercepts of a transformed curve</div>
+<div class="adjustment">Same coordinate-mapping idea — transform the known feature points directly rather than re-solving.</div>
+</div><div class="variant-row">
+<div class="scenario">Combined $y = af(x-b)+c$</div>
+<div class="adjustment">Apply horizontal shift to $x$, then scale $y$ by $a$, then add $c$ — vertical operations are not independent of order when both stretch and shift are present.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading $f(x-2)$ as a shift LEFT by 2 instead of RIGHT by 2.</li><li>Treating the outer constant as if it shifted the curve vertically rather than stretching it.</li><li>Believing the stretch alters the $x$-coordinate of stationary points (it does not).</li><li>Confusing the order of horizontal and vertical operations when shifts and stretches are combined.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Multiplying the $x$-coordinate by the outer constant by mistake.</li><li>Subtracting instead of adding $2$ to $x$ for $f(x-2)$.</li><li>Forgetting to also scale a non-zero $y$-coordinate (leaving it equal to the original).</li><li>Applying $y=f(kx)$ as if $x$-coordinates were multiplied by $k$ rather than divided.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure scope: graph transformations $y=af(x)$, $y=f(x)+a$, $y=f(x+a)$, $y=f(ax)$ and their stationary-point implications are standard P2/P3 content and frequently linked to differentiation questions in P3/P4.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2023-Q8.html" class="example-chip">P3 Jun 2023 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

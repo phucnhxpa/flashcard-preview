@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divide equation through by GCD of coefficients before factorising — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Coefficient Reduction</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Divide equation through by GCD of coefficients before factorising</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Coefficient Reduction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a polynomial equation (most often a quadratic) has been collected into standard form $ax^2+bx+c=0$ and every coefficient — including the constant — shares a common integer factor greater than 1. Typical cues: all coefficients even, all divisible by 3, or all ending in 0/5. Recognised just before choosing a factorisation method, completing the square, or applying the quadratic formula. Equivalent phrasings: &#x27;simplify the equation first&#x27;, &#x27;cancel a common factor from both sides&#x27;, &#x27;reduce to lowest terms&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Dividing an equation by a non-zero constant preserves its solution set, since $kP(x)=0 \iff P(x)=0$ for $k\neq 0$. Smaller coefficients shrink the product $ac$ that drives factor-pair searches, and shrink the discriminant arithmetic if the quadratic formula is used. This reduces both cognitive load and the chance of sign or arithmetic slips. It is a pure simplification with no trade-off — the roots are unchanged.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that every coefficient in the collected equation shares an obvious common factor (e.g. all even).</li><li>Rules out diving straight into factorisation or the quadratic formula with the large numbers, since the factor-pair search for $ac$ would be needlessly long.</li><li>Commits to dividing through because solutions of $P(x)=0$ are identical to those of $\tfrac{1}{k}P(x)=0$, so nothing is lost.</li><li>Computes the GCD of $|a|,|b|,|c|$ and divides every term — left side and right side — by it.</li><li>Checks the simplified quadratic still has integer coefficients and proceeds with factorisation or the formula on the smaller numbers.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the equation in standard form $ax^2+bx+c=0$.</li><li>Compute $d=\gcd(|a|,|b|,|c|)$.</li><li>Divide every term by $d$: $\tfrac{a}{d}x^2+\tfrac{b}{d}x+\tfrac{c}{d}=0$.</li><li>Confirm the right-hand side $0/d=0$ is unchanged.</li><li>Continue with factorisation, completing the square, or the quadratic formula on the reduced equation.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $10x^2-4x-6=0$.\\ All coefficients share factor 2, so divide through: $5x^2-2x-3=0$.\\ Now $ac=-15$; the pair $(-5,3)$ works, giving $5x^2-5x+3x-3=0 \Rightarrow (5x+3)(x-1)=0$.\\ Hence $x=1$ or $x=-\tfrac{3}{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cubic or higher polynomial equation set to zero, e.g. $6x^3+9x^2-3x=0$</div>
+<div class="adjustment">Divide through by $\gcd=3$ to obtain $2x^3+3x^2-x=0$, then factor out $x$ and continue.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic with fractional coefficients, e.g. $\tfrac{1}{2}x^2+\tfrac{3}{4}x-\tfrac{1}{4}=0$</div>
+<div class="adjustment">Multiply (rather than divide) by the LCM of denominators (here 4) to clear fractions: $2x^2+3x-1=0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Inequality such as $4x^2-8x-12&lt;0$</div>
+<div class="adjustment">Divide by a positive common factor (here 4) to get $x^2-2x-3&lt;0$; the inequality direction is preserved because the divisor is positive.</div>
+</div><div class="variant-row">
+<div class="scenario">Linear equation $15x-25=10$</div>
+<div class="adjustment">Divide every term by 5 to get $3x-5=2$ before solving.</div>
+</div><div class="variant-row">
+<div class="scenario">Negative leading coefficient, e.g. $-4x^2+8x-12=0$</div>
+<div class="adjustment">Divide by $-4$ to obtain $x^2-2x+3=0$, simultaneously simplifying and making the leading coefficient $+1$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the move as &#x27;cancelling $x$&#x27; when the constant term is non-zero — confusing dividing the equation by a constant with dividing by a variable.</li><li>Believing the simplification changes the roots, and so avoiding it for fear of losing solutions.</li><li>Thinking a common factor exists when one coefficient is actually coprime to the others (e.g. assuming $6x^2+4x+3$ is divisible by 2).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dividing only some terms (e.g. forgetting the constant) and producing a wrong quadratic.</li><li>Failing to divide the right-hand side when it is non-zero, e.g. reducing $4x^2+8x=12$ to $x^2+2x=12$ instead of $x^2+2x=3$.</li><li>Dividing by a non-divisor and silently introducing fractions, defeating the purpose of the move.</li><li>When dividing an inequality by a negative common factor, forgetting to reverse the inequality sign.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely standard Edexcel IAL Pure 1 technique used throughout quadratic, cubic, and inequality work; no content beyond the specification is invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jun_2024-Q7.html" class="example-chip">P2 Jun 2024 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

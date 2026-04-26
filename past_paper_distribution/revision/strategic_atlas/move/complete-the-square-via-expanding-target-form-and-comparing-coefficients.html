@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complete the square via expanding target form and comparing coefficients — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Completing The Square</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Complete the square via expanding target form and comparing coefficients</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Completing The Square</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks to express a quadratic in the form a(x+b)² + c (or p(x+q)² + r), especially when the leading coefficient is not 1. Phrases like &#x27;express in the form...&#x27;, &#x27;find the values of a, b, c&#x27;, or &#x27;hence write down the minimum value&#x27; all signal this move. It also fires when the student wants a method that bypasses the &#x27;factor-out-then-complete&#x27; route. Any quadratic where vertex form is required is a candidate.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Expanding a(x+b)² + c yields ax² + 2abx + (ab² + c), so matching against the given quadratic produces three equations — one per power of x — for the three unknowns a, b, c. Because the equations decouple (a from x², then b from x, then c from the constant), the system solves by a clean cascade rather than simultaneous algebra. This works for any leading coefficient and avoids memorising the &#x27;halve the coefficient&#x27; shortcut. The identity (x+b)² = x² + 2bx + b² is the only fact needed.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices the target form a(x+b)² + c has three unknowns and the source quadratic has three coefficients — a determined system.</li><li>Rules out the monic shortcut &#x27;halve the x-coefficient&#x27; because the leading coefficient is not 1, and rules out factoring-out as merely an alternative route.</li><li>Commits to coefficient comparison because expanding the target form and equating powers of x is mechanical and hard to misexecute.</li><li>Bridges to action by writing the identity ax² + 2abx + ab² + c ≡ given quadratic and lining up powers of x.</li><li>Solves in cascade order: a from x², then b from the x-term using the now-known a, then c from the constant using both.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the identity: given quadratic ≡ a(x+b)² + c, and expand RHS to ax² + 2abx + ab² + c.</li><li>Compare x² coefficients to get a directly.</li><li>Compare x coefficients: equate to 2ab and solve for b using the known a.</li><li>Compare constant terms: equate to ab² + c and solve for c using the known a and b.</li><li>State the completed form a(x+b)² + c with the found values, and (if asked) read off the vertex (−b, c) or minimum value c.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Express $3x^2 + 12x + 13$ as $a(x+b)^2 + c$. Expand: $a(x+b)^2 + c = ax^2 + 2abx + ab^2 + c$. Compare $x^2$: $a = 3$. Compare $x$: $2ab = 12 \Rightarrow 6b = 12 \Rightarrow b = 2$. Compare constants: $ab^2 + c = 13 \Rightarrow 12 + c = 13 \Rightarrow c = 1$. Hence $3x^2 + 12x + 13 = 3(x+2)^2 + 1$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Monic quadratic x² + px + q</div>
+<div class="adjustment">Skip the a-equation (a = 1 automatically); the &#x27;halve p&#x27; shortcut gives (x + p/2)² + (q − p²/4) immediately.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic with negative leading coefficient, e.g. −2x² + 8x − 3</div>
+<div class="adjustment">Same procedure; a comes out negative (a = −2), and the parabola opens downward so c is the maximum value, not minimum.</div>
+</div><div class="variant-row">
+<div class="scenario">Factor-out-first route</div>
+<div class="adjustment">Factor the leading coefficient: 3x² + 12x + 13 = 3[x² + 4x] + 13, complete inside brackets to 3[(x+2)² − 4] + 13 = 3(x+2)² + 1. Same answer, different bookkeeping.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in a substituted variable, e.g. 2u² − 12u + 5 where u = e^x or u = sin x</div>
+<div class="adjustment">Apply the same coefficient-matching to get 2(u−3)² − 13, then substitute back; useful for finding ranges of trig/exponential expressions.</div>
+</div><div class="variant-row">
+<div class="scenario">Discriminant or &#x27;show always positive&#x27; problems</div>
+<div class="adjustment">After completing the square, argue from a(x+b)² ≥ 0 to deduce minimum value c, hence the sign of the quadratic for all real x.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming a = 1 and trying to fit the quadratic into (x+b)² + c, ignoring the leading coefficient.</li><li>Confusing a(x+b)² + c with (ax+b)² + c, which expands to a²x² + 2abx + b² + c and gives wrong values.</li><li>Treating the requested form as a(x−b)² + c and reading off b with the wrong sign.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to distribute a through the b² term: writing the constant as b² + c instead of ab² + c.</li><li>Sign error in the vertex: reporting it as (b, c) instead of (−b, c).</li><li>Arithmetic slip when computing ab² (e.g. 3·2² = 12, not 6) before solving for c.</li><li>Solving for b without first substituting the value of a, leading to a b/a confusion.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure content (P1): completing the square for quadratics with any real leading coefficient, used for vertex/min-max, sketching, and feeding into discriminant or quadratic-inequality questions.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2023-Q3.html" class="example-chip">P1 Jun 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

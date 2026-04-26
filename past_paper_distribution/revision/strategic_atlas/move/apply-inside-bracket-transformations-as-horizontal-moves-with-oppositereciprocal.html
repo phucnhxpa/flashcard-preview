@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply inside-bracket transformations as horizontal moves with opposite/reciprocal effect — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Inside Bracket Transformation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Apply inside-bracket transformations as horizontal moves with opposite/reciprocal effect</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Inside Bracket Transformation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The function under transformation has its argument modified, e.g. f(x + a), f(x − a), f(kx), or f(−kx). Whenever the constant or multiplier is INSIDE the bracket (acting on x before f is applied), the transformation is HORIZONTAL and behaves counter-intuitively: opposite sign for translations, reciprocal factor for stretches. Visual cues: a sketch problem asking you to draw y = f(x + 3), y = f(−3x), y = f(2x), etc., usually with named points (intercepts, touches, cusps) on the original graph. Equivalent phrasings: &#x27;sketch y = f(...)&#x27;, &#x27;state the coordinates of the image of P under...&#x27;, &#x27;describe the transformation taking f(x) to f(...)&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>An inside-bracket modification changes WHICH x-value produces a given output, not the output itself, so the graph deforms horizontally while y-values are preserved. If f(c) = d, then f(x + a) = d when x = c − a, hence the LEFT shift for +a; similarly f(kx) = d when x = c/k, producing a compression by factor 1/|k| (and a y-axis reflection if k &lt; 0). The &#x27;opposite/reciprocal&#x27; rule is just the algebra of solving for the new x. Decomposing compound arguments like −3x into a reflection plus a stretch keeps the point-mapping systematic and avoids sign or scale-factor errors.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the constant/multiplier sits INSIDE the f(...) bracket, acting on x — so this is a horizontal transformation, not vertical.</li><li>I rule out outside transformations like f(x) + a or a·f(x), which would change y-coordinates; here the y-values of all named points must stay fixed.</li><li>I commit to the inside-bracket rule: translations go in the OPPOSITE direction to the sign, and stretches use the RECIPROCAL of the multiplier; a negative multiplier additionally reflects in the y-axis.</li><li>I write the argument in the form k(x − h) if needed, then read off the mapping x ↦ (x/k) + h, equivalently (x, y) ↦ ((x − h_old shift)/k_correction, y). For simple cases: f(x + a) gives (x, y) ↦ (x − a, y); f(kx) gives (x, y) ↦ (x/k, y); f(−kx) gives (x, y) ↦ (−x/k, y).</li><li>I apply this mapping to every named point (intercepts, turning points, touches/cusps) and crucially preserve the NATURE of each feature — a touch stays a touch, a crossing stays a crossing, asymptotes transform too.</li><li>Sanity check: any point on the y-axis is fixed by a pure horizontal stretch/reflection (good invariance test); any point originally at x = −a maps to the y-axis under f(x + a).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Read the argument of f and identify whether you have a translation (x ± a), a stretch (kx), or a compound (−kx, k(x − h), etc.).</li><li>Write the point-mapping rule: f(x + a) → (x, y) ↦ (x − a, y); f(x − a) → (x, y) ↦ (x + a, y); f(kx) → (x, y) ↦ (x/k, y); f(−kx) → (x, y) ↦ (−x/k, y).</li><li>Apply the mapping to each named point on the original curve, keeping y-coordinates unchanged.</li><li>Transfer the geometric NATURE of each feature with the point (touch ↔ touch, cross ↔ cross, max ↔ max).</li><li>Transform any asymptotes using the same rule (vertical asymptote x = c moves to the new x-coordinate; horizontal asymptotes are unaffected by inside-bracket changes).</li><li>Sketch the new curve through the transformed points, preserving overall shape, and label the new coordinates.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Original curve passes through $(-1,0)$, $(0,2)$, and touches the x-axis at $(3,0)$. For $y = f(x+3)$: mapping $(x,y) \mapsto (x-3, y)$ gives $(-4,0)$, $(-3,2)$, and a touch at $(0,0)$. For $y = f(-3x)$: mapping $(x,y) \mapsto (-x/3, y)$ gives $(1/3,0)$, $(0,2)$ (invariant, on the mirror line), and a touch at $(-1,0)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Pure horizontal translation f(x ± a)</div>
+<div class="adjustment">Shift LEFT by a for +a, RIGHT by a for −a; mapping (x, y) ↦ (x ∓ a, y).</div>
+</div><div class="variant-row">
+<div class="scenario">Pure horizontal stretch f(kx) with k &gt; 0</div>
+<div class="adjustment">Stretch by reciprocal scale factor 1/k (compression if k &gt; 1, stretch if 0 &lt; k &lt; 1); mapping (x, y) ↦ (x/k, y).</div>
+</div><div class="variant-row">
+<div class="scenario">Pure y-axis reflection f(−x)</div>
+<div class="adjustment">Reflect in the y-axis; mapping (x, y) ↦ (−x, y). Special case k = −1.</div>
+</div><div class="variant-row">
+<div class="scenario">Compound inside transformation f(−kx)</div>
+<div class="adjustment">Decompose into reflection (sign) and stretch (reciprocal of |k|); combined mapping (x, y) ↦ (−x/k, y).</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed form f(k(x − h)) or f(kx + b)</div>
+<div class="adjustment">Factorise the argument first as k(x − h) with h = −b/k; apply translation by h then horizontal stretch by 1/k.</div>
+</div><div class="variant-row">
+<div class="scenario">Outside transformations like f(x) + a or −f(x)</div>
+<div class="adjustment">These are VERTICAL (change y-coordinates) — do NOT confuse with inside transformations. Mapping (x, y) ↦ (x, y + a) or (x, −y).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Shifting RIGHT for f(x + a) by following the &#x27;+&#x27; sign literally instead of applying the opposite-direction rule.</li><li>Treating f(x + a) as a vertical shift (confusing inside vs outside operations).</li><li>Multiplying x-coordinates by k instead of 1/k for f(kx) — forgetting the reciprocal rule.</li><li>Reading the negative in f(−x) as an x-axis reflection (which is −f(x)) rather than a y-axis reflection.</li><li>Applying an inside multiplier to y-coordinates instead of x-coordinates.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Failing to preserve the NATURE of features: a touch at (3, 0) must become a touch at the image point, not a crossing.</li><li>Forgetting to transform asymptotes alongside the named points.</li><li>On compound arguments like f(−3x), applying only the stretch or only the reflection and forgetting the other.</li><li>Mis-factorising forms like f(2x − 4): must rewrite as f(2(x − 2)), giving a translation right by 2 then stretch by 1/2 — not a translation by 4.</li><li>Altering y-coordinates for an inside transformation — y-values must stay fixed.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2/P3) graph transformations. No formula booklet entry is required — these are standard transformation rules. Avoid out-of-scope generalisations such as transformations of complex-valued functions or matrix representations of transformations beyond what FP1 covers.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jun_2024-Q3.html" class="example-chip">P1 Jun 2024 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

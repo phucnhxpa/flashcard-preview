@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolate the unit-coefficient variable and substitute to eliminate it — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Directed Elimination</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Isolate the unit-coefficient variable and substitute to eliminate it</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Directed Elimination</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on a 2×2 linear system where (i) one equation has a variable with coefficient 1 (or −1), and (ii) the question targets the *other* variable — typically a &#x27;show that&#x27; or &#x27;find&#x27; instruction naming a specific unknown. Common phrasings: &#x27;show that d = …&#x27;, &#x27;hence find n&#x27;, &#x27;given a + 3d = 18 and 2a + 7d = 38.5, show that d = 2.5&#x27;. Also fires when one equation is already given in the form &#x27;x = …&#x27; or is trivially rearrangeable without introducing fractions.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A unit coefficient lets you rearrange one equation into &#x27;a = (expression in d)&#x27; with no division, so substitution introduces no fractions and preserves arithmetic cleanliness. Substituting then collapses the system to a single linear equation in the target variable. Because the goal variable is fixed by the question, directed elimination — choosing which variable to remove based on the goal, not symmetry — is the efficient route. This is preferable to coefficient-matching elimination when one variable is already &#x27;free&#x27; to isolate.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question fixes the target: &#x27;show that d = 2.5&#x27; means the final line must be an equation in d alone, so a must be eliminated.</li><li>Rule out eliminating d (wrong direction) and rule out coefficient-matching elimination as unnecessarily heavier when Equation 1 already has a unit coefficient on a.</li><li>Commit to substitution because rearranging a + 3d = 18 to a = 18 − 3d is instantaneous and fraction-free.</li><li>Bridge: write a = 18 − 3d, then plan to insert this into the second equation 2a + 7d = 38.5.</li><li>Tactically, expand the bracket carefully (sign on −3d when multiplied by 2), combine like terms in d, and isolate d in one final step.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the equation with a unit (or −1) coefficient on the variable to be eliminated.</li><li>Rearrange that equation to express the eliminated variable explicitly: a = 18 − 3d.</li><li>Substitute the expression into the *other* equation: 2(18 − 3d) + 7d = 38.5.</li><li>Expand and combine like terms: 36 − 6d + 7d = 38.5 ⇒ 36 + d = 38.5.</li><li>Solve the resulting single-variable equation: d = 2.5.</li><li>(If required) back-substitute d into a = 18 − 3d to recover a.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $a + 3d = 18$ and $2a + 7d = 38.5$, show that $d = 2.5$.\\ From (1): $a = 18 - 3d$.\\ Sub into (2): $2(18 - 3d) + 7d = 38.5 \Rightarrow 36 - 6d + 7d = 38.5$.\\ So $36 + d = 38.5 \Rightarrow d = 2.5$. $\blacksquare$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Arithmetic sequence problem giving two term equations, e.g. $u_5 = 18$, $u_8 = 25.5$ rewritten as $a + 4d = 18$, $a + 7d = 25.5$</div>
+<div class="adjustment">Both equations have unit coefficient on a; subtract directly (elimination) rather than substitute, since 3d = 7.5 falls out instantly.</div>
+</div><div class="variant-row">
+<div class="scenario">Simultaneous equations from a curve/line intersection where one equation is already $y = mx + c$</div>
+<div class="adjustment">Substitute the explicit y straight into the other equation; no rearrangement step needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Geometric sequence yielding $ar = p$ and $ar^3 = q$ (non-linear)</div>
+<div class="adjustment">Use division to eliminate a (giving $r^2 = q/p$) instead of substitution; substitution still works but division is cleaner.</div>
+</div><div class="variant-row">
+<div class="scenario">System with a negative unit coefficient, e.g. $-x + 2y = 5$</div>
+<div class="adjustment">Rearrange to $x = 2y - 5$ (flip sign), then substitute as usual; watch the sign on the isolated term.</div>
+</div><div class="variant-row">
+<div class="scenario">&#x27;Show that&#x27; question where decimals are awkward</div>
+<div class="adjustment">Multiply the decimal equation through by a power of 10 first (e.g. $2a + 7d = 38.5 \Rightarrow 4a + 14d = 77$) to keep all arithmetic in integers.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Eliminating the target variable instead of the other one, ending with an equation in the wrong unknown.</li><li>Treating &#x27;show that d = 2.5&#x27; as permission to verify by substitution rather than to derive d from scratch.</li><li>Choosing coefficient-matching elimination by reflex even when one equation has a unit coefficient ready for substitution.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when expanding $2(18 - 3d)$: writing $+6d$ instead of $-6d$.</li><li>Combining $-6d + 7d$ as $-d$ or $13d$ rather than $+d$.</li><li>Arithmetic slip handling the decimal $38.5$; clearing decimals first by scaling can prevent this.</li><li>Forgetting to back-substitute when the question also asks for the second variable.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1 simultaneous equations; recurring in arithmetic/geometric sequence problems in P1/P2). No techniques beyond linear rearrangement and substitution are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2023-Q2.html" class="example-chip">P2 Oct 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

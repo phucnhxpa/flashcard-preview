@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form displacement vector from fixed point to parametrised point — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Vector Subtraction For Distance</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Form displacement vector from fixed point to parametrised point</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Vector Subtraction For Distance</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a distance condition is imposed between a fixed point A and a variable point P that lies on a line with parameter λ (e.g. &#x27;find λ such that AP = k&#x27; or &#x27;find the point on line l closest to A&#x27;). Cue phrases include &#x27;distance from A to the line&#x27;, &#x27;point on l whose distance from A is...&#x27;, or any |AP| = constant. The unknown λ must be extracted via a scalar equation, but distance is intrinsically a magnitude of a vector — so a vector must be built first.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Distance between two points equals the magnitude of the displacement vector joining them: AP = |p − a|. Subtracting position vectors component-wise produces an expression linear in λ in each component, so |AP|² becomes a quadratic in λ — exactly the form solvable by standard algebra. Forming AP is the obligatory bridge from parametric geometry to a scalar equation in λ.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the condition is on a length AP, but A is fixed while P depends on λ — so P has no fixed coordinates yet.</li><li>Rules out trying to apply a distance formula directly between coordinates, since one set of coordinates is symbolic in λ; also rules out using PA·d = 0 (that would solve a different problem — foot of perpendicular).</li><li>Commits to forming the displacement vector AP = p − a because |AP| is the only object whose square gives a clean quadratic in λ.</li><li>Writes p in terms of λ from the line equation, then subtracts a component-wise to get AP(λ).</li><li>Chooses AP over PA (either is fine since magnitudes match), and keeps components unsimplified momentarily to check sign handling before squaring.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write P&#x27;s position vector p = a₀ + λd from the line equation.</li><li>Compute AP = p − a component-wise, giving each component as a linear expression in λ.</li><li>Simplify each component, watching signs carefully, especially constant terms.</li><li>Note any component that simplifies to a constant (independent of λ) or to zero — this lightens the magnitude calculation later.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Line $l: \mathbf{r} = (1,2,3) + \lambda(1,0,-1)$ and fixed point $A=(4,2,5)$. Then $\mathbf{p} = (1+\lambda,\,2,\,3-\lambda)$, so $\overrightarrow{AP} = \mathbf{p}-\mathbf{a} = (1+\lambda-4,\,2-2,\,3-\lambda-5) = (\lambda-3,\,0,\,-\lambda-2)$. The middle zero will simplify $|\overrightarrow{AP}|^2 = (\lambda-3)^2 + (\lambda+2)^2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Distance between two parametrised points on different lines (e.g. shortest distance between skew lines via calculus)</div>
+<div class="adjustment">Form displacement with two parameters: AP(λ,μ) = p(λ) − q(μ); leads to a system from ∂/∂λ = 0 and ∂/∂μ = 0, or equivalently AP perpendicular to both direction vectors.</div>
+</div><div class="variant-row">
+<div class="scenario">Point on a plane satisfying a distance condition from A</div>
+<div class="adjustment">Parametrise the plane with two parameters s,t and form AP(s,t); |AP|² is a quadratic surface in (s,t).</div>
+</div><div class="variant-row">
+<div class="scenario">Finding foot of perpendicular from A to a line</div>
+<div class="adjustment">Same AP(λ) construction, but instead of |AP|=k, impose AP·d = 0 to solve for λ.</div>
+</div><div class="variant-row">
+<div class="scenario">2D version with a parametric line in the plane</div>
+<div class="adjustment">Identical construction with two components instead of three; quadratic in λ still arises.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating P as if it had fixed coordinates and trying to apply the distance formula directly without first parametrising.</li><li>Confusing this distance task with the perpendicular-foot task and applying AP·d = 0 when the question actually fixes a length.</li><li>Believing the choice of AP vs PA changes the answer (it does not, since |AP| = |PA|).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in subtraction, especially when the line component itself has a minus sign, e.g. (3−λ) − 5 = −λ−2, not −λ+2.</li><li>Forgetting to subtract A from every component (often only the λ-bearing components get adjusted).</li><li>Mixing up which vector is being subtracted from which, producing −AP and then mis-squaring later (harmless for magnitude but harmful if a dot product follows).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure/Further Pure vectors: 3D position vectors, parametric line equations, and magnitudes via $|\mathbf{v}|^2 = v_1^2+v_2^2+v_3^2$. No calculus or matrix machinery needed.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Jun_2024-Q6.html" class="example-chip">P4 Jun 2024 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

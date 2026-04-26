@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reverse substitution and clear compound fractions by scaling — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Substitution Reversal</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Reverse substitution and clear compound fractions by scaling</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Reversal</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires at the final stage of a substitution-based solution (Bernoulli ODE, homogeneous ODE, reciprocal/power substitution) when the working variable has been solved but the original variable is still required. The cue is a general solution like z = ax/b + c/d + Ce^{kx} that must be inverted via y^n = 1/z or y = xv, producing a compound fraction with mixed denominators. Also triggers whenever an arbitrary constant is multiplied by an awkward numerical factor that can be absorbed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Examiners reward a tidy closed form with integer coefficients in the denominator, not a stack of fractions. Multiplying numerator and denominator of a single fraction by the LCM of inner denominators is an identity-preserving operation. Because C (or any +C) is arbitrary, any nonzero constant multiple kC is again an arbitrary constant and may be relabelled A — this is a standard, legitimate re-parameterisation of the family of solutions.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that the answer is required in y, not the auxiliary z (or v), so the substitution must be reversed.</li><li>Rules out leaving fractions inside fractions: a denominator like 3x/2 + 3/8 + Ce^{4x} is messy and loses presentation marks.</li><li>Commits to scaling top and bottom by the LCM of the inner denominators (here 8), since C has not been pinned down by an initial condition.</li><li>Bridges to operation: writes y^2 = 1/z explicitly, then multiplies the single fraction by 8/8.</li><li>Inside the move, decides to absorb 8C into a fresh arbitrary constant A, and double-checks that the squared variable y^2 (not y) is what was isolated.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the reverse-substitution identity, e.g. y^2 = 1/z.</li><li>Substitute the explicit z to get y^2 = 1/(3x/2 + 3/8 + Ce^{4x}).</li><li>Identify the LCM of inner denominators (here 8) and multiply numerator and denominator by it.</li><li>Simplify each term: 8(3x/2) = 12x, 8(3/8) = 3, 8Ce^{4x} = 8Ce^{4x}.</li><li>Relabel 8C as a new arbitrary constant A, giving y^2 = 8/(12x + 3 + Ae^{4x}).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve a Bernoulli ODE giving z = 3x/2 + 3/8 + Ce^{4x} where z = 1/y^2. Then y^2 = 1/(3x/2 + 3/8 + Ce^{4x}). Multiply top and bottom by 8: y^2 = 8/(12x + 3 + 8Ce^{4x}). Letting A = 8C, the tidy final form is y^2 = 8/(12x + 3 + Ae^{4x}).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Homogeneous ODE solved via v = y/x</div>
+<div class="adjustment">After finding v(x), reverse with y = xv and expand; clear any fractions in v(x) before multiplying through by x.</div>
+</div><div class="variant-row">
+<div class="scenario">Bernoulli with z = y^{1-n}</div>
+<div class="adjustment">Reverse via y = z^{1/(1-n)}; if z is a sum of fractions, scale inside the bracket before taking the root.</div>
+</div><div class="variant-row">
+<div class="scenario">Partial-fraction integration giving ln|y| = ln|f(x)| + C</div>
+<div class="adjustment">Exponentiate and absorb e^C into a new arbitrary constant A, then clear inner fractions in f(x).</div>
+</div><div class="variant-row">
+<div class="scenario">Integrating-factor solution y·μ(x) = ∫... + C</div>
+<div class="adjustment">After dividing by μ(x), multiply top and bottom by a common factor to remove fractional coefficients, relabelling C if it picks up a constant multiple.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Leaving the answer as z = ... and forgetting to convert back to y entirely.</li><li>Believing the scaling changes the solution rather than its presentation.</li><li>Treating 8C and C as different constants in the answer scheme rather than recognising the relabel.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Relabelling 8C as A is valid only because C is arbitrary — if an initial condition has already fixed C, the numerical factor must be kept.</li><li>Writing y = ... instead of y^2 = ..., or taking a square root without ± and without checking the sign permitted by the initial condition.</li><li>Multiplying only part of the denominator by 8 (forgetting the Ce^{4x} term) or forgetting to multiply the numerator.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard finishing step in Edexcel IAL Further Pure first-order ODE questions (Bernoulli, homogeneous, integrating factor); the arbitrary-constant relabel is explicitly accepted in mark schemes.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch4/q-Jan_2021-Q4.html" class="example-chip">FP2 Jan 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

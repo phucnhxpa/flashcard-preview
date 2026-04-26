@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combine log sum into product then convert to index form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Constant To Log Conversion</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Combine log sum into product then convert to index form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Constant To Log Conversion</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The equation contains a sum (or difference) of two logarithms with the same base set equal to a constant, e.g. $\log_4 a + \log_4 b = 3$. The logs obstruct algebraic manipulation, and the right-hand side is a clean number ready for exponentiation. Typical phrasings: &#x27;Given that $\log_c x + \log_c y = k$...&#x27;, or appearing as one half of a simultaneous system alongside a linear/polynomial equation in $a$ and $b$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The addition law $\log_c x + \log_c y = \log_c(xy)$ collapses two log terms into a single $\log_c(\text{expression}) = \text{constant}$, which is the canonical form for the definition $\log_c N = P \iff N = c^P$. Applying this definition exponentiates away the logarithm, replacing a transcendental relation with a polynomial product equation. This product equation then pairs naturally with any other algebraic equation (often linear) to form a standard simultaneous system.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice two log terms with the same base added (or subtracted) and equated to a constant — the addition/subtraction law applies directly.</li><li>Rule out converting each log separately (e.g. setting $\log_4 a = p$, $\log_4 b = q$), since that introduces two new unknowns without simplifying.</li><li>Commit to combining first because the result $\log_c(\text{single expression}) = \text{constant}$ is the exact precondition for clean exponentiation.</li><li>Bridge: write $\log_4(ab) = 3$, then read off $ab = 4^3$ using the definition of a logarithm.</li><li>Tactically, evaluate $4^3 = 64$ immediately so the product equation is ready to substitute into the partner equation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Apply the addition law: $\log_c a + \log_c b = \log_c(ab)$.</li><li>Rewrite the equation as $\log_c(ab) = k$.</li><li>Convert to index form using $\log_c N = P \iff N = c^P$: $ab = c^k$.</li><li>Evaluate $c^k$ to a numerical value.</li><li>Pair the resulting product equation with the other given equation to solve simultaneously.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\log_4 a + \log_4 b = 3$ and $a - b = 8$. Combine: $\log_4(ab) = 3$, so $ab = 4^3 = 64$. From the linear equation $a = b + 8$, substitute: $(b+8)b = 64 \Rightarrow b^2 + 8b - 64 = 0$, giving $b = -4 + 4\sqrt{5}$ (taking $b>0$), and $a = 4 + 4\sqrt{5}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Difference of logs: $\log_c a - \log_c b = k$</div>
+<div class="adjustment">Use the subtraction law to get $\log_c(a/b) = k$, then $a/b = c^k$.</div>
+</div><div class="variant-row">
+<div class="scenario">Coefficients present: $2\log_c a + \log_c b = k$</div>
+<div class="adjustment">First apply the power law $2\log_c a = \log_c(a^2)$, then combine to $\log_c(a^2 b) = k$ before exponentiating.</div>
+</div><div class="variant-row">
+<div class="scenario">Constant absorbed into log: $\log_c a + \log_c b = \log_c m$</div>
+<div class="adjustment">Combine LHS to $\log_c(ab) = \log_c m$ and equate arguments: $ab = m$ (no exponentiation needed).</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed bases</div>
+<div class="adjustment">First rewrite all logs in a common base via change-of-base before applying the addition law.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $\log_c a + \log_c b$ as $\log_c(a+b)$ — the classic addition-inside-vs-outside error.</li><li>Reading $ab = 4^3$ as $ab = 4 \times 3 = 12$, confusing exponentiation with multiplication.</li><li>Combining logs of different bases as if the addition law applied across bases.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Exponentiating before reducing to a single $\log_c(\cdot) = \text{constant}$ form, which corrupts the conversion.</li><li>Losing the domain constraint $a, b &gt; 0$ required for the original logs, leading to acceptance of negative roots from the resulting quadratic.</li><li>Forgetting to apply the power law first when coefficients sit in front of the log terms.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure Mathematics (P2) logarithm laws: addition, subtraction, power, and the definition $\log_c N = P \iff N = c^P$. Solving the resulting linear-and-product system uses only GCSE/AS-level quadratic techniques.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Jun_2022-Q4.html" class="example-chip">P2 Jun 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

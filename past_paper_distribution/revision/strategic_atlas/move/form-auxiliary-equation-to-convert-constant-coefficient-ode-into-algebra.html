@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form auxiliary equation to convert constant-coefficient ODE into algebra — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Auxiliary Equation Method</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Form auxiliary equation to convert constant-coefficient ODE into algebra</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Auxiliary Equation Method</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The ODE is linear with constant coefficients in standard form a·y&#x27;&#x27; + b·y&#x27; + c·y = f(x), where a, b, c are real numbers (not functions of x). This is the textbook signal for the auxiliary equation method — whenever you see a homogeneous (or homogeneous part of a) linear ODE with numerical coefficients on y&#x27;&#x27;, y&#x27;, y, this move fires. Equivalent phrasings: &#x27;find the complementary function&#x27;, &#x27;solve y&#x27;&#x27; + py&#x27; + qy = 0&#x27;, or any FP2/FP3-style second-order linear ODE with constants.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Substituting the trial y = e^{mx} into the homogeneous equation a·y&#x27;&#x27; + b·y&#x27; + c·y = 0 turns each derivative into a power of m times e^{mx} (since e^{mx} is an eigenfunction of d/dx with eigenvalue m). The common factor e^{mx}, which is never zero, cancels, leaving the purely algebraic quadratic am² + bm + c = 0. The roots of this &#x27;auxiliary&#x27; (or &#x27;characteristic&#x27;) equation directly encode the structural form of the complementary function, so a hard differential problem is reduced to school-level algebra.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the ODE is linear with CONSTANT coefficients on y&#x27;&#x27;, y&#x27;, y — this is the unmistakable cue for the auxiliary equation method.</li><li>Rule out heavier alternatives: variation of parameters and reduction of order are unnecessary here; the integrating factor is for first-order only. Auxiliary equation + Particular Integral is the efficient standard route.</li><li>Commit to the trial y = e^{mx} because differentiation of e^{mx} just multiplies by m, so the exponential will factor out cleanly and leave a polynomial in m.</li><li>Read coefficients a, b, c directly off the ODE (being careful with signs when terms are subtracted) and write the auxiliary equation am² + bm + c = 0. Note that the RHS f(x) plays no role at this stage — only the homogeneous part matters.</li><li>Decide how to solve the quadratic: try factorisation first, otherwise use the discriminant b² − 4ac (or the quadratic formula). The sign of the discriminant classifies the root type and dictates the CF template to write down.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Put the ODE into standard form a·y&#x27;&#x27; + b·y&#x27; + c·y = f(x) and identify constants a, b, c.</li><li>Replace y&#x27;&#x27; → m², y&#x27; → m, y → 1 to obtain the auxiliary equation am² + bm + c = 0.</li><li>Solve for m by factorisation, completing the square, or the quadratic formula; compute the discriminant Δ = b² − 4ac to classify the roots.</li><li>Write the complementary function according to the root type: (i) Δ &gt; 0, distinct real roots m₁, m₂ → y_CF = Ae^{m₁x} + Be^{m₂x}; (ii) Δ = 0, repeated root m → y_CF = (A + Bx)e^{mx}; (iii) Δ &lt; 0, complex conjugate roots p ± qi → y_CF = e^{px}(A cos qx + B sin qx).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $y'' + 5y' + 6y = 0$: substitute $y = e^{mx}$ to get $m^2 + 5m + 6 = 0$. Factorise: $(m+2)(m+3)=0$, so $m=-2,\,-3$ (two distinct real roots). Therefore the complementary function is $y_{CF} = Ae^{-2x} + Be^{-3x}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">First-order linear ODE with constant coefficients, e.g. ay&#x27; + by = 0</div>
+<div class="adjustment">Auxiliary equation is linear: am + b = 0, giving a single root and y = Ce^{mx}.</div>
+</div><div class="variant-row">
+<div class="scenario">Higher-order constant-coefficient ODE (third- or fourth-order in FP2/FP3)</div>
+<div class="adjustment">Auxiliary equation becomes a cubic/quartic; factorise and combine the CF terms in the same root-classification way.</div>
+</div><div class="variant-row">
+<div class="scenario">Non-homogeneous ODE a·y&#x27;&#x27; + b·y&#x27; + c·y = f(x)</div>
+<div class="adjustment">Use the auxiliary equation only on the homogeneous part to get y_CF; then add a Particular Integral y_PI separately.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Misreading the sign of b when the ODE has a minus sign, e.g. writing m² + 3m + 2 = 0 instead of m² − 3m + 2 = 0 for y&#x27;&#x27; − 3y&#x27; + 2y = 0.</li><li>Treating the RHS f(x) as if it contributes to the auxiliary equation — it does not; it only enters via the Particular Integral.</li><li>Confusing coefficients when the ODE is presented out of standard order (e.g. y&#x27; term written before y&#x27;&#x27;).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic errors in the discriminant, especially when b is negative, leading to the wrong root classification.</li><li>For repeated roots writing Ae^{mx} + Be^{mx} (which collapses to one constant) instead of the correct (A + Bx)e^{mx}.</li><li>For complex roots p ± qi, dropping the e^{px} factor and writing only A cos qx + B sin qx, or swapping the roles of p (exponential decay/growth) and q (oscillation frequency).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully in scope for Edexcel IAL Further Pure (FP2). The three CF templates for distinct real, repeated, and complex roots are the standard results expected; no formula booklet entry is invoked beyond the quadratic formula. Avoid generalising to variable-coefficient ODEs (e.g. Cauchy–Euler equations beyond their FP2 reduction substitution) or to systems of ODEs.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../FP2/ch5/q-Jan_2024-Q6.html" class="example-chip">FP2 Jan 2024 Q6</a><a href="../FP2/ch5/q-Jan_2021-Q6.html" class="example-chip">FP2 Jan 2021 Q6</a><a href="../FP2/ch5/q-Jun_2023-Q4.html" class="example-chip">FP2 Jun 2023 Q4</a><a href="../FP2/ch5/q-Jun_2024-Q8.html" class="example-chip">FP2 Jun 2024 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

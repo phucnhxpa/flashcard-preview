@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate recurrence with full precision (or set u_{n+1}=u_n=L) to find fixed-point limit — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Fixed Point Iteration</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Iterate recurrence with full precision (or set u_{n+1}=u_n=L) to find fixed-point limit</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Fixed Point Iteration</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the question gives a recurrence x_{n+1} = g(x_n) (or T_{n+1} = g(T_n), u_{n+1} = f(u_n)) together with a starting value, and asks either (i) for specific iterates to a stated decimal precision, (ii) to iterate until convergence to k d.p., or (iii) for the limit as n → ∞ assuming the sequence converges. Visual cues: a &#x27;show that&#x27; part producing T = g(T) followed by &#x27;use the iteration with T_1 = ...&#x27;, or wording like &#x27;the sequence converges to L, find L&#x27;. Equivalent phrasings include &#x27;apply the iterative formula&#x27;, &#x27;find the limit&#x27;, or &#x27;continue the iteration until two successive values agree to 4 d.p.&#x27;</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A fixed-point iteration x_{n+1} = g(x_n) converges to a root of x = g(x) when |g&#x27;(x)| &lt; 1 near the root, so repeated substitution drives the sequence toward the fixed point. If the sequence converges, then both x_n and x_{n+1} tend to the same limit L, so L must satisfy L = g(L) — converting an infinite process into a single algebraic equation. For numerical iteration, feeding back full-precision values prevents rounding-error amplification through nonlinear functions like arccos or exp, ensuring the displayed answer is correct to the requested precision.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the recurrence form x_{n+1} = g(x_n) and check what is asked: numerical iterates to k d.p., or the limit L as n → ∞.</li><li>Rule out solving for a closed form (e.g. u_n = A·r^n + c) — this is longer, may diverge, and is unnecessary when only iterates or the limit are wanted; rule out Newton-Raphson unless the question explicitly sets it up.</li><li>Commit to the fixed-point method: for limits, substitute u_{n+1} = u_n = L and solve L = g(L); for iterates, substitute the previous value and compute, retaining full calculator precision (use ANS).</li><li>Bridge to first operation: write down x_1 (given) and compute x_2 = g(x_1) on the calculator, storing the unrounded value rather than the displayed rounded one.</li><li>Tactical decision on stopping: continue iterating until two consecutive iterates agree to the required number of decimal places, then quote that common value as the limit; only round at the final reporting step.</li><li>Tactical decision on mode/branch: ensure radians for trig/arccos, and for non-linear fixed-point equations (e.g. quadratic L = L² − 2) pick the root the sequence actually approaches by checking the starting value.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify g: rewrite the recurrence as x_{n+1} = g(x_n) and confirm the starting value x_1.</li><li>For a numerical iteration: compute x_2 = g(x_1) on the calculator, press = and use ANS for x_3 = g(ANS), continuing without intermediate rounding.</li><li>Tabulate iterates carrying ≥ 2 extra decimals beyond the requested precision; stop when x_{n+1} = x_n to the required d.p.</li><li>Round only the reported iterates (e.g. x_2 and x_5) to the stated precision at the end.</li><li>For a limit L: replace BOTH u_{n+1} and u_n by L in the recurrence to obtain L = g(L).</li><li>Solve L = g(L) algebraically (linear → one root; quadratic/non-linear → select the root consistent with the starting value or stated convergence).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $x_{n+1} = \tfrac{1}{3}\arccos(1.5x_n - 2)$ with $x_1 = 0.8$ (radians): $x_2 = \tfrac{1}{3}\arccos(-0.8) = 0.83269\ldots$ (store full value as ANS); $x_3 = \tfrac{1}{3}\arccos(1.5\cdot\text{ANS}-2) = 0.81786\ldots$; continuing, $x_4 = 0.81316\ldots$, $x_5 = 0.81169\ldots$. Report $x_2 = 0.8327$, $x_5 = 0.8117$ to 4 d.p. The limit $L$ satisfies $L = \tfrac{1}{3}\arccos(1.5L-2)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Limit of a linear recurrence u_{n+1} = au_n + b (question states convergence)</div>
+<div class="adjustment">Set u_{n+1} = u_n = L to get L = aL + b ⟹ L = b/(1−a); ignore that |a|&gt;1 would diverge — the question grants convergence.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic recurrence u_{n+1} = u_n² + c</div>
+<div class="adjustment">Solve L = L² + c (a quadratic with two candidate limits); pick the root the iteration actually approaches based on the starting value.</div>
+</div><div class="variant-row">
+<div class="scenario">Second-order recurrence u_{n+2} = au_{n+1} + bu_n</div>
+<div class="adjustment">Set u_{n+2} = u_{n+1} = u_n = L to get L(1 − a − b) = 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton-Raphson formulation x_{n+1} = x_n − f(x_n)/f&#x27;(x_n)</div>
+<div class="adjustment">Same full-precision iteration discipline; the fixed-point limit equation reduces to f(L) = 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence involving exp or trig with awkward arguments (e.g. T_{n+1} = (1/12)(116 − 16e^{−0.75T_n} + e^{T_n−10} − e^{−10}))</div>
+<div class="adjustment">Iterate with ANS until T_{n+1} = T_n to 4 d.p.; convergence is the explicit stopping criterion.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;find the limit&#x27; as requiring a closed-form solution u_n = A·r^n + c when the fixed-point equation is sufficient.</li><li>Assuming convergence must be verified by |g&#x27;(L)| &lt; 1 even when the question states the sequence converges.</li><li>Reading the iteration as a one-off substitution (only computing x_2) when the question asks for repeated iteration to convergence.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rounding each iterate to 4 d.p. before substituting it back — the single most common error; can shift later iterates in the last reported decimal place.</li><li>Calculator in degrees instead of radians for arccos/cos/sin-based iterations.</li><li>Replacing only one of u_{n+1}, u_n with L when forming the fixed-point equation.</li><li>For non-linear fixed-point equations, accepting an extraneous root without checking which branch the iteration actually approaches.</li><li>Stopping iteration too early (after only 2–3 steps) so that &#x27;convergence to 4 d.p.&#x27; is not visibly demonstrated.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL P3/P4 scope: numerical methods (iteration to find roots) and convergence of sequences. No formula booklet entry — students are expected to use the recurrence as given. Avoid invoking Banach fixed-point theorem or formal contraction arguments; |g&#x27;(L)| &lt; 1 is mentioned only intuitively if at all.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jan_2020-Q7.html" class="example-chip">P3 Jan 2020 Q7</a><a href="../P3/ch4/q-Jun_2022-Q8.html" class="example-chip">P3 Jun 2022 Q8</a><a href="../P2/ch4/q-Jan_2023-Q3.html" class="example-chip">P2 Jan 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

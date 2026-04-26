@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply two boundary conditions to solve simultaneously for A and B — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Boundary Condition Resolution</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Apply two boundary conditions to solve simultaneously for A and B</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Boundary Condition Resolution</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a second-order ODE has been solved to its general form $y = \text{CF} + \text{PI}$ containing exactly two arbitrary constants $A$ and $B$, and the question supplies two conditions — typically $y(x_0) = k_1$ together with $y&#x27;(x_0) = k_2$, or two values $y(x_1)$ and $y(x_2)$. The cue phrases are &#x27;given that&#x27;, &#x27;initially&#x27;, &#x27;when $x = 0$&#x27;, or &#x27;particular solution&#x27;. Whenever the count of unknowns equals the count of conditions, a 2×2 linear system is the closing move.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The general solution describes an entire family of curves; each boundary condition selects one constraint, collapsing one degree of freedom. Substituting a value of $x$ into $y$ or $y&#x27;$ converts the condition into a linear equation in $A$ and $B$. Two such equations uniquely pin down the family member that the problem demands, by the existence-and-uniqueness principle for linear ODEs with constant coefficients.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the general solution still contains two arbitrary constants and the question gives two pieces of data — this is the matching count for closure.</li><li>I rule out trying to fix $A$ and $B$ from the ODE itself or from the PI alone; the constants only constrain via the supplied conditions.</li><li>I commit to producing two linear equations in $A,B$ because each condition, once $x$ is plugged in, becomes algebraically linear.</li><li>I begin by substituting the condition on $y$ first (it is usually the simpler equation), then differentiate $y$ in full to handle the condition on $y&#x27;$.</li><li>Tactically I keep $A$ and $B$ symbolic until both equations are formed, then solve by elimination or substitution and report the particular solution explicitly.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the general solution $y = \text{CF} + \text{PI}$ clearly, identifying $A$ and $B$.</li><li>Substitute $x = x_0$ and $y = k_1$ to obtain Equation (1) in $A$ and $B$.</li><li>Differentiate the FULL general solution (CF and PI) to get $\dfrac{dy}{dx}$.</li><li>Substitute $x = x_0$ and $y&#x27; = k_2$ into $\dfrac{dy}{dx}$ to obtain Equation (2) in $A$ and $B$.</li><li>Solve the simultaneous pair (1),(2) by elimination or substitution.</li><li>Re-write $y$ with the numerical values of $A$ and $B$ to give the particular solution.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>General solution: $y = Ae^{2x} + Be^{-x} + 3$, with $y(0)=4$ and $y'(0)=1$.\\ Condition 1: $A + B + 3 = 4 \Rightarrow A+B=1$.\\ Differentiate: $y' = 2Ae^{2x} - Be^{-x}$, so $2A - B = 1$.\\ Adding: $3A = 2 \Rightarrow A = \tfrac{2}{3},\ B = \tfrac{1}{3}$.\\ Particular solution: $y = \tfrac{2}{3}e^{2x} + \tfrac{1}{3}e^{-x} + 3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Two-point boundary conditions, e.g. $y(0)=1$ and $y(\pi)=0$</div>
+<div class="adjustment">Substitute each $x$-value directly into $y$ (no differentiation needed); the system is still 2×2 but trig/exp evaluations at the second point can be messier.</div>
+</div><div class="variant-row">
+<div class="scenario">Condition given on $\dfrac{dy}{dx}$ at a non-zero point</div>
+<div class="adjustment">Differentiate first, then evaluate at the specified $x$; watch for non-trivial values of $e^{ax}$, $\sin$, $\cos$.</div>
+</div><div class="variant-row">
+<div class="scenario">First-order ODE with one constant $A$ and one condition</div>
+<div class="adjustment">Reduces to a single equation; same logic but no simultaneous solving required.</div>
+</div><div class="variant-row">
+<div class="scenario">Coupled system reduced to a single second-order ODE in one variable</div>
+<div class="adjustment">After finding the particular solution for one variable, back-substitute to find the second; conditions may apply to either variable.</div>
+</div><div class="variant-row">
+<div class="scenario">Complex-root CF written as $e^{\alpha x}(A\cos\beta x + B\sin\beta x)$</div>
+<div class="adjustment">Differentiation requires the product rule; substituting $x=0$ usually simplifies via $\cos 0=1,\ \sin 0=0$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $A$ and $B$ as if they could be read off from the PI rather than determined by the conditions.</li><li>Assuming the conditions apply to the CF only, ignoring the PI when substituting.</li><li>Confusing &#x27;initial&#x27; with &#x27;boundary&#x27; and applying both conditions at the same $x$ when the problem specifies two different $x$-values.</li><li>Believing that one condition suffices because the ODE is &#x27;simple&#x27;.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Differentiating only the CF and omitting the derivative of the PI when forming the equation in $y&#x27;$.</li><li>Arithmetic slips evaluating $e^0 = 1$, $\cos 0 = 1$, $\sin 0 = 0$ — particularly sign errors on $-Be^{-x}$ type terms.</li><li>Swapping which condition is for $y$ and which is for $y&#x27;$.</li><li>Forgetting to write the final particular solution after solving for $A,B$ — losing the presentation mark.</li><li>Algebraic errors when eliminating between the two equations, especially with fractions or surds.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure scope (FP2/FP3 second-order linear ODEs with constant coefficients). The 2×2 linear system is solved by elementary elimination — no matrix inversion required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch5/q-Jan_2024-Q6.html" class="example-chip">FP2 Jan 2024 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

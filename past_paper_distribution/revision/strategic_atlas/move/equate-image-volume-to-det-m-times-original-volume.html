@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate image volume to |det M| times original volume — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Determinant Volume Scaling</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Equate image volume to |det M| times original volume</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Determinant Volume Scaling</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a 3×3 matrix M (often containing an unknown parameter k) acts as a linear transformation on a solid (tetrahedron, parallelepiped, cube) and the question links the original volume to the transformed volume. Cue phrases include &#x27;maps T to T&#x27;&#x27;, &#x27;image has volume…&#x27;, &#x27;find the value(s) of k such that the volume is…&#x27;. Equivalent 2D phrasings refer to area of an image parallelogram/triangle. The signal is that you are given (or can compute) both volumes and need a single equation in the unknown.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A linear transformation with matrix M scales every volume in 3D by |det M|, because the scalar triple product [Ma, Mb, Mc] = det(M) · [a, b, c]. Hence Volume(image) = |det M| · Volume(original). Knowing both volumes converts the geometric statement into a single algebraic equation |det M| = V_image / V_original, which is solvable for any parameter inside M. The absolute value matters because det M may be negative (orientation-reversing) yet volume is unsigned.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices that two volumes (original and image) are linked by a single matrix transformation, so the determinant scaling law is the natural bridge.</li><li>Rules out computing the image tetrahedron vertex-by-vertex — this is wasteful when the scale factor handles it in one step.</li><li>Commits to the identity Volume(image) = |det M| · Volume(original) because it converts the geometry into one equation in the unknown parameter.</li><li>Bridges to operation: expand det M as a polynomial in k, then form |det M| · V = V_image.</li><li>Tactically splits the resulting absolute-value equation into two linear cases and checks each candidate does not make det M = 0 (which would collapse the image to zero volume).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Compute det M as an expression in the unknown parameter (e.g. det M = 5k − 10).</li><li>Write the scaling equation |det M| · V_original = V_image.</li><li>Isolate |det M| = V_image / V_original.</li><li>Split into two cases: det M = +(V_image/V_original) and det M = −(V_image/V_original).</li><li>Solve each linear equation for the parameter.</li><li>Reject any value that makes det M = 0 (singular matrix); retain all others.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Tetrahedron $T$ has volume $\tfrac{20}{3}$. Under $M$ with $\det M = 5k-10$, the image has volume $50$. Then $|5k-10|\cdot\tfrac{20}{3}=50$, so $|5k-10|=\tfrac{15}{2}$. Cases: $5k-10=\tfrac{15}{2}\Rightarrow k=\tfrac{7}{2}$, or $5k-10=-\tfrac{15}{2}\Rightarrow k=\tfrac12$. Neither gives $k=2$, so both are valid.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2D area scaling under a 2×2 matrix (parallelogram, triangle, or unit square image)</div>
+<div class="adjustment">Use Area(image) = |det M| · Area(original) with a 2×2 determinant ad − bc.</div>
+</div><div class="variant-row">
+<div class="scenario">Volume of image of the unit cube / standard tetrahedron</div>
+<div class="adjustment">V_original is 1 (or a known constant like 1/6), so |det M| equals the image volume directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Composite transformation MN applied to a solid</div>
+<div class="adjustment">Use |det(MN)| = |det M||det N| as the combined scale factor.</div>
+</div><div class="variant-row">
+<div class="scenario">Inverse transformation pulling image back to original</div>
+<div class="adjustment">Scale factor becomes 1/|det M|; use V_original = V_image / |det M|.</div>
+</div><div class="variant-row">
+<div class="scenario">Orientation-reversing transformation (reflection-type, det M &lt; 0)</div>
+<div class="adjustment">Volume formula still uses |det M|; the sign only tells you orientation has flipped.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating det M (signed) as the scale factor and discarding the negative case, losing one valid value of k.</li><li>Trying to transform each vertex of the tetrahedron and recompute a scalar triple product instead of using the scale-factor shortcut.</li><li>Confusing area scaling (2D) with volume scaling (3D) and using a 2×2 minor of M.</li><li>Reading &#x27;volume of image is 50&#x27; as &#x27;det M = 50&#x27; without dividing by the original volume.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the modulus and missing one root of |det M| = c.</li><li>Arithmetic slips when simplifying V_image / V_original (e.g. 50 ÷ (20/3) = 15/2).</li><li>Forgetting to exclude parameter values that make det M = 0.</li><li>Sign errors when expanding the 3×3 determinant in terms of the parameter.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure (FP3) result: a linear transformation in 3D scales volumes by |det M|, with the 2D analogue (|det M| scales areas) appearing in FP1. No content beyond cofactor expansion of a 3×3 determinant is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Oct_2021-Q4.html" class="example-chip">FP3 Oct 2021 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

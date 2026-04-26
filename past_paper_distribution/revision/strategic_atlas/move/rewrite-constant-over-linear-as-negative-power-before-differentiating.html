@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rewrite constant-over-linear as negative power before differentiating — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Algebraic Preprocessing</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Rewrite constant-over-linear as negative power before differentiating</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Algebraic Preprocessing</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when y is a constant (or simple expression) divided by a linear factor — or by a power/root of a linear factor — such as y = 16/(3(3x−k)), y = 5/(2x+1)^3, or y = 1/√(4x−7). The numerator&#x27;s derivative is zero or trivial, so the quotient rule would carry dead weight. Cue phrases: &#x27;differentiate y = A/(ax+b)^n&#x27;, &#x27;find dy/dx where the variable only appears in the denominator&#x27;. Especially attractive when the denominator is itself wrapped in another constant factor that can be pulled out front.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Any expression A/(ax+b)^n equals A(ax+b)^(−n), reducing differentiation to one application of the chain rule on a power: bring the exponent down, reduce by one, multiply by the inner derivative. The quotient rule produces the same answer but with an f&#x27;g − fg&#x27; template where f&#x27; = 0, wasting steps and inviting sign errors. Extracting any pure constants first keeps the remaining composite as clean as possible, so only one piece — the bracket raised to a power — actually needs differentiating.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the variable lives entirely in the denominator, with the numerator a pure constant — no genuine quotient structure.</li><li>Rule out the quotient rule: it would produce a zero from f&#x27; and is overkill for a constant-over-power.</li><li>Commit to rewriting as constant × (linear)^(negative power), turning the problem into a standard chain-rule-on-a-power.</li><li>Pull every constant factor (including any constant inside the denominator like the 3 in 3(3x−k)) out front before differentiating, so only the bracketed power remains.</li><li>Apply n·(inner)^(n−1)·(inner)&#x27; carefully, watching the sign from the negative exponent and remembering to multiply by the inner derivative.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the structure y = A/[c·(ax+b)^n] and pull the constant c into the front: y = (A/c)(ax+b)^(−n).</li><li>Differentiate using the chain rule on a power: dy/dx = (A/c)·(−n)(ax+b)^(−n−1)·a.</li><li>Multiply numerical constants together cleanly: combine A/c, −n, and the inner derivative a into a single coefficient.</li><li>If a positive-denominator form is required, rewrite the negative power back as a fraction for the final answer.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Differentiate $y = \dfrac{16}{3(3x-k)}$. Rewrite: $y = \tfrac{16}{3}(3x-k)^{-1}$. Then $\dfrac{dy}{dx} = \tfrac{16}{3}\cdot(-1)(3x-k)^{-2}\cdot 3 = -\dfrac{16}{(3x-k)^2}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Denominator is a power of a linear factor, e.g. y = 5/(2x+1)^3</div>
+<div class="adjustment">Rewrite as 5(2x+1)^(−3); chain rule gives dy/dx = 5·(−3)(2x+1)^(−4)·2 = −30/(2x+1)^4.</div>
+</div><div class="variant-row">
+<div class="scenario">Denominator is a root, e.g. y = 1/√(4x−7)</div>
+<div class="adjustment">Rewrite as (4x−7)^(−1/2); chain rule gives dy/dx = −½(4x−7)^(−3/2)·4 = −2/(4x−7)^(3/2).</div>
+</div><div class="variant-row">
+<div class="scenario">Constant buried inside denominator, e.g. y = 1/(2(5−x))</div>
+<div class="adjustment">Pull the 2 out: y = ½(5−x)^(−1), then chain rule with inner derivative −1 gives dy/dx = ½·(−1)(5−x)^(−2)·(−1) = 1/[2(5−x)^2].</div>
+</div><div class="variant-row">
+<div class="scenario">Sum of such terms, e.g. y = 3/x − 4/x^2</div>
+<div class="adjustment">Rewrite each as a negative power: y = 3x^(−1) − 4x^(−2), then differentiate term by term.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating 3(3x−k) as a single bracket and forgetting to extract the leading 3, losing a factor of 1/3 in the final answer.</li><li>Reading the move as needing the quotient rule because the expression &#x27;looks like a fraction&#x27;, when in fact the numerator is constant.</li><li>Confusing the constant denominator factor with part of the chain — only ax+b is the inner function, not c(ax+b).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to multiply by the inner derivative (the &#x27;a&#x27; from ax+b) — the most common chain rule omission.</li><li>Sign error: the negative exponent contributes a minus sign that must persist into the simplified form.</li><li>Miscombining the constants: e.g. (16/3)·(−1)·3 should give −16, not −16/3.</li><li>Reducing the exponent incorrectly: −1 reduces to −2, not 0; −1/2 reduces to −3/2, not 1/2.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (P2/P3) — uses only the power rule, chain rule, and index laws taught for differentiation of x^n with rational/negative n.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jan_2024-Q1.html" class="example-chip">P3 Jan 2024 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply strong induction with two base cases for a second-order linear recurrence — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Strong Induction Framing</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Apply strong induction with two base cases for a second-order linear recurrence</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strong Induction Framing</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the recurrence relating terms of a sequence has the form u_{n+2} = a·u_{n+1} + b·u_n (or any rule depending on two previous terms), and you are asked to prove a closed form by induction. Cue phrases include &#x27;prove by induction that u_n = …&#x27; alongside a recurrence that names two predecessors. Standard one-step induction will visibly fail to provide enough substitutions. Also fires for Fibonacci-style sequences and any second-order linear recurrence with given u_1, u_2.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Computing u_{k+2} from the recurrence requires closed forms for both u_{k+1} and u_k, so the inductive hypothesis must supply two consecutive truths simultaneously. Strong induction — assuming P(k) ∧ P(k+1) — delivers exactly the two substitutions the recurrence demands. Because the inductive step now starts a chain anchored by two terms, two base cases (n=1 and n=2) are required; otherwise the domino chain cannot begin. The logical structure mirrors the order of the recurrence: order-2 recurrence ↔ 2 hypotheses ↔ 2 base cases.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the recurrence references u_n and u_{n+1} together — it is second order, not first order.</li><li>Rule out the textbook P(k) ⇒ P(k+1) template: it provides only one closed form, leaving the other term in the recurrence unjustified.</li><li>Commit to strong induction with hypothesis P(k) ∧ P(k+1), recognising this matches the two inputs the recurrence consumes.</li><li>Bridge to execution: state the proposition P(n), verify P(1) and P(2) separately as the two anchor cases.</li><li>Inside the step, substitute both closed forms into u_{k+2} = a·u_{k+1} + b·u_k, then algebraically reorganise to match the closed form evaluated at k+2.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>State proposition P(n): u_n = 3·2^n − 2·3^n (or whatever closed form is given).</li><li>Verify base case n=1: compute 3·2^1 − 2·3^1 = 0 and check this equals the given u_1.</li><li>Verify base case n=2: compute 3·2^2 − 2·3^2 = −6 and check this equals the given u_2.</li><li>Assume P(k) and P(k+1) both hold for some k ≥ 1 (strong inductive hypothesis).</li><li>Use the recurrence: u_{k+2} = 5u_{k+1} − 6u_k = 5(3·2^{k+1} − 2·3^{k+1}) − 6(3·2^k − 2·3^k).</li><li>Factor powers of 2 and 3 separately to obtain 3·2^{k+2} − 2·3^{k+2}, which is P(k+2).</li><li>Conclude by induction P(n) holds for all n ≥ 1.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let u_1=0, u_2=−6, u_{n+2}=5u_{n+1}−6u_n. Claim: u_n=3·2^n−2·3^n. Bases: 3·2−2·3=0=u_1; 3·4−2·9=−6=u_2. Assume true at k and k+1. Then u_{k+2}=5(3·2^{k+1}−2·3^{k+1})−6(3·2^k−2·3^k)=2^k(30−18)−3^k(30−18)·… regrouping gives 3·2^{k+2}−2·3^{k+2}, so P(k+2) holds.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Third-order recurrence u_{n+3}=f(u_{n+2},u_{n+1},u_n)</div>
+<div class="adjustment">Assume P(k), P(k+1), P(k+2) and verify three base cases n=1,2,3.</div>
+</div><div class="variant-row">
+<div class="scenario">Fibonacci-type identity, e.g. proving F_{n+2}=F_{n+1}+F_n satisfies a closed form</div>
+<div class="adjustment">Same two-hypothesis, two-base-case template; substitute both closed forms into the recurrence.</div>
+</div><div class="variant-row">
+<div class="scenario">Second-order recurrence with shifted indexing u_n=a·u_{n−1}+b·u_{n−2}</div>
+<div class="adjustment">Bases at the two smallest indices in scope; hypothesis assumes P(k−1) and P(k), conclude P(k+1).</div>
+</div><div class="variant-row">
+<div class="scenario">Matrix-power proofs where M^n has a claimed form satisfying a 2-term relation</div>
+<div class="adjustment">Use strong induction on n with two base cases M^1, M^2.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the recurrence as first-order and attempting standard P(k) ⇒ P(k+1), then finding u_{k−1} unaccounted for.</li><li>Verifying only n=1 and assuming the chain starts there, ignoring that the step needs two consecutive truths.</li><li>Confusing &#x27;strong induction&#x27; with simply assuming P(j) for all j ≤ k without recognising that for this proof only the two latest are used.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Omitting the second base case n=2 — the proof is logically incomplete.</li><li>Substituting only one closed form into the recurrence and leaving the other term as u_k unsimplified.</li><li>Algebra slips when factoring 2^k and 3^k — failing to pull out 2^{k+2} and 3^{k+2} cleanly.</li><li>Stating &#x27;assume true for all k&#x27; without making explicit that both P(k) and P(k+1) are being used.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Strong induction with multiple base cases is within Edexcel IAL Further Pure proof-by-induction scope, typically applied to second-order linear recurrences and sequence identities.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch8/q-Oct_2021-Q9.html" class="example-chip">FP1 Oct 2021 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

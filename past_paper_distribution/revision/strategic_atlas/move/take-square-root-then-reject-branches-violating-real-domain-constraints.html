@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Take ± square root then reject branches violating real-domain constraints — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Modulus Case Analysis</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Take ± square root then reject branches violating real-domain constraints</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Modulus Case Analysis</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when an equation has the form (expression)² = k with k &gt; 0, or |expression|² = k, and you need to extract the inner expression by square-rooting both sides. Also fires after squaring a modulus equation, or when |z|² = x² + y² = k arises in complex numbers. The cue is a perfect square equalling a constant: square-rooting introduces a ± branch, and at least one branch is typically incompatible with the real-number domain (e.g. a sum of squares cannot be negative).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Square-rooting both sides of A² = k yields A = ±√k, and both branches must initially be retained to avoid losing solutions. However, when A itself is constrained (e.g. A = p²+1 ≥ 1, or A = x²+y² ≥ 0), the negative branch produces an impossible equation and is rejected on domain grounds. This &#x27;generate all, then filter&#x27; discipline is the standard A-level technique for ensuring the solution set is both complete and valid, and it avoids the twin errors of losing solutions (only taking +√) or admitting non-real ones.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the equation has shape (something)² = positive constant, so square-rooting is the natural unwinding step.</li><li>Rule out simply writing the positive root only: that would silently discard a potential branch and lose marks for incomplete reasoning.</li><li>Commit to writing both ± branches explicitly, with the plan to filter afterwards using the real-domain constraint on the inner expression.</li><li>Bridge: identify what the inner expression is bounded by — here p²+1 ≥ 1, so only the +10 branch can possibly hold.</li><li>Tactically, show the rejected branch&#x27;s contradiction (p² = −11) explicitly rather than skipping it, then solve the surviving branch for all values of p (remembering p² = 9 gives p = ±3, not just p = 3).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the equation as (A)² = k with k ≥ 0.</li><li>Square-root both sides: A = ±√k.</li><li>Write both branches as separate cases.</li><li>For each branch, apply the real-domain constraint on A (e.g. A = p²+1 ≥ 1, or A = x²+y² ≥ 0) and reject any branch that violates it.</li><li>Solve the surviving branch(es), taking ± where a further square root appears (e.g. p² = 9 ⇒ p = ±3).</li><li>State the full solution set.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(p^2+1)^2 = 100$ for real $p$.\\ Square-rooting: $p^2+1 = \pm 10$.\\ Branch $p^2+1 = -10$ gives $p^2 = -11$, impossible for real $p$ — reject.\\ Branch $p^2+1 = 10$ gives $p^2 = 9$, so $p = \pm 3$.\\ Hence $p = 3$ or $p = -3$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Complex modulus equation $|z|^2 = k$ leading to $x^2 + y^2 = k$</div>
+<div class="adjustment">If $k &lt; 0$ there are no real $(x,y)$; if $k \geq 0$ proceed to parametrise the circle of radius $\sqrt{k}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation of form $(x-a)^2 = b$ in coordinate geometry (e.g. circle/locus)</div>
+<div class="adjustment">Take $x - a = \pm\sqrt{b}$; reject the branch only if an additional inequality (e.g. $x \geq 0$) is imposed.</div>
+</div><div class="variant-row">
+<div class="scenario">After squaring a modulus equation $|f(x)| = g(x)$</div>
+<div class="adjustment">Both branches $f(x) = \pm g(x)$ must be considered, then candidate solutions filtered by checking $g(x) \geq 0$ and substituting back.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic in $u = p^2$ such as $u^2 + u - 90 = 0$</div>
+<div class="adjustment">Solve for $u$, then reject any negative root before taking $p = \pm\sqrt{u}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Taking only the positive square root and never mentioning the negative branch — the rejection must be shown, not skipped.</li><li>Stopping at $p^2 = 9$ and writing only $p = 3$, forgetting the second ± from the inner square root.</li><li>Treating $(p^2+1)^2 = 100$ as $p^2+1 = 10$ by &#x27;cancelling&#x27; the square, losing the case-analysis structure entirely.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Accepting the rejected branch and chasing complex values of $p$ when the question specifies $p \in \mathbb{R}$.</li><li>Writing $p^2 = \pm 9$ — confusing the ± from the outer square root with a non-existent ± on $p^2$ itself.</li><li>Failing to justify the rejection in writing (just crossing it out), which can lose method marks.</li><li>Expanding $(p^2+1)^2 = 100$ into a quartic and losing the clean structure, rather than square-rooting directly.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure Maths (P1–P4) for real-variable work and Further Pure for the complex-modulus variant; no analysis beyond elementary square-rooting and domain checking is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jun_2021-Q2.html" class="example-chip">FP1 Jun 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read implicit boundary (axis) from the figure to close the region — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Boundary Completeness Check</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Read implicit boundary (axis) from the figure to close the region</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Boundary Completeness Check</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks you to define a shaded region R by inequalities, but the named curves/lines in the stem do not by themselves enclose a finite area. Typical cue: the figure shows R hugging an axis (or a previously drawn axis line) that is not relabelled in the stem. Also fires when two of the named boundaries meet at the origin and a third is a vertical/horizontal line, leaving one side open. Phrases like &#x27;the region R bounded by l₁, C and l₂&#x27; with a diagram are the classic setup.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A region described by a system of inequalities must be fully enclosed; otherwise the inequalities admit points outside the shaded figure. Examiners deliberately let the diagram carry one boundary (commonly an axis) to test whether students extract information from figures, not just text. Adding the missing inequality x ≥ 0 (or y ≥ 0) closes the region and matches the mark scheme&#x27;s full description. Without it the description is incomplete and a definition mark is lost.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the stem names only three boundaries but the diagram clearly shows R is finite.</li><li>Rule out the assumption that the named boundaries alone suffice by mentally testing a point just to the left of the y-axis — it would still satisfy the three given inequalities, so the description is open.</li><li>Commit to inspecting the figure for an unlabelled boundary; identify the y-axis (or x-axis) as the missing edge.</li><li>Translate that geometric edge into an inequality: the y-axis bounding on the left gives x ≥ 0.</li><li>Decide whether the boundary is included (≥/≤) or excluded (&gt;/&lt;); a solid line on the diagram and a closed region indicate ≥, then combine with the existing x ≤ 16 into 0 ≤ x ≤ 16.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Inspect the figure and list every line/curve that touches R, including unlabelled axes.</li><li>Compare with the inequalities you have so far; identify which side of R is not yet bounded.</li><li>Write the missing boundary as an inequality (e.g. x ≥ 0 for the y-axis, y ≥ 0 for the x-axis).</li><li>Use ≥/≤ since boundary points belong to R (solid line in the figure).</li><li>Where possible, combine with an existing opposite-side inequality into a compact double inequality such as 0 ≤ x ≤ 16.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Figure shows R bounded by l₁: y = 2x, the curve C: y = \sqrt{x}, and l₂: x = 16, with R sitting in x ≥ 0. The named pieces give y ≤ 2x, y ≥ \sqrt{x}, x ≤ 16, but a point like (-1, -1) satisfies all three, so R is not yet closed. Reading the y-axis as the left boundary, we add x ≥ 0 and write the full description as 0 ≤ x ≤ 16, \sqrt{x} ≤ y ≤ 2x.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Region sits above the x-axis with curves meeting it</div>
+<div class="adjustment">Add y ≥ 0 as the implicit lower boundary.</div>
+</div><div class="variant-row">
+<div class="scenario">Region lies in the first quadrant bounded only by a curve and a slanted line</div>
+<div class="adjustment">Add both x ≥ 0 and y ≥ 0 to close the region.</div>
+</div><div class="variant-row">
+<div class="scenario">Polar/parametric region whose Cartesian sketch hugs an axis</div>
+<div class="adjustment">Convert the axis to its Cartesian inequality (x ≥ 0 or y ≥ 0) before integrating.</div>
+</div><div class="variant-row">
+<div class="scenario">Strict inequality from a dashed line in the figure</div>
+<div class="adjustment">Use &gt; or &lt; instead of ≥/≤ for that boundary.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating only the boundaries named in the stem as the full set and ignoring the axis shown in the diagram.</li><li>Assuming x ≥ 0 is automatic from context and not stating it, when the question asks for a complete set of inequalities defining R.</li><li>Confusing the y-axis (x = 0) with y = 0 when writing the inequality.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Writing x &gt; 0 instead of x ≥ 0 when the boundary point (origin or a point on the y-axis) lies in R.</li><li>Writing the inequality the wrong way round (x ≤ 0) by mis-identifying which side of the axis R lies on.</li><li>Forgetting to merge x ≥ 0 with x ≤ 16 into 0 ≤ x ≤ 16 when the question asks for a tidy description.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard for Edexcel IAL Pure (C2/C34) area-under-curve and &#x27;define the region&#x27; questions, and for Further Pure region-of-integration setups; uses only Cartesian inequalities and direct figure-reading, no advanced topology.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2019-Q4.html" class="example-chip">P1 Jan 2019 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

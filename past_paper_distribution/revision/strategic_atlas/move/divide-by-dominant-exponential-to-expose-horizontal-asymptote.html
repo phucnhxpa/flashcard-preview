@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Divide by dominant exponential to expose horizontal asymptote — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Asymptotic Normalisation</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Divide by dominant exponential to expose horizontal asymptote</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Asymptotic Normalisation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question asks for the &#x27;upper limit&#x27;, &#x27;long-run value&#x27;, &#x27;limiting population&#x27;, or horizontal asymptote of a function with exponentials in both numerator and denominator (e.g. logistic-type N = A·e^{kt}/(B + Ce^{kt})). Phrases like &#x27;as t becomes large&#x27;, &#x27;eventually&#x27;, or &#x27;long-term behaviour&#x27; are strong cues. Direct substitution of t → ∞ produces an ∞/∞ indeterminate form. The growing exponential appears with the same rate constant in top and bottom.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Dividing numerator and denominator by the dominant growing exponential e^{kt} converts each occurrence either into a constant (when it cancels) or into a decaying e^{-kt} that tends to 0. This collapses the indeterminate ∞/∞ into a finite ratio of constants, which is precisely the horizontal asymptote. The technique mirrors the standard rational-function trick of dividing by the highest power of x, applied with e^{kt} playing the role of the dominant term.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the phrase &#x27;upper limit&#x27; / &#x27;long-term value&#x27; and read this as a limit as t → ∞, not a maximum found by calculus.</li><li>Rule out setting dN/dt = 0: a logistic-style increasing function has no turning point, so a derivative approach won&#x27;t find the asymptote.</li><li>Commit to limit-taking because both numerator and denominator contain e^{kt} with the same exponent, signalling a clean ∞/∞ that will simplify.</li><li>Bridge: identify e^{kt} as the dominant term in the denominator and prepare to divide every term in the fraction by it.</li><li>Tactical: after dividing, replace each e^{-kt} by 0 and read off the surviving constants as the limit.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the dominant growing exponential common to numerator and denominator (here e^{0.3t}).</li><li>Divide every term in numerator and denominator by that exponential, turning e^{kt}/e^{kt} into 1 and constants into Ce^{-kt}.</li><li>Apply e^{-kt} → 0 as t → ∞.</li><li>Simplify the resulting ratio of constants to obtain the horizontal asymptote.</li><li>State that the value is approached but not attained.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the upper limit of $N = \dfrac{600 e^{0.3t}}{2 + e^{0.3t}}$ as $t \to \infty$.\\ Divide top and bottom by $e^{0.3t}$: $N = \dfrac{600}{2e^{-0.3t} + 1}$.\\ As $t \to \infty$, $e^{-0.3t} \to 0$, so $N \to \dfrac{600}{1} = 600$.\\ The population approaches but never reaches 600.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Pre-rearranged form N = A/(B + Ce^{-kt})</div>
+<div class="adjustment">No division step needed; just let e^{-kt} → 0 to read off A/B directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Rational function in x as x → ∞</div>
+<div class="adjustment">Divide numerator and denominator by the highest power of x; same logic with x^n replacing e^{kt}.</div>
+</div><div class="variant-row">
+<div class="scenario">Lower limit / initial value at t = 0</div>
+<div class="adjustment">Substitute t = 0 directly (e^{0} = 1) rather than taking a limit.</div>
+</div><div class="variant-row">
+<div class="scenario">Different exponential rates, e.g. e^{0.5t} on top and e^{0.3t} on bottom</div>
+<div class="adjustment">Divide by the larger-rate exponential; the limit may be 0 or ∞ rather than a finite ratio.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;upper limit&#x27; as a maximum and setting dN/dt = 0, even though the function is monotonic.</li><li>Substituting t = ∞ into the original form and giving up at ∞/∞ without normalising.</li><li>Confusing the upper limit with the initial value N(0).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting that the asymptote is approached but not attained, so writing N = 600 as if achieved.</li><li>Dividing only some terms by e^{kt} instead of every term, producing an algebraically wrong expression.</li><li>Mishandling signs in the exponent: e^{kt}/e^{kt} = 1, not e^{2kt}, and constants become Ce^{-kt}, not Ce^{kt}.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Maths (P2/P3 exponential models) and reinforced in Further Maths; uses only the standard fact that e^{-kt} → 0 as t → ∞ for k &gt; 0.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Jun_2021-Q8.html" class="example-chip">P3 Jun 2021 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

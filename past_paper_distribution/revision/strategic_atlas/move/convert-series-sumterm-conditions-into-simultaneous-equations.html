@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert series sum/term conditions into simultaneous equations — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Equation Formulation</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Convert series sum/term conditions into simultaneous equations</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Equation Formulation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem states numerical values for sums or specific terms of an arithmetic and/or geometric series and asks for the underlying parameters $a$, $d$, or $r$. Typical cues: &#x27;the sum of the first $n$ terms is...&#x27;, &#x27;the sum to infinity is...&#x27;, &#x27;the $k$th term equals...&#x27;. Often two series share a common element (e.g. same first term) so the conditions interlock. The student must recognise that each numerical condition is one equation waiting to be written.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Every standard sum/term formula ($u_n$, $S_n$, $S_\infty$) is an identity linking the parameters to a numerical output. Substituting the given value turns each verbal condition into a clean algebraic equation. Collecting these equations produces a simultaneous system whose size matches the number of unknowns, reducing a word problem to routine algebra. This is the universal bridge between sequence vocabulary and algebraic technique.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the problem gives numerical results (sums or specific terms) for one or more series — these are equations in disguise.</li><li>I rule out trying to compute terms one by one or guessing values; the formulas $S_n=\tfrac{n}{2}(2a+(n-1)d)$ and $S_\infty=\tfrac{a}{1-r}$ are the right tools.</li><li>I commit to writing one equation per numerical condition before attempting to solve, so I see the full system at once.</li><li>I substitute the given values into the matching formula and simplify to a tidy form (e.g. $a+2d=7$) ready for elimination/substitution.</li><li>If unknowns outnumber equations, I look for a linking phrase (&#x27;same first term&#x27;, &#x27;common ratio equals...&#x27;) to supply the missing relation, and I flag any convergence requirement $|r|&lt;1$ to check later.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify which formula matches each given condition: $u_n=a+(n-1)d$, $S_n=\tfrac{n}{2}(2a+(n-1)d)$, $u_n=ar^{n-1}$, $S_n=\tfrac{a(1-r^n)}{1-r}$, or $S_\infty=\tfrac{a}{1-r}$.</li><li>Substitute the numerical condition into the formula to produce one equation per condition.</li><li>Simplify each equation (clear fractions, divide by common factors) into a clean algebraic form.</li><li>Use any linking statement between series to equate parameters and reduce the number of unknowns.</li><li>Solve the resulting simultaneous system, then verify domain conditions (e.g. $|r|&lt;1$ for $S_\infty$).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>An AS and GS share first term $a$. Given $S_5=35$ for the AS and $S_\infty=32$ for the GS:\n$S_5=\tfrac{5}{2}(2a+4d)=35 \Rightarrow a+2d=7$ (Eq 1).\n$S_\infty=\tfrac{a}{1-r}=32 \Rightarrow a=32(1-r)$ (Eq 2).\nA further link (e.g. $d=ar$) then closes the system, with $|r|<1$ checked at the end.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">nth-term condition for an AS</div>
+<div class="adjustment">Use $u_n=a+(n-1)d$; e.g. &#x27;7th term is 20&#x27; becomes $a+6d=20$.</div>
+</div><div class="variant-row">
+<div class="scenario">nth-term condition for a GS</div>
+<div class="adjustment">Use $u_n=ar^{n-1}$; e.g. &#x27;4th term is 54&#x27; becomes $ar^3=54$.</div>
+</div><div class="variant-row">
+<div class="scenario">Finite GS sum given</div>
+<div class="adjustment">Use $S_n=\tfrac{a(1-r^n)}{1-r}$ instead of $S_\infty$; no convergence check needed but $r\ne 1$.</div>
+</div><div class="variant-row">
+<div class="scenario">Sum of an AS via first and last term</div>
+<div class="adjustment">If the last term $l$ is known, use $S_n=\tfrac{n}{2}(a+l)$ to avoid introducing $d$.</div>
+</div><div class="variant-row">
+<div class="scenario">Ratio of two terms in a GS</div>
+<div class="adjustment">Dividing two term equations $ar^m$ and $ar^k$ eliminates $a$ and yields a power equation in $r$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing $S_n$ (sum) with $u_n$ (single term) and applying the wrong formula.</li><li>Using $S_n=\tfrac{n}{2}(a+l)$ when the last term is not actually given.</li><li>Treating &#x27;sum to infinity&#x27; as a finite sum and using $S_n$ with a large $n$ instead of $S_\infty$.</li><li>Assuming the two series share more than they do (e.g. equal common difference and ratio) without textual support.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the convergence requirement $|r|&lt;1$ when invoking $S_\infty=\tfrac{a}{1-r}$.</li><li>Arithmetic slips when clearing the $\tfrac{n}{2}$ factor in the AS sum formula.</li><li>Dropping a sign when rearranging $a=32(1-r)$ or similar.</li><li>Solving the system but failing to back-substitute to verify each original condition holds.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>All formulas used ($u_n$, $S_n$ for AS and GS, and $S_\infty$ with $|r|&lt;1$) are standard in Edexcel IAL Pure Mathematics (P1/P2); no techniques beyond simultaneous equations are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jun_2023-Q11.html" class="example-chip">P2 Jun 2023 Q11</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

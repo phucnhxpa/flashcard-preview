@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert region boundaries into a system of inequalities by side-selection — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Region Definition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Convert region boundaries into a system of inequalities by side-selection</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Region Definition</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A diagram shows a shaded region R bounded by some combination of curves (parabolas, lines), axes, and/or vertical/horizontal lines, and the question asks you to write down the set of inequalities defining R. Visual cues include explicit boundary equations labelled on the sketch, dashed vs solid boundary lines (signalling strict vs non-strict inequalities), and a clearly enclosed shaded area. Equivalent phrasings: &#x27;find inequalities that define R&#x27;, &#x27;describe the region by inequalities&#x27;, &#x27;state the inequalities satisfied by points in R&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each boundary equation y = f(x) or x = a divides the plane into two half-regions, and an inequality (y &gt; f(x), y &lt; f(x), x &gt; a, x &lt; a) selects exactly one of them. The shaded region R is the intersection of these chosen half-regions, so the conjunction of one correctly-oriented inequality per boundary defines R. The principle is purely set-theoretic: R = ⋂ᵢ Hᵢ where each Hᵢ is the half-region on the correct side of boundary i. Getting the inequality direction right is the entire mathematical content of the move.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the diagram has a shaded region R with several labelled boundaries (a curve, one or more lines, possibly an axis); the question asks me to describe R algebraically rather than find an area, so I rule out integration and stick to inequality-writing.</li><li>I rule out implicit/parametric descriptions because every boundary is given as an explicit equation y = f(x) or x = constant, which is exactly the format that converts cleanly to half-plane inequalities.</li><li>I commit to a &#x27;one inequality per boundary, then intersect&#x27; strategy: list every boundary equation, decide its inequality sign, and conjoin them.</li><li>For each boundary I ask &#x27;is R above/below this curve?&#x27; or &#x27;is R left/right of this vertical line?&#x27;. I answer either by geometric reasoning (e.g. parabola opens upward, vertex below R, so R is above the curve) or by picking a clearly interior test point (x₀, y₀) ∈ R and checking which inequality it satisfies.</li><li>I decide strict vs non-strict: dashed boundaries → strict (&lt;, &gt;); solid boundaries / &#x27;including the boundary&#x27; → non-strict (≤, ≥). If the question is silent, I follow the diagram convention.</li><li>Finally, I check my system is non-empty by re-testing one interior point against ALL the inequalities simultaneously, and I present the answer compactly (e.g. as a double inequality a &lt; x &lt; b together with f(x) &lt; y &lt; g(x) when the geometry permits).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List every boundary equation explicitly: e.g. y = f(x), y = mx + c, x = a, x = b.</li><li>Pick a test point (x₀, y₀) clearly inside R (or use vertex/intercept reasoning).</li><li>For each boundary y = g(x): substitute x₀ and compare y₀ with g(x₀); if y₀ &gt; g(x₀) write y &gt; g(x), else y &lt; g(x).</li><li>For each vertical boundary x = a: compare x₀ with a to choose x &gt; a or x &lt; a (similarly for horizontal lines).</li><li>Choose strict (&lt;, &gt;) or non-strict (≤, ≥) based on whether the boundary is dashed or solid in the diagram.</li><li>Combine into a simultaneous system, e.g. f(x) &lt; y &lt; g(x) with a &lt; x &lt; b, and verify the test point satisfies all parts.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Region R is bounded above by $y = 2(x-4)(x-10)$, below by $y = 3x - 12$, on the left by $x = 0$, on the right by $x = 4$. Test point $(2, 0)$: line gives $3(2)-12 = -6$, so $y > 3x-12$ ✓; curve gives $2(-2)(-8) = 32$, so $y < 2(x-4)(x-10)$ ✓. Hence $R: \; 3x - 12 < y < 2(x-4)(x-10)$ with $0 < x < 4$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Region lies above an upward-opening parabola, below a line, and to the right of a vertical line</div>
+<div class="adjustment">Write y ≥ ½x² − 10x + 22, y ≤ −⅛x + 25/4, x ≥ 10 — same side-selection logic, just different curves and directions.</div>
+</div><div class="variant-row">
+<div class="scenario">Boundary is included in R (solid line in diagram)</div>
+<div class="adjustment">Use ≤ or ≥ in place of &lt; or &gt;; the side-selection step is unchanged.</div>
+</div><div class="variant-row">
+<div class="scenario">Region is the interior of a circle of radius r centred at (a, b)</div>
+<div class="adjustment">Replace the linear/quadratic boundary with $(x-a)^2 + (y-b)^2 &lt; r^2$ for the interior (or &gt; for the exterior).</div>
+</div><div class="variant-row">
+<div class="scenario">Region enclosed by curves on all sides with no vertical/horizontal cut-off</div>
+<div class="adjustment">Find the x-coordinates of intersection points and use them as the implicit x-bounds inside the compound inequality.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Defaulting to y ≤ f(x) for every curve without checking direction, when the region is actually above the curve.</li><li>Confusing which labelled equation belongs to which boundary, leading to inequalities applied to the wrong curve.</li><li>Treating the question as an area-finding problem and starting integration instead of writing inequalities.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Reversing the inequality for a vertical line (writing x ≤ a when R lies to the right of x = a).</li><li>Using ≤/≥ when the diagram shows a dashed boundary (or vice versa), losing the strict/non-strict mark.</li><li>Stating the inequalities as an unlinked list without making clear they must hold simultaneously — examiners require an &#x27;and&#x27; or a compound double-inequality form.</li><li>Forgetting the x-bounds entirely, which leaves the described region unbounded and incorrect.</li><li>Not verifying with a test point, producing an inconsistent system that defines the empty set.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is core Edexcel IAL Pure (P1/P2) coordinate-geometry content on linear and quadratic inequalities and their graphical interpretation; no formula booklet entry is invoked. Avoid generalising to systems of nonlinear inequalities involving more than one curved boundary unless the curves and their intersections have been computed explicitly — multi-region decomposition is not required at this level.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Jan_2023-Q8.html" class="example-chip">P1 Jan 2023 Q8</a><a href="../P1/ch1/q-Oct_2022-Q9.html" class="example-chip">P1 Oct 2022 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

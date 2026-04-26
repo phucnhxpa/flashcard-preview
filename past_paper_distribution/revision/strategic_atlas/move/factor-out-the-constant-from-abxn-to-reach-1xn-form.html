@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor out the constant from (a+bx)^n to reach (1+X)^n form — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../binomial.html">Binomial Expansion</a> / <strong>Standard Form Reduction</strong></div>
+  <span class="domain-pill" style="background:#EC407A;color:white">Binomial Expansion</span>
+  <h1>Factor out the constant from (a+bx)^n to reach (1+X)^n form</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Standard Form Reduction</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever you face a binomial (a+bx)^n with non-integer or negative n where the constant term inside the bracket is not 1 (e.g. (2−5x)^{-2}, (4+x)^{-1/2}, (9−2x)^{-1}, (8+3x)^{1/3}). The visual cue is a bracket of the form (a±bx)^n with a≠1 and n a fraction or negative integer. Equivalent phrasings: &#x27;reduce (a+bx)^n to standard form&#x27;, &#x27;normalise the constant inside the bracket&#x27;, &#x27;prepare for the generalised binomial expansion&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The generalised binomial theorem in the Edexcel formula booklet is stated only for (1+X)^n, valid for |X|&lt;1. To use it on (a+bx)^n we must rewrite the bracket so its constant term is 1. Factoring a out gives a(1+(b/a)x), and the index law (ab)^n = a^n·b^n then peels the constant a^n outside as a fixed scalar multiplier, leaving the standard-form kernel (1+(b/a)x)^n ready for term-by-term expansion. This separates the problem cleanly into &#x27;evaluate a^n&#x27; and &#x27;expand (1+X)^n with X=(b/a)x&#x27;.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the bracket is (a+bx)^n with a≠1 and n non-integer or negative, so the formula booklet&#x27;s (1+X)^n template does not apply directly.</li><li>Rule out expanding as-is (no closed formula for (a+bx)^n with general n in the booklet) and rule out factoring out x (this would make the expansion variable large, violating the convergence condition |X|&lt;1).</li><li>Commit to factoring the constant a from inside the bracket because that is the only manipulation which produces a leading 1 inside while keeping the variable term small.</li><li>Bridge to operations: write (a+bx) = a(1 + (b/a)x), then distribute the power using (PQ)^n = P^n Q^n to extract a^n as an external scalar.</li><li>Tactical decision: evaluate a^n immediately as a clean number (e.g. 4^{-1/2}=1/2, 2^{-2}=1/4, 8^{1/3}=2) and combine it with any pre-existing scalar multiplier in the question before expanding, so the series multiplication at the end is as simple as possible.</li><li>Identify n and X=(b/a)x explicitly, and note the convergence condition |bx/a|&lt;1, i.e. |x|&lt;|a/b|, for later use.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Factor the constant: (a+bx) = a\left(1 + \tfrac{b}{a}x\right), preserving the sign of b.</li><li>Distribute the power via index law: (a+bx)^n = a^n\left(1 + \tfrac{b}{a}x\right)^n.</li><li>Evaluate the scalar a^n as a simple number (e.g. 4^{-1/2}=\tfrac{1}{2}, 2^{-2}=\tfrac{1}{4}).</li><li>Absorb a^n into any external scalar multiplier already present in the question.</li><li>Identify n and X = \tfrac{b}{a}x for substitution into (1+X)^n = 1 + nX + \tfrac{n(n-1)}{2!}X^2 + \cdots.</li><li>State the validity range |X|&lt;1, i.e. |x|&lt;\left|\tfrac{a}{b}\right|.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Expand (4+x)^{-1/2}. Factor: (4+x)^{-1/2} = \bigl(4(1+\tfrac{x}{4})\bigr)^{-1/2} = 4^{-1/2}(1+\tfrac{x}{4})^{-1/2} = \tfrac{1}{2}(1+\tfrac{x}{4})^{-1/2}. Now apply (1+X)^n with n=-\tfrac{1}{2}, X=\tfrac{x}{4}: \tfrac{1}{2}\left(1 - \tfrac{1}{2}\cdot\tfrac{x}{4} + \tfrac{(-1/2)(-3/2)}{2}\cdot\tfrac{x^2}{16} + \cdots\right) = \tfrac{1}{2} - \tfrac{x}{16} + \tfrac{3x^2}{256} - \cdots, valid for |x|<4.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">For (3+2x)^{1/2}</div>
+<div class="adjustment">Factor out 3: 3^{1/2}(1+\tfrac{2x}{3})^{1/2} = \sqrt{3}\,(1+\tfrac{2x}{3})^{1/2}; here the scalar is irrational but the technique is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">For (8+3x)^{1/3}</div>
+<div class="adjustment">Factor out 8: 8^{1/3}(1+\tfrac{3x}{8})^{1/3} = 2(1+\tfrac{3x}{8})^{1/3}; the cube root resolves to a clean integer.</div>
+</div><div class="variant-row">
+<div class="scenario">For (9-2x)^{-1} or (2-5x)^{-2} (negative coefficient on x)</div>
+<div class="adjustment">Factor out the positive constant; the minus sign stays attached to the variable term, giving (1-\tfrac{2x}{9})^{-1} or (1-\tfrac{5x}{2})^{-2}. Then X is negative — track the sign carefully when substituting into the binomial series.</div>
+</div><div class="variant-row">
+<div class="scenario">When the question already has an external scalar k(a+bx)^n</div>
+<div class="adjustment">Combine k with a^n immediately: e.g. 8(2-5x)^{-2} = 8\cdot 2^{-2}(1-\tfrac{5x}{2})^{-2} = 2(1-\tfrac{5x}{2})^{-2} before expanding.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to factor out x (or the bx term) instead of the constant a, producing something like (x(a/x+b))^n — this puts a large quantity inside the bracket and breaks convergence.</li><li>Treating (a+bx)^n as if the booklet formula applies directly with X=a+bx-1 or similar ad hoc substitution, instead of normalising to a leading 1.</li><li>Factoring to make the x-coefficient equal to 1 (e.g. extracting b) rather than making the constant equal to 1.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to raise the factored constant to the power n — writing a(1+\tfrac{b}{a}x)^n instead of a^n(1+\tfrac{b}{a}x)^n. This loses the scalar on every term.</li><li>Mis-evaluating the fractional/negative power of the constant, e.g. writing 4^{-1/2}=2 instead of \tfrac{1}{2}, or 2^{-2}=\tfrac{1}{2} instead of \tfrac{1}{4}.</li><li>Sign error inside the bracket: writing (1+\tfrac{b}{a}x) when the original was (a-bx); the minus sign must be carried through so X = -\tfrac{b}{a}x.</li><li>Forgetting to multiply the final expanded series by the external scalar a^n at the end of the calculation.</li><li>Stating the validity range as |x|&lt;1 (copying from the booklet) instead of the correct |x|&lt;|a/b|.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P3/P4) using the generalised binomial expansion from the formula booklet, which is stated only for (1+X)^n with |X|&lt;1. Do not attempt to expand around x=∞ or use complex-valued constants — these are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch5/q-Oct_2023-Q2.html" class="example-chip">P4 Oct 2023 Q2</a><a href="../P4/ch4/q-Oct_2022-Q4.html" class="example-chip">P4 Oct 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

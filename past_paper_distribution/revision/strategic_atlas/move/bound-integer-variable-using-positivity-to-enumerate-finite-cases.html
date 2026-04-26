@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bound integer variable using positivity to enumerate finite cases — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Domain Restriction</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Bound integer variable using positivity to enumerate finite cases</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Domain Restriction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem declares variables to be positive integers (or natural numbers) and gives linear/affine relations between them, e.g. a = 8 − 2b with a, b ∈ ℤ⁺. Also triggers when a &#x27;prove that...&#x27; statement quantifies over a set whose size is not yet known. Cue words: &#x27;positive integers&#x27;, &#x27;natural numbers&#x27;, &#x27;where a, b, c are...&#x27;. The presence of a strict positivity constraint on a dependent expression is the key signal that the parameter set is actually finite.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A linear constraint of the form a = p − qb with a &gt; 0 and b ≥ 1 forces b into a bounded interval, and integrality then collapses this interval to a finite list. This converts a potentially open-ended universal claim into a manageable enumeration, legitimising proof by exhaustion. It also disciplines any algebraic proof by clarifying exactly which cases must be covered, preventing over-general arguments.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the variables are declared positive integers — this is a working constraint, not flavour text.</li><li>Rule out treating b as a free real variable; the algebraic relation a = 8 − 2b plus a &gt; 0 forces b &lt; 4.</li><li>Commit to translating each positivity statement into an inequality on b, then intersect with b ≥ 1.</li><li>Bridge: solve 8 − 2b &gt; 0 to get b &lt; 4, and combine with b ∈ ℤ⁺ to obtain b ∈ {1, 2, 3}.</li><li>Decide between two proof routes now visible: a clean algebraic argument valid on this range, or a three-case exhaustion.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write down all positivity constraints: a &gt; 0, b &gt; 0, c &gt; 0.</li><li>Substitute the given relations to express each constraint in terms of one variable, e.g. 8 − 2b &gt; 0.</li><li>Solve each inequality: b &lt; 4 from a &gt; 0; b ≥ 1 from b ∈ ℤ⁺.</li><li>Intersect the inequalities and impose integrality to list the finite case set b ∈ {1, 2, 3}.</li><li>Confirm the remaining variables (here c = b + 2) are automatically positive on this set, so no extra cases are lost.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $a, b, c \in \mathbb{Z}^+$ with $a = 8 - 2b$ and $c = b + 2$. From $a > 0$: $8 - 2b > 0 \Rightarrow b < 4$. With $b \geq 1$: $b \in \{1,2,3\}$. Then $(a,b,c) \in \{(6,1,3),(4,2,4),(2,3,5)\}$, giving exactly three cases to verify.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Prove a divisibility/parity claim about $a + b + c$ where $a = 10 - 3b$, $a,b \in \mathbb{Z}^+$.</div>
+<div class="adjustment">Solve $10 - 3b &gt; 0$ to get $b \in \{1,2,3\}$ and then check the claim case-by-case.</div>
+</div><div class="variant-row">
+<div class="scenario">Geometric sequence with positive terms and given sum/relation between terms.</div>
+<div class="adjustment">Positivity of all terms bounds the common ratio $r$ (e.g. $r &gt; 0$, sometimes $r &lt; 1$ from convergence), restricting the parameter set.</div>
+</div><div class="variant-row">
+<div class="scenario">Diophantine-style word problems (coins, tickets) with linear constraint and non-negativity.</div>
+<div class="adjustment">Replace &#x27;positive integer&#x27; with &#x27;non-negative integer&#x27;; include the boundary case $b = 0$ in enumeration.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic relation such as $a = 12 - b^2$ with $a, b \in \mathbb{Z}^+$.</div>
+<div class="adjustment">Solve $12 - b^2 &gt; 0$ to get $b \in \{1,2,3\}$; the bounding inequality is non-linear but the enumeration step is identical.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Ignoring the positive-integer constraint entirely and attempting a proof for all real b.</li><li>Treating &#x27;positive integer&#x27; as &#x27;non-negative integer&#x27; and erroneously including b = 0.</li><li>Checking only one of a, b, c for positivity and missing a hidden case restriction.</li><li>Assuming the case set must be infinite and jumping straight to a general algebraic proof without first bounding b.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using b ≥ 0 instead of b ≥ 1 (positive means strictly greater than zero).</li><li>Writing b ≤ 4 instead of b &lt; 4 (failing to use strict inequality from a &gt; 0).</li><li>Forgetting to test b = 4 explicitly: $a = 8 - 8 = 0$ is not positive, so b = 4 is excluded.</li><li>Listing the finite case set but then proving the claim only for one representative value.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Sits squarely within Edexcel IAL Pure proof techniques (P1/P3): proof by exhaustion and direct proof on a finite domain, using only linear inequalities and integer reasoning.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2022-Q2.html" class="example-chip">P2 Oct 2022 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

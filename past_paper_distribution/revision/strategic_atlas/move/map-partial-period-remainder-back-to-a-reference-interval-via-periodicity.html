@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map partial-period remainder back to a reference interval via periodicity — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Periodic Reduction</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Map partial-period remainder back to a reference interval via periodicity</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Periodic Reduction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The solution range exceeds an integer number of fundamental periods, leaving a leftover sub-interval shorter than one period (e.g. solving on $(0, 21\pi]$ for a $2\pi$-periodic equation, where $21\pi = 10\cdot 2\pi + \pi$). The student has already counted solutions in the complete periods and must now handle only the remainder. Cues: range endpoint is not a clean multiple of the period; question phrased as &#x27;how many solutions in $[0, N]$&#x27; with $N$ awkward; or part (ii) extends a previous range by less than one period.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If $f$ has period $T$, then the solutions of $f(x)=k$ in any interval $(a, a+T]$ are translates of those in $(0, T]$. So the count and location in a leftover sub-interval $(nT, nT+r]$ with $r&lt;T$ match exactly those in $(0, r]$. This avoids re-solving the equation and reduces the problem to a finite checklist of base-period roots intersected with a small window.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Student notices the upper bound is not an exact multiple of the period, so direct multiplication &#x27;solutions per period $\times$ number of periods&#x27; undercounts.</li><li>They rule out re-solving the trig equation from scratch on the new range — the periodicity makes that wasteful — and rule out simply scaling counts proportionally to interval length.</li><li>They commit to translating the leftover interval back to a reference window of the same length starting at $0$, because both factors of the equation share the period.</li><li>Concretely they set $x&#x27; = x - nT$ where $nT$ is the largest multiple of $T$ below the upper bound, mapping the remainder to $(0, r]$.</li><li>Inside the move they list the base-period solutions already known and tick off only those with $x&#x27; \in (0, r]$, being careful with which endpoint is included.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the period $T$ of the equation (here $T = 2\pi$ since both $\sin x$ and $\cos 2x$ have period dividing $2\pi$).</li><li>Find the largest multiple $nT$ at or below the upper bound and compute the remainder length $r$ (e.g. $21\pi - 20\pi = \pi$, so $n=10$, $r=\pi$).</li><li>Substitute $x&#x27; = x - nT$ to map the leftover $(nT, nT+r]$ to $(0, r]$.</li><li>List the base-period solutions $x&#x27; \in (0, T]$ from earlier work.</li><li>Select those base solutions with $x&#x27; \in (0, r]$ and count them.</li><li>Add this count to the contribution from the complete periods to get the grand total.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solutions of $\sin x(2\cos 2x+1)=0$ in $(0, 2\pi]$ are $x' \in \{\pi/6, 5\pi/6, \pi, 7\pi/6, 11\pi/6, 2\pi\}$ (6 per period). On $(0, 21\pi]$, ten full periods give $60$ solutions. The remainder is $(20\pi, 21\pi]$, mapping via $x' = x - 20\pi$ to $(0, \pi]$. Base solutions in $(0,\pi]$: $\pi/6, 5\pi/6, \pi$ — 3 of them. Total $= 60 + 3 = 63$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Range like $0 \le x \le 19.5\pi$ with a $2\pi$-periodic equation</div>
+<div class="adjustment">Subtract $9\cdot 2\pi = 18\pi$ to leave remainder $(0, 1.5\pi]$; check which base-period roots lie in this longer (but still partial) window.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation in $\tan x$ with period $\pi$</div>
+<div class="adjustment">Use $T=\pi$; reduce the upper bound modulo $\pi$ rather than $2\pi$.</div>
+</div><div class="variant-row">
+<div class="scenario">Equation in $\sin(kx)$ or $\cos(kx)$ with period $2\pi/k$</div>
+<div class="adjustment">Use the smaller period $T=2\pi/k$; the remainder interval is mapped back to $(0, 2\pi/k]$ before counting.</div>
+</div><div class="variant-row">
+<div class="scenario">Half-open vs closed endpoints (e.g. $[0, N)$ instead of $(0, N]$)</div>
+<div class="adjustment">Translate the inclusion conventions when mapping to $(0, r]$ — a root at $x&#x27;=0$ or $x&#x27;=r$ may or may not count depending on the original interval.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the extra $\pi$ as &#x27;half a period&#x27; and including half the per-period count (e.g. $1.5$ then rounding) instead of checking which specific roots lie in $(0, r]$.</li><li>Assuming the leftover interval starts at $x=0$ in the original variable rather than at $x=nT$, leading to double-counting solutions already in the full periods.</li><li>Forgetting that two different factors (here $\sin x$ and $\cos 2x$) might have different fundamental periods and using the wrong $T$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Mis-deciding whether $x&#x27; = r$ is in the interval — depends on whether the original range is closed at the top.</li><li>Arithmetic slip computing $nT$ (e.g. $20\pi$ vs $21\pi$) which shifts every solution.</li><li>Including a base-period root like $x&#x27; = 3\pi/2$ in $(0, \pi]$ by misreading the inequality.</li><li>Checking the upper boundary $x = nT + r$ as a solution of the original equation when it is not (e.g. $\sin(21\pi)=0$, not $\tfrac12$ or $-1$).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P2/P3 technique for counting trig solutions on extended intervals; relies only on knowing fundamental periods of $\sin, \cos, \tan$ and translating intervals — no transforms beyond syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2019-Q5.html" class="example-chip">P1 Jan 2019 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

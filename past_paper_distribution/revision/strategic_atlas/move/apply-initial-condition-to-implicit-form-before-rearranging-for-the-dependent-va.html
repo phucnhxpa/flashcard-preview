@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply initial condition to implicit form before rearranging for the dependent variable — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../ode.html">Differential Equations</a> / <strong>Strategic Ic Timing</strong></div>
+  <span class="domain-pill" style="background:#66BB6A;color:white">Differential Equations</span>
+  <h1>Apply initial condition to implicit form before rearranging for the dependent variable</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Strategic Ic Timing</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>After separating variables and integrating, you have an implicit relation like (H−5)/(H+3) = Ae^(−t/5) (or ln|...| = ... + C) containing an unknown constant A (or C), and you are given an initial condition such as H(0) = 13. The implicit form is algebraically tidy, while solving explicitly for the dependent variable would produce a fraction or exponential expression with A entangled in numerator and denominator. The cue is: &#x27;I could rearrange for H now, or I could substitute first — which is cleaner?&#x27;</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The constant of integration is just a number; it does not need the explicit form to be pinned down. Substituting (t,H) = (0,13) into the compact implicit equation typically reduces to one arithmetic step because e^0 = 1 and the left side becomes a simple ratio. Rearranging first creates a Möbius-type expression in A whose inversion to find A is algebraically heavier and error-prone. Choosing the order of operations — IC before rearrangement — is a genuine efficiency decision rewarded in IAL mark schemes.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the post-integration form (H−5)/(H+3) = Ae^(−t/5) still contains the unknown A, and the IC H(0)=13 is available.</li><li>Rule out the temptation to first &#x27;finish&#x27; by solving for H explicitly; that would give H as a Möbius function of Ae^(−t/5), and substituting then solving for A is messier.</li><li>Commit to substituting t=0, H=13 directly into the implicit form to extract A in a single line.</li><li>Bridge: evaluate (13−5)/(13+3) and set equal to A·e^0 = A.</li><li>Tactical: once A is a clean number (here 1/2), then rearrange for H with that numerical A so cross-multiplication produces small integer coefficients.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Stop after integration at the implicit form, e.g. (H−5)/(H+3) = Ae^(−t/5).</li><li>Substitute t = 0 and the given H value: (13−5)/(13+3) = A·e^0.</li><li>Simplify arithmetic: 8/16 = A, hence A = 1/2.</li><li>Rewrite the particular solution: (H−5)/(H+3) = (1/2)e^(−t/5).</li><li>Only now rearrange for H: cross-multiply, collect H terms on one side, factorise, and divide.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Separating dH/dt = −(1/5)(H−5)(H+3)/8 (say) leads after integration to $\frac{H-5}{H+3} = Ae^{-t/5}$. With $H(0)=13$: $\frac{13-5}{13+3} = A\cdot 1 \Rightarrow A = \tfrac{1}{2}$. Hence $\frac{H-5}{H+3} = \tfrac{1}{2}e^{-t/5}$, then cross-multiply $2(H-5) = (H+3)e^{-t/5}$ and solve for $H$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Logarithmic implicit form ln|y−a| − ln|y−b| = kt + C</div>
+<div class="adjustment">Substitute the IC directly to find C as a single logarithm, then exponentiate; avoid combining into a single fraction with unknown C first.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling: ln|θ − θ_room| = −kt + C</div>
+<div class="adjustment">Plug t=0, θ=θ₀ to get C = ln|θ₀ − θ_room| immediately, rather than exponentiating with C unknown.</div>
+</div><div class="variant-row">
+<div class="scenario">Logistic-type ODE giving (P/(N−P)) = Ae^(kt)</div>
+<div class="adjustment">Use IC P(0)=P₀ in the ratio form: A = P₀/(N−P₀), then rearrange for P.</div>
+</div><div class="variant-row">
+<div class="scenario">Integrating-factor solution y·μ(x) = ∫... + C</div>
+<div class="adjustment">Apply IC before dividing through by μ(x), so C is found from a clean linear equation.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking the &#x27;general solution&#x27; must be presented in explicit form y = f(x) before any constant can be evaluated.</li><li>Believing the IC must be applied at the very last step of the problem.</li><li>Confusing this with absorbing C into a new constant A — the timing decision is separate from the relabelling.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Rearranging for H with general A first, producing H = (−5A e^(−t/5) − 3)/(A e^(−t/5) − 1) and then having to solve a fractional equation for A.</li><li>Forgetting that e^0 = 1 when substituting t = 0, leaving an unsimplified A·e^0.</li><li>Sign errors when later cross-multiplying with the numerical A if brackets are dropped.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure/Further Pure separable-variables and first-order linear ODE work; uses only standard log/exponential manipulation and rational rearrangement.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2021-Q10.html" class="example-chip">P4 Jan 2021 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

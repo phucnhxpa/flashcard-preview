@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pair only the cross-terms that hit the target power — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../binomial.html">Binomial Expansion</a> / <strong>Selective Multiplication</strong></div>
+  <span class="domain-pill" style="background:#EC407A;color:white">Binomial Expansion</span>
+  <h1>Pair only the cross-terms that hit the target power</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Selective Multiplication</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A question asks for the coefficient of $x^k$ in a product $(A + Bx)\times(\text{series})$ or $(A + Bx + Cx^2)\times(\text{series})$, where the series is typically a binomial expansion truncated to a few terms. Phrases like &#x27;find the coefficient of $x^3$&#x27;, &#x27;hence find...&#x27;, or &#x27;using your expansion from part (a)&#x27; are the giveaway. The full product is not required — only one specific power. Common in Edexcel IAL C12/P3 binomial expansion follow-up parts.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>In a product $f(x)g(x)$, the coefficient of $x^k$ is $\sum_{i+j=k} a_i b_j$ (the Cauchy product). When one factor has very few terms, this sum collapses to as many contributions as there are non-zero terms in the short factor. Listing only those pairings whose degrees add to $k$ avoids redundant multiplication and reduces arithmetic error. It is the most efficient route for any &#x27;coefficient of $x^k$ in a product&#x27; task at A-level.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question only asks for one specific coefficient (e.g. $x^3$), not the full expansion of the product.</li><li>I rule out multiplying every term against every term — most products would be discarded anyway.</li><li>I commit to the Cauchy-pair strategy: list only the index pairs $(i,j)$ with $i+j=k$.</li><li>Bridge to operation: write down the short factor&#x27;s terms with their degrees, and the relevant series terms with their degrees, then match.</li><li>Tactically, I keep coefficients as exact fractions, and check at the end that every contributing pair has been counted exactly once.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the target power $x^k$ and the two factors $f(x)$ and $g(x)$.</li><li>List the terms of the short factor with their degrees (e.g. $A$ at degree 0, $Bx$ at degree 1).</li><li>For each term of degree $i$ in the short factor, locate the term of degree $k-i$ in the expansion.</li><li>Form the products of (coefficient $\times$ coefficient) for each valid pairing.</li><li>Sum these contributions, working over a common denominator if fractions are involved.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find the coefficient of $x^2$ in $(2+5x)(1+x)^4$. The expansion gives $1+4x+6x^2+\dots$. Pairings for $x^2$: $2\times 6x^2$ and $5x\times 4x$. Coefficient $= 2(6) + 5(4) = 12 + 20 = 32$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Pre-multiplier is a quadratic $(A+Bx+Cx^2)$</div>
+<div class="adjustment">Three pairings are needed: $A\cdot[x^k] + B\cdot[x^{k-1}] + C\cdot[x^{k-2}]$ from the expansion.</div>
+</div><div class="variant-row">
+<div class="scenario">Both factors are full binomial series (e.g. $(1+x)^n(1-2x)^m$)</div>
+<div class="adjustment">Use the Cauchy convolution $\sum_{i=0}^{k}a_i b_{k-i}$, taking only the indices needed up to $i+j=k$.</div>
+</div><div class="variant-row">
+<div class="scenario">Target power is $x^0$ (the constant) or $x^1$</div>
+<div class="adjustment">Only one or two pairings exist; the method is even shorter, but check the constant term of each factor carefully.</div>
+</div><div class="variant-row">
+<div class="scenario">Pre-multiplier contains a negative power, e.g. $(1+\tfrac{1}{x})\cdot(\dots)$ in a Further Maths context</div>
+<div class="adjustment">Same principle, but degrees can be negative; pair so that degrees still sum to $k$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading the question as &#x27;expand fully&#x27; rather than &#x27;find one coefficient&#x27;, leading to wasted work.</li><li>Missing one of the cross-product contributions, especially the one coming from the $x$-term of the short factor.</li><li>Treating the truncated series as exact and including spurious higher-order terms that the expansion did not provide.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Pairing the wrong degrees: the constant pairs with the $x^k$ coefficient, the $x$-term pairs with the $x^{k-1}$ coefficient — swapping these is the most common slip.</li><li>Forgetting to multiply by the numerical coefficient of the $x$-term (using $1$ instead of $B$).</li><li>Sign errors when the expansion has alternating signs — keep brackets around negative coefficients.</li><li>Arithmetic slips with fractions; convert to a common denominator before summing.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Maths (C12/P3 binomial expansion) and Further Maths; no generating-function machinery beyond the finite Cauchy-product idea is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jun_2024-Q1.html" class="example-chip">P2 Jun 2024 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

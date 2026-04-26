@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plot complex roots on Argand diagram using Re-Im coordinates — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Argand Diagram Plotting</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Plot complex roots on Argand diagram using Re-Im coordinates</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Argand Diagram Plotting</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A question explicitly asks to &#x27;show on an Argand diagram&#x27; or &#x27;represent on an Argand diagram&#x27; a set of complex numbers, typically the roots of a polynomial just found in earlier parts. The cue is a list of complex values $a+bi$ to be displayed geometrically. May also appear after solving $z^n = w$ or factorising a quartic over $\mathbb{C}$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>An Argand diagram identifies the complex number $a+bi$ with the Cartesian point $(a,b)$, where the real part is the horizontal coordinate and the imaginary part is the vertical coordinate. This bijection between $\mathbb{C}$ and $\mathbb{R}^2$ turns algebraic features into geometric ones: conjugate pairs become reflections in the real axis, real numbers lie on the horizontal axis, and purely imaginary numbers lie on the vertical axis. Mark schemes reward correctly placed and labelled points together with axis labels.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices each root is given (or can be written) in the form $a+bi$ with real $a,b$.</li><li>Rules out polar/modulus-argument plotting since the question gives Cartesian-form roots and only asks for placement, not arcs or circles.</li><li>Commits to the standard convention: horizontal axis = Re, vertical axis = Im, so $a+bi \mapsto (a,b)$.</li><li>Bridges to drawing axes labelled Re and Im, then placing each root one at a time with its label written next to the point.</li><li>Tactically chooses a scale that fits the largest $|a|$ and $|b|$ values, and visually checks that conjugate pairs appear symmetric about the real axis as a self-consistency check.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Draw two perpendicular axes; label horizontal as Re (or Re($z$)) and vertical as Im (or Im($z$)).</li><li>Choose a scale that accommodates the largest real and imaginary parts among the roots.</li><li>For each root $a+bi$, mark the point $(a,b)$ with a clear dot or cross.</li><li>Label each plotted point with the corresponding complex value (e.g. $3i$, $-3i$, $8$, $2$).</li><li>Verify visually: conjugate pairs should be mirror images in the Re axis; real roots should lie on the Re axis.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Roots of $z^4 - 10z^3 + 25z^2 - 90z + 144 = 0$ are $z = 8,\ 2,\ 3i,\ -3i$. On the Argand diagram with Re horizontal and Im vertical, plot $(8,0)$ labelled $8$, $(2,0)$ labelled $2$, $(0,3)$ labelled $3i$, and $(0,-3)$ labelled $-3i$. The pair $3i,\ -3i$ is symmetric about the Re axis, confirming the conjugate root theorem.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Roots with both nonzero real and imaginary parts, e.g. $2 \pm 3i$</div>
+<div class="adjustment">Plot $(2,3)$ and $(2,-3)$ in the interior of the right half-plane; they remain mirror-symmetric about the Re axis.</div>
+</div><div class="variant-row">
+<div class="scenario">$n$th roots of a complex number $z^n = w$</div>
+<div class="adjustment">Plot the $n$ roots; they lie equally spaced on a circle of radius $|w|^{1/n}$ centred at the origin — optionally sketch the circle as a visual aid.</div>
+</div><div class="variant-row">
+<div class="scenario">Loci such as $|z - a| = r$ or $\arg(z - a) = \theta$</div>
+<div class="adjustment">Switch from plotting discrete points to drawing the corresponding circle, half-line, or perpendicular bisector on the same Re-Im axes.</div>
+</div><div class="variant-row">
+<div class="scenario">A single complex number to be illustrated as a vector</div>
+<div class="adjustment">Draw an arrow from the origin to $(a,b)$ rather than a single point, and label the tip with $z = a+bi$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the Argand diagram as a normal $xy$-plane and writing coordinates as $(\mathrm{Re}, \mathrm{Im})$ but labelling the axes $x$ and $y$ instead of Re and Im.</li><li>Reading $bi$ as a real-axis quantity and plotting $(b,0)$ for a purely imaginary root.</li><li>Assuming polar form is required and trying to mark modulus/argument instead of Cartesian coordinates.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Swapping the axes (placing Re vertically and Im horizontally).</li><li>Forgetting to label the axes Re and Im, or omitting point labels — both cost presentation marks.</li><li>Plotting $(3,0)$ for $3i$ instead of $(0,3)$, i.e. confusing real and imaginary components.</li><li>Using inconsistent or unmarked scales so conjugate symmetry is not visually evident.</li><li>Drawing only dots without writing the corresponding complex values next to them.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure scope (FP1/FP2): Argand diagram representation of complex numbers in Cartesian form, with conjugate-pair symmetry as a standard visual check.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jun_2021-Q5.html" class="example-chip">FP1 Jun 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply discriminant &gt; 0 to enforce two distinct real roots — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Discriminant Condition</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Apply discriminant &gt; 0 to enforce two distinct real roots</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Discriminant Condition</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question hinges on a quadratic (already given, or formed by substituting a line into a curve) and demands &#x27;two distinct real roots&#x27;, &#x27;two distinct points of intersection&#x27;, &#x27;the line meets the curve at two distinct points&#x27;, or equivalent phrasing. The quadratic typically contains an unknown parameter (k, p, m, …) and the question asks you to derive an inequality in that parameter — often a &#x27;show that&#x27; target. The cue is the combination of: (i) a quadratic structure ax² + bx + c = 0, and (ii) a root-counting requirement linked to a parameter. Variations of the same trigger include &#x27;has real and distinct solutions&#x27;, &#x27;crosses the x-axis at two points&#x27;, or &#x27;cuts the curve twice&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For ax² + bx + c = 0 the discriminant Δ = b² − 4ac classifies the roots: Δ &gt; 0 ↔ two distinct real roots, Δ = 0 ↔ one repeated real root, Δ &lt; 0 ↔ no real roots. Imposing Δ &gt; 0 therefore converts the geometric/root-counting condition into a clean algebraic inequality in the parameter. This is almost always the fastest and most rigorous route — completing the square or graphical reasoning are slower and rarely produce the required &#x27;show that&#x27; inequality directly.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the keyword &#x27;distinct&#x27; (or &#x27;two points of intersection&#x27;) sitting beside a quadratic — this is the canonical discriminant trigger.</li><li>Rule out alternatives: solving the quadratic explicitly is impossible while the parameter is unknown; completing the square or sketching is slower and less marks-friendly for a &#x27;show that&#x27; proof.</li><li>Commit to Δ = b² − 4ac &gt; 0 because &#x27;distinct&#x27; demands strict inequality (Δ ≥ 0 would wrongly include the repeated-root case).</li><li>Carefully identify a, b, c from the quadratic in standard form ax² + bx + c = 0, paying attention to signs and to which terms depend on the parameter.</li><li>Substitute into Δ &gt; 0, then expand methodically — squaring b first, then computing 4ac with full attention to the factor of 4 and to negative terms inside c.</li><li>Aim the simplification toward the target inequality printed in the question; if it is a &#x27;show that&#x27;, preserve every intermediate line so no marks are lost.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Put the equation in standard form ax² + bx + c = 0 and read off a, b, c.</li><li>Write the condition: Δ = b² − 4ac &gt; 0.</li><li>Compute b² (watch sign: (k − 8)² = k² − 16k + 64, not k² + 64).</li><li>Compute 4ac in full, including the leading 4 (e.g. 4·8·(12p + 15 − 4p²) = 32(12p + 15 − 4p²)).</li><li>Subtract: b² − 4ac, distributing the minus sign over every term of 4ac.</li><li>Collect like terms and, if needed, divide through by a positive common factor to reach the printed target inequality.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Line y = kx + 1 meets curve 4x² + y² = 2y at two distinct points → quadratic 4x² + (k−8)x + (1−2k) = 0. Apply Δ > 0: $(k-8)^2 - 4(4)(1-2k) > 0$ ⟹ $k^2 - 16k + 64 - 16 + 32k > 0$ ⟹ $k^2 + 16k + 48 > 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Line is tangent to the curve (one point of contact)</div>
+<div class="adjustment">Set Δ = 0 instead of Δ &gt; 0; the rest of the algebra is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">Line does not meet the curve</div>
+<div class="adjustment">Set Δ &lt; 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Parameter sits in the leading coefficient or in trig form (e.g. a = sin θ)</div>
+<div class="adjustment">Same Δ-logic; the resulting inequality may be trigonometric or require separate care that a ≠ 0 (so the equation is genuinely quadratic).</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic given in non-standard order (e.g. constants on the right)</div>
+<div class="adjustment">Rearrange to ax² + bx + c = 0 first before identifying a, b, c.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using Δ ≥ 0 instead of Δ &gt; 0 — &#x27;distinct&#x27; strictly excludes the repeated-root case.</li><li>Trying to solve the quadratic for x explicitly while the parameter is still unknown.</li><li>Misidentifying a, b, c when the quadratic is not written in standard form, or when the parameter sits inside more than one coefficient.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors expanding (k − 8)² — students sometimes write k² + 64 (missing cross term) or +16k instead of −16k.</li><li>Dropping the factor of 4 in 4ac, e.g. writing 4·(1 − 2k) instead of 4·4·(1 − 2k).</li><li>Failing to distribute the minus sign across every term of 4ac, especially when c contains negatives like (12p + 15 − 4p²).</li><li>Skipping intermediate algebra in &#x27;show that&#x27; questions and losing method marks even when the final inequality is correct.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P1/P2 scope; the discriminant b² − 4ac is assumed knowledge and not in the formula booklet. Avoid invoking results about complex roots beyond &#x27;no real roots&#x27; — Further Pure complex-root theory is not needed here.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch1/q-Oct_2020-Q7.html" class="example-chip">P1 Oct 2020 Q7</a><a href="../P1/ch3/q-Oct_2023-Q10.html" class="example-chip">P1 Oct 2023 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

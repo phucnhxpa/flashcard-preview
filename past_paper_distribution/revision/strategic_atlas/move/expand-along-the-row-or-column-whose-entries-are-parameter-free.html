@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expand along the row or column whose entries are parameter-free — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Expansion Row Selection</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Expand along the row or column whose entries are parameter-free</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Expansion Row Selection</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A 3×3 determinant must be evaluated where one or more entries depend on a parameter (e.g. k), and no row or column contains a zero to exploit. One row (or column) consists entirely of constants while the others mix constants with the parameter. The task is to choose which row/column to expand along for cofactor expansion. Phrasings include &#x27;find the values of k for which det(A) = 0&#x27; or &#x27;show that det(A) = ...&#x27; with a symbolic matrix.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Cofactor expansion multiplies each chosen row/column entry by a 2×2 minor. If the chosen entries are constants, the parameter k appears only inside the minors, never as both a multiplier and inside a minor at once. This keeps the resulting polynomial in k linear-in-structure and minimises bracket expansions. A shared constant factor (like 2) can also be pulled out, simplifying the algebra further.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the matrix is symbolic: some entries depend on k, others are pure numbers.</li><li>Rule out rows/columns containing k as multipliers, since they would force k to appear both outside and inside the 2×2 minors.</li><li>Commit to the row (or column) of all constants, because constant multipliers keep the expansion clean and any common factor can be extracted.</li><li>Bridge: write det(A) = a·C₁ − b·C₂ + c·C₃ with the correct sign pattern (+, −, +) for that row/column.</li><li>Inside each 2×2 minor, expand carefully; collect like powers of k at the end rather than mid-computation.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the row or column whose entries are all constants (or contain the most constants/zeros).</li><li>Write det(A) as the signed sum of (entry)·(2×2 minor) using the checkerboard sign pattern.</li><li>Form each 2×2 submatrix by deleting the chosen row and the relevant column.</li><li>Evaluate each 2×2 minor as ad − bc, keeping k-terms tidy.</li><li>Combine, factor out any common constant, and simplify to a polynomial in k.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $A = \begin{pmatrix} 2 & 2 & 2 \\ 2 & 1 & 2 \\ 2 & k & k \end{pmatrix}$. Expand along row 1: $\det(A) = 2\begin{vmatrix}1 & 2 \\ k & k\end{vmatrix} - 2\begin{vmatrix}2 & 2 \\ 2 & k\end{vmatrix} + 2\begin{vmatrix}2 & 1 \\ 2 & k\end{vmatrix}$. This gives $2(k - 2k) - 2(2k - 4) + 2(2k - 2) = -2k - 4k + 8 + 4k - 4 = -2k + 4$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">A row or column contains a zero entry</div>
+<div class="adjustment">Prefer that row/column instead — the zero kills one cofactor term entirely, beating the &#x27;all constants&#x27; heuristic.</div>
+</div><div class="variant-row">
+<div class="scenario">Symbolic 3×3 with parameter spread evenly across all rows</div>
+<div class="adjustment">Choose the row/column with the fewest distinct symbolic terms, or use row operations first to create a zero before expanding.</div>
+</div><div class="variant-row">
+<div class="scenario">A column (not row) is the all-constant one</div>
+<div class="adjustment">Expand along that column using the same sign pattern (+, −, +) read vertically; the logic is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">The constant row shares a common factor</div>
+<div class="adjustment">Factor it out of the determinant first via the scalar-row property: replacing row by 1, multiplying det by the factor.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming row 1 is always the right choice by default, even when row 2 or a column has zeros.</li><li>Thinking &#x27;mostly constant&#x27; beats &#x27;all constant&#x27; — any single k in the chosen row reintroduces the multiplier-and-minor entanglement.</li><li>Confusing &#x27;fewer parameter entries&#x27; with &#x27;shorter computation&#x27;; the issue is parameter placement, not raw count.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the alternating sign pattern: the (1,2) cofactor carries a minus sign.</li><li>Deleting the wrong row or column when forming the 2×2 minor.</li><li>Dropping a factor of 2 (or other common multiplier) when extracting it from the row.</li><li>Sign errors inside ad − bc when one of the entries is itself negative or contains −k.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Cofactor expansion of 3×3 determinants is standard in Edexcel IAL Further Pure (matrices chapter); the row-choice heuristic is implicit in worked examples and exam efficiency.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2021-Q3.html" class="example-chip">FP3 Jan 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

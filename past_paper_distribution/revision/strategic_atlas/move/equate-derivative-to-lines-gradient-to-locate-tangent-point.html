@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate derivative to line&#x27;s gradient to locate tangent point — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Tangency Gradient Match</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Equate derivative to line&#x27;s gradient to locate tangent point</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Tangency Gradient Match</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a question states that a line y = mx + c is tangent to a curve y = f(x) and asks for an unknown constant (often c, or sometimes m, or a parameter inside the curve). The gradient of the line is directly readable from the coefficient of x. No specific point of contact is given — it must be located. Phrasings include &#x27;is a tangent to&#x27;, &#x27;touches the curve&#x27;, or &#x27;meets the curve at exactly one point&#x27; within a calculus chapter.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>At a point of tangency, the curve and line share the same gradient, so f&#x27;(x) must equal m at that x-coordinate. This converts the geometric &#x27;touching&#x27; condition into an algebraic equation in x alone, pinpointing the tangent point. Once x is known, substituting into the curve gives the y-coordinate, and substituting both into the line equation determines the unknown constant. This is the calculus-route alternative to the discriminant-zero method and is preferred when differentiation is the chapter&#x27;s focus.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the keyword &#x27;tangent&#x27; alongside a line in slope-intercept form — the coefficient of x is the gradient m.</li><li>Rule out brute substitution (curve = line, discriminant = 0); since the chapter is differentiation, the examiner expects f&#x27;(x) = m.</li><li>Commit to the gradient-match because it produces a single equation in x, simpler than a quadratic discriminant analysis.</li><li>Bridge: differentiate the curve to get f&#x27;(x), then set f&#x27;(x) = m and solve for x.</li><li>Tactically: once x is found, compute y on the curve, then enforce that this point lies on the line to extract the unknown constant.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Read the line&#x27;s gradient m as the coefficient of x.</li><li>Differentiate the curve to obtain f&#x27;(x).</li><li>Set f&#x27;(x) = m and solve for x — this is the x-coordinate of the tangent point.</li><li>Substitute x into the curve equation to find y.</li><li>Substitute (x, y) into the line equation and solve for the unknown constant.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find c such that y = 4x + c is tangent to y = 2x^2 + 8x + 3.\n dy/dx = 4x + 8. Set 4x + 8 = 4 ⇒ x = -1.\n Then y = 2(-1)^2 + 8(-1) + 3 = -3.\n On the line: -3 = 4(-1) + c ⇒ c = 1.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Tangent to an implicit curve (e.g., x^2 + xy + y^2 = k)</div>
+<div class="adjustment">Differentiate implicitly to get dy/dx in terms of x and y, then equate to m; combine with the curve equation to solve simultaneously.</div>
+</div><div class="variant-row">
+<div class="scenario">Line gradient unknown but intercept fixed (find m)</div>
+<div class="adjustment">Same logic — set f&#x27;(x) = m, but now m is the unknown; use the &#x27;point lies on line&#x27; equation as the second relation.</div>
+</div><div class="variant-row">
+<div class="scenario">Normal rather than tangent</div>
+<div class="adjustment">Set f&#x27;(x) = -1/m (negative reciprocal of the line&#x27;s gradient) instead of m.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve x = g(t), y = h(t)</div>
+<div class="adjustment">Compute dy/dx = h&#x27;(t)/g&#x27;(t), set equal to m, solve for t, then recover the point.</div>
+</div><div class="variant-row">
+<div class="scenario">Unknown parameter inside the curve (e.g., y = x^2 + ax + b)</div>
+<div class="adjustment">Use both conditions — gradient match and point on line — to set up two equations in the parameters.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing &#x27;tangent to the curve&#x27; with &#x27;tangent at a stated point&#x27; — here the contact point is unknown and must be found via the gradient condition.</li><li>Treating the problem as a generic intersection and solving curve = line for two roots, missing the tangency (repeated-root) requirement.</li><li>Misreading the line&#x27;s gradient when it is given in implicit form like 4x - y + c = 0 instead of slope-intercept form.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Differentiation slips: forgetting to drop the constant term, or mishandling the coefficient of x^2 (e.g., 2x^2 → 2x instead of 4x).</li><li>Equating f&#x27;(x) to c (the intercept) instead of to m (the gradient).</li><li>Forgetting the second step — finding x is not the answer; the unknown constant requires substituting back.</li><li>Sign errors when the line is rearranged from a non-standard form before reading off m.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P1/P2 differentiation of polynomials; P3/P4 for implicit and parametric variants). No tools beyond standard differentiation rules are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Specimen_2018-Q4.html" class="example-chip">P1 Specimen 2018 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge same-exponent factors into a single base via (ab)^x — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Base Merging</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Merge same-exponent factors into a single base via (ab)^x</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Base Merging</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The equation contains two (or more) exponential terms multiplied together that share the same exponent but have different bases, e.g. $4^x \times 6^x$ or $2^x \times 5^x$. Equivalent surface cues: a product like $a^x b^x$ on one side, or $\frac{a^x}{b^x}$ which merges to $(a/b)^x$. Fires whenever a single log step is blocked because two distinct bases share the same unknown exponent.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The index law $a^x b^x = (ab)^x$ (and $a^x/b^x = (a/b)^x$) collapses two exponential factors sharing the same exponent into one exponential with a combined base. This reduces the equation to the canonical form $c = k^x$, which is solved in one log step as $x = \log_k c$. Without merging, you would need a more cumbersome simultaneous-log manipulation; merging is the cleanest route on IAL papers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice two exponentials with identical exponent $x$ but different bases multiplied together.</li><li>Rule out taking logs immediately — that would give $\log a^x + \log b^x = x(\log a + \log b)$, workable but messier; also rule out adding bases, which is not a valid law.</li><li>Commit to the product-of-powers law because the matching exponent makes $(ab)^x$ exact and the equation becomes a single-base exponential.</li><li>Multiply the bases to form one exponential $(ab)^x$, leaving the equation in the form $c = (ab)^x$.</li><li>Apply $\log$ (any base) to isolate $x = \dfrac{\log c}{\log(ab)}$; choose base 10 or $\ln$ to match the demanded answer form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the matching exponent across the two factors.</li><li>Apply $a^x \times b^x = (ab)^x$ to merge the bases.</li><li>Rewrite the equation as $c = (ab)^x$.</li><li>Take logs of both sides and solve $x = \dfrac{\log c}{\log(ab)}$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $2 = 4^x \times 6^x$.\\ Merge: $4^x \times 6^x = (4 \cdot 6)^x = 24^x$.\\ So $2 = 24^x \Rightarrow x \log 24 = \log 2 \Rightarrow x = \dfrac{\log 2}{\log 24}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quotient of same-exponent powers, e.g. $\dfrac{6^x}{2^x} = 5$</div>
+<div class="adjustment">Apply $a^x/b^x = (a/b)^x$ to get $3^x = 5$, then log.</div>
+</div><div class="variant-row">
+<div class="scenario">Three or more factors, e.g. $2^x \times 3^x \times 5^x = 60$</div>
+<div class="adjustment">Merge all bases: $30^x = 60$, then log.</div>
+</div><div class="variant-row">
+<div class="scenario">Reverse split: need $12^x$ to match a $3^x$ elsewhere</div>
+<div class="adjustment">Split $12^x = 3^x \times 4^x$ to expose a common factor with the other term.</div>
+</div><div class="variant-row">
+<div class="scenario">Exponents are linear in $x$ but identical, e.g. $a^{2x+1} \times b^{2x+1}$</div>
+<div class="adjustment">Factor common exponent first: $(ab)^{2x+1}$, then log and solve linear equation in $x$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Adding bases: writing $4^x + 6^x = 10^x$ — no such identity exists; the law is for products only.</li><li>Treating $4^x \times 6^x$ as $24^{2x}$ by also multiplying the exponents — the exponent stays $x$, only bases multiply.</li><li>Believing the merge requires the bases to share a prime factor; it does not — any two real positive bases combine.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Applying the law when exponents differ: $4^x \times 6^{2x} \neq 24^x$. First rewrite to a common exponent (e.g. $6^{2x} = 36^x$) before merging.</li><li>Forgetting to handle a coefficient outside the powers, e.g. $2 \cdot 4^x \times 6^x$ — only the powers merge; the constant stays.</li><li>Sign/quotient slip: $a^x/b^x = (a/b)^x$, not $(b/a)^x$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard index-law manipulation in Edexcel IAL P2/P3 logarithms and exponentials; relies only on $a^x b^x = (ab)^x$ and basic log laws, both within syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch5/q-Jan_2020-Q9.html" class="example-chip">P2 Jan 2020 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

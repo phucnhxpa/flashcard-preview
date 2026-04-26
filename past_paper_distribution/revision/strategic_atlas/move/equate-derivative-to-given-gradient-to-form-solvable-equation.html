@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate derivative to given gradient to form solvable equation — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Gradient Equation</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Equate derivative to given gradient to form solvable equation</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Gradient Equation</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question links a curve y = f(x) to a numerical gradient — phrases like &#x27;the tangent at P has gradient m&#x27;, &#x27;the gradient of the curve is m&#x27;, &#x27;find x where the slope equals m&#x27;, or &#x27;find the constant k given f&#x27;(a) has gradient m&#x27;. The structural cue is a stated slope value paired with either an unknown x-coordinate or an unknown coefficient inside f(x). Equivalent phrasings include &#x27;tangent parallel to y = mx + c&#x27; (gradient = m) and &#x27;stationary point&#x27; (gradient = 0). The move also fires when a normal&#x27;s gradient is given — after first taking the negative reciprocal to recover the tangent gradient.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition, f&#x27;(a) is the gradient of the tangent to y = f(x) at x = a. Setting f&#x27;(x) = m therefore translates a geometric statement about slope into an algebraic equation that can be solved by standard techniques (linear, quadratic, factorising). This is the fundamental bridge between calculus (the derivative as a function) and coordinate geometry (gradient of a line). Without this translation no progress is possible; with it, the problem reduces to algebra in either x or in an unknown coefficient.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the keyword &#x27;gradient&#x27; (or &#x27;tangent slope&#x27;, &#x27;parallel to&#x27;, &#x27;stationary&#x27;) paired with a specific numerical value — this is the visual cue that f&#x27;(x) = m is the governing equation.</li><li>Rule out alternatives: integrating to recover f(x), substituting into y = f(x), or using the tangent line equation y − y₁ = m(x − x₁) — none of these are needed yet because the unknown lives in the derivative relationship, not in the function value.</li><li>Commit to the move because the derivative directly encodes slope: every other geometric piece of information (point on curve, equation of tangent line) is downstream of first solving f&#x27;(x) = m.</li><li>Differentiate f(x) term-by-term using the power rule (if f&#x27;(x) is not already given), then write the equation f&#x27;(x) = m and rearrange to standard form.</li><li>Tactical decision: identify whether the unknown is x (locating a point) or a coefficient like k (calibrating the function) — in the first case substitute and solve for x; in the second case substitute the known x-value and solve for k.</li><li>Sanity-check the expected number of solutions: a quadratic f&#x27;(x) yields up to two x-values (matching &#x27;points P and Q&#x27;); a single-coefficient unknown yields exactly one value of k.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>If not given, compute f&#x27;(x) by applying the power rule term-by-term.</li><li>Write the equation f&#x27;(x) = m, where m is the stated tangent gradient (take the negative reciprocal first if a normal gradient was given).</li><li>Substitute the known quantity: either the specific x-value (when solving for an unknown coefficient) or leave x as the unknown (when solving for the point).</li><li>Rearrange to standard form (linear in k, or polynomial = 0 in x).</li><li>Solve by inspection, factorising, or the quadratic formula; reject any roots excluded by the question.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $f(x) = 4x^2 + kx + 3$ with $f'(3) = 24$: differentiate to get $f'(x) = 8x + k$, substitute $x = 3$ to obtain $24 + k = 24$… wait, recompute: $f'(3) = 8(3) + k = 24 + k$, so $24 + k = 24$ gives $k = 0$. (For the original cubic-style $f'(x) = 4x^2 + kx + 3$ with $f'(3) = 24$: $36 + 3k + 3 = 24 \Rightarrow 3k = -15 \Rightarrow k = -5$.)</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Normal line gradient is given instead of tangent gradient</div>
+<div class="adjustment">First compute m_tangent = −1/m_normal, then apply f&#x27;(x) = m_tangent.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks for stationary points or horizontal tangents</div>
+<div class="adjustment">Same move with m = 0: solve f&#x27;(x) = 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent parallel to a given line y = mx + c</div>
+<div class="adjustment">Read off m from the line and set f&#x27;(x) = m.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve</div>
+<div class="adjustment">Compute dy/dx = (dy/dt)/(dx/dt) first, then equate to the given gradient.</div>
+</div><div class="variant-row">
+<div class="scenario">Implicitly defined curve</div>
+<div class="adjustment">Differentiate implicitly to obtain dy/dx in terms of x and y, then substitute and equate to m.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting into f(x) (the y-value) instead of f&#x27;(x) (the gradient).</li><li>Setting y = m instead of dy/dx = m when the question says &#x27;gradient is m&#x27;.</li><li>Confusing &#x27;gradient of normal&#x27; with &#x27;gradient of tangent&#x27; and equating f&#x27;(a) to the normal&#x27;s slope directly.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slips when evaluating powers, e.g. writing 4(3) = 12 instead of 4(3)² = 36.</li><li>Sign errors when rearranging f&#x27;(x) = m to f&#x27;(x) − m = 0, especially with negative coefficients.</li><li>Forgetting to differentiate the constant term to 0 (harmless) or, worse, leaving it in the derivative.</li><li>Failing to reject extraneous roots that the question explicitly excludes.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL P1/P2/P3 differentiation: power-rule differentiation of polynomials and the interpretation of the derivative as the gradient of the tangent. No formula booklet entry is invoked — this is foundational. Avoid invoking implicit or parametric differentiation unless the question explicitly presents the curve in those forms (P3/P4 territory).</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Oct_2024-Q8.html" class="example-chip">P1 Oct 2024 Q8</a><a href="../P1/ch4/q-Oct_2024-Q9.html" class="example-chip">P1 Oct 2024 Q9</a><a href="../P1/ch4/q-Oct_2021-Q2.html" class="example-chip">P1 Oct 2021 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

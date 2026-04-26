@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiate f to prepare the Newton-Raphson denominator — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Derivative As Tool</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Differentiate f to prepare the Newton-Raphson denominator</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Derivative As Tool</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question instructs you to apply the Newton-Raphson formula $x_{n+1} = x_n - \frac{f(x_n)}{f&#x27;(x_n)}$ to refine a root estimate. Cues include phrases like &#x27;use the Newton-Raphson procedure&#x27;, &#x27;taking $x_0 = \dots$ as a first approximation&#x27;, or &#x27;find $x_1$ (and $x_2$) to a stated accuracy&#x27;. Before any iteration can occur, $f&#x27;(x)$ must exist and be computable. The move also fires implicitly whenever a tangent-based root-finding scheme is invoked.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Newton-Raphson improves a root estimate by linearising $f$ at $(x_n, f(x_n))$: the tangent has gradient $f&#x27;(x_n)$, and its $x$-intercept gives the next estimate $x_{n+1}$. The derivative is therefore not optional decoration — it is the denominator of the update rule. Without $f&#x27;(x)$, the iteration cannot start. A non-zero $f&#x27;(x_n)$ also guarantees the tangent is non-horizontal so the intercept exists.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question demands the Newton-Raphson formula, which has $f&#x27;(x_n)$ in its denominator.</li><li>I rule out any iteration attempt before $f&#x27;(x)$ is in hand — using $f$ alone would be a structural error.</li><li>I commit to differentiating $f$ now, once, as a clean preparatory step so each iteration only needs evaluation.</li><li>I apply the standard rules (power rule for polynomials; chain/product/exponential rules for transcendentals) to obtain $f&#x27;(x)$ in simplified form.</li><li>I check $f&#x27;(x_0) \neq 0$ to confirm the formula is well-defined before substituting.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify $f(x)$ from the problem statement.</li><li>Differentiate term-by-term using the appropriate rules to obtain $f&#x27;(x)$.</li><li>Simplify $f&#x27;(x)$ so substitution is clean.</li><li>Evaluate $f&#x27;(x_0)$ at the given starting estimate.</li><li>Verify $f&#x27;(x_0) \neq 0$ before using it as the denominator in the Newton-Raphson update.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x) = x^3 - 3x^2 - 1$ with $x_0 = 3.5$. Differentiate: $f'(x) = 3x^2 - 6x$. Evaluate: $f'(3.5) = 3(12.25) - 6(3.5) = 36.75 - 21 = 15.75 \neq 0$. The Newton-Raphson step is therefore well-defined and ready to apply.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Transcendental $f$, e.g. $f(x) = e^x - 3x$</div>
+<div class="adjustment">Use $\frac{d}{dx}(e^x) = e^x$ to get $f&#x27;(x) = e^x - 3$; the structural role is identical.</div>
+</div><div class="variant-row">
+<div class="scenario">Trigonometric $f$, e.g. $f(x) = \cos x - x$</div>
+<div class="adjustment">Differentiate to $f&#x27;(x) = -\sin x - 1$; ensure the calculator is in radians when evaluating.</div>
+</div><div class="variant-row">
+<div class="scenario">Logarithmic $f$, e.g. $f(x) = \ln x - x + 2$</div>
+<div class="adjustment">Use $\frac{d}{dx}(\ln x) = \frac{1}{x}$ to get $f&#x27;(x) = \frac{1}{x} - 1$; check the domain $x &gt; 0$.</div>
+</div><div class="variant-row">
+<div class="scenario">Product or quotient form, e.g. $f(x) = x e^{-x} - k$</div>
+<div class="adjustment">Apply the product rule to get $f&#x27;(x) = e^{-x} - x e^{-x} = (1-x)e^{-x}$ before iterating.</div>
+</div><div class="variant-row">
+<div class="scenario">$f&#x27;(x_n)$ very small (near-zero)</div>
+<div class="adjustment">Iteration may overshoot; flag this as a strategic warning even though it rarely blocks the standard A-level computation.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing $f(x_n)$ and $f&#x27;(x_n)$ and putting the derivative in the numerator.</li><li>Treating Newton-Raphson as a fixed-point iteration $x_{n+1} = g(x_n)$ and skipping differentiation entirely.</li><li>Differentiating only after substituting $x_0$ numerically, producing a constant &#x27;derivative&#x27; of $0$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when differentiating $-3x^2$, writing $+6x$ instead of $-6x$.</li><li>Dropping the constant term correctly but mis-applying the power rule (e.g. $\frac{d}{dx}(x^3) = 2x^2$).</li><li>Arithmetic slips evaluating squares such as $(3.5)^2 = 12.25$.</li><li>For transcendentals, forgetting the chain rule (e.g. $\frac{d}{dx}(e^{2x}) = 2e^{2x}$, not $e^{2x}$).</li><li>Failing to check $f&#x27;(x_0) \neq 0$ before dividing.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL scope: Newton-Raphson appears in Pure/Core numerical methods, and the differentiation rules required (power, chain, product, quotient, $e^x$, $\ln x$, $\sin/\cos$) are all standard A-level content.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch3/q-Jun_2024-Q3.html" class="example-chip">FP1 Jun 2024 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set determinant to zero to find singular parameter values — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Singularity Determinant</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Set determinant to zero to find singular parameter values</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Singularity Determinant</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for value(s) of a parameter (often k) that make a square matrix singular, non-invertible, or have no inverse. Equivalent phrasings include &#x27;matrix has no inverse&#x27;, &#x27;system has non-unique solutions&#x27;, or &#x27;rows/columns are linearly dependent&#x27;. The matrix is square (typically 2×2 or 3×3) with the parameter appearing in one or more entries. Any wording that flags loss of invertibility should fire this move.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A square matrix A is singular if and only if det(A) = 0; this is the defining algebraic characterisation of non-invertibility. Computing det(A) as a polynomial in the parameter converts the abstract singularity condition into a concrete equation to solve. For a single-parameter family, this is more systematic than searching for explicit row dependencies. The same equation also characterises when the associated linear system Ax = b fails to have a unique solution.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the keyword &#x27;singular&#x27; (or &#x27;no inverse&#x27;, &#x27;non-invertible&#x27;) and recall the equivalence singular ⟺ det(A) = 0.</li><li>Rule out hunting for row/column dependencies by inspection — feasible only for very simple matrices and error-prone with a parameter.</li><li>Commit to the determinant route because it is systematic, mechanical, and produces a polynomial equation in the parameter.</li><li>Choose the expansion row/column that contains the most zeros or the simplest entries (often the row where k does not appear) to minimise algebra.</li><li>After expanding, simplify carefully to a clean polynomial in k, then solve det(A) = 0 and report all roots.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the matrix as square and locate where the parameter k appears.</li><li>Choose an expansion row or column — preferably one with zeros or constants only.</li><li>Expand the determinant using the cofactor (Laplace) rule, respecting the +, −, + sign pattern.</li><li>Evaluate each 2×2 minor carefully, keeping k symbolic.</li><li>Collect like terms to obtain det(A) as a polynomial in k.</li><li>Set det(A) = 0 and solve for k; check each root by substitution if time allows.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For $A = \begin{pmatrix} 2 & 2 & 2 \\ 1 & k & 2 \\ 2 & 2 & k \end{pmatrix}$, expand along row 1: $\det(A) = 2(k^2 - 4) - 2(k - 4) + 2(2 - 2k)$. Simplify: $\det(A) = 2k^2 - 8 - 2k + 8 + 4 - 4k = 2k^2 - 6k + 4$. Set $2k^2 - 6k + 4 = 0 \Rightarrow k^2 - 3k + 2 = 0 \Rightarrow k = 1 \text{ or } k = 2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">2×2 parametric matrix asked to be singular</div>
+<div class="adjustment">Use det = ad − bc directly; usually yields a linear or quadratic in k with no cofactor expansion needed.</div>
+</div><div class="variant-row">
+<div class="scenario">System of linear equations with no unique solution</div>
+<div class="adjustment">Rephrase as singularity of the coefficient matrix and apply the same det = 0 procedure.</div>
+</div><div class="variant-row">
+<div class="scenario">4×4 matrix in Further Pure</div>
+<div class="adjustment">Apply row operations to introduce zeros before expanding, or expand along the sparsest row to control complexity.</div>
+</div><div class="variant-row">
+<div class="scenario">Find k so that A has a repeated eigenvalue / characteristic equation has a double root</div>
+<div class="adjustment">Use det(A − λI) = 0 and impose discriminant = 0, still a determinant-to-zero move at heart.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing singular (det = 0) with non-singular (det ≠ 0) and solving the wrong condition.</li><li>Reading &#x27;has an inverse for all k except…&#x27; as requiring det ≠ 0 to be solved, instead of finding the k where det = 0.</li><li>Treating &#x27;no unique solution&#x27; as needing a separate technique rather than a singularity condition.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in the cofactor checkerboard pattern (+, −, +) when expanding.</li><li>Arithmetic mistakes in 2×2 minors, especially when k appears in both entries of a column.</li><li>Failing to fully simplify before solving, leading to messy or incorrect polynomial roots.</li><li>Reporting only one root of a quadratic in k when two singular values exist.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP1/FP2) matrix content: 2×2 and 3×3 determinants, singularity, and inverse existence. No use of rank or higher-dimensional theory beyond syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jan_2021-Q3.html" class="example-chip">FP3 Jan 2021 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

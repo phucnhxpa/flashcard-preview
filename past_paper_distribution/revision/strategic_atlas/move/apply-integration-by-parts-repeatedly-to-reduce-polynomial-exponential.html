@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply integration by parts repeatedly to reduce polynomial × exponential — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Repeated Ibp</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Apply integration by parts repeatedly to reduce polynomial × exponential</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Repeated Ibp</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the integrand is a polynomial of degree n multiplied by an exponential function, e.g. ∫x²e^x dx, ∫6x²e^(-x/3) dx, or ∫x³e^(kx) dx. Visual cue: a product of an algebraic factor (power of x) and a function from the exponential family (e^x, e^(-x), e^(kx)). There is no inner-function/composite structure that would suggest substitution, and the two factors are of unlike type. Equivalent phrasings: &#x27;polynomial times exponential&#x27;, &#x27;x^n e^(ax) integrand&#x27;, &#x27;product of algebraic and exponential factor&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Integration by parts ∫u dv = uv − ∫v du transfers a derivative from u to v. If u is the polynomial, then du has degree one lower; if dv is the exponential, then v stays in the same exponential family. Each IBP round therefore strictly reduces the polynomial&#x27;s degree by 1 while the exponential is reproduced (up to a constant). After exactly n rounds for a degree-n polynomial, the polynomial factor becomes a constant and the chain terminates with a pure exponential integral. This is the canonical &#x27;product rule reversed&#x27; strategy because substitution fails — there is no composite to unwind.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand is a product of two unlike factors: a polynomial x^n and an exponential e^(ax). This pattern is the textbook signal for IBP.</li><li>Rule out substitution: there is no inner function whose derivative appears as the other factor, so u = x^n or u = e^(ax) substitutions both fail to simplify.</li><li>Commit to integration by parts using the LIATE heuristic: choose u = x^n (Algebraic) so du lowers the degree, and dv = e^(ax) dx so v = (1/a)e^(ax) stays in the exponential family. The reverse choice would increase the polynomial&#x27;s degree and never terminate.</li><li>Anticipate the iteration count: a degree-n polynomial requires exactly n rounds of IBP, after which the integrand becomes a constant times e^(ax), trivially integrable.</li><li>Tactical decisions: factor out any leading constants first to keep arithmetic clean; track the −1/a (or analogous) factor from each integration of e^(ax) carefully because signs propagate through every round.</li><li>Optionally use the tabular (DI) method for higher degrees: list derivatives of the polynomial down one column and integrals of the exponential down the other, alternating signs.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify polynomial factor x^n and exponential factor e^(ax); set u = x^n, dv = e^(ax) dx.</li><li>Compute du = n x^(n-1) dx and v = (1/a) e^(ax).</li><li>Apply IBP: ∫x^n e^(ax) dx = (x^n/a) e^(ax) − (n/a) ∫x^(n-1) e^(ax) dx.</li><li>Repeat IBP on the new integral with u = x^(n-1), dv = e^(ax) dx; continue until the polynomial reduces to a constant.</li><li>Integrate the final ∫e^(ax) dx = (1/a) e^(ax) and back-substitute through every level.</li><li>Combine all terms; the antiderivative has the form (polynomial of degree n in x) · e^(ax) + C.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Compute $\int x^2 e^x\,dx$. Round 1: $u=x^2$, $dv=e^x dx \Rightarrow du=2x\,dx$, $v=e^x$, giving $x^2 e^x - \int 2x e^x\,dx$. Round 2: $u=2x$, $dv=e^x dx \Rightarrow du=2\,dx$, $v=e^x$, giving $2x e^x - \int 2 e^x\,dx = 2x e^x - 2e^x$. Combine: $\int x^2 e^x\,dx = (x^2 - 2x + 2)e^x + C$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Exponential with non-unit coefficient, e.g. ∫x² e^(-x/3) dx</div>
+<div class="adjustment">Same procedure but v = -3 e^(-x/3); the factor (1/a) = -3 propagates through every round, so track it carefully. Often easier to factor out leading constants first.</div>
+</div><div class="variant-row">
+<div class="scenario">Higher-degree polynomial, e.g. ∫x³ e^(kx) dx</div>
+<div class="adjustment">Three rounds of IBP instead of two — same logic, one extra iteration. Tabular (DI) method becomes especially efficient here.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial × trig function, e.g. ∫x² sin(x) dx</div>
+<div class="adjustment">Same repeated-IBP structure with u = polynomial, but signs cycle through sin → −cos → −sin → cos rather than reproducing. Still terminates in n rounds.</div>
+</div><div class="variant-row">
+<div class="scenario">Definite integral version</div>
+<div class="adjustment">Apply limits to every uv term and to the final integrated piece; do not substitute limits prematurely between rounds — keep antiderivatives symbolic until the end.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Choosing u = e^(ax) and dv = x^n dx — this raises the polynomial degree from n to n+1 each round, so the chain never terminates.</li><li>Attempting a substitution like u = x^n or u = ax — neither factor is the derivative of an inner function of the other, so substitution does not simplify.</li><li>Treating the integral as if it needs a single IBP when degree ≥ 2 — leads to an unfinished answer with an integral still present.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when integrating e^(-x) or e^(-x/3): v = -e^(-x) (or -3e^(-x/3)), and the negative propagates through every subsequent term.</li><li>Alternating IBP signs (−∫v du) compounding across rounds — easy to drop a minus on round 2 or 3.</li><li>Losing track of accumulated constants (the n/a factor multiplied across rounds, or an outer factor like 6 pulled out at the start).</li><li>Forgetting +C on indefinite integrals; for definite integrals, forgetting to apply limits to every term in the combined antiderivative.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3 (integration by parts) and used routinely in P4/FP. The IBP formula ∫u dv/dx dx = uv − ∫v du/dx dx is in the formula booklet. The tabular/DI shortcut is not in the booklet but is an equivalent presentation; students should still show u, dv working in exam scripts. Do not invoke reduction-formula notation beyond what FP problems explicitly request.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2022-Q7.html" class="example-chip">P4 Jan 2022 Q7</a><a href="../P4/ch6/q-Jun_2021-Q8.html" class="example-chip">P4 Jun 2021 Q8</a><a href="../P4/ch6/q-Jun_2022-Q8.html" class="example-chip">P4 Jun 2022 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

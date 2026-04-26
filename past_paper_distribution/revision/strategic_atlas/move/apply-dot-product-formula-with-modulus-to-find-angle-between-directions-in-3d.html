@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply dot product formula with modulus to find angle between directions in 3D — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Dot Product Angle</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Apply dot product formula with modulus to find angle between directions in 3D</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Dot Product Angle</strong></span>
+    <span>Frequency: <strong>5 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question explicitly asks for the angle between two lines, between two vectors, or between a displacement vector and a line in 3D. Visual cues include: parametric/vector line equations from which direction vectors can be read off, two displacement vectors (e.g. AB and AC) given by coordinates, or wording like &#x27;find the acute angle between l₁ and l₂&#x27;. Alternative phrasings: &#x27;angle that AC makes with line l&#x27;, &#x27;angle between the two lines&#x27;, &#x27;show that the lines are perpendicular&#x27; (a special case where cos θ = 0).</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The identity a·b = |a||b|cos θ rearranges to cos θ = (a·b)/(|a||b|), which after arccos gives the angle directly — this is the only A-level tool for angles in 3D since coordinate geometry doesn&#x27;t extend cleanly. For lines (which have no inherent orientation), reversing a direction vector flips the sign of the dot product and gives the supplementary obtuse angle; taking the absolute value of the numerator collapses these to the unique acute angle. For two specific vectors (displacements with definite orientation), the sign is kept and an obtuse angle is legitimate.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the object asked for is an angle between two directions in 3D — direction vectors of lines, or displacement vectors between named points.</li><li>Rule out the cross product route (|a×b| = |a||b|sin θ): arcsin is ambiguous between acute/obtuse, whereas arccos on [0°,180°] is single-valued, so dot product is safer and faster.</li><li>Rule out coordinate-geometry/triangle methods: in 3D these require finding distances and applying the cosine rule, which is more arithmetic than the dot product.</li><li>Commit to cos θ = (d₁·d₂)/(|d₁||d₂|). Crucial decision: is this &#x27;angle between lines&#x27; (use |d₁·d₂| → forces acute) or &#x27;angle between specified vectors&#x27; (keep sign → may be obtuse)? Read the question wording carefully.</li><li>Extract the two vectors cleanly: from a line r = a + t d, take d (ignore a); from points A, B, take AB = B − A. Then compute the dot product, the two magnitudes, and arccos in that order, deferring rounding until the very last step.</li><li>Sanity check: if the dot product is 0 the lines/vectors are perpendicular (θ = 90°); if cos θ comes out &gt; 1 in magnitude, an arithmetic slip has occurred.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two vectors u, v: read direction vectors from line equations, or compute displacement vectors from given points.</li><li>Compute the scalar product u·v = u₁v₁ + u₂v₂ + u₃v₃.</li><li>Compute |u| = √(u₁² + u₂² + u₃²) and |v| = √(v₁² + v₂² + v₃²).</li><li>Form cos θ = (u·v)/(|u||v|). For &#x27;angle between lines&#x27;, replace the numerator with |u·v| to force an acute angle.</li><li>Apply θ = arccos(...) using exact surds inside the bracket; only round at the final step (1 d.p. in degrees, unless told otherwise).</li><li>State the answer with units (degrees or radians as requested) and verify it lies in the expected range.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Lines l₁, l₂ have directions d₁ = (1,2,3), d₂ = (2,1,−1). Then d₁·d₂ = 2+2−3 = 1, |d₁| = √14, |d₂| = √6, so cos θ = |1|/(√14·√6) = 1/√84. Hence θ = arccos(1/√84) ≈ 83.7°.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Angle between two lines (no inherent orientation)</div>
+<div class="adjustment">Take |d₁·d₂| in the numerator to guarantee an acute answer.</div>
+</div><div class="variant-row">
+<div class="scenario">Angle between two specific displacement vectors (e.g. ∠BAC in a triangle)</div>
+<div class="adjustment">Do NOT take absolute value — keep the sign so an obtuse angle is reported correctly.</div>
+</div><div class="variant-row">
+<div class="scenario">Angle α between a line and a plane</div>
+<div class="adjustment">Use sin α = |d·n|/(|d||n|) where n is the plane&#x27;s normal — complementary trig function, same dot-product logic.</div>
+</div><div class="variant-row">
+<div class="scenario">Angle between two planes</div>
+<div class="adjustment">Apply the same formula to the two normal vectors n₁, n₂.</div>
+</div><div class="variant-row">
+<div class="scenario">Showing two lines/vectors are perpendicular</div>
+<div class="adjustment">Show u·v = 0; no arccos needed.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing &#x27;angle between two lines&#x27; (always acute, use modulus) with &#x27;angle between two vectors&#x27; (can be obtuse, keep sign).</li><li>Using position vectors a₁, a₂ from r = a + td instead of the direction vectors d₁, d₂.</li><li>Treating an angle ∠BAC at a vertex as a &#x27;line angle&#x27; and forcing it acute when in fact it may legitimately be obtuse.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the absolute value when &#x27;acute angle between lines&#x27; is required, returning the obtuse supplement instead.</li><li>Premature rounding: computing |u||v| as a decimal before dividing introduces error; keep √(|u|²·|v|²) exact until arccos.</li><li>Arithmetic slips in the dot product (sign errors on negative components) or in simplifying surds, e.g. √14·√2 = √28 = 2√7.</li><li>Returning radians when the question asks for degrees (or vice versa), or not rounding to the specified accuracy.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Strictly within Edexcel IAL P3/FP3 vectors. The formula a·b = |a||b|cos θ is in the formula booklet; the angle-between-line-and-plane formula is not always given and should be derived if needed. Cross product / vector product is FP3 only — at P3, stick to the dot product method.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (5)</h3>
+<div class="example-grid"><a href="../P4/ch7/q-Jun_2022-Q6.html" class="example-chip">P4 Jun 2022 Q6</a><a href="../P4/ch7/q-Jan_2022-Q8.html" class="example-chip">P4 Jan 2022 Q8</a><a href="../P4/ch7/q-Oct_2023-Q6.html" class="example-chip">P4 Oct 2023 Q6</a><a href="../P4/ch7/q-Jan_2021-Q2.html" class="example-chip">P4 Jan 2021 Q2</a><a href="../P4/ch7/q-Oct_2022-Q3.html" class="example-chip">P4 Oct 2022 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use focus-directrix property to read off focal distance directly — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Parabola Definition Shortcut</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Use focus-directrix property to read off focal distance directly</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Parabola Definition Shortcut</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a problem about a point $P$ on the parabola $y^2 = 4ax$ mentions either the distance from $P$ to the focus $S$ or the (perpendicular) distance from $P$ to the directrix $x = -a$. Classic phrasings: &#x27;the shortest distance from $P$ to the directrix is $k$&#x27;, &#x27;the distance of $P$ from the directrix equals...&#x27;, or any setup asking for $PS$ where $P$&#x27;s coordinates are not yet pinned down. Also fires implicitly whenever a perimeter, focal chord length, or sum-of-focal-distances appears.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By definition, every point on a parabola is equidistant from focus and directrix, so $PS = x_P + a$ for $y^2 = 4ax$. This converts a two-coordinate Pythagoras computation into a one-line read-off, and often hands you $x_P$ for free as a by-product. It removes any need to solve for $P$ before computing $PS$, which is both faster and immune to sign or algebra slips in $\sqrt{(x_P-a)^2 + y_P^2}$.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the problem mentions both the focus $S$ and the directrix (or a distance to one of them) — that pairing is the signature of the focus-directrix definition.</li><li>Rule out the brute-force route: solving for $P$&#x27;s coordinates from the parabola equation and a side condition, then applying the distance formula, is longer and error-prone.</li><li>Commit to the definition $PS = $ (perpendicular distance from $P$ to directrix), because the problem has effectively pre-computed that perpendicular distance for you.</li><li>Translate to the algebraic form: for $y^2 = 4ax$, identify $a$, then write $PS = x_P + a$ and equate to the given distance.</li><li>If the problem also wants $P$&#x27;s coordinates (e.g. for $OP$ in a perimeter), use the same equation to extract $x_P$, then substitute back into $y^2 = 4ax$ for $y_P$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify $a$ from $y^2 = 4ax$, so the focus is $S=(a,0)$ and directrix is $x = -a$.</li><li>Write the focus-directrix relation: $PS = x_P + a$.</li><li>Equate $x_P + a$ to the given perpendicular distance from $P$ to the directrix.</li><li>Read off $PS$ directly (= that distance), and if needed solve for $x_P$ and then $y_P$ from $y_P^2 = 4ax_P$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $P$ lie on $y^2 = 18x$, so $4a = 18$ and $a = 9/2$; the directrix is $x = -9/2$. Given the perpendicular distance from $P$ to the directrix is $9$, the focus-directrix property gives $PS = 9$ at once. Furthermore $x_P + 9/2 = 9 \Rightarrow x_P = 9/2$, and $y_P^2 = 18 \cdot 9/2 = 81$ so $y_P = \pm 9$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Focal chord on $y^2 = 4ax$ with endpoints $P, Q$</div>
+<div class="adjustment">Apply the property to each endpoint: $PS + QS = (x_P + a) + (x_Q + a) = x_P + x_Q + 2a$, giving the chord length without coordinate distance work.</div>
+</div><div class="variant-row">
+<div class="scenario">Parabola given in shifted form, e.g. $(y-k)^2 = 4a(x-h)$</div>
+<div class="adjustment">Use $PS = (x_P - h) + a$ with directrix $x = h - a$; same shortcut after a translation.</div>
+</div><div class="variant-row">
+<div class="scenario">Parabola $x^2 = 4ay$ (vertical axis)</div>
+<div class="adjustment">Swap roles: directrix is $y = -a$, focus is $(0,a)$, and $PS = y_P + a$.</div>
+</div><div class="variant-row">
+<div class="scenario">Ellipse focal-distance question (Further Pure)</div>
+<div class="adjustment">Use the ellipse focal property $PS = a - ex_P$ (and $PS&#x27; = a + ex_P$) instead — same philosophy of avoiding the distance formula.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;shortest distance to the directrix&#x27; as a slant or Euclidean distance from $P$ to a specific point on the directrix, rather than the perpendicular distance (which for a vertical directrix is purely horizontal).</li><li>Failing to recognise that the given directrix distance IS the focal distance $PS$, and instead launching into solving for $P$ first.</li><li>Confusing the directrix-distance with the distance from the origin or vertex to the directrix.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error: writing $PS = x_P - a$ instead of $x_P + a$ (forgetting the directrix is at $x = -a$, so the perpendicular distance is $x_P - (-a) = x_P + a$).</li><li>Misidentifying $a$ from $y^2 = 4ax$ — e.g. taking $a = 18$ instead of $a = 9/2$ when $4a = 18$.</li><li>Applying the formula to a parabola not in standard position without first translating to vertex-at-origin form.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP1/FP3) coordinate geometry of the parabola $y^2 = 4ax$, where the focus-directrix definition and standard form are explicitly taught. No conic theory beyond the syllabus is invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch4/q-Jan_2022-Q3.html" class="example-chip">FP1 Jan 2022 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

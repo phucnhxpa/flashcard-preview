@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble full antiderivative before applying definite limits — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Deferred Evaluation</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Assemble full antiderivative before applying definite limits</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Deferred Evaluation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A definite integral $\int_a^b f(x)\,dx$ requires two or more rounds of integration by parts (or a chain of reduction steps) to resolve. Cues include integrands like $x^n e^{kx}$, $x^n \sin kx$, $x^n \cos kx$ with $n\ge 2$, or $e^{ax}\sin bx$ where IBP cycles back. The temptation is to evaluate $[uv]_a^b$ at every stage, but this multiplies bookkeeping. Defer all limit substitution until the indefinite antiderivative is fully assembled.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each IBP round produces its own boundary term $[uv]_a^b$ plus a residual integral; applying limits at every stage means tracking and summing several partial boundary contributions, a frequent source of sign and arithmetic errors. Building the full indefinite antiderivative $F(x)$ first reduces the problem to a single substitution $F(b)-F(a)$. Common factors (like $e^{2x}$) become visible across all terms simultaneously, aiding clean factorisation. The Fundamental Theorem of Calculus guarantees the two approaches are equivalent, so deferring costs nothing.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the integrand needs repeated IBP — e.g. $x^2 e^{2x}$ drops degree by one each round, so I&#x27;ll need two passes.</li><li>I rule out applying $[uv]_0^1$ after each round: that would force me to track two boundary contributions and one residual integral, then re-substitute later anyway.</li><li>I commit to treating the problem as &#x27;find $F(x)$ first, evaluate $F(1)-F(0)$ second&#x27; — a clean two-stage workflow.</li><li>Concretely, I drop the $+C$ throughout the indefinite work and only write the bracket $[F(x)]_0^1$ once at the end.</li><li>Inside the move, I keep all terms in a common form (here, multiples of $e^{2x}$) so that the final substitution exposes shared factors for tidy simplification.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Strip the limits temporarily and compute the indefinite integral via successive IBP rounds.</li><li>Combine all partial results into one antiderivative $F(x)$, omitting $+C$.</li><li>Write $I = [F(x)]_a^b$ in a single line.</li><li>Substitute $x=b$, simplifying using $e^0=1$, $\sin 0=0$, $\cos 0=1$ as relevant.</li><li>Substitute $x=a$, being careful with the subtraction sign across all terms.</li><li>Factor common constants/exponentials in the final answer.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Compute $\int_0^1 x^2 e^{2x}\,dx$. Two IBP rounds give the indefinite antiderivative $F(x)=\tfrac12 x^2 e^{2x}-\tfrac12 x e^{2x}+\tfrac14 e^{2x}$. Then $F(1)=\tfrac12 e^2-\tfrac12 e^2+\tfrac14 e^2=\tfrac14 e^2$ and $F(0)=\tfrac14$. Hence $I=\tfrac14 e^2-\tfrac14=\tfrac14(e^2-1)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cycling integrals such as $\int_0^{\pi} e^x \sin x\,dx$ where IBP reproduces the original integral</div>
+<div class="adjustment">Defer limits until after solving algebraically for $\int e^x\sin x\,dx$ as an indefinite expression; only then evaluate $[F(x)]_0^{\pi}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Reduction formula problems, e.g. $I_n=\int_0^{\pi/2} \sin^n x\,dx$</div>
+<div class="adjustment">Apply limits at each reduction step is actually preferred here because boundary terms often vanish; the deferred-evaluation move is mainly for non-reducing IBP chains.</div>
+</div><div class="variant-row">
+<div class="scenario">Definite integrals requiring substitution then IBP, e.g. $\int_0^1 \arcsin x\,dx$</div>
+<div class="adjustment">Find the full antiderivative in $x$ (not in the substituted variable), then substitute the original $x$-limits at the end.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial $\times$ trig, e.g. $\int_0^{\pi} x^2 \cos x\,dx$</div>
+<div class="adjustment">Same workflow: assemble $F(x)=x^2\sin x+2x\cos x-2\sin x$ first, then evaluate once.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the residual integral after one IBP round as &#x27;already evaluated&#x27; and applying limits before completing the second IBP.</li><li>Confusing this move with reduction-formula problems, where applying limits early is often advantageous.</li><li>Believing that $+C$ matters for definite integrals and carrying it through, then becoming confused at the final subtraction.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors when distributing the $-F(a)$ across multiple terms of the antiderivative.</li><li>Forgetting that $e^0=1$, not $0$, so the lower-limit contribution is non-zero.</li><li>Dropping a coefficient (e.g. $\tfrac12$ from the first IBP) when transcribing the assembled antiderivative.</li><li>Failing to factor the final answer, leaving an unsimplified form like $\tfrac14 e^2-\tfrac14$ when $\tfrac14(e^2-1)$ is expected.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (P3/P4 integration by parts) and Further Pure (reduction formulae context). No techniques beyond standard IBP and the Fundamental Theorem of Calculus are invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jan_2024-Q4.html" class="example-chip">P2 Jan 2024 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

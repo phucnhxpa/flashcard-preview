@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resolve SSA ambiguous case by selecting 180°−arcsin when obtuse angle required — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Ambiguous Case Resolution</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Resolve SSA ambiguous case by selecting 180°−arcsin when obtuse angle required</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Ambiguous Case Resolution</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever the Sine Rule has been used to find an unknown angle and the equation reduces to sin θ = k with 0 &lt; k &lt; 1. Concrete cues: (i) an SSA configuration where the known angle is opposite the shorter of two given sides, (ii) a diagram (even &#x27;not to scale&#x27;) showing the target angle as clearly obtuse, or (iii) the question text explicitly stating the angle is obtuse/greater than 90° (or &gt; π/2). Alternative phrasing: &#x27;arcsin only returned an acute value but the geometry demands the second-quadrant solution&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The calculator&#x27;s arcsin returns only the principal value in [0°, 90°] (or [0, π/2]), but the identity sin θ = sin(180° − θ) means every value 0 &lt; k &lt; 1 has two solutions in (0°, 180°): an acute α and an obtuse 180° − α. In the SSA (ambiguous) case both can yield valid triangles, so the student must consciously generate the supplementary candidate and use the diagram or stated constraint to choose. Skipping this step silently substitutes the wrong angle and cascades errors through every subsequent length, area, or angle calculation.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice I have used the Sine Rule and obtained sin θ = k with 0 &lt; k &lt; 1, in an SSA setup — this is the classic ambiguous case.</li><li>I rule out blindly accepting arcsin(k): I recall sin is positive in both Q1 and Q2, so on (0°, 180°) there are TWO candidates, α = arcsin(k) and 180° − α.</li><li>I rule out using cosine rule rearrangement (which would give a unique angle) because the sine rule is what fits the given data — so I must handle the ambiguity manually.</li><li>I commit to listing both candidates, then disambiguating using either the diagram (angle visibly obtuse), an explicit statement in the question, or a feasibility check on angle sum &lt; 180°.</li><li>Tactical choice: if the problem says the angle is obtuse, I select 180° − α (or π − α in radians); if not stated, I check that 180° − α plus the other known angle is still &lt; 180° before keeping it.</li><li>Final guard: I keep the unrounded acute value α in memory and subtract from 180° at the end, to avoid rounding error in the obtuse value.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>From Sine Rule, isolate sin θ = k (e.g. sin θ = 0.7731).</li><li>Compute the acute principal value: α = arcsin(k) (in degrees or radians as required).</li><li>Form the obtuse candidate: θ_obtuse = 180° − α (or π − α in radians).</li><li>Disambiguate: use the diagram, the stated &#x27;obtuse&#x27; constraint, or check the third angle 180° − (given angle) − θ_obtuse &gt; 0°.</li><li>Select the appropriate root and round only at the final step to the requested precision.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sine Rule gives $\sin(\angle ACB) = 0.7934$ in a triangle with $\angle BAC = 35°$, and the diagram shows $\angle ACB$ obtuse. Acute root: $\alpha = \arcsin(0.7934) \approx 52.5°$. Obtuse root: $\angle ACB = 180° - 52.5° = 127.5°$. Feasibility check: $35° + 127.5° = 162.5° < 180°$, so the third angle is $17.5° > 0°$ ✓. Answer: $\angle ACB \approx 127.5°$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Problem stated in radians (e.g. circle/sector geometry with π)</div>
+<div class="adjustment">Use θ = π − arcsin(k) instead of 180° − arcsin(k); guard against accidentally writing 2π − α (that would be a reflex angle).</div>
+</div><div class="variant-row">
+<div class="scenario">Both acute and obtuse roots produce valid triangles (no diagram, no constraint)</div>
+<div class="adjustment">Report BOTH solutions and the two corresponding triangles — do not arbitrarily discard one.</div>
+</div><div class="variant-row">
+<div class="scenario">Cosine Rule available as alternative</div>
+<div class="adjustment">Switching to the cosine rule for the unknown angle eliminates ambiguity, since arccos returns a unique value in (0°, 180°).</div>
+</div><div class="variant-row">
+<div class="scenario">Equation sin θ = k solved over [0°, 360°] (not a triangle)</div>
+<div class="adjustment">Two solutions in the first cycle are α and 180° − α; further solutions add 360°. Do not use 360° − α (that is the cosine pattern).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Accepting the calculator&#x27;s arcsin output uncritically and missing the supplementary solution entirely.</li><li>Reflexively discarding the obtuse candidate because of a half-remembered &#x27;angles in a triangle are acute&#x27; rule (confusing with right triangles).</li><li>Computing 360° − α instead of 180° − α, conflating sine symmetry with cosine/full-rotation patterns.</li><li>Treating the diagram as decorative when it is labelled &#x27;not to scale&#x27;, and so ignoring the visual cue that the angle is obtuse.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to verify the obtuse choice still yields a positive third angle (i.e. given angle + obtuse candidate &lt; 180°).</li><li>Rounding the intermediate acute value α too early so that 180° − α inherits a magnified error — keep full precision until the last step.</li><li>In radian problems, writing 2π − α (a reflex angle) instead of π − α (the second-quadrant angle).</li><li>Failing to check feasibility of sin θ = k itself: if k &gt; 1 the configuration is impossible and no triangle exists.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Maths (P2 Sine Rule, ambiguous case) and reused in P3/P4 trigonometric equations and circle geometry. The Sine Rule is given in the formula booklet; the identity sin(180° − θ) = sin θ is expected knowledge. Do not generalise to complex-valued or hyperbolic analogues — those are outside IAL scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P1/ch3/q-Jan_2019-Q7.html" class="example-chip">P1 Jan 2019 Q7</a><a href="../P1/ch3/q-Jun_2022-Q2.html" class="example-chip">P1 Jun 2022 Q2</a><a href="../P1/ch3/q-Jun_2019-Q7.html" class="example-chip">P1 Jun 2019 Q7</a><a href="../P1/ch3/q-Jan_2021-Q5.html" class="example-chip">P1 Jan 2021 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

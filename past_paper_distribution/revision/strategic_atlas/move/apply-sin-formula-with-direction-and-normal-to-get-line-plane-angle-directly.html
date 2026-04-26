@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply sin formula with direction and normal to get line-plane angle directly — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../vectors.html">Vectors</a> / <strong>Angle Formula Selection</strong></div>
+  <span class="domain-pill" style="background:#7E57C2;color:white">Vectors</span>
+  <h1>Apply sin formula with direction and normal to get line-plane angle directly</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Angle Formula Selection</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question explicitly asks for the acute angle between a line and a plane (not between a line and the normal, and not between two planes or two lines). You have, or can extract, the line&#x27;s direction vector d and the plane&#x27;s normal vector n (typically from a Cartesian equation ax+by+cz=k giving n=(a,b,c)). Phrasings include &#x27;angle the line makes with the plane&#x27;, &#x27;acute angle between l and Π&#x27;, or a diagram showing a line piercing a plane. The cue is: ONE direction vector + ONE normal vector.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The dot product naturally yields the angle α between two vectors, so d·n = |d||n|cos α gives the angle between the line&#x27;s direction and the plane&#x27;s normal — not the plane itself. The angle θ between the line and the plane is the complement: θ = 90° − α, so sin θ = cos α. Using sin θ = |d·n|/(|d||n|) folds the complementary relationship into a single step, eliminating the most common error of reporting α instead of θ. The absolute value enforces the acute angle regardless of how d or n are oriented.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice one direction vector (from the line) and one normal vector (from the plane&#x27;s Cartesian form) — this is the line-plane configuration, not line-line or plane-plane.</li><li>I rule out cos θ = |d·n|/(|d||n|) because that would give the angle between d and n, i.e. the angle to the normal, which is the complement of what is asked.</li><li>I rule out computing α first and then doing 90° − α: it works but introduces an extra step where errors creep in.</li><li>I commit to sin θ = |d·n|/(|d||n|) because sin θ = cos α encodes the complement directly, giving the line-plane angle in one shot.</li><li>I include absolute value bars: the sign of d·n depends on arbitrary choices of direction for d and orientation for n, but the acute angle must be non-negative.</li><li>Finally I take arcsin of the result and present the answer in the form requested (degrees to a stated accuracy, or exact form).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify d = direction vector of the line and n = (a,b,c) from the plane ax+by+cz=k.</li><li>Compute the scalar product d·n.</li><li>Compute the magnitudes |d| = √(d·d) and |n| = √(n·n).</li><li>Form sin θ = |d·n| / (|d| |n|), with absolute value to guarantee an acute angle.</li><li>Evaluate θ = arcsin(|d·n| / (|d| |n|)) and present to required accuracy.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Line direction $\mathbf{d}=(4,-2,7)$, plane normal $\mathbf{n}=(2,4,-1)$. Then $\mathbf{d}\cdot\mathbf{n}=8-8-7=-7$, $|\mathbf{d}|=\sqrt{69}$, $|\mathbf{n}|=\sqrt{21}$. So $\sin\theta=\dfrac{|-7|}{\sqrt{69}\cdot\sqrt{21}}=\dfrac{7}{\sqrt{1449}}$, giving $\theta\approx 10.6^\circ$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Angle between two planes (dihedral angle)</div>
+<div class="adjustment">Use cos θ = |n₁·n₂|/(|n₁||n₂|) with the two normals — both objects are planes so the angle between normals equals the dihedral angle; no complement needed.</div>
+</div><div class="variant-row">
+<div class="scenario">Angle between two lines</div>
+<div class="adjustment">Use cos θ = |d₁·d₂|/(|d₁||d₂|) with the two direction vectors — both are directions so cos applies directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Plane given in vector form r·n = p</div>
+<div class="adjustment">n is already the normal — read it off directly; no need to extract from Cartesian coefficients.</div>
+</div><div class="variant-row">
+<div class="scenario">Plane given by three points or two direction vectors in the plane</div>
+<div class="adjustment">First compute n = d_a × d_b via the cross product, then apply sin θ = |d·n|/(|d||n|) as usual.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using cos θ = |d·n|/(|d||n|) and reporting that angle — this gives the angle between the line and the normal, off by 90° from the required answer.</li><li>Treating the plane&#x27;s normal as if it were a direction in the plane, leading to use of the wrong formula.</li><li>Reading &#x27;angle between line and plane&#x27; as &#x27;angle between line and normal&#x27; when a diagram shows the normal drawn in.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Omitting the absolute value when d·n &lt; 0, which produces a negative sine and an invalid (or obtuse) angle.</li><li>Arithmetic slips in |d||n| — e.g. computing √69·√21 as √(69·21) = √1449 incorrectly (note 69×21 = 1449).</li><li>Forgetting to convert calculator output between radians and degrees as required by the question.</li><li>Using cos correctly to find α and then forgetting the final 90° − α subtraction (the sin formula sidesteps this entirely).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Further Pure (FP3) result: sin θ = |d·n|/(|d||n|) appears in the formula booklet under vectors. Stay within 3D Cartesian/vector geometry; do not generalise to higher dimensions or to angles between curves and surfaces (out of scope).</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../FP3/ch5/q-Jan_2023-Q7.html" class="example-chip">FP3 Jan 2023 Q7</a><a href="../FP3/ch5/q-Specimen_2018-Q6.html" class="example-chip">FP3 Specimen 2018 Q6</a><a href="../FP3/ch5/q-Jan_2022-Q7.html" class="example-chip">FP3 Jan 2022 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split polynomial-over-power-of-x fraction into separate x^n terms before differentiating — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Algebraic Preparation</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Split polynomial-over-power-of-x fraction into separate x^n terms before differentiating</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Algebraic Preparation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when y is given as a single algebraic fraction with a polynomial numerator over a monomial in x (e.g. x^k or √x), or as a sum of such fractions, and differentiation is required. Phrasings include &#x27;find dy/dx&#x27;, &#x27;differentiate with respect to x&#x27;, or &#x27;find the gradient function&#x27; applied to expressions like (ax² + bx + c)/x^k. The cue is a denominator that is a single power of x (positive, negative, or fractional), making term-by-term division trivial. Also fires when constants like 5/x or 3/√x appear alongside polynomial terms.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Dividing a sum by a single power x^k distributes exactly: (A + B)/x^k = A x^{-k} + B x^{-k}. Once every term is in the form a x^n, the power rule d/dx(x^n) = n x^{n-1} applies directly, with no need for the quotient rule. This is faster, less error-prone, and aligns with how Edexcel IAL marks expect candidates to handle such fractions. The quotient rule, while valid, introduces unnecessary algebra and additional sign and product errors.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Student notices the expression is a fraction (or sum of fractions) whose denominators are pure powers of x — no compound denominators like (x+1).</li><li>They rule out the quotient rule because the denominator is a monomial, so direct division is available and cleaner.</li><li>They commit to the splitting strategy because it reduces the problem to a sum of a x^n terms — the canonical input for the power rule.</li><li>Bridge: write the fraction as a sum, then convert each 1/x^k factor into x^{-k} so every term has explicit exponent form.</li><li>Inside the move, they track each term carefully — including any constant produced by cancellation (e.g. 2x²/x² = 2) — before applying d/dx term by term.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify each fraction with a monomial denominator x^k (k may be a positive integer, negative, or fractional).</li><li>Distribute the division: (A + B + C)/x^k = A/x^k + B/x^k + C/x^k.</li><li>Simplify each quotient: cancel powers of x and rewrite remaining 1/x^m as x^{-m}.</li><li>Collect all terms into the form Σ a_i x^{n_i}, including any constant terms.</li><li>Differentiate term by term using d/dx(a x^n) = a n x^{n-1}.</li><li>Optionally rewrite the final answer back in fractional form if the question requests it.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Differentiate $y = \dfrac{3 - 2x^2}{x^2} - \dfrac{5}{x}$.\\ Split: $y = 3x^{-2} - 2 - 5x^{-1}$.\\ Differentiate: $\dfrac{dy}{dx} = -6x^{-3} + 5x^{-2}$, i.e. $\dfrac{dy}{dx} = -\dfrac{6}{x^3} + \dfrac{5}{x^2}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Numerator over √x, e.g. y = (ax³ + bx + c)/√x</div>
+<div class="adjustment">Rewrite √x = x^{1/2} and split: terms become a x^{5/2}, b x^{1/2}, c x^{-1/2}; then apply the power rule.</div>
+</div><div class="variant-row">
+<div class="scenario">Numerator over a higher power, e.g. y = (x⁴ - 2x² + 7)/x³</div>
+<div class="adjustment">Split into x - 2x^{-1} + 7x^{-3}; differentiate to 1 + 2x^{-2} - 21x^{-4}.</div>
+</div><div class="variant-row">
+<div class="scenario">Integration of the same fraction type</div>
+<div class="adjustment">Same preparatory split is required before applying ∫x^n dx = x^{n+1}/(n+1) + C; watch the n = -1 case for ln|x|.</div>
+</div><div class="variant-row">
+<div class="scenario">Mixed surd/fraction expressions like y = (2 + √x)/x</div>
+<div class="adjustment">Split into 2x^{-1} + x^{-1/2}; both terms now follow the power rule directly.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the expression as needing the quotient rule because it &#x27;looks like a fraction&#x27;, ignoring that the denominator is a monomial.</li><li>Splitting only some terms in the numerator (e.g. dividing the leading term but not the constant).</li><li>Confusing √x with x and writing x^{-1} instead of x^{-1/2} when the denominator is √x.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the negative sign on the exponent when rewriting 1/x^k as x^{-k}.</li><li>Losing a constant term that arises from cancellation (e.g. 2x²/x² = 2) and then having no contribution to dy/dx from it — correct, but students sometimes also drop it from y itself prematurely.</li><li>Sign errors differentiating negative powers: d/dx(3x^{-2}) = -6x^{-3}, not +6x^{-3}.</li><li>Arithmetic slips with fractional exponents, e.g. d/dx(x^{1/2}) = (1/2)x^{-1/2}, not (1/2)x^{1/2}.</li><li>Failing to convert the final answer back to fraction or surd form when the question asks for it in that format.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics (C12/P2) differentiation of x^n for rational n; no chain, product, or quotient rule required. The same preparation underpins the corresponding integration questions in C12/P2.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Jan_2024-Q3.html" class="example-chip">P1 Jan 2024 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

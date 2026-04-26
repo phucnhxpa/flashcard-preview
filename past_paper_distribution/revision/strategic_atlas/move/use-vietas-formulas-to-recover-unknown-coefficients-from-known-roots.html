@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use Vieta&#x27;s formulas to recover unknown coefficients from known roots — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Root Coefficient Relations</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Use Vieta&#x27;s formulas to recover unknown coefficients from known roots</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Coefficient Relations</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A polynomial (typically cubic or quartic) has unknown real coefficients and we know — or can deduce via the conjugate root theorem — all of its roots. We need to determine those unknown coefficients efficiently. Cue phrases: &#x27;given that 1−2i is a root of z³+az²+bz+c=0, find a and b&#x27;, or &#x27;the equation has roots α, β, γ, find...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Vieta&#x27;s formulas express each coefficient as a symmetric function of the roots, so once roots are known the coefficients fall out by direct evaluation. This bypasses polynomial long division (forming the real quadratic factor (z−α)(z−ᾱ) then dividing) and bypasses substituting complex roots into the polynomial (which forces expansion of high powers of a+bi). For a cubic with three unknowns we get exactly three relations — sum, pairwise sum, product — each isolating one unknown.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice all three roots are known or one more can be deduced, and the unknowns are coefficients — that&#x27;s a roots↔coefficients problem.</li><li>I rule out polynomial division: forming (z−(1−2i))(z−(1+2i))=z²−2z+5 and dividing z³+az²+bz+10 by it leaves a, b inside the long-division steps — messy.</li><li>I rule out direct substitution: plugging 1±2i into the cubic forces me to expand (1±2i)² and (1±2i)³, which is heavy complex arithmetic for two simultaneous equations.</li><li>I commit to Vieta&#x27;s: three symmetric relations match my three unknowns (a, b, third root), each a clean scalar computation.</li><li>Tactically I order them: use the product first to pin down the missing real root, then sum to get a, then pairwise sum to get b — each step uses the previously found value.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the polynomial in standard form and identify the Vieta relations: for z³+az²+bz+c=0 with roots α,β,γ — α+β+γ=−a, αβ+βγ+γα=b, αβγ=−c.</li><li>Use the product relation to determine any missing root from the known constant term.</li><li>Use the sum relation to find the coefficient of z².</li><li>Use the pairwise-product relation to find the coefficient of z.</li><li>Verify by substituting one root back into the now fully-determined polynomial.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $z^3+az^2+bz+10=0$ has root $1-2i$ (so also $1+2i$), let third root be $z_3$. Product: $(1-2i)(1+2i)z_3 = 5z_3 = -10 \Rightarrow z_3=-2$. Sum: $(1-2i)+(1+2i)+(-2)=0=-a \Rightarrow a=0$. Pairwise: $5 + (1-2i)(-2)+(1+2i)(-2) = 5-4 = 1 = b$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Quartic with two conjugate pairs and unknown coefficients</div>
+<div class="adjustment">Use all four Vieta relations (sum, sum of pairs, sum of triples, product); pair conjugates to keep arithmetic real.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic where only one complex root is given</div>
+<div class="adjustment">First invoke the conjugate root theorem to get a second root, then deduce the third from the product relation before applying sum/pairwise.</div>
+</div><div class="variant-row">
+<div class="scenario">Non-monic polynomial $kz^3+az^2+bz+c=0$</div>
+<div class="adjustment">Divide through by $k$ first, or use the adjusted Vieta forms: sum $=-a/k$, pairwise $=b/k$, product $=-c/k$.</div>
+</div><div class="variant-row">
+<div class="scenario">Quadratic with one known complex root</div>
+<div class="adjustment">Vieta&#x27;s collapses to sum and product only — two relations for two coefficients.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Defaulting to substitution because it feels &#x27;direct&#x27;, missing that Vieta&#x27;s is dramatically shorter when roots are known.</li><li>Attempting polynomial long division with literal unknowns a, b still in the dividend — leads to algebra that is harder than the original problem.</li><li>Forgetting to use the conjugate root theorem to identify the second root before counting unknowns.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors: for $z^3+az^2+bz+c=0$ the sum of roots is $-a$ and the product is $-c$; the alternating signs are easy to misremember.</li><li>Applying monic Vieta formulas to a non-monic polynomial without dividing through by the leading coefficient.</li><li>Arithmetic slips when summing pairwise products of complex numbers — imaginary parts must cancel for real coefficients; failure to cancel signals an error.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Vieta&#x27;s formulas for quadratics, cubics, and quartics are core Further Pure content (Edexcel IAL FP1/FP2), as is the conjugate root theorem for polynomials with real coefficients.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jun_2023-Q6.html" class="example-chip">FP1 Jun 2023 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

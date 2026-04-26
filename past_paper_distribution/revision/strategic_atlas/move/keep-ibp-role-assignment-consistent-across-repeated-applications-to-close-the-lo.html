@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keep IBP role assignment consistent across repeated applications to close the loop — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Ibp Assignment Consistency</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Keep IBP role assignment consistent across repeated applications to close the loop</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Ibp Assignment Consistency</strong></span>
+    <span>Frequency: <strong>3 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The integrand is a product of two factor types where one of them either self-reproduces under integration (like $e^{ax}$) or has a clean differentiation pattern (like $\sin^n x$, $\ln x$, $x^n$). A second (or third) integration by parts is needed and the new integral has the SAME structural form as the original — typically $\int e^{ax}\sin(bx)\,dx$, $\int e^{ax}\cos(bx)\,dx$, or a reduction-formula setup like $\int e^x \sin^n x\,dx$. The visual cue: after one IBP, you see a sibling integral of the same exp×trig (or exp×poly) family, and you must decide afresh which factor is $u$.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>If you keep the SAME factor as $u$ on every pass (trig as $u$, exponential as $dv$, or log/poly as $u$, exponential as $dv$), the trig factor advances through its derivative cycle ($\sin\to\cos\to-\sin$) or the polynomial power steps down, while the exponential is reproduced unchanged. This makes the original integral $I$ re-emerge with a non-unity coefficient, giving a solvable linear equation in $I$. If you swap roles on the second pass, the second IBP exactly inverts the first — algebraically you get $0=0$ or $I=I$, a tautology with no progress. The principle is: consistency preserves the loop; inconsistency closes it trivially.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the integrand is exp×trig (or exp×poly, log×poly), and one IBP will not finish the job — the residual integral has the same structural shape.</li><li>Rule out a u-substitution (no inner-derivative pattern) and rule out direct integration (no antiderivative of the product is known). IBP is the only tool.</li><li>Apply LIATE on the FIRST pass: choose $u$ as the factor whose derivative is simpler/lower-degree (Log, Inverse trig, Algebraic, Trig) and $dv$ as the self-reproducing factor (Exponential).</li><li>Anticipate that a second IBP is coming. Decide upfront: I will keep the SAME role assignment philosophy on every pass — the exponential always plays $dv$, the trig/poly/log always plays $u$.</li><li>Rule out swapping on pass two by sanity-check: if I let $u = e^{ax}$ and $dv = \cos(bx)\,dx$ now, applying IBP would just undo pass one and return me to the starting integral. So consistency is forced.</li><li>Commit: after the second IBP, the original integral $I$ reappears with a coefficient $\neq 1$. Move all $I$ terms to one side and solve algebraically.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>First IBP: set $u = $ (trig or log or poly), $dv = e^{ax}\,dx$, so $v = \tfrac{1}{a}e^{ax}$.</li><li>Write $I = uv - \int v\,du$, producing a new integral of the same exp×trig (or exp×poly) shape.</li><li>Second IBP on the new integral: KEEP the same convention — the (now-different) trig/poly factor is $u$, and $e^{ax}\,dx$ is again $dv$.</li><li>Expand: the original $I$ reappears on the right-hand side with some coefficient $k$.</li><li>Form the linear equation $I = (\text{boundary terms}) + kI$ and solve: $I = \dfrac{\text{boundary terms}}{1-k} + C$.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For $I = \int e^{2x}\sin x\,dx$: First IBP with $u=\sin x,\ dv=e^{2x}dx$ gives $I = \tfrac{1}{2}e^{2x}\sin x - \tfrac{1}{2}\int e^{2x}\cos x\,dx$. Second IBP — KEEP $u=\cos x,\ dv=e^{2x}dx$ — gives $\int e^{2x}\cos x\,dx = \tfrac{1}{2}e^{2x}\cos x + \tfrac{1}{2}I$. Substituting back: $I = \tfrac{1}{2}e^{2x}\sin x - \tfrac{1}{4}e^{2x}\cos x - \tfrac{1}{4}I$, so $\tfrac{5}{4}I = \tfrac{1}{4}e^{2x}(2\sin x - \cos x)$, giving $I = \tfrac{1}{5}e^{2x}(2\sin x - \cos x) + C$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Reduction formula like $I_n = \int e^x \sin^n x\,dx$</div>
+<div class="adjustment">Same rule across BOTH IBPs in deriving the recurrence: keep $e^x$ as $dv$ (reproduces), trig power as $u$ (steps down). Switching on pass two collapses the recurrence.</div>
+</div><div class="variant-row">
+<div class="scenario">Algebraic × logarithmic, e.g. $\int x^n \ln x\,dx$</div>
+<div class="adjustment">LIATE picks $u=\ln x$, $dv=x^n dx$. Only one IBP is needed, but the same principle (log as $u$ because $du=1/x$ simplifies) applies if a second pass arises with $(\ln x)^2$.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial × exponential, e.g. $\int x^n e^{ax}\,dx$</div>
+<div class="adjustment">Always assign $u = x^n$ (power drops by 1 each IBP) and $dv = e^{ax}dx$. Repeat $n$ times consistently until the polynomial vanishes.</div>
+</div><div class="variant-row">
+<div class="scenario">$\int e^{ax}\cos(bx)\,dx$ with general constants</div>
+<div class="adjustment">Same consistency rule; the final coefficient on $I$ becomes $-b^2/a^2$ (or similar), and you solve $I(1+b^2/a^2)=\ldots$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the second integral as a &#x27;fresh&#x27; problem and re-applying LIATE blindly — leading to a role swap that undoes pass one.</li><li>Trying a u-substitution on the residual integral when its structure is genuinely IBP-only.</li><li>Believing the integral &#x27;cannot be done&#x27; after the original $I$ reappears — failing to recognise the algebraic-equation trick.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Swapping $u$ and $dv$ on the second pass — produces $0=0$ or $I=I$ and looks like progress until you simplify.</li><li>Sign errors when collecting the $I$ terms on one side — the IBP formula is $uv - \int v\,du$, and a missed minus flips the coefficient.</li><li>Forgetting the $+C$ once $I$ has been solved algebraically (the constant is not absorbed by the cancellation).</li><li>Mismanaging the $\tfrac{1}{a}$ from $v = \tfrac{1}{a}e^{ax}$ across two passes, giving the wrong final coefficient.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P3 integration by parts (formula booklet: $\int u\,\dfrac{dv}{dx}\,dx = uv - \int v\,\dfrac{du}{dx}\,dx$). The &#x27;solve for $I$&#x27; algebraic trick is standard at IAL. Reduction-formula derivations using this consistency rule appear in FP2/FP3; do not stray into complex-exponential shortcuts ($e^{(a+ib)x}$), which are out of scope.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (3)</h3>
+<div class="example-grid"><a href="../P4/ch6/q-Jan_2021-Q7.html" class="example-chip">P4 Jan 2021 Q7</a><a href="../P4/ch6/q-Oct_2021-Q8.html" class="example-chip">P4 Oct 2021 Q8</a><a href="../FP3/ch4/q-Jan_2022-Q6.html" class="example-chip">FP3 Jan 2022 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

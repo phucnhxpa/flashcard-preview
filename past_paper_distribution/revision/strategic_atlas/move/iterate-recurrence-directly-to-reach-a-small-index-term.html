@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterate recurrence directly to reach a small-index term — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Direct Iteration</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Iterate recurrence directly to reach a small-index term</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Direct Iteration</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a &#x27;show that&#x27; question asks for a specific term $u_N$ with $N$ small (typically $N \le 6$) from a recurrence relation. Especially compelling when the recurrence contains an awkward feature like $(-1)^n$, a non-constant coefficient, or a parameter $k$ that blocks a clean closed form. Cues include phrasings such as &#x27;given $u_1 = \ldots$, show that $u_5 = \ldots$&#x27; or &#x27;find $u_4$ in terms of $k$&#x27;. The &#x27;show that&#x27; wording itself signals that every intermediate term must be displayed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>For a small number of steps, repeatedly substituting into the recurrence is both faster and more transparent than deriving a general formula. It produces a visible chain of justified equalities, which is exactly what &#x27;show that&#x27; rewards. Carrying any parameter (like $k$) symbolically through the iteration also yields expressions reusable in later parts of the question. Closed forms are unnecessary — and often impossible at A-level — when sign-alternating or variable-coefficient terms are present.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the recurrence contains an alternating or non-standard factor (e.g. $(-1)^n$) so no familiar closed form (AP/GP) applies.</li><li>Rule out solving the recurrence in general — the target index is small, so the cost of a closed form outweighs the benefit.</li><li>Commit to direct iteration: count how many substitutions are needed (here $n=1,2,3,4$ to reach $u_5$).</li><li>Decide to keep the parameter $k$ symbolic at every stage so each $u_n$ is an explicit expression in $k$.</li><li>Track the sign of $(-1)^n$ carefully step-by-step and bracket expressions before distributing to avoid sign slips.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the starting value $u_1$ and the recurrence form $u_{n+1} = f(n, u_n)$.</li><li>Substitute $n=1$ to get $u_2$, simplifying with brackets around any composite expression.</li><li>Substitute $n=2$ into the recurrence using the just-computed $u_2$ to get $u_3$.</li><li>Continue substituting successive values of $n$ until the required $u_N$ is reached.</li><li>Present each line as an equality chain so the &#x27;show that&#x27; demand is met.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $u_1 = -7$ and $u_{n+1} = (-1)^n u_n + k$:\n$u_2 = (-1)^1(-7) + k = 7 + k$ — wait, recompute: $u_2 = -u_1 + k = -(-7)+k = 7+k$.\n$u_3 = (-1)^2 u_2 + k = (7+k)+k = 7+2k$.\n$u_4 = (-1)^3 u_3 + k = -(7+2k)+k = -7-k$.\n$u_5 = (-1)^4 u_4 + k = (-7-k)+k = -7$. (Sign of $u_1$ chosen here for illustration; the principle is the iteration itself.)</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Recurrence $u_{n+1} = a u_n + b$ with numerical $a,b$ and small target index</div>
+<div class="adjustment">Iterate arithmetically; no symbolic parameter to carry, but still write each line.</div>
+</div><div class="variant-row">
+<div class="scenario">Recurrence with a parameter, e.g. $u_{n+1} = u_n^2 - p$, asked to express $u_4$ in terms of $p$</div>
+<div class="adjustment">Keep $p$ symbolic; expand and simplify polynomials at each stage.</div>
+</div><div class="variant-row">
+<div class="scenario">Periodic recurrence where the question asks for $u_{100}$</div>
+<div class="adjustment">Iterate only until the period is detected, then use $n \bmod \text{period}$ rather than iterating 100 times.</div>
+</div><div class="variant-row">
+<div class="scenario">Two-term recurrence $u_{n+2} = f(u_{n+1}, u_n)$ with both $u_1, u_2$ given</div>
+<div class="adjustment">Same direct iteration, but each step uses the two most recent terms.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading $(-1)^n u_n$ as $(-1)^{n} \cdot n$ or attaching the sign to the wrong term.</li><li>Treating the recurrence as geometric because of the $(-1)^n$ factor and trying to write a closed form.</li><li>Misaligning the index: using $(-1)^{n+1}$ when computing $u_{n+1}$ instead of $(-1)^n$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Substituting the wrong power of $-1$ at each stage (off-by-one in the index).</li><li>Forgetting brackets when $(-1)^n = -1$ multiplies a sum, leading to sign errors on the second term.</li><li>Evaluating numerically too early and losing the symbolic $k$ that later parts need.</li><li>Stopping one step short or one step too far — miscounting how many substitutions reach $u_N$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Direct iteration of recurrences is standard in Edexcel IAL P1/P2 sequences and series; no closed-form solution of recurrences is required at this level.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Oct_2024-Q2.html" class="example-chip">P2 Oct 2024 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

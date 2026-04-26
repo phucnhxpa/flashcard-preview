@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expand polynomial product directly instead of parts or substitution — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Partial Fractions Then Integrate</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Expand polynomial product directly instead of parts or substitution</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Partial Fractions Then Integrate</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The integrand is a product of two polynomial factors, e.g. $x^2(2x-3)^3$, $x(x+1)^4$, or $(x-1)^2(x+2)^3$. The combined degree after expansion is modest (typically ≤ 6 or 7), so term-by-term integration via the power rule is feasible. Cues include a low integer power on a linear bracket and a small monomial multiplier. Substitution and integration by parts both look applicable but neither truly avoids expansion.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A product of polynomials is itself a polynomial, and polynomials are integrated trivially by the power rule on each term. Integration by parts on $x^n \times (\text{cubic})$ would require $n$ successive applications, while substitution $u = ax+b$ still leaves a $(u+c)^n u^m$ expression that must be expanded. Direct expansion compresses the work into one binomial expansion plus routine integration. It is the dominant strategy whenever the total degree stays manageable.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the integrand is a product of two polynomial factors — both expandable in closed form.</li><li>Rule out integration by parts: $u=x^2,\,dv=(2x-3)^3\,dx$ would need three cycles of parts to clear $x^2$.</li><li>Rule out substitution $u=2x-3$: it converts to $\tfrac{1}{8}\int(u+3)^2 u^3\,du$, which still requires expansion.</li><li>Commit to expansion because the result is a degree-5 polynomial with only four terms — the cleanest path.</li><li>Tactically: expand the higher-power bracket first, then distribute the monomial, then integrate term by term.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Expand the bracketed power using the binomial theorem, e.g. $(2x-3)^3 = 8x^3 - 36x^2 + 54x - 27$.</li><li>Multiply through by the monomial factor: $x^2(8x^3 - 36x^2 + 54x - 27) = 8x^5 - 36x^4 + 54x^3 - 27x^2$.</li><li>Integrate term by term using $\int x^n\,dx = \frac{x^{n+1}}{n+1}$.</li><li>Simplify each coefficient (e.g. $8/6 = 4/3$, $54/4 = 27/2$).</li><li>For a definite integral, evaluate each limit as a single combined fraction (using a common denominator) before subtracting.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Compute $\int_2^3 x^2(2x-3)^3\,dx$. Expand: $(2x-3)^3 = 8x^3-36x^2+54x-27$, so the integrand is $8x^5-36x^4+54x^3-27x^2$. Antiderivative: $F(x) = \tfrac{4}{3}x^6 - \tfrac{36}{5}x^5 + \tfrac{27}{2}x^4 - 9x^3$. Then $\int_2^3 = F(3) - F(2)$, evaluated by combining each over LCD $30$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">$\int x(x+1)^4\,dx$</div>
+<div class="adjustment">Expand $(x+1)^4$ via binomial; multiply by $x$; integrate the resulting degree-5 polynomial.</div>
+</div><div class="variant-row">
+<div class="scenario">$\int x^3(1-x)^2\,dx$</div>
+<div class="adjustment">Expand $(1-x)^2 = 1-2x+x^2$; multiply by $x^3$; integrate the degree-5 polynomial term by term.</div>
+</div><div class="variant-row">
+<div class="scenario">$\int (x-1)^2(x+2)^3\,dx$</div>
+<div class="adjustment">Expand each bracket separately, multiply the two expansions, then integrate; total degree 5.</div>
+</div><div class="variant-row">
+<div class="scenario">Integrand contains $e^x$ or $\sin x$ instead of a polynomial factor</div>
+<div class="adjustment">Expansion no longer applies — switch to integration by parts (LIATE).</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reflexively reaching for integration by parts whenever a product is seen, without first checking if both factors are polynomial.</li><li>Attempting substitution $u = 2x-3$ and not realising expansion of $(u+3)^2 u^3$ is still required, plus extra fraction arithmetic.</li><li>Worrying that the bracketed power must be &#x27;kept intact&#x27; — students sometimes feel expanding &#x27;destroys structure&#x27; when in fact it simplifies the problem.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors in binomial expansion, especially $(-3)^2 = +9$ vs $(-3)^3 = -27$.</li><li>Forgetting to multiply every expanded term by the monomial factor (commonly missing the last term).</li><li>Arithmetic slips evaluating high powers at the limits, e.g. $3^6 = 729$, $2^6 = 64$ — one error cascades.</li><li>LCD errors when combining several fractions at the evaluation stage; safer to compute $F(3)$ and $F(2)$ each as a single fraction first.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure (C2/C4): binomial expansion of $(a+b)^n$ for positive integer $n$ and power-rule integration of polynomials. No techniques beyond A-level are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch4/q-Jun_2021-Q7.html" class="example-chip">FP3 Jun 2021 Q7</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

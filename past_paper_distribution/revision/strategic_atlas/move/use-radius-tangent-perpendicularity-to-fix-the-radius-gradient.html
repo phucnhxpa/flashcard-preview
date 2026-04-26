@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use radius-tangent perpendicularity to fix the radius gradient — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Circle Tangent Property</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Use radius-tangent perpendicularity to fix the radius gradient</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Circle Tangent Property</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a line $l$ is stated to be tangent to a circle at a known point $P$, and you need the line through $P$ and the centre $N$ (or equivalently the radius/normal direction). Typical cues: &#x27;tangent to the circle at $P$&#x27;, &#x27;find the equation of $PN$&#x27;, or &#x27;show that the centre lies on...&#x27;. Especially indicated when the circle equation itself is unknown, so discriminant or substitution methods are unavailable. The only geometric bridge between $l$ and $N$ is the radius drawn to the contact point.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By the circle theorem, the radius to the point of tangency is perpendicular to the tangent. This converts a geometric tangency condition into an algebraic gradient relation $m_{PN}\cdot m_l = -1$. Once $m_l$ is read off, $m_{PN}$ is forced, and the line through $P$ with that gradient is immediate. It bypasses any need for the circle&#x27;s equation, centre coordinates, or radius length.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice $l$ is tangent at $P$ and the unknown line passes through $P$ and the centre $N$ — a radius.</li><li>Rule out discriminant or simultaneous-equation methods because the circle equation is not given.</li><li>Commit to the radius$\perp$tangent theorem as the only available bridge between $l$ and $N$.</li><li>Read the gradient $m_l$ directly from the tangent&#x27;s equation, rearranging to $y=mx+c$ form if needed.</li><li>Apply $m_{PN}=-1/m_l$, then write the line through $P$ in point-gradient form.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify $P$ (point of tangency) and read $m_l$ from the tangent equation.</li><li>If $l$ is in form $ax+by+c=0$, compute $m_l=-a/b$.</li><li>Compute $m_{PN}=-1/m_l$ (negative reciprocal).</li><li>Apply point-gradient form $y-y_P = m_{PN}(x-x_P)$ to write the equation of $PN$.</li><li>Simplify to the form requested (e.g. $y=mx+c$ or $ax+by+c=0$).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Tangent $l: y=\tfrac{1}{2}x+3$ touches a circle at $P(0,0)$; find the line $PN$ through the centre. Read $m_l=\tfrac{1}{2}$, so $m_{PN}=-1/(1/2)=-2$. Through $P(0,0)$: $y-0=-2(x-0)$, giving $y=-2x$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Tangent given in general form $ax+by+c=0$</div>
+<div class="adjustment">Extract $m_l=-a/b$ first, then apply $m_{PN}=-1/m_l$ as usual.</div>
+</div><div class="variant-row">
+<div class="scenario">Question asks for the normal to the circle at $P$</div>
+<div class="adjustment">The normal coincides with $PN$, so the same perpendicularity gives its gradient directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Centre $N$ is known and tangent at $P$ is requested</div>
+<div class="adjustment">Reverse the move: compute $m_{PN}$ from the two points, then $m_l=-1/m_{PN}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent is horizontal ($m_l=0$)</div>
+<div class="adjustment">Radius is vertical: $PN$ has equation $x=x_P$ (perpendicularity formula does not apply directly).</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent is vertical (undefined gradient)</div>
+<div class="adjustment">Radius is horizontal: $PN$ has equation $y=y_P$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating $PN$ as parallel to the tangent (using $m_l$ itself) instead of perpendicular.</li><li>Confusing the tangent line with the chord of contact or with the normal at a different point.</li><li>Assuming the centre is at the origin when only $P$ is at the origin.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Dropping the negative sign: writing $m_{PN}=1/m_l$ instead of $-1/m_l$.</li><li>Failing to rearrange $ax+by+c=0$ correctly before reading the gradient.</li><li>Mishandling the vertical/horizontal tangent edge cases where the gradient product rule breaks down.</li><li>Using a wrong point in point-gradient form (e.g. plugging in $N$ when $N$ is not yet known).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Uses only the Edexcel IAL P2/P3 circle theorem (radius $\perp$ tangent at point of contact) and the standard perpendicular-gradients condition $m_1 m_2=-1$ from coordinate geometry.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Oct_2019-Q6.html" class="example-chip">P2 Oct 2019 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

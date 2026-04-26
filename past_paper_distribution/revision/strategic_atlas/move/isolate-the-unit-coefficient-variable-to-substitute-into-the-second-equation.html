@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolate the unit-coefficient variable to substitute into the second equation — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Substitution Solve</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Isolate the unit-coefficient variable to substitute into the second equation</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Substitution Solve</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on a 2×2 linear system in two unknowns where at least one equation has a coefficient of 1 (or −1) on one of the variables, e.g. a + 4d = 26 paired with 2a + 9d = 56. The cue is visual: scan for a &#x27;lonely&#x27; variable with no leading number. Common surfaces include arithmetic progression problems (solving for a and d from two term/sum conditions), simultaneous equations in coordinate geometry (line meets line), and pairs of constraints in mechanics or statistics worded problems.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Rearranging an equation with a unit coefficient produces an exact expression with no fractions, which keeps the substituted equation clean and integer-valued. Substituting collapses the 2×2 system into a single linear equation in one unknown, which is the minimal-work reduction. Elimination would also solve it but requires an extra scaling step; when a unit coefficient is already present, substitution is the path of least friction and least error.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the system is 2×2 linear and one equation, a + 4d = 26, has coefficient 1 on a.</li><li>I rule out elimination as primary: it would need me to double equation (1) before subtracting, an avoidable extra step.</li><li>I commit to substitution because isolating a from (1) introduces no fractions and no sign traps beyond a single distribution.</li><li>Bridge: rearrange (1) to a = 26 − 4d, then plug this expression for a into (2) wherever a appears.</li><li>Tactically, I expand carefully (watch the sign on −4d when multiplied by 2), solve the resulting linear equation in d, then back-substitute into a = 26 − 4d to recover a.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the variable with unit coefficient: a in (1) a + 4d = 26.</li><li>Rearrange (1): a = 26 − 4d.</li><li>Substitute into (2): 2(26 − 4d) + 9d = 56.</li><li>Expand and collect: 52 − 8d + 9d = 56, so 52 + d = 56.</li><li>Solve: d = 4.</li><li>Back-substitute: a = 26 − 4(4) = 10.</li><li>Check both equations: 10 + 16 = 26 ✓ and 20 + 36 = 56 ✓.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $a + 4d = 26$ and $2a + 9d = 56$. From (1): $a = 26 - 4d$. Sub into (2): $2(26 - 4d) + 9d = 56 \Rightarrow 52 + d = 56 \Rightarrow d = 4$. Then $a = 26 - 16 = 10$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Arithmetic progression: given $a + 4d = 26$ (the 5th term) and $S_{10} = 245$ giving $2a + 9d = 49$.</div>
+<div class="adjustment">Same move: isolate $a$ from the term equation, substitute into the sum equation.</div>
+</div><div class="variant-row">
+<div class="scenario">Line-meets-line in coordinate geometry, e.g. $y = 3x - 2$ and $2x + 5y = 11$.</div>
+<div class="adjustment">The first equation already isolates $y$; substitute directly into the second to get a single equation in $x$.</div>
+</div><div class="variant-row">
+<div class="scenario">Both equations have non-unit coefficients, e.g. $3a + 4d = 26$ and $2a + 9d = 56$.</div>
+<div class="adjustment">Switch to elimination (scale and subtract) to avoid fractional substitutions.</div>
+</div><div class="variant-row">
+<div class="scenario">Coefficient is $-1$, e.g. $-a + 4d = 26$.</div>
+<div class="adjustment">Isolate via $a = 4d - 26$; the move is identical, just track the sign.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the system as needing elimination by default and doubling (1) unnecessarily, doing more algebra than required.</li><li>Choosing to isolate the wrong variable (e.g. $d$ from (1), giving $d = (26-a)/4$) and reintroducing fractions.</li><li>Mistaking a non-linear system (e.g. one equation quadratic) for this template — the move applies only to linear 2×2.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when distributing: writing $2(26 - 4d) = 52 + 8d$ instead of $52 - 8d$.</li><li>Forgetting to back-substitute, leaving the answer as just $d = 4$.</li><li>Substituting the rearranged expression back into the same equation it came from (yielding $0 = 0$).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Pure Maths (P1) simultaneous-equation technique; appears routinely in sequences/series problems and coordinate geometry, fully within syllabus.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2024-Q5.html" class="example-chip">P2 Jan 2024 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

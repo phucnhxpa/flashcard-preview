@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluate derivative at given x to obtain gradient at a point — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Gradient Evaluation</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Evaluate derivative at given x to obtain gradient at a point</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Gradient Evaluation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question asks for the &#x27;gradient of the curve at x = a&#x27;, &#x27;gradient at the point P&#x27;, or &#x27;slope of the tangent at...&#x27;. Phrases like &#x27;rate of change at&#x27;, &#x27;gradient of C when x = ...&#x27;, or &#x27;find the gradient at the point (a, b)&#x27; are equivalent cues. The student must recognise that a geometric quantity (tangent slope) is being requested at a specific input value, after a derivative expression has been (or must be) found.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The derivative dy/dx is itself a function — the gradient function — whose value at any x equals the slope of the tangent to the curve at that x. Hence &#x27;gradient at x = a&#x27; is literally dy/dx evaluated at x = a. This identification is the key bridge between the algebraic operation of differentiation and the geometric notion of tangent slope, and underlies every later use of derivatives in tangent/normal/stationary-point work.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notices the word &#x27;gradient&#x27; (or &#x27;slope of tangent&#x27;, &#x27;rate of change&#x27;) tied to a specific x-value or point.</li><li>Rules out substituting into y itself — that would give a coordinate, not a slope — and rules out re-differentiating unnecessarily.</li><li>Commits to the identity: gradient at x = a equals dy/dx|_{x=a}, provided dy/dx has already been (or can be) found.</li><li>Bridges to operation by writing dy/dx, then substituting the given x-value into that expression.</li><li>Decides whether to leave surds/indices exact or to simplify to a single fraction or decimal, depending on what the next part needs (tangent equation, comparison, etc.).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Ensure dy/dx is in a clean, substitution-ready form (e.g. rewrite negative/fractional indices clearly).</li><li>Write the notation dy/dx|_{x=a} = [expression with a substituted].</li><li>Substitute the given x-value carefully, respecting fractional and negative indices.</li><li>Simplify to an exact value (surd or fraction) unless a decimal is requested.</li><li>State the result as &#x27;the gradient at x = a is ...&#x27; to close the geometric question.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given y = 3x^{-1/2} + 2x, find the gradient of C at x = 4. Differentiate: dy/dx = -\tfrac{3}{2}x^{-3/2} + 2. Evaluate at x = 4: dy/dx|_{x=4} = -\tfrac{3}{2}(4)^{-3/2} + 2 = -\tfrac{3}{2}\cdot\tfrac{1}{8} + 2 = -\tfrac{3}{16} + 2 = \tfrac{29}{16}. So the gradient at x = 4 is \tfrac{29}{16}.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Point given as coordinates (a, b)</div>
+<div class="adjustment">Use only the x-coordinate a in dy/dx; the y-coordinate is not needed for the gradient.</div>
+</div><div class="variant-row">
+<div class="scenario">Point given by a y-value only</div>
+<div class="adjustment">First solve y = (given value) for x using the curve equation, then substitute that x into dy/dx.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve x = f(t), y = g(t)</div>
+<div class="adjustment">Use dy/dx = (dy/dt)/(dx/dt) and evaluate at the given parameter t, not at an x-value directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Implicit curve F(x, y) = 0</div>
+<div class="adjustment">After implicit differentiation, substitute both x and y coordinates of the point into dy/dx.</div>
+</div><div class="variant-row">
+<div class="scenario">Gradient of normal at the point</div>
+<div class="adjustment">Compute gradient of tangent first as above, then take the negative reciprocal.</div>
+</div><div class="variant-row">
+<div class="scenario">Stationary point context</div>
+<div class="adjustment">Instead of evaluating, set dy/dx = 0 and solve for x; evaluation comes later for the second derivative test.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading &#x27;gradient at x = 4&#x27; as &#x27;y-value at x = 4&#x27; and substituting into the original equation.</li><li>Reading it as a request for the equation of the tangent line rather than just its slope.</li><li>Treating &#x27;gradient of the chord&#x27; or &#x27;average rate of change&#x27; as the same as the gradient at a point.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Substituting into y instead of dy/dx.</li><li>Mishandling fractional/negative indices, e.g. computing 4^{-3/2} as -8 rather than 1/8.</li><li>Forgetting a constant term (like the + 2) when substituting.</li><li>Rounding prematurely when an exact surd/fraction answer is expected.</li><li>For parametric or implicit curves, substituting the wrong variable (x instead of t, or ignoring y).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics: applies to standard, parametric, and implicit differentiation contexts in P1–P4, and underpins tangent, normal, and stationary point questions throughout the specification.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Oct_2023-Q1.html" class="example-chip">P1 Oct 2023 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

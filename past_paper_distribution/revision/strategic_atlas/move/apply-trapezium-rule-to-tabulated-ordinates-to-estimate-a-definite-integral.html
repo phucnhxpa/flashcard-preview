@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply trapezium rule to tabulated ordinates to estimate a definite integral — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Numerical Integration</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Apply trapezium rule to tabulated ordinates to estimate a definite integral</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Numerical Integration</strong></span>
+    <span>Frequency: <strong>4 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question provides a table of (x, y) values at equally spaced x-values and asks for a numerical estimate of a definite integral, often with the explicit instruction &#x27;use the trapezium rule with all the values of y in the table&#x27;. The integrand may be analytically intractable (e.g. log₂(2x), e^(x²)) or simply untabulated as a function. Equivalent phrasings include &#x27;estimate the area under the curve&#x27;, &#x27;estimate ∫ₐᵇ f(x) dx using n strips&#x27;, or providing only discrete data with no formula. The visual cue is a horizontal table of x and y rows with uniform x-spacing.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The trapezium rule replaces the curve between successive ordinates by straight-line segments, so the area under the curve is approximated by the sum of trapezoid areas. With equal spacing h, this collapses to the compact formula (h/2)[y₀ + yₙ + 2(y₁ + y₂ + … + yₙ₋₁)], where the boundary ordinates appear once and the interior ordinates appear doubled (because each interior ordinate is shared by two trapezia). It converts an analytically hard or impossible integral into a routine arithmetic computation, and is the standard numerical method on the Edexcel IAL P-papers.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the question supplies a table of equally spaced x-values with corresponding y-values, and either asks for an estimate or names the trapezium rule explicitly — this is the canonical trigger.</li><li>Rule out analytical integration: either no closed-form antiderivative exists in the IAL toolkit (e.g. log₂(2x), e^(x²)), or the question forbids it by demanding a numerical estimate using the tabulated data.</li><li>Commit to the trapezium rule because the data is discrete, equally spaced, and the question wants a number — Simpson&#x27;s rule is not on the IAL specification, so trapezium is the only relevant numerical tool.</li><li>Bridge to operation: count the number of ordinates m, deduce the number of strips n = m − 1, then compute h = (b − a)/n. Check the spacing is genuinely uniform.</li><li>Tactically partition the ordinates into &#x27;ends&#x27; (y₀ and yₙ, weight 1) and &#x27;middles&#x27; (y₁,…,yₙ₋₁, weight 2). Sum each group separately to localise arithmetic errors.</li><li>Substitute into A ≈ (h/2)[ (y₀ + yₙ) + 2(y₁ + y₂ + … + yₙ₋₁) ], keeping full precision until the final rounding step so subsequent parts of the question can reuse the unrounded value.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Count ordinates m and strips n = m − 1; compute h = (b − a)/n.</li><li>Identify the boundary ordinates y₀ and yₙ; sum them: S_end = y₀ + yₙ.</li><li>Identify the interior ordinates y₁, …, yₙ₋₁; sum them: S_mid = y₁ + y₂ + ⋯ + yₙ₋₁.</li><li>Apply the formula: A ≈ (h/2)[ S_end + 2·S_mid ].</li><li>Evaluate the bracket first, then multiply by h/2; keep full precision.</li><li>Round only at the end to the requested number of significant figures or decimal places.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Estimate $\int_{2}^{4} f(x)\,dx$ from the table $x=2,2.5,3,3.5,4$ with $y=4.718, 5.617, 6.723, 8.083, 9.756$. Here $n=4$ strips and $h=0.5$. Ends: $4.718+9.756=14.474$. Middles: $5.617+6.723+8.083=20.423$. Then $A\approx \tfrac{0.5}{2}[14.474+2(20.423)] = 0.25\times 55.320 = 13.83$ (3 s.f. $\approx 13.8$).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Function given algebraically but a numerical estimate is requested (e.g. estimate ∫₀² e^(x²) dx with 4 strips)</div>
+<div class="adjustment">Build the table yourself by evaluating f at the equally spaced x-values, then apply the same formula.</div>
+</div><div class="variant-row">
+<div class="scenario">Only 3 ordinates (n = 2 strips)</div>
+<div class="adjustment">Formula reduces to (h/2)[y₀ + 2y₁ + y₂] — same weighting principle with one middle term.</div>
+</div><div class="variant-row">
+<div class="scenario">y-values given in surd or exact form</div>
+<div class="adjustment">Either keep exact form through the algebra and convert at the end, or convert to decimals at the start; be consistent to avoid rounding error.</div>
+</div><div class="variant-row">
+<div class="scenario">Unequally spaced x-values</div>
+<div class="adjustment">The compact formula no longer applies — sum each trapezium ½(xᵢ₊₁ − xᵢ)(yᵢ + yᵢ₊₁) individually.</div>
+</div><div class="variant-row">
+<div class="scenario">Follow-up part asks for an improved estimate</div>
+<div class="adjustment">Halving the strip width (doubling the number of strips) typically improves accuracy; reuse already-computed ordinates.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Confusing the number of ordinates with the number of strips, e.g. taking n = 5 instead of n = 4 from a 5-row table and so using the wrong h.</li><li>Using h = b − a (the total interval width) instead of the strip width (b − a)/n.</li><li>Doubling the endpoint ordinates instead of (or as well as) the interior ordinates.</li><li>Reading the question as asking for an exact value when it specifies the trapezium rule, then attempting analytical integration.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the factor of 2 on the interior ordinates inside the bracket.</li><li>Including y₀ or yₙ inside the &#x27;2(...)&#x27; bracket by mistake.</li><li>Omitting the ½ in h/2, effectively doubling the final answer.</li><li>Premature rounding of the interior or endpoint sum, causing the final answer to fall outside the accepted tolerance.</li><li>Arithmetic slip when summing several decimal ordinates — keep a running total and double-check.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL Pure Mathematics (P2/P3), the trapezium rule formula A ≈ (h/2)[y₀ + yₙ + 2(y₁ + … + yₙ₋₁)] is given in the formula booklet. Simpson&#x27;s rule and error-bound analysis are NOT on the IAL specification and should not be invoked.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (4)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Oct_2023-Q6.html" class="example-chip">P2 Oct 2023 Q6</a><a href="../P2/ch8/q-Jan_2022-Q1.html" class="example-chip">P2 Jan 2022 Q1</a><a href="../P2/ch8/q-Oct_2019-Q5.html" class="example-chip">P2 Oct 2019 Q5</a><a href="../P2/ch8/q-Jan_2020-Q1.html" class="example-chip">P2 Jan 2020 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrate f&#x27;(x) term-by-term to recover f(x) with constant of integration — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Antidifferentiation</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Integrate f&#x27;(x) term-by-term to recover f(x) with constant of integration</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Antidifferentiation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question states f&#x27;(x) (or dy/dx) explicitly — typically as a sum of power terms, possibly including negative or fractional indices after rewriting surds/reciprocals — and asks you to find f(x) (or y). Equivalent phrasings: &#x27;given the gradient function, find the curve&#x27;, &#x27;find an expression for f(x)&#x27;, or kinematics versions like &#x27;given v = ds/dt, find s&#x27;. A second piece of information (e.g. f(4) = 12, or &#x27;the curve passes through (a, b)&#x27;) is usually supplied in a later part, signalling that a constant of integration is required and will be determined.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Indefinite integration is the formal inverse of differentiation, so f(x) = ∫f&#x27;(x) dx reconstructs the original function. For polynomial-style integrands the power rule ∫ax^n dx = a·x^(n+1)/(n+1) (n ≠ −1) reverses the power rule for differentiation term by term. The &#x27;+ c&#x27; is essential because differentiation annihilates constants, leaving an infinite family of antiderivatives; a boundary condition pins down which member of the family is meant.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the structural cue: f&#x27;(x) is given and f(x) is wanted — this is the textbook signature of indefinite integration, the inverse of differentiation.</li><li>Rule out alternatives: no need for substitution, integration by parts, or the reverse chain rule because the integrand is just a sum of power terms; differentiating again would be the wrong direction.</li><li>Commit to integrating term-by-term using the power rule, after first rewriting any surds, reciprocals, or bracketed expressions as x^n form so the rule applies cleanly.</li><li>Bridge to execution: write f(x) = ∫f&#x27;(x) dx, then split the integral over the sum and handle each ax^n term independently.</li><li>Tactical decision: keep the constant of integration c explicit and unevaluated for now — a later part of the question (typically a given value f(x₀) = y₀) will determine it.</li><li>Sanity check: differentiate the answer mentally to confirm it returns f&#x27;(x); verify each new exponent is (old + 1) and the divisor matches that new exponent.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rewrite f&#x27;(x) so every term is in the form ax^n (e.g. 1/√x = x^(−1/2), 3 = 3x^0).</li><li>Apply ∫ax^n dx = a·x^(n+1)/(n+1) to each term, raising the index by 1 and dividing by the NEW index.</li><li>Sum the antiderivatives and append + c: f(x) = Σ a_i·x^(n_i+1)/(n_i+1) + c.</li><li>Simplify coefficients (e.g. −16·x^(1/2)/(1/2) = −32x^(1/2) = −32√x) and, if convenient, restore surd form.</li><li>If a boundary condition is given in a follow-up part, substitute it to solve for c.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given f'(x) = 4x^2 − 5x + 3, integrate term-by-term: ∫4x^2 dx = \tfrac{4}{3}x^3, ∫−5x dx = −\tfrac{5}{2}x^2, ∫3 dx = 3x. Therefore f(x) = \tfrac{4}{3}x^3 − \tfrac{5}{2}x^2 + 3x + c.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">f&#x27;(x) contains surds or reciprocals (e.g. −16/√x)</div>
+<div class="adjustment">Rewrite as a power x^n first (−16x^(−1/2)), then apply the power rule; dividing by 1/2 means multiplying by 2.</div>
+</div><div class="variant-row">
+<div class="scenario">Kinematics: v(t) = ds/dt given, find s(t)</div>
+<div class="adjustment">Same procedure — integrate v with respect to t and use an initial displacement s(t₀) = s₀ to fix c.</div>
+</div><div class="variant-row">
+<div class="scenario">Second derivative f&#x27;&#x27;(x) given, find f(x)</div>
+<div class="adjustment">Integrate twice, introducing two constants c₁ and c₂; two boundary conditions are needed to determine both.</div>
+</div><div class="variant-row">
+<div class="scenario">Integrand is a product or bracket like x(2x − 1)</div>
+<div class="adjustment">Expand first into a polynomial in x^n form, then integrate term-by-term.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Differentiating instead of integrating because the previous part of the question involved differentiation.</li><li>Treating ∫f&#x27;(x) dx as if it must equal a definite value, and so omitting + c.</li><li>Trying to apply the power rule directly to a product or quotient without first expanding/rewriting as x^n.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the constant of integration &#x27;+ c&#x27; — costs a mark in every Edexcel mark scheme and prevents solving any follow-up boundary-condition part.</li><li>Dividing by the old exponent n instead of the new exponent n+1 (e.g. writing 4x^3/2 instead of 4x^3/3).</li><li>Arithmetic slips with fractional indices: miscomputing (−1/2 + 1) = 1/2, or forgetting that dividing by 1/2 means multiplying by 2.</li><li>Failing to rewrite surds/reciprocals in x^n form before integrating, then applying the rule incorrectly to √x or 1/x^k.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P2/P3 indefinite integration of x^n (n ≠ −1) — no formula booklet entry needed beyond the power rule. The case n = −1 (giving ln|x|) and integration of e^(kx), sin(kx), cos(kx) are separate standard results; do not over-generalise the power rule to n = −1.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Oct_2024-Q8.html" class="example-chip">P1 Oct 2024 Q8</a><a href="../P1/ch4/q-Jun_2023-Q8.html" class="example-chip">P1 Jun 2023 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

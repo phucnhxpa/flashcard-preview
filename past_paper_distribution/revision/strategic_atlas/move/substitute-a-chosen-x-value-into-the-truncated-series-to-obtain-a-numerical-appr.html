@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute a chosen x-value into the truncated series to obtain a numerical approximation — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Series Approximation</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Substitute a chosen x-value into the truncated series to obtain a numerical approximation</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Series Approximation</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on follow-up parts using the word &#x27;hence&#x27; or &#x27;use your series/expansion from part (a)&#x27; to estimate a function value, a definite integral, or evaluate a limit. Visual cues: a specific small x-value is given (e.g. x = 0.1), or the student is asked to choose x so the LHS becomes a known constant (e.g. ln(3/2), √(1.02), an estimate of π or e). Also fires when an expression like ∫₀^c f(x) dx must be approximated, or when a 0/0 limit involving f(x) appears. Equivalent phrasings: &#x27;find an approximate value of...&#x27;, &#x27;estimate to 4 d.p.&#x27;, &#x27;deduce that f(c) ≈ ...&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A truncated Maclaurin/Taylor series is a polynomial that approximates the original function near the expansion point; for x within the radius of convergence (and especially small x), higher-order terms are negligible. Substituting a numerical x converts the abstract polynomial into a concrete decimal estimate — this is the entire purpose of constructing the series in applied questions. For limits, replacing f(x) by its series turns indeterminate 0/0 forms into ratios of polynomials whose lowest powers of x cancel cleanly. The principle invoked is local polynomial approximation: f(x) = Pₙ(x) + O(xⁿ⁺¹).</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the word &#x27;hence&#x27; or &#x27;use your expansion&#x27; — this signals I must use the truncated series from the previous part, not the original function (using f directly forfeits method marks).</li><li>I rule out direct evaluation (calculator on f(c)) and rule out re-expanding from scratch — the series is already in hand.</li><li>I commit to substitution because the requested x-value is small (or can be chosen small) and lies inside the validity interval, so the truncated polynomial gives accuracy to the required d.p.</li><li>I decide which x to use: if given, I just substitute; if I must choose, I pick x so the LHS of the expansion equals the target constant (e.g. set 1+x = 3/2 ⇒ x = 1/2 to estimate ln(3/2)).</li><li>I check x lies in the interval of convergence (e.g. |x| &lt; 1 for ln(1+x), (1+x)ⁿ with non-integer n) and confirm enough terms were retained for the requested accuracy — if a limit comes out as 0/0 even after substitution of the series, I needed one more term.</li><li>I substitute term-by-term, keeping extra decimal places in intermediate work, then round only at the end.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write down the truncated series from part (a), e.g. f(x) ≈ a₀ + a₁x + a₂x² + a₃x³.</li><li>Identify or deduce the substitution value x = c (given, or chosen so LHS = target constant).</li><li>Verify c lies inside the interval of convergence; state this if the mark scheme expects it.</li><li>Replace x by c in every term: compute a₀, a₁c, a₂c², a₃c³ as exact fractions or to at least 2 more d.p. than required.</li><li>Sum the terms to get the approximation.</li><li>(For integrals) Integrate the polynomial term-by-term first, then evaluate between the limits.</li><li>(For limits) Substitute the series into the full expression, factor out the lowest power of x from numerator and denominator, cancel, then let x → 0.</li><li>Round the final answer to the specified number of decimal places or significant figures.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $\ln(1+x) \approx x - \tfrac{x^2}{2} + \tfrac{x^3}{3}$, estimate $\ln(1.1)$. Substitute $x = 0.1$: $0.1 - \tfrac{0.01}{2} + \tfrac{0.001}{3} = 0.1 - 0.005 + 0.000333\ldots = 0.09533$ (5 d.p.). True value $0.09531$ — accurate to 4 d.p.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Choosing x so the LHS becomes a known irrational (e.g. ln(3/2), √(1.02))</div>
+<div class="adjustment">Solve LHS = target for x, check |x| &lt; radius of convergence, then substitute as normal.</div>
+</div><div class="variant-row">
+<div class="scenario">Approximating a definite integral ∫₀^c f(x) dx</div>
+<div class="adjustment">Integrate the truncated polynomial term-by-term first to get a new polynomial in c, then evaluate at the upper limit.</div>
+</div><div class="variant-row">
+<div class="scenario">Evaluating a limit as x → 0 of an expression involving f(x)</div>
+<div class="adjustment">Replace each function by its series, simplify numerator and denominator as polynomials, cancel the common lowest power of x, then set x = 0.</div>
+</div><div class="variant-row">
+<div class="scenario">Finding the first non-zero term of f(x) − g(x) (order of zero)</div>
+<div class="adjustment">Subtract series term-by-term; the lowest surviving power gives the order.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using f(x) directly on a calculator when the question says &#x27;hence&#x27; — this loses all method marks.</li><li>Thinking &#x27;more terms = more marks&#x27; — only the terms required for the stated accuracy or to resolve the limit are needed.</li><li>Mistaking a &#x27;show that&#x27; for an &#x27;estimate&#x27; — if exact, do not round.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Substituting an x outside the interval of convergence (e.g. x = 1 in a series valid only for |x| &lt; 1) — gives a meaningless answer.</li><li>Rounding intermediate terms too aggressively, accumulating error in the final decimal.</li><li>Arithmetic slips when raising decimals to powers (e.g. 0.1³ = 0.001, not 0.01).</li><li>In limits: cancelling x from numerator and denominator when one side still has a non-zero constant term.</li><li>Retaining too few terms — if all terms cancel in a limit, the expansion in part (a) was too short.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL Further Pure (FP2/FP3) Maclaurin/Taylor series scope. Standard expansions for eˣ, ln(1+x), sin x, cos x, (1+x)ⁿ are in the formula booklet with their validity intervals. Do NOT invoke Lagrange remainder bounds or rigorous error estimates — these are out of scope; just retain enough terms to meet the stated accuracy.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../FP2/ch6/q-Jun_2024-Q7.html" class="example-chip">FP2 Jun 2024 Q7</a><a href="../FP2/ch6/q-Specimen_2018-Q5.html" class="example-chip">FP2 Specimen 2018 Q5</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

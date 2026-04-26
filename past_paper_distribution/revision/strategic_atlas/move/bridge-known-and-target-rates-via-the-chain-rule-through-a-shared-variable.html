@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridge known and target rates via the chain rule through a shared variable — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Related Rates Chain Rule Bridge</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Bridge known and target rates via the chain rule through a shared variable</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Related Rates Chain Rule Bridge</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question gives one rate of change with respect to time (e.g. dV/dt, dA/dt) and asks for a different rate of change with respect to time (e.g. dh/dt, dV/dt), while a derivative linking the two quantities (e.g. dV/dh, dV/dA) is either already available or easy to compute from a given formula. Visual cues: phrasing like &#x27;water poured at a constant rate&#x27;, &#x27;expanding/shrinking at...&#x27;, or a multi-part question where part (a) or (b) asks for dV/dh or dV/dA and the next part gives a time-rate. The key signal is that no direct formula links the two variables to t, but both are linked through a shared geometric variable.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The chain rule dY/dt = (dY/dX)(dX/dt) factorises a time rate into a geometric sensitivity (how Y responds to changes in X, fixed by the shape) and a kinematic rate (how fast X itself changes in time). Since one of these factors is given and the other can be computed from the geometric formula, the unknown rate is isolated by a single multiplication or division — no ODE need be solved. This is the universal mechanism for related-rates problems: it turns an apparently dynamic problem into a static evaluation at one instant.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice I am given one time-derivative (e.g. dV/dt) and asked for another (e.g. dh/dt), but the formula I have links V to h, not to t.</li><li>I rule out trying to find h(t) explicitly by solving the ODE dV/dt = f(h)·dh/dt — that is a separable ODE and far more work than needed for a single instantaneous rate.</li><li>I rule out implicit differentiation of the expanded polynomial in t — it works but reproduces exactly what the chain rule gives, less cleanly.</li><li>I commit to the chain rule dV/dt = (dV/dh)(dh/dt) because it links all three quantities in a single algebraic identity, and I already have (or can quickly compute) dV/dh.</li><li>Tactical choice: if an earlier part of the question has computed dV/dh or dV/dA, I use that intermediate variable rather than going via dx/dt — the question is structured to feed forward.</li><li>I evaluate dV/dh at the specified instant (e.g. h = 5), then rearrange dh/dt = (dV/dt)/(dV/dh) to isolate the unknown, and finally simplify and attach units.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the two time-rates (one given, one required) and the shared geometric variable X linking them.</li><li>Write the chain rule explicitly: dY/dt = (dY/dX) · (dX/dt).</li><li>Compute or quote dY/dX from the given formula (or from a previous part of the question).</li><li>Substitute the specified instantaneous value of X into dY/dX to get a number.</li><li>Rearrange: if the unknown is dX/dt, divide; if the unknown is dY/dt, multiply.</li><li>Simplify the resulting fraction (cancel common factors) and attach correct units (e.g. cm s⁻¹, cm³ s⁻¹).</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $V = \tfrac{1}{3}h^3 + \tfrac{4}{3}h^2$ and $\tfrac{dV}{dt} = 160$, find $\tfrac{dh}{dt}$ at $h=5$. Compute $\tfrac{dV}{dh} = h^2 + \tfrac{8}{3}h$, so at $h=5$: $\tfrac{dV}{dh} = 25 + \tfrac{40}{3} = \tfrac{115}{3}$. Then $\tfrac{dh}{dt} = \tfrac{dV/dt}{dV/dh} = \tfrac{160}{115/3} = \tfrac{480}{115} = \tfrac{96}{23} \approx 4.17 \text{ cm s}^{-1}$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Reverse direction: given dh/dt, asked for dV/dt</div>
+<div class="adjustment">No rearrangement — multiply directly: dV/dt = (dV/dh)(dh/dt).</div>
+</div><div class="variant-row">
+<div class="scenario">Cone or other 3D shape with two geometric variables (e.g. r and h)</div>
+<div class="adjustment">Eliminate one variable using a similar-triangles or geometric constraint before computing dV/dh.</div>
+</div><div class="variant-row">
+<div class="scenario">Earlier part of the question pre-computes dV/dA (not dV/dx)</div>
+<div class="adjustment">Use dV/dt = (dV/dA)(dA/dt) directly — the examiner has signalled this bridge by structuring the parts; do not detour through dx/dt.</div>
+</div><div class="variant-row">
+<div class="scenario">Surface area or perimeter rates</div>
+<div class="adjustment">Replace V with A or P; identical chain-rule structure applies.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Inverting the chain rule: writing dh/dt = (dV/dh)(dV/dt) instead of dividing by dV/dh.</li><li>Ignoring the result of an earlier part and re-deriving everything from scratch via dx/dt, wasting time and risking error.</li><li>Using dA/dV instead of dV/dA when chaining — i.e. inverting which derivative belongs in the numerator.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to evaluate dV/dh at the specific instant (e.g. h = 5), leaving the answer as a function of h.</li><li>Dividing incorrectly: must multiply by the reciprocal (e.g. multiply by 3/115, not by 115/3).</li><li>Failing to simplify the final fraction by common factors (e.g. 480/115 = 96/23).</li><li>Rounding intermediate surd or decimal values too early, producing an inaccurate final answer at the required significant figures.</li><li>Omitting units on the final rate — Edexcel mark schemes often require cm s⁻¹ or cm³ s⁻¹ for the final mark.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Stays fully within Edexcel IAL P3/P4 (related rates via chain rule) and FP differentiation. The chain rule dy/dt = (dy/dx)(dx/dt) is in the formula booklet implicitly under differentiation rules. Avoid generalising to partial derivatives or multivariable chain rules — IAL treats only single-variable chains, with any extra variable eliminated geometrically before differentiating.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P4/ch5/q-Jun_2021-Q3.html" class="example-chip">P4 Jun 2021 Q3</a><a href="../P4/ch5/q-Jan_2022-Q4.html" class="example-chip">P4 Jan 2022 Q4</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

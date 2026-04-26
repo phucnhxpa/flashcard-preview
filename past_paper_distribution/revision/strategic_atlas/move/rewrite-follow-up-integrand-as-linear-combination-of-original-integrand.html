@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rewrite follow-up integrand as linear combination of original integrand — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Integrand Bridge</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Rewrite follow-up integrand as linear combination of original integrand</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Integrand Bridge</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires on multi-part numerical integration questions where part (b) estimates ∫f(x) dx (typically by trapezium rule) and a later part says &#x27;hence&#x27; find ∫g(x) dx over the same limits, with g(x) algebraically related to f(x). Cue words: &#x27;hence&#x27;, &#x27;use your answer to&#x27;, or matching limits with a structurally similar integrand. Especially common when both integrands share a transcendental term (like log₁₀(sin x), eˣ, or √(x)) with the same or opposite sign.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Definite integration is linear: ∫(af(x) + b) dx = a∫f(x) dx + b(upper − lower). If the new integrand can be written as af(x) + b, the new integral collapses into a constant plus a scalar multiple of the already-computed estimate. The mark scheme&#x27;s &#x27;hence&#x27; explicitly rewards this reuse — recomputing from scratch wastes time and forfeits method marks tied to the algebraic link.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice both integrands share the same non-trivial sub-expression (e.g. log₁₀(sin x)) — this signals an intended algebraic bridge.</li><li>Rule out redoing the trapezium rule with fresh y-values: the word &#x27;hence&#x27; and matching limits indicate reuse is mandatory.</li><li>Commit to letting y = (original integrand) and solving for the shared sub-expression in terms of y.</li><li>Substitute that expression into the new integrand and simplify to the form a − y or a + by.</li><li>Split the new integral by linearity: ∫(constant) dx becomes constant × (b − a), and ∫y dx is the known estimate.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Let y denote the original integrand (e.g. y = 1 − log₁₀(sin x)).</li><li>Solve for the shared sub-expression: log₁₀(sin x) = 1 − y.</li><li>Substitute into the new integrand: 3 + log₁₀(sin x) = 3 + (1 − y) = 4 − y.</li><li>Apply linearity: ∫ₐᵇ(4 − y) dx = 4(b − a) − ∫ₐᵇ y dx.</li><li>Insert the known numerical estimate from part (b) for ∫ₐᵇ y dx and the limits&#x27; difference for the constant term.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose part (b) gave $\int_{0.5}^{3}(1-\log_{10}(\sin x))\,dx \approx 2.3$. For part (c): let $y = 1-\log_{10}(\sin x)$, so $\log_{10}(\sin x) = 1-y$. Then $3+\log_{10}(\sin x) = 4-y$, giving $\int_{0.5}^{3}(4-y)\,dx = 4(2.5) - 2.3 = 10 - 2.3 = 7.7$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Part (c) asks for ∫(af(x) + b) dx with a ≠ 1.</div>
+<div class="adjustment">Result is a(b − a)·... no — apply linearity: a × (estimate) + b × (upper − lower).</div>
+</div><div class="variant-row">
+<div class="scenario">New integrand has same sign on shared term, e.g. f(x) = 1 + log(sin x) and g(x) = 5 + log(sin x).</div>
+<div class="adjustment">Then log(sin x) = y − 1, so g(x) = 5 + (y − 1) = 4 + y; integral becomes 4(b−a) + (estimate).</div>
+</div><div class="variant-row">
+<div class="scenario">Shared term is eˣ, √x, or another non-log expression.</div>
+<div class="adjustment">Same algebraic isolation; the bridge is independent of the function type.</div>
+</div><div class="variant-row">
+<div class="scenario">Question uses Simpson&#x27;s rule estimate instead of trapezium (Further Maths).</div>
+<div class="adjustment">Identical reasoning — linearity of ∫ doesn&#x27;t depend on which numerical method produced the estimate.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the two parts as independent and re-tabulating y-values for a fresh trapezium rule.</li><li>Identifying log₁₀(sin x) directly with y instead of with 1 − y, dropping the constant.</li><li>Forgetting that ∫(constant) dx over [a,b] equals constant × (b − a), not just the constant.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when isolating the shared term: writing log₁₀(sin x) = y − 1 instead of 1 − y.</li><li>Confusing y (the whole integrand) with just the transcendental piece inside it.</li><li>Multiplying the constant by the wrong interval length, e.g. using upper limit alone instead of (upper − lower).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P2/P3 trapezium-rule questions and Further Pure Simpson&#x27;s-rule extensions; relies only on linearity of the definite integral, which is standard A-level content.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jun_2022-Q2.html" class="example-chip">P2 Jun 2022 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

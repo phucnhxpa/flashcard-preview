@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spot integer eigenvalue by trial then deflate cubic via division — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../matrices.html">Matrices</a> / <strong>Root Spotting Then Deflation</strong></div>
+  <span class="domain-pill" style="background:#8D6E63;color:white">Matrices</span>
+  <h1>Spot integer eigenvalue by trial then deflate cubic via division</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Root Spotting Then Deflation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when the characteristic equation \(\det(A-\lambda I)=0\) expands to a cubic in \(\lambda\) with no obvious factorisation. Edexcel FP3/FM eigenvalue problems are engineered so that at least one eigenvalue is a small integer (typically in \(\{0,\pm 1,\pm 2,\pm 3\}\)) dividing the constant term. Cues include a 3×3 matrix with small integer entries and a cubic whose coefficients are modest. Also fires when the question asks to &#x27;show that \(\lambda=k\) is an eigenvalue&#x27; — a hint that \(k\) is a root to deflate by.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By the Rational Root Theorem, any rational root of a monic (or leading-coefficient \(\pm 1\)) cubic with integer coefficients must divide the constant term. Once one root \(\lambda_1\) is verified, the factor theorem guarantees \((\lambda-\lambda_1)\) divides the cubic exactly, leaving a quadratic quotient that is solvable by the formula or inspection. This converts a hard cubic into a trivial linear search plus a routine quadratic — exactly the structure A-level expects.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Student notices the characteristic polynomial is a genuine cubic with no common \(\lambda\) factor and no immediate grouping.</li><li>They rule out the cubic formula (out of A-level scope) and random algebraic manipulation as inefficient.</li><li>They commit to root-spotting because the constant term is small and integer roots are likely by exam design.</li><li>Bridge: list the divisors of the constant term as candidate roots and prepare to substitute.</li><li>Tactical decision: after finding \(\lambda_1\), choose between synthetic division, long division, or comparing coefficients to extract the quadratic factor — pick whichever minimises sign errors.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the characteristic cubic in standard form, e.g. \(\lambda^3 + p\lambda^2 + q\lambda + r = 0\) (multiply by \(-1\) if needed).</li><li>List divisors of the constant term \(r\) as candidate integer roots.</li><li>Substitute candidates \(\lambda = \pm 1, \pm 2, \ldots\) until one yields zero — call it \(\lambda_1\).</li><li>Divide the cubic by \((\lambda - \lambda_1)\) using long division, synthetic division, or coefficient comparison to obtain a quadratic \(\lambda^2 + s\lambda + t\).</li><li>Solve the quadratic by factorisation or the quadratic formula to obtain \(\lambda_2, \lambda_3\).</li><li>State all three eigenvalues.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Suppose \(\det(A-\lambda I) = -\lambda^3 + 2\lambda^2 + 5\lambda - 6 = 0\), i.e. \(\lambda^3 - 2\lambda^2 - 5\lambda + 6 = 0\). Test \(\lambda=1\): \(1-2-5+6 = 0\) ✓. Divide: \(\lambda^3 - 2\lambda^2 - 5\lambda + 6 = (\lambda-1)(\lambda^2 - \lambda - 6)\). Factor the quadratic: \((\lambda-3)(\lambda+2)\). Eigenvalues: \(\lambda = 1, 3, -2\).</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Cubic has zero constant term</div>
+<div class="adjustment">Factor \(\lambda\) out immediately; one eigenvalue is \(0\) and the remaining quadratic is solved directly.</div>
+</div><div class="variant-row">
+<div class="scenario">Question states &#x27;show \(\lambda=k\) is an eigenvalue&#x27;</div>
+<div class="adjustment">Verify by substitution, then deflate by \((\lambda-k)\) without searching.</div>
+</div><div class="variant-row">
+<div class="scenario">Symmetric matrix with a known repeated eigenvalue</div>
+<div class="adjustment">After spotting one root, expect the quadratic factor to be a perfect square; check the discriminant.</div>
+</div><div class="variant-row">
+<div class="scenario">Cubic factors by grouping</div>
+<div class="adjustment">Try grouping pairs of terms before trial substitution — sometimes \(\lambda^2(\lambda-a) - b(\lambda-a)\) appears.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the cubic as needing the cubic formula or numerical methods rather than recognising the exam-design hint of an integer root.</li><li>Testing values not dividing the constant term (e.g. \(\lambda=4\) when the constant is 6) and wasting time.</li><li>Confusing the characteristic polynomial sign convention and listing divisors of the wrong constant.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign errors during synthetic or long division, especially when the cubic has a leading \(-\lambda^3\) term — multiply through by \(-1\) first.</li><li>Forgetting to check whether the discriminant of the quadratic factor is zero, which would indicate a repeated eigenvalue.</li><li>Stopping after finding one eigenvalue and not stating all three.</li><li>Arithmetic slips when expanding \(\det(A-\lambda I)\) before the trial — verify the cubic carefully first.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP3) eigenvalue work for 3×3 matrices; uses only the factor theorem, polynomial division, and the quadratic formula — all core A-level techniques.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP3/ch6/q-Jun_2023-Q2.html" class="example-chip">FP3 Jun 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

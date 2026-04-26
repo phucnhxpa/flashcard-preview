@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assign independent decay clocks to each superimposed dose — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Modelling Setup</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Assign independent decay clocks to each superimposed dose</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Modelling Setup</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Two or more quantities follow the same exponential decay law $x = De^{-kt}$ but are introduced at different absolute times, and you are asked for the total at some later instant. Wording cues include &#x27;a second dose is given $5$ hours after the first&#x27;, &#x27;find the total amount $T$ hours after the second dose&#x27;, or any phrasing that mixes a global observation time with locally-reset decay models. The model&#x27;s $t$ variable explicitly means &#x27;time since this particular dose was administered&#x27;, not absolute clock time. Fires whenever the same decay/growth law must be applied with different starting epochs and the contributions are then summed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Each dose decays independently from the instant it enters the body, so its contribution at any later time depends only on its own elapsed time, not on when other doses were given. Because the differential equation $\frac{dx}{dt} = -kx$ is linear, the principle of superposition applies: the total amount is the sum of the individual decaying contributions. Assigning a separate elapsed-time variable to each dose turns a confusing two-clock problem into a clean sum of exponentials. Once elapsed times are correctly identified, every term is a direct substitution into the given model.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the model $x = De^{-0.2t}$ uses $t$ as &#x27;time since administration&#x27;, so each dose carries its own private clock starting at zero.</li><li>Rule out using a single shared $t$ for both doses — that would ignore the offset between administration times and double-count the decay.</li><li>Commit to introducing distinct elapsed-time expressions for each dose, measured from its own start, evaluated at the same absolute observation moment.</li><li>Bridge: pick an absolute time axis, mark each administration time on it, mark the observation time, and read off each elapsed time as (observation time) − (administration time).</li><li>Tactically, write the total as a sum of exponential terms with the same $D$ and $k$ but different exponents, then simplify only after the structure is clearly visible.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Set an absolute time axis and record each dose&#x27;s administration time, e.g. dose 1 at $t_{\text{abs}} = 0$, dose 2 at $t_{\text{abs}} = 5$.</li><li>Identify the absolute observation time, e.g. $t_{\text{abs}} = 5 + T$.</li><li>For each dose, compute elapsed time = observation time − administration time: dose 1 gives $5 + T$, dose 2 gives $T$.</li><li>Substitute each elapsed time into the decay model: $15e^{-0.2(5+T)}$ and $15e^{-0.2T}$.</li><li>Sum the contributions: $x = 15e^{-0.2(5+T)} + 15e^{-0.2T}$, then simplify (e.g. factor $15e^{-0.2T}$) only if useful.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>A $15$ mg dose is given at $t_{\text{abs}} = 0$ and another at $t_{\text{abs}} = 5$, each decaying as $x = 15e^{-0.2t}$ where $t$ is hours since that dose. Total amount $T$ hours after the second dose (i.e. at $t_{\text{abs}} = 5+T$): dose 1 has decayed for $5+T$ hours, dose 2 for $T$ hours, so $x = 15e^{-0.2(5+T)} + 15e^{-0.2T} = 15e^{-0.2T}\!\left(e^{-1} + 1\right)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Three or more repeated doses in pharmacokinetics</div>
+<div class="adjustment">Sum one exponential term per dose, each with its own elapsed time measured from its own administration moment.</div>
+</div><div class="variant-row">
+<div class="scenario">Radioactive samples mixed at different times</div>
+<div class="adjustment">Replace &#x27;doses&#x27; with &#x27;sources&#x27;; same superposition $x = \sum A_i e^{-k(t - t_i)}$ for $t \ge t_i$.</div>
+</div><div class="variant-row">
+<div class="scenario">Newton&#x27;s law of cooling with two objects placed in the room at different times</div>
+<div class="adjustment">Each temperature excess decays from its own placement time; total/average uses individual elapsed times.</div>
+</div><div class="variant-row">
+<div class="scenario">Compound interest deposits made on different dates (growth instead of decay)</div>
+<div class="adjustment">Use $A_i e^{r(t - t_i)}$ with positive exponent; otherwise identical structure.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Using a single $t$ for both doses, e.g. writing $15e^{-0.2T} + 15e^{-0.2T} = 30e^{-0.2T}$, which ignores the $5$-hour offset.</li><li>Treating $t$ in the model as absolute clock time rather than &#x27;time since this dose&#x27;.</li><li>Measuring both elapsed times from the first dose but forgetting to subtract $5$ in the second dose&#x27;s exponent.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign/offset error: writing $5 - T$ instead of $5 + T$ for the first dose&#x27;s elapsed time.</li><li>Combining exponentials incorrectly, e.g. $e^{-0.2(5+T)} + e^{-0.2T} = e^{-0.2(5+2T)}$ (exponentials do not add that way).</li><li>Forgetting that the result is only valid for $T \ge 0$ (after the second dose has been given).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure/Statistics exponential modelling: uses only $e^{kt}$ manipulation and summation, no differential equations or convolution machinery beyond linear superposition stated in words.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Specimen_2018-Q10.html" class="example-chip">P3 Specimen 2018 Q10</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

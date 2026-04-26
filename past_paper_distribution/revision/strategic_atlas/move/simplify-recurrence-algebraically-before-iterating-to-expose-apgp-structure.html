@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simplify recurrence algebraically before iterating to expose AP/GP structure — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../sequences_series.html">Sequences &amp; Series</a> / <strong>Recurrence Simplification</strong></div>
+  <span class="domain-pill" style="background:#26A69A;color:white">Sequences &amp; Series</span>
+  <h1>Simplify recurrence algebraically before iterating to expose AP/GP structure</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Recurrence Simplification</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a recurrence $a_{n+1}=f(a_n)$ is presented in an unsimplified form containing obvious algebraic redundancies — common factors that cancel (e.g. $2(a_n+3)/2$), like terms that combine, or brackets that expand to something cleaner. Cue phrases: &#x27;a recurrence is defined by...&#x27; followed by a fraction, nested brackets, or mixed constants. Also fires whenever you are about to compute several terms by repeated substitution and the given form looks heavier than necessary.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Most IAL recurrences hide a standard structure ($a_{n+1}=a_n+d$, $a_{n+1}=ra_n$, or $a_{n+1}=ra_n+c$) behind cosmetic algebra. Simplifying first converts the problem into a recognised AP/GP/linear recurrence, so closed-form formulae and standard sums become available. It also prevents compounded arithmetic slips: each iteration on a clean form costs one addition rather than a fraction evaluation.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the RHS contains a redundant structure — here a factor of $2$ in the numerator and denominator of $2(a_n+3)/2$.</li><li>Rule out diving straight into substitution of $a_1$: that would carry the redundancy through every term and inflate error risk.</li><li>Commit to algebraic simplification first because the cleaner form will (i) reveal whether the sequence is arithmetic/geometric and (ii) make every subsequent term trivial.</li><li>Bridge: cancel the common factor, then collect constants to read off the standard form $a_{n+1}=a_n+d$ or $a_{n+1}=ra_n+c$.</li><li>Tactical decision: once simplified, identify $d$ (or $r,c$) and only then begin iterating or applying $a_n=a_1+(n-1)d$.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Inspect the RHS for cancellable factors, like terms, or expandable brackets.</li><li>Perform the cancellation/expansion: e.g. $\dfrac{2(a_n+3)}{2}=a_n+3$.</li><li>Combine constants: $a_{n+1}=a_n+3-7=a_n-4$.</li><li>Classify: compare against $a_{n+1}=a_n+d$ (AP), $a_{n+1}=ra_n$ (GP), or $a_{n+1}=ra_n+c$ (linear).</li><li>Record the parameter(s) ($d=-4$ here) before computing any terms or sums.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $a_{n+1}=\dfrac{2(a_n+3)}{2}-7$ with $a_1=10$.\\ Simplify: $a_{n+1}=a_n+3-7=a_n-4$, so the sequence is arithmetic with $d=-4$.\\ Then $a_n=10+(n-1)(-4)=14-4n$, giving $a_2=6,\ a_3=2,\ a_4=-2$ instantly.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Geometric recurrence disguised by a common factor, e.g. $a_{n+1}=\dfrac{6a_n}{2}$</div>
+<div class="adjustment">Cancel to $a_{n+1}=3a_n$, identify GP with $r=3$, then use $a_n=a_1 r^{n-1}$.</div>
+</div><div class="variant-row">
+<div class="scenario">Bracketed expansion hiding a linear recurrence, e.g. $a_{n+1}=3(a_n-2)+5$</div>
+<div class="adjustment">Expand and combine: $a_{n+1}=3a_n-1$; recognise linear (non-AP/GP) and iterate or solve via fixed-point shift.</div>
+</div><div class="variant-row">
+<div class="scenario">Fraction with same denominator on both terms, e.g. $a_{n+1}=\dfrac{a_n+4}{2}+\dfrac{a_n}{2}$</div>
+<div class="adjustment">Combine over the common denominator to $a_{n+1}=a_n+2$, an AP with $d=2$.</div>
+</div><div class="variant-row">
+<div class="scenario">Constant collapsing inside trig/log-free recurrence, e.g. $a_{n+1}=a_n+5-3$</div>
+<div class="adjustment">Collect to $a_{n+1}=a_n+2$ before computing terms or applying $S_n$ formulae.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Substituting $a_1$ into the original unsimplified form and chasing fractions through every iteration.</li><li>Misreading $\dfrac{2(a_n+3)}{2}$ as $2a_n+\dfrac{3}{2}$ or $2a_n+3/2$ due to dropped brackets.</li><li>Treating the recurrence as geometric because of the visible factor of $2$, instead of cancelling it.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Cancelling the $2$ correctly but forgetting to subtract the trailing $7$, leaving $a_{n+1}=a_n+3$.</li><li>Sign error when combining constants: writing $3-7=-3$ or $+4$ instead of $-4$.</li><li>Identifying the AP correctly but then using $a_n=a_1+nd$ instead of $a_n=a_1+(n-1)d$.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL P1/P2 sequences and series: recognising AP/GP from a recurrence and applying $a_n=a_1+(n-1)d$ or $a_n=a_1 r^{n-1}$. No solution of general linear recurrences beyond term-by-term iteration is required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch4/q-Jan_2021-Q8.html" class="example-chip">P2 Jan 2021 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

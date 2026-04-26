@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partition region using geometric boundaries to assign per-piece integration limits — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_int.html">Integration</a> / <strong>Region Decomposition</strong></div>
+  <span class="domain-pill" style="background:#FFA726;color:white">Integration</span>
+  <h1>Partition region using geometric boundaries to assign per-piece integration limits</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Region Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A diagram shows two (or more) shaded regions whose boundaries are described by a mix of curves, lines, and coordinate axes (e.g. R₁ bounded by C, l and the y-axis; R₂ bounded by C and a chord). The limits are not all given by curve–curve intersections — at least one boundary is a coordinate axis or a vertical/horizontal line stated in the question. Wording cues include &#x27;bounded by ... and the y-axis&#x27;, &#x27;enclosed between C and the line&#x27;, or labelled points E, F at intersections. Fires before any antiderivative is computed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>An integral ∫ₐᵇ (top − bottom) dx requires concrete numerical limits, but the problem supplies them implicitly through geometry. The y-axis means x = 0; a labelled intersection point means solving curve = line. By matching each region&#x27;s verbal/visual boundary description to an x-value (or y-value), the student converts a picture into a definite integral. Treating each region separately avoids cancellation between pieces where the &#x27;top&#x27; function changes.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the two shaded regions have different boundary descriptions — one mentions the y-axis, the other does not.</li><li>Rule out using a single integral over the whole x-range, since the upper/lower function swaps at the intersection point E.</li><li>Commit to splitting at the shared boundary x-value (point E) and treating R₁ and R₂ as independent integrals.</li><li>Translate each named boundary into an x-value: y-axis → x = 0; point E → solve C = l; point F → second intersection.</li><li>Decide which curve is on top in each subregion (often different) before writing the integrand.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>List every boundary of each region in words: curve C, line l, axis, chord, etc.</li><li>Convert each boundary to an equation: y-axis → x = 0, x-axis → y = 0, named points → solve simultaneously.</li><li>Find intersection x-coordinates by setting the relevant curves equal.</li><li>Assign limits: R₁ from x = 0 to x = 1; R₂ from x = 1 to x = 3 (or analogous).</li><li>For each piece, identify top function minus bottom function on that interval.</li><li>Write Area = ∫₀¹ (top₁ − bottom₁) dx + ∫₁³ (top₂ − bottom₂) dx.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve C: y = x(3−x) and line l: y = x meet where x(3−x) = x ⇒ x = 0 or x = 2. R₁ is bounded by C, l and the y-axis; R₂ is enclosed by C and l. Then R₁ runs from x = 0 to x = 0 (degenerate here) — instead take y-axis with C: y = x(3−x), line l: y = x+1, meeting at x = 1. R₁ = ∫₀¹ [(x(3−x)) − (x+1)] dx, R₂ = ∫₁ˣ_F [...] dx using the second intersection x_F.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Region bounded by curve and the x-axis up to a vertical line x = k</div>
+<div class="adjustment">Lower limit comes from where curve meets x-axis (y = 0); upper limit is the stated k.</div>
+</div><div class="variant-row">
+<div class="scenario">Two curves intersecting twice with no axis involved</div>
+<div class="adjustment">Both limits are intersection x-values; solve f(x) = g(x) for both.</div>
+</div><div class="variant-row">
+<div class="scenario">Integration with respect to y (horizontal strips)</div>
+<div class="adjustment">Replace x-axis/y-axis roles; y-axis boundary becomes a y-limit only if region is described in y.</div>
+</div><div class="variant-row">
+<div class="scenario">Region containing a point where top/bottom functions swap</div>
+<div class="adjustment">Split the integral at the swap point even if it is not a labelled vertex.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric or polar region (Further Maths)</div>
+<div class="adjustment">Convert geometric boundaries to parameter or angle limits, e.g. θ = 0 for the initial line.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming both regions share the same limits (e.g. both from 1 to 3), ignoring that R₁ extends back to the y-axis.</li><li>Treating a labelled point as an intersection of curve and line when it is actually the foot of a perpendicular or a point on an axis.</li><li>Including or excluding a triangular sliver (e.g. under chord DF) that the diagram does not actually shade.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Using a single integral from x = 0 to x = 3 then trying to split mid-calculation — error-prone compared with setting up two integrals from the start.</li><li>Forgetting that on R₁ the line is above the curve while on R₂ the curve is above the line (or vice versa), leading to a sign error.</li><li>Solving curve = line and using only one root, missing the second intersection that bounds R₂.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P2/P3 area-between-curves work; all boundaries are lines, polynomial/rational/exponential curves, or coordinate axes, and limits are found by elementary simultaneous equations.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch8/q-Jan_2023-Q9.html" class="example-chip">P2 Jan 2023 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose &#x27;perpendicular bisector&#x27; into midpoint plus perpendicular gradient — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Problem Decomposition</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Decompose &#x27;perpendicular bisector&#x27; into midpoint plus perpendicular gradient</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Problem Decomposition</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question asks for the equation of the &#x27;perpendicular bisector&#x27; of a segment $AB$, or equivalently &#x27;the line equidistant from $A$ and $B$&#x27; phrased as a straight line. Also fires for sub-parts that ask for the locus of a circle&#x27;s centre given two points on its circumference, since that centre lies on such a bisector. Cue words: &#x27;perpendicular bisector&#x27;, &#x27;mediator&#x27;, &#x27;equidistant from two fixed points&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>A straight line in the plane is uniquely determined by one point and one gradient. The compound term &#x27;perpendicular bisector&#x27; supplies exactly these two pieces: &#x27;bisector&#x27; pins down a point (the midpoint of $AB$), and &#x27;perpendicular&#x27; pins down the gradient (negative reciprocal of $m_{AB}$). Splitting the phrase into its two defining constraints turns a geometric description into two routine algebraic computations that can be assembled with $y - y_0 = m(x - x_0)$.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Student notices the phrase &#x27;perpendicular bisector&#x27; and parses it as two independent line-defining constraints rather than a single mysterious object.</li><li>They rule out the locus approach $|PA|^2 = |PB|^2$ as overkill for a straight line, and rule out guessing intercepts or using only the midpoint without the gradient.</li><li>They commit because &#x27;point + gradient&#x27; is the minimal data for a line, and both pieces are directly readable from the wording.</li><li>Bridge to first operation: compute the midpoint $M$ of $AB$ via the average formula, then compute $m_{AB}$.</li><li>Tactical decision: take the negative reciprocal $m_\perp = -1/m_{AB}$, then substitute $M$ and $m_\perp$ into point-gradient form and tidy to the form requested (often $ax+by+c=0$).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Sub-task 1: compute midpoint $M = \left(\tfrac{x_1+x_2}{2}, \tfrac{y_1+y_2}{2}\right)$.</li><li>Sub-task 2: compute $m_{AB} = \tfrac{y_2-y_1}{x_2-x_1}$.</li><li>Sub-task 3: take perpendicular gradient $m_\perp = -\tfrac{1}{m_{AB}}$ (handle vertical/horizontal $AB$ separately).</li><li>Assembly: write $y - y_M = m_\perp(x - x_M)$ and rearrange to the requested form.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>For $A(2,-1)$ and $B(8,5)$: midpoint $M = (5,2)$; gradient $m_{AB} = \tfrac{5-(-1)}{8-2} = 1$; so $m_\perp = -1$. The perpendicular bisector is $y - 2 = -1(x-5)$, i.e. $y = -x + 7$ or $x + y - 7 = 0$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Perpendicular bisector of a chord of a circle</div>
+<div class="adjustment">Same decomposition, but the resulting line must pass through the centre — use this as a cross-check or to locate an unknown centre.</div>
+</div><div class="variant-row">
+<div class="scenario">Locus of points equidistant from $A$ and $B$</div>
+<div class="adjustment">Set $|PA|^2 = |PB|^2$, expand and simplify; this bypasses gradients and is useful when $AB$ is vertical/horizontal or when the perpendicular gradient is awkward.</div>
+</div><div class="variant-row">
+<div class="scenario">Circumcentre of a triangle</div>
+<div class="adjustment">Apply the move to two sides separately and intersect the two perpendicular bisectors.</div>
+</div><div class="variant-row">
+<div class="scenario">$AB$ is horizontal ($y_1 = y_2$)</div>
+<div class="adjustment">Perpendicular bisector is the vertical line $x = \tfrac{x_1+x_2}{2}$; do not invoke negative reciprocal.</div>
+</div><div class="variant-row">
+<div class="scenario">$AB$ is vertical ($x_1 = x_2$)</div>
+<div class="adjustment">Perpendicular bisector is the horizontal line $y = \tfrac{y_1+y_2}{2}$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating &#x27;perpendicular bisector&#x27; as a line through the midpoint parallel to $AB$, dropping the perpendicularity condition.</li><li>Computing the midpoint correctly but using $m_{AB}$ instead of $-1/m_{AB}$ as the gradient.</li><li>Using one of the endpoints $A$ or $B$ instead of the midpoint as the point on the line.</li><li>Confusing &#x27;perpendicular bisector of $AB$&#x27; with &#x27;perpendicular from a point to $AB$&#x27;, which is a different construction.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error when forming the negative reciprocal, e.g. writing $1/m$ instead of $-1/m$.</li><li>Arithmetic slip in the midpoint, especially with negative coordinates: $\tfrac{x_1+x_2}{2}$, not $\tfrac{x_2-x_1}{2}$.</li><li>Failing to handle the vertical/horizontal $AB$ edge cases where the gradient is $0$ or undefined.</li><li>Leaving the answer in point-gradient form when the question demands $ax+by+c=0$ with integer coefficients.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Pure Mathematics P1 (coordinate geometry of straight lines): midpoint formula, gradient, perpendicular gradients via $m_1 m_2 = -1$, and point-gradient form. No vectors or calculus required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P2/ch3/q-Jun_2023-Q3.html" class="example-chip">P2 Jun 2023 Q3</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

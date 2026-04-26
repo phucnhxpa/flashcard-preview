@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decompose modulus graph via chain of transformations from y = |x| — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../algebra.html">Algebra &amp; Functions</a> / <strong>Transformation Sequencing</strong></div>
+  <span class="domain-pill" style="background:#5B6BFA;color:white">Algebra &amp; Functions</span>
+  <h1>Decompose modulus graph via chain of transformations from y = |x|</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Transformation Sequencing</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a function of the form $y = a|x - p| + q$ or $y = q - a|x - p|$ is presented and a sketch (or key features: vertex, intercepts, gradients) is required, often with a parameter such as $k$. Common cues are &#x27;sketch the graph of $y = k - 2|x|$&#x27;, &#x27;state the coordinates of the vertex in terms of $k$&#x27;, or follow-up parts asking how many solutions an equation has. Also fires when comparing the graph to the parent $y = |x|$ is faster than piecewise analysis.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Every modulus function of this form is built from $y = |x|$ by a composition of stretches, reflections, and translations, and these transformations act predictably on the V-shape. Decomposing the formula in the order (horizontal shift, stretch, reflection, vertical shift) immediately fixes the vertex, the gradient of each arm, and the orientation (V or inverted V). This avoids casework on $x \ge 0$ vs $x &lt; 0$ and gives a sketch that is structurally correct, which is essential when later parts use the graph to count intersections with a line $y = mx + c$.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the expression contains $|x|$ (or $|x - p|$) wrapped by multiplicative and additive constants — this is a transformed parent graph, not a new shape to plot pointwise.</li><li>Rule out plotting via tables of values or solving piecewise inequalities: both are slower and more error-prone for a sketch worth a few marks.</li><li>Commit to the transformation chain because the vertex, slopes, and orientation drop out directly, and intercepts are then a one-line calculation.</li><li>Bridge: read the formula outwards from $|x|$ — identify in order any inside shift, the multiplier on $|\cdot|$ (stretch and possibly reflection), and the outside constant (vertical shift).</li><li>Tactically, apply the inside shift first, then the stretch, then the reflection (if the coefficient is negative), then the vertical translation; track the vertex through each step rather than redrawing.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the parent: $y = |x|$ (V-shape, vertex $(0,0)$, gradients $\pm 1$).</li><li>Apply any horizontal shift inside the modulus: $|x - p|$ moves the vertex to $(p, 0)$.</li><li>Apply the vertical stretch by $|a|$: gradients become $\pm |a|$.</li><li>If the coefficient of $|\cdot|$ is negative, reflect in the $x$-axis to get an inverted V.</li><li>Apply the vertical shift: add $q$ (or $k$) so the vertex moves to $(p, q)$.</li><li>Compute axis intercepts from the final equation to label the sketch.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Sketch $y = k - 2|x|$ for $k > 0$. Start from $y = |x|$; stretch vertically by $2$ to get $y = 2|x|$ (gradients $\pm 2$); reflect in the $x$-axis to get $y = -2|x|$ (inverted V, vertex $(0,0)$); translate up by $k$ to get $y = k - 2|x|$ with vertex $(0, k)$. Setting $y = 0$ gives $|x| = k/2$, so $x$-intercepts are $\left(\pm \tfrac{k}{2}, 0\right)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">$y = |x - a| + b$ with $a, b &gt; 0$</div>
+<div class="adjustment">No reflection or stretch; translate the V-shape right by $a$ and up by $b$, vertex at $(a, b)$, gradients $\pm 1$.</div>
+</div><div class="variant-row">
+<div class="scenario">$y = |2x - k|$</div>
+<div class="adjustment">Factor inside as $2|x - k/2|$: horizontal translation by $k/2$ then vertical stretch by $2$, giving vertex $(k/2, 0)$ and gradients $\pm 2$.</div>
+</div><div class="variant-row">
+<div class="scenario">$y = a - |x - p|$</div>
+<div class="adjustment">Translate right by $p$, reflect in $x$-axis, then translate up by $a$, giving an inverted V with vertex $(p, a)$ and gradients $\pm 1$.</div>
+</div><div class="variant-row">
+<div class="scenario">$y = |\,f(x)\,|$ where $f$ is linear, e.g. $y = |3x + 6|$</div>
+<div class="adjustment">Rewrite as $3|x + 2|$: vertex at $(-2, 0)$, gradients $\pm 3$; reflection of the parent in the $x$-axis is implicit only on the part where $f(x) &lt; 0$.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Reading $y = k - 2|x|$ as $y = |k - 2x|$, conflating an external subtraction with subtraction inside the modulus.</li><li>Treating the coefficient $2$ in $|2x - k|$ as a horizontal effect only and not factoring it out, leading to a wrong vertex.</li><li>Assuming $k$ must be positive and drawing the graph above the $x$-axis without considering sign of $k$ when the question allows it.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting the reflection when the coefficient of $|\cdot|$ is negative, drawing a V opening upward with vertex $(0, k)$.</li><li>Placing $x$-intercepts at $\pm k$ instead of $\pm k/2$ by ignoring the factor of $2$.</li><li>Applying transformations in the wrong order (e.g. translating before stretching when the stretch is on the modulus argument) and shifting the vertex incorrectly.</li><li>Labelling only the vertex and omitting intercepts (or vice versa), losing presentation marks on a &#x27;sketch showing key features&#x27; question.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>This is core Edexcel IAL Pure content (modulus graphs and transformations of $y = f(x)$). All steps stay within sketches, vertex/intercept identification, and standard transformation rules covered in P2/P3.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jun_2021-Q6.html" class="example-chip">P3 Jun 2021 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

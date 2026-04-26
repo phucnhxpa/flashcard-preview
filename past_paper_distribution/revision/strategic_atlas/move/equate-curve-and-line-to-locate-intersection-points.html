@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate curve and line to locate intersection points — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../coordinate_geom.html">Coordinate Geometry</a> / <strong>Simultaneous Equations</strong></div>
+  <span class="domain-pill" style="background:#42A5F5;color:white">Coordinate Geometry</span>
+  <h1>Equate curve and line to locate intersection points</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Simultaneous Equations</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>A question asks for points where two graphs meet — typically a tangent/normal/chord meeting a curve again, or two curves intersecting. Phrases like &#x27;meets the curve again&#x27;, &#x27;find the other point of intersection&#x27;, &#x27;where the line crosses the curve&#x27;, or &#x27;find the coordinates of the points of intersection&#x27; all signal this move. It also fires when you need to verify that a known point lies on both, then find any additional intersections.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>At any intersection point both equations give the same y for the same x, so equating their y-expressions eliminates y and produces a single equation in x whose roots are exactly the intersection x-coordinates. This reduces a 2D geometric problem to a 1D algebraic one. Once x is found, substitute back into the simpler (linear) equation to recover y.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the question demands a point lying on both loci, so a system of two equations in (x,y) governs the answer.</li><li>Rule out geometric/graphical shortcuts — exact coordinates are wanted, so algebra is needed.</li><li>Commit to elimination of y by equating the two y-expressions, since one equation is already y = (line) and the other is y = f(x).</li><li>Write f(x) = mx + c, then clear denominators if f involves fractions, and bring everything to one side to get P(x) = 0.</li><li>Use any known intersection (e.g. the point of tangency/normal foot from an earlier part) as a guaranteed root to factorise the polynomial and isolate the remaining intersection(s).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write both equations in the form y = (expression in x).</li><li>Set the two expressions equal: f(x) = mx + c.</li><li>Clear denominators (multiply through by x or any common factor) and bring all terms to one side, giving a polynomial equation = 0.</li><li>Factor out any known root (x − a) using the point given/found earlier.</li><li>Solve the remaining factor for the other intersection x-values.</li><li>Substitute each x back into y = mx + c to obtain the y-coordinates.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Curve $y = \tfrac{18}{x} + 20 - 4x - x^2$ meets the normal $y = -2x + 7$. Equating: $\tfrac{18}{x} + 20 - 4x - x^2 = -2x + 7$, so $\tfrac{18}{x} + 13 - 2x - x^2 = 0$. Multiply by $x$: $-x^3 - 2x^2 + 13x + 18 = 0$, i.e. $x^3 + 2x^2 - 13x - 18 = 0$. Knowing $x=2$ is a root (from part (a)) is wrong — test: $8+8-26-18 \ne 0$; instead factor by the actual known root and solve the resulting quadratic for the other intersection x-values, then back-substitute into $y=-2x+7$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Two curves $y=f(x)$ and $y=g(x)$ intersect</div>
+<div class="adjustment">Set $f(x)=g(x)$ instead of $f(x)=mx+c$; the resulting equation may be higher-degree.</div>
+</div><div class="variant-row">
+<div class="scenario">Line meets a circle $(x-a)^2+(y-b)^2=r^2$</div>
+<div class="adjustment">Substitute $y=mx+c$ into the circle equation to get a quadratic in $x$; discriminant tells you 0/1/2 intersections.</div>
+</div><div class="variant-row">
+<div class="scenario">Tangent meets curve (repeated root case)</div>
+<div class="adjustment">After equating, the polynomial has a repeated factor $(x-a)^2$ at the point of tangency; factor it out to find any further intersection.</div>
+</div><div class="variant-row">
+<div class="scenario">Parametric curve meets a line</div>
+<div class="adjustment">Substitute $x(t),y(t)$ into the line equation to get a single equation in $t$; solve for $t$, then recover $(x,y)$.</div>
+</div><div class="variant-row">
+<div class="scenario">Implicit curve $F(x,y)=0$ meets a line</div>
+<div class="adjustment">Substitute $y=mx+c$ into $F$ to obtain an equation in $x$ alone.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Thinking the move requires solving for both x and y simultaneously by substitution into both equations, rather than eliminating y once.</li><li>Believing the known tangency/normal-foot x is automatically a root of the new equation without verifying.</li><li>Treating &#x27;meets again&#x27; as needing a different method (e.g. calculus) instead of algebraic intersection.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to bring ALL terms to one side — partial rearrangement leads to incorrect polynomials.</li><li>Sign errors when moving terms across the equals sign.</li><li>Failing to multiply every term by $x$ when clearing the $\tfrac{1}{x}$ fraction (missing the constant term).</li><li>Losing or introducing the root $x=0$ when multiplying through by $x$ — check it is not a spurious solution.</li><li>Stopping at x-values without computing the corresponding y-values requested by the question.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P1–P4 technique used in coordinate geometry, tangents/normals, and curve-intersection problems; the resulting polynomials are typically quadratic or cubic with at least one rational root supplied by an earlier part.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P1/ch4/q-Specimen_2018-Q9.html" class="example-chip">P1 Specimen 2018 Q9</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

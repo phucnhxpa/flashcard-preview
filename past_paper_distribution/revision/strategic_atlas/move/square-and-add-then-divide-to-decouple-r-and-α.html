@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Square-and-add then divide to decouple R and α — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../trig.html">Trigonometry</a> / <strong>Pythagorean Ratio Decoupling</strong></div>
+  <span class="domain-pill" style="background:#E91E63;color:white">Trigonometry</span>
+  <h1>Square-and-add then divide to decouple R and α</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Pythagorean Ratio Decoupling</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Two simultaneous equations of the form R·cos α = a and R·sin α = b appear, with R &gt; 0 and α in a specified range. Equivalent surfaces: matching coefficients after writing a cos x + b sin x ≡ R cos(x − α) (or R sin(x + α)), or converting Cartesian point (a, b) to polar form. Cue words: &#x27;express in the form R cos(...)&#x27;,&#x27;find R and α&#x27;, or any pair of equations sharing one angle locked between cos and sin.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Squaring both equations and adding invokes cos²α + sin²α = 1, killing α and leaving R² = a² + b². Dividing the sin-equation by the cos-equation invokes sin α / cos α = tan α, killing R and leaving tan α = b/a. The two Pythagorean-ratio identities are complementary: one isolates the magnitude, the other isolates the angle, so the system separates cleanly without substitution.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice two equations sharing the same α, with R appearing as a common multiplier — this is the signature of a harmonic-form identification problem.</li><li>I rule out direct substitution (solving one equation for cos α and plugging in) because that introduces square roots and quadrant ambiguity.</li><li>I commit to the square-add / divide pair because cos²α + sin²α = 1 and tan α = sin α / cos α are exactly the identities that decouple R from α.</li><li>First operation: square each equation so the squared trig terms can combine via Pythagoras to give R².</li><li>Tactically I take R &gt; 0 (as stipulated), then use the signs of a and b to place α in the correct quadrant before applying arctan.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Write the two equations: R cos α = a, R sin α = b.</li><li>Square both: R² cos²α = a², R² sin²α = b².</li><li>Add and use cos²α + sin²α = 1: R² = a² + b², so R = √(a² + b²) (positive root).</li><li>Divide the sin-equation by the cos-equation: tan α = b/a.</li><li>Determine α from arctan(b/a), adjusting by ±π if the quadrant (set by signs of a and b) requires it; check α lies in the stated range.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Given $R\cos\alpha = \sqrt5$ and $R\sin\alpha = 2\sqrt5$ with $R>0,\;0<\alpha<\tfrac{\pi}{2}$: square and add to get $R^2 = 5 + 20 = 25$, so $R = 5$. Divide to get $\tan\alpha = \dfrac{2\sqrt5}{\sqrt5} = 2$, so $\alpha = \arctan 2 \approx 1.107$ rad. Hence $\sqrt5\cos x + 2\sqrt5\sin x \equiv 5\cos(x - 1.107)$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Expressing a cos x + b sin x ≡ R sin(x + α)</div>
+<div class="adjustment">Match to get R sin α = a (cos-coefficient) and R cos α = b (sin-coefficient); same square-add gives R, divide gives tan α = a/b.</div>
+</div><div class="variant-row">
+<div class="scenario">Expressing a sin x − b cos x ≡ R sin(x − α)</div>
+<div class="adjustment">Matching gives R cos α = a, R sin α = b; technique unchanged but mind the sign convention on α.</div>
+</div><div class="variant-row">
+<div class="scenario">Cartesian to polar conversion (x, y) → (r, θ)</div>
+<div class="adjustment">Use r = √(x² + y²) and θ = arctan(y/x), with quadrant correction based on signs of x and y.</div>
+</div><div class="variant-row">
+<div class="scenario">Complex number a + bi to modulus-argument form</div>
+<div class="adjustment">|z| = √(a² + b²) plays the role of R; arg z = arctan(b/a) (with quadrant adjustment) plays the role of α.</div>
+</div><div class="variant-row">
+<div class="scenario">Solving a cos x + b sin x = c (after harmonic conversion)</div>
+<div class="adjustment">First apply this move to obtain R and α, then solve R cos(x − α) = c.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the system as linear in cos α and sin α and trying to eliminate by row operations — misses the Pythagorean shortcut.</li><li>Reading R·cos α as a product of two unknowns to be solved separately, rather than as a coupled pair to be decoupled by identity.</li><li>Confusing which form is being targeted (R cos(x − α) vs R sin(x + α)) and matching coefficients to the wrong slot.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Forgetting to take the positive root for R when the question stipulates R &gt; 0.</li><li>Applying arctan without quadrant analysis: if a &lt; 0 or b &lt; 0, arctan(b/a) alone gives the wrong α.</li><li>Squaring loses sign information — recover sign from the original equations, not the squared ones.</li><li>Mixing up which equation is sin and which is cos when dividing, giving tan α = a/b instead of b/a.</li><li>Leaving α in degrees when the question (or range) is in radians, or vice versa.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL P3 &#x27;harmonic form&#x27; technique (a cos x + b sin x ≡ R cos(x ∓ α) or R sin(x ± α)); also reused in FP1 polar/Cartesian conversion and complex-number modulus-argument work.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch2/q-Jan_2023-Q2.html" class="example-chip">P3 Jan 2023 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

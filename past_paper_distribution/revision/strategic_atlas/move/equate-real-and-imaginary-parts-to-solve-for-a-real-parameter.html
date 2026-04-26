@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equate real and imaginary parts to solve for a real parameter — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Real Imaginary Separation</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Equate real and imaginary parts to solve for a real parameter</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Real Imaginary Separation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a complex equation must hold with a real unknown (parameter, coordinate, or coefficient) appearing on one side. Cues: an equation of the form a+bi = c+di where one side is purely real or purely imaginary, or where the unknown is stated to be real. Also triggers in locus work when w = u+iv is set equal to an expression in x,y, or when finding real/imaginary parts of a quotient. Any phrase like &#x27;find the real value of p such that...&#x27; is a strong signal.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Two complex numbers are equal iff their real parts are equal AND their imaginary parts are equal — this is the defining property of C as R^2 with the chosen basis {1,i}. So one complex equation encodes two simultaneous real equations. When the unknown is real, this typically gives one determining equation plus one consistency condition. The method converts complex algebra into ordinary real algebra without losing information.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the equation is complex-valued but the unknown p is declared real, so p contributes only to the real part of any expression it sits in.</li><li>Rule out brute manipulation (e.g. dividing both sides by i or taking modulus) — these can lose information or introduce extraneous solutions.</li><li>Commit to writing each side in the canonical a+bi form so that matching is unambiguous.</li><li>Bridge: identify which terms are real and which carry an explicit i, treating √3, π, etc. as real constants.</li><li>Tactically: solve the simpler of the two resulting equations first; use the other as a consistency check, and if it fails, suspect a misread or algebraic slip upstream.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Rearrange so each side is in the form (real expression) + i·(real expression).</li><li>Read off Re(LHS), Im(LHS), Re(RHS), Im(RHS).</li><li>Set Re(LHS) = Re(RHS) — this is one real equation.</li><li>Set Im(LHS) = Im(RHS) — this is the second real equation.</li><li>Solve the equation containing the unknown p; substitute into the other to verify consistency.</li><li>If the consistency equation fails identically, return to the source equation and check for a misread or error.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Solve $(2+i)p + 3i = 4 + 5i$ for real $p$.\\ LHS $= 2p + i(p+3)$, RHS $= 4 + 5i$.\\ Real parts: $2p = 4 \Rightarrow p = 2$.\\ Imaginary parts: $p+3 = 5 \Rightarrow p = 2$. ✓ Consistent, so $p=2$.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Locus problem: w = f(z) with z = x+iy, find Cartesian equation of image</div>
+<div class="adjustment">Compute u = Re(w), v = Im(w) in terms of x,y, then eliminate x,y between the two real equations.</div>
+</div><div class="variant-row">
+<div class="scenario">Finding real and imaginary parts of a quotient (a+bi)/(c+di)</div>
+<div class="adjustment">Multiply by conjugate first to put in a+bi form, then read off parts; no equating needed but the same separation principle.</div>
+</div><div class="variant-row">
+<div class="scenario">Polynomial with real coefficients: substituting z = x+iy and demanding the result be real</div>
+<div class="adjustment">Set Im of the expression to zero; this single equation defines a curve or condition on x,y.</div>
+</div><div class="variant-row">
+<div class="scenario">Solving z² = a+bi for z = x+iy with x,y real</div>
+<div class="adjustment">Equate real parts (x²−y² = a) and imaginary parts (2xy = b), then solve the simultaneous system.</div>
+</div><div class="variant-row">
+<div class="scenario">Determining a real constant k so that an expression is purely real (or purely imaginary)</div>
+<div class="adjustment">Set Im (or Re) of the expression equal to zero — only one equation arises since only one constraint is imposed.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating √3, π, or e^a (with a real) as if they had imaginary content because they look unfamiliar.</li><li>Assuming the unknown can absorb an imaginary mismatch when it is declared real.</li><li>Checking only one part (real or imaginary) and missing a contradiction in the other.</li><li>Confusing &#x27;purely imaginary&#x27; (Re = 0) with &#x27;imaginary part&#x27; (the coefficient of i).</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>If the unknown is allowed to be complex, separation gives two equations in two real unknowns Re(p), Im(p), not one.</li><li>A contradiction between the two parts indicates a misread question or arithmetic slip upstream — do not force an answer.</li><li>Failing to fully simplify each side into a+bi form before reading off parts (e.g. leaving an i² unsimplified).</li><li>Dividing by i or by a complex factor instead of separating — risks sign errors and obscures the two-equation structure.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Standard Edexcel IAL Core/Further Pure technique used throughout complex numbers (FP1/FP2): solving equations, loci, square roots of complex numbers, and identifying real/imaginary parts of expressions.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP2/ch3/q-Jan_2021-Q1.html" class="example-chip">FP2 Jan 2021 Q1</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

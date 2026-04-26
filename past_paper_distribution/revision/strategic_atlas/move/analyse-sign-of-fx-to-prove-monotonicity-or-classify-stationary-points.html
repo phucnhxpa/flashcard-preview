@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analyse sign of f&#x27;(x) to prove monotonicity or classify stationary points — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../calculus_diff.html">Differentiation</a> / <strong>Sign Of Derivative</strong></div>
+  <span class="domain-pill" style="background:#FF6B35;color:white">Differentiation</span>
+  <h1>Analyse sign of f&#x27;(x) to prove monotonicity or classify stationary points</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Sign Of Derivative</strong></span>
+    <span>Frequency: <strong>2 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires whenever a question says &#x27;show f is increasing/decreasing on …&#x27;, &#x27;prove f is monotonic&#x27;, or asks you to classify a stationary point (max/min) without an explicit instruction to use f&#x27;&#x27;(x). Visual cues: f(x) is a rational function (Möbius (ax+b)/(cx+d), or a quotient whose derivative will factor cleanly), or f&#x27;(x) has already been computed and presents as a product/quotient of linear factors over a positive denominator. Equivalent phrasings include &#x27;deduce that f is one-to-one&#x27;, &#x27;hence find the nature of the turning point&#x27;, or &#x27;state, with reason, whether f is increasing&#x27;. The common structural tell is that the SIGN of f&#x27;(x) is decidable by inspection rather than its value being needed.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>By the Monotonic Function Theorem, f is decreasing on an interval iff f&#x27;(x) &lt; 0 throughout (similarly for increasing), and the First Derivative Test classifies a stationary point by the sign change of f&#x27; across it. Computing f&#x27;(x) and reducing the sign question to inspection of a constant numerator, a square denominator, or a small set of linear factors converts a qualitative demand into a one-line algebraic verification. This avoids the heavier machinery of f&#x27;&#x27;(x) — particularly attractive for rational f, where f&#x27;&#x27; would require a second quotient rule. The underlying principle is that signs of products/quotients are determined factor-by-factor, with squares and positive constants contributing nothing to sign changes.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice the verb &#x27;show … decreasing/increasing&#x27; or &#x27;classify the stationary point&#x27; — this immediately reframes the problem as &#x27;determine the sign of f&#x27;(x)&#x27;.</li><li>Rule out the definition-based approach (showing f(a) &gt; f(b) for a &lt; b) — too laborious for a &#x27;show that&#x27; mark scheme — and rule out f&#x27;&#x27;(x) when f is rational, because the second quotient rule is messy.</li><li>Commit to differentiating once and reading off the sign: for a Möbius function the numerator of f&#x27; will collapse to the constant ad − bc; for a stationary-point classification, f&#x27; will already factor.</li><li>Bridge to action: apply the quotient rule with u, v clearly labelled, simplify until the numerator is either a single constant or a product of linear factors.</li><li>Tactical decision: isolate the parts of f&#x27;(x) whose sign is automatic — squared denominators are positive, named positive constants drop out — so that only one or two factors govern the sign.</li><li>If classifying a stationary point, build a sign chart at the relevant critical x-values; if proving monotonicity, just state the sign on the whole stated domain, explicitly invoking the domain restriction (e.g. &#x27;since x &gt; 4, (x−4)² &gt; 0&#x27;).</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Differentiate: for f = u/v use f&#x27;(x) = (v·u&#x27; − u·v&#x27;)/v² (mind the order to avoid a sign error).</li><li>Simplify the numerator fully; for (ax+b)/(cx+d) it collapses to ad − bc.</li><li>Identify automatically-signed pieces: v² &gt; 0, positive constants, etc., and set them aside.</li><li>Reduce the sign question to the remaining factor(s): a constant, or linear factors (px+q).</li><li>For monotonicity: state the sign of f&#x27;(x) on the given interval, citing the domain (e.g. x &gt; 4 ⇒ (x−4)² &gt; 0), and conclude &#x27;f is decreasing/increasing&#x27;.</li><li>For stationary-point classification: tabulate signs of each linear factor on intervals separated by the critical points; multiply to get the sign of f&#x27;; a + → − change marks a local max, − → + a local min.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Let $f(x)=\dfrac{5x-3}{x-4}$, $x>4$. Quotient rule: $f'(x)=\dfrac{(x-4)(5)-(5x-3)(1)}{(x-4)^2}=\dfrac{-17}{(x-4)^2}$. Since $(x-4)^2>0$ for $x>4$ and $-17<0$, $f'(x)<0$ on the domain, so $f$ is decreasing.</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Möbius function f(x) = (ax+b)/(cx+d)</div>
+<div class="adjustment">Numerator of f&#x27; collapses to the constant ad − bc; sign of f&#x27; is the sign of ad − bc on the whole domain.</div>
+</div><div class="variant-row">
+<div class="scenario">f&#x27;(x) is a product of linear factors over a positive denominator</div>
+<div class="adjustment">Use a sign chart at each linear root; multiply factor signs interval-by-interval to classify each stationary point via First Derivative Test.</div>
+</div><div class="variant-row">
+<div class="scenario">Derivative carries a negative leading constant k &lt; 0</div>
+<div class="adjustment">All factor-sign products flip; remember to include the constant&#x27;s sign in the chart.</div>
+</div><div class="variant-row">
+<div class="scenario">Denominator of f&#x27; can change sign on the domain</div>
+<div class="adjustment">Track the denominator&#x27;s sign in the chart as an additional factor; do not assume it is positive.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Trying to prove monotonicity by evaluating f at two specific points — this checks two values, not all x in the interval.</li><li>Confusing &#x27;f&#x27; changes from + to −&#x27; with &#x27;f is decreasing&#x27; — the First Derivative Test concerns the sign of f&#x27;, not of f.</li><li>Reaching for f&#x27;&#x27;(x) to classify a stationary point when the first-derivative sign test is far cleaner.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Sign error in the quotient rule: writing (u·v&#x27; − v·u&#x27;)/v² instead of (v·u&#x27; − u·v&#x27;)/v².</li><li>Forgetting to invoke the domain explicitly — e.g. saying &#x27;(x−4)² &gt; 0&#x27; without noting x &gt; 4 (or x ≠ 4) means the conclusion is technically unjustified.</li><li>Only checking one side of a critical point when applying the First Derivative Test, missing the sign-change requirement.</li><li>Ignoring the sign of a constant multiplier (a negative k flips the entire sign chart).</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Within Edexcel IAL P2/P3/P4 scope: quotient rule and First Derivative Test are standard. The quotient rule is in the formula booklet; the monotonicity criterion (f&#x27;&gt;0 ⇒ increasing) is stated in the specification but not the booklet. Avoid invoking strict-monotonicity-from-f&#x27;≥0 with isolated zeros — at IAL level stick to f&#x27;(x) &gt; 0 (or &lt; 0) throughout.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (2)</h3>
+<div class="example-grid"><a href="../P3/ch1/q-Jan_2022-Q6.html" class="example-chip">P3 Jan 2022 Q6</a><a href="../P3/ch4/q-Jun_2022-Q6.html" class="example-chip">P3 Jun 2022 Q6</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

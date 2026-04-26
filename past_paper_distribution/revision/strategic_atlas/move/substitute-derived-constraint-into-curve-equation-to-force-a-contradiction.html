@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Substitute derived constraint into curve equation to force a contradiction — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../proof.html">Proof</a> / <strong>Proof By Contradiction</strong></div>
+  <span class="domain-pill" style="background:#789262;color:white">Proof</span>
+  <h1>Substitute derived constraint into curve equation to force a contradiction</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Proof By Contradiction</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>Fires when a problem asks you to prove that no point on a curve satisfies some auxiliary condition (e.g. vertical tangent, horizontal tangent, lies on a given line, intersects another curve). The auxiliary condition reduces to a simple relation between the coordinates such as $y=x$, $y=0$, or $y=mx+c$. You must show the system of {curve equation, auxiliary relation} has no real solution. Phrasings include &#x27;show that C has no vertical tangents&#x27;, &#x27;prove the line does not meet C&#x27;, or &#x27;show no such point exists&#x27;.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>Substituting the auxiliary relation into the curve equation eliminates one variable, collapsing a 2D problem into a single-variable equation in $x$ (or $y$). If that equation forces $x^2$ (or a sum of squares) to equal a negative number, real solutions are impossible and the original assumption fails. The contradiction is clean because non-negativity of squares over $\mathbb{R}$ is an unassailable fact, so the proof needs no further machinery.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>Notice that the question asks to prove non-existence, so a direct construction won&#x27;t work — contradiction or exhaustion is needed.</li><li>Rule out graphical or hand-wave arguments: the mark scheme will demand algebra, and the two conditions (curve + auxiliary) form a solvable system.</li><li>Commit to substitution because it eliminates one variable cheaply and turns &#x27;no point exists&#x27; into &#x27;this equation has no real root&#x27;, a standard A-level check.</li><li>Bridge: take the auxiliary relation (here $y=x$) and substitute into the curve equation to get a polynomial in $x$ alone.</li><li>Inside the move, simplify carefully, isolate $x^2$ (or apply discriminant if it&#x27;s a quadratic in $x$ with mixed terms), and explicitly cite $x^2 \ge 0$ or $\Delta &lt; 0$ as the contradiction.</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify the auxiliary relation forced by the side-condition (e.g. denominator $=0$ gives $y=x$).</li><li>Substitute this relation into the curve equation to eliminate one variable.</li><li>Simplify to a single-variable equation, typically of the form $ax^2 + b = 0$ or a quadratic.</li><li>Rearrange to isolate $x^2$ or compute the discriminant.</li><li>Show no real solution exists (either $x^2 = $ negative, or $\Delta &lt; 0$).</li><li>State the conclusion: no point on the curve meets the side-condition, hence the required property holds.</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Show $C: x^2 + 4xy - 2y^2 + 18 = 0$ has no vertical tangent. The vertical-tangent condition gives $y=x$. Substituting: $x^2 + 4x^2 - 2x^2 + 18 = 3x^2 + 18 = 0$, so $x^2 = -6$. Since $x^2 \ge 0$ for all real $x$, no real $x$ satisfies this, so no such point on $C$ exists. $\blacksquare$</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">Proving no horizontal tangent on an implicit curve</div>
+<div class="adjustment">Set the numerator of $\mathrm{d}y/\mathrm{d}x = 0$, derive a relation between $x$ and $y$, substitute into the curve, and show no real solution.</div>
+</div><div class="variant-row">
+<div class="scenario">Proving a line $y = mx + c$ does not meet a curve</div>
+<div class="adjustment">Substitute the line into the curve to get a quadratic in $x$, then show its discriminant is negative.</div>
+</div><div class="variant-row">
+<div class="scenario">Proving two curves do not intersect</div>
+<div class="adjustment">Equate or substitute one equation into the other and show the resulting equation has no real roots (often via discriminant or sum-of-squares argument).</div>
+</div><div class="variant-row">
+<div class="scenario">Proving an equation has no real solution in a Further Pure context</div>
+<div class="adjustment">Reduce to $f(x)^2 + k = 0$ with $k&gt;0$ and cite non-negativity of squares.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Treating the problem as requiring a graphical sketch or appeal to &#x27;shape of curve&#x27; rather than algebraic proof.</li><li>Believing that finding $\mathrm{d}y/\mathrm{d}x$ is undefined somewhere automatically proves a vertical tangent exists, without checking that such a point lies on the curve.</li><li>Confusing &#x27;no real solution&#x27; with &#x27;no solution&#x27;, and writing about complex roots as if they were admissible points on $C$.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Arithmetic slips in substitution, e.g. writing $4x \cdot x = 4x$ instead of $4x^2$, or mishandling the sign of $-2y^2$.</li><li>Failing to state the reason explicitly ($x^2 \ge 0$ for real $x$, or $\Delta &lt; 0$) — examiners require this justification.</li><li>Stopping at $x^2 = -6$ without drawing the conclusion about non-existence on $C$.</li><li>Forgetting to also recover $y$ (when relevant) or to check that the auxiliary condition was correctly derived before substituting.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Entirely within Edexcel IAL Pure (implicit differentiation, tangents, simultaneous equations, discriminant) and standard proof techniques; no tools beyond non-negativity of real squares and quadratic theory are required.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../P3/ch4/q-Oct_2024-Q8.html" class="example-chip">P3 Oct 2024 Q8</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check quadrant to select correct principal argument — Strategic Atlas</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+  --line: #E5E5EA;
+  --pill-bg: #F5F5F7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--fg); line-height: 1.55;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+header.hero { padding: 48px 24px 32px; border-bottom: 1px solid var(--line); }
+header.hero .container { padding: 0; }
+header.hero h1 { font-size: 38px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+header.hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 700px; }
+header.hero .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+header.hero .breadcrumb a:hover { color: var(--fg); }
+
+.domain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.domain-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; transition: all 0.18s ease; cursor: pointer; display: block;
+}
+.domain-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: rgba(0,0,0,0.18);
+}
+.domain-card .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.domain-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.domain-card .meta { color: var(--muted); font-size: 13px; }
+
+section.family { margin-top: 36px; }
+section.family h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+section.family .family-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.move-list { display: flex; flex-direction: column; gap: 10px; }
+.move-row {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  transition: all 0.16s ease;
+}
+.move-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); border-color: rgba(0,0,0,0.18); }
+.move-row .move-name { font-size: 15px; font-weight: 500; flex: 1; }
+.move-row .freq-pill {
+  background: var(--pill-bg); color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 99px; font-weight: 500;
+}
+
+article.move {
+  max-width: 820px;
+}
+article.move .domain-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 99px;
+  background: var(--pill-bg); margin-bottom: 14px;
+}
+article.move h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700;
+  margin: 0 0 12px;
+}
+article.move .meta-row {
+  font-size: 13px; color: var(--muted); margin-bottom: 28px;
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+}
+article.move .meta-row strong { color: var(--fg); font-weight: 600; }
+
+.section-block {
+  margin: 28px 0;
+  border-left: 3px solid var(--line);
+  padding-left: 18px;
+}
+.section-block h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600; margin: 0 0 8px;
+}
+.section-block p { margin: 0 0 8px; font-size: 16px; line-height: 1.6; }
+.section-block ol, .section-block ul { margin: 8px 0 0; padding-left: 20px; }
+.section-block ol li, .section-block ul li { margin-bottom: 8px; line-height: 1.55; }
+
+.block-trigger { border-left-color: #5B6BFA; }
+.block-motivation { border-left-color: #FFA726; }
+.block-thought { border-left-color: #66BB6A; }
+.block-mechanic { border-left-color: #E91E63; }
+.block-example { border-left-color: #5C6BC0; }
+.block-variants { border-left-color: #8D6E63; }
+.block-misread { border-left-color: #FF6B35; }
+.block-pitfalls { border-left-color: #C62828; }
+.block-scope { border-left-color: #90A4AE; }
+
+.example-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+.example-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 99px;
+  background: var(--pill-bg); color: var(--fg); transition: all 0.14s;
+  border: 1px solid transparent;
+}
+.example-chip:hover { background: #fff; border-color: var(--line); transform: translateY(-1px); }
+
+.variant-row {
+  background: var(--pill-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+}
+.variant-row .scenario {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.variant-row .adjustment { font-size: 14px; color: var(--muted); }
+
+.search-box {
+  width: 100%; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 15px; font-family: inherit; outline: none; transition: border 0.15s;
+  background: var(--bg);
+}
+.search-box:focus { border-color: var(--fg); }
+
+footer { color: var(--muted); font-size: 13px; padding: 40px 24px; text-align: center; border-top: 1px solid var(--line); margin-top: 60px; }
+
+/* MathJax font sizing */
+mjx-container { font-size: 1.02em !important; }
+mjx-container[display="true"] { margin: 12px 0 !important; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
+         processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+<header class="hero"><div class="container">
+  <div class="breadcrumb"><a href="../index.html">Strategic Atlas</a> / <a href="../complex.html">Complex Numbers</a> / <strong>Quadrant Validation</strong></div>
+  <span class="domain-pill" style="background:#5C6BC0;color:white">Complex Numbers</span>
+  <h1>Check quadrant to select correct principal argument</h1>
+  <div class="meta-row">
+    <span>Family: <strong>Quadrant Validation</strong></span>
+    <span>Frequency: <strong>1 questions</strong></span>
+  </div>
+</div></header>
+<div class="container">
+<article class="move">
+<div class="section-block block-trigger">
+<h3>Trigger — When to use</h3>
+<p>The question asks for arg(z) of a complex number z = x + iy, typically in the principal range (−π, π]. The student is about to apply arctan(y/x) but must first determine which quadrant z lies in. This fires whenever Re(z) and Im(z) are both nonzero, and especially when Re(z) &lt; 0 where arctan alone gives the wrong answer. Also fires for purely real or purely imaginary z, where arctan is undefined or misleading.</p>
+</div>
+<div class="section-block block-motivation">
+<h3>Motivation — Why this works</h3>
+<p>The function arctan returns values only in (−π/2, π/2), corresponding to quadrants I and IV. For z in quadrant II or III, the raw arctan(y/x) value differs from the true argument by ±π. Checking the signs of Re(z) and Im(z) identifies the quadrant and tells the student whether to accept arctan(y/x), add π, or subtract π. This guarantees the answer lies in the required principal range.</p>
+</div>
+<div class="section-block block-thought">
+<h3>Thought Process — The step-by-step reasoning</h3>
+<ol><li>I notice the question asks for arg(z) and I have explicit real and imaginary parts.</li><li>I rule out blindly typing arctan(y/x) into the calculator — that only works in quadrants I and IV.</li><li>I commit to a two-step procedure: first locate z in the Argand diagram by signs of Re(z) and Im(z), then compute arctan|y/x| as a reference angle.</li><li>First concrete operation: read off the signs of Re(z) and Im(z) to fix the quadrant.</li><li>Inside the move, I decide the adjustment: Q1 → θ = arctan(y/x); Q2 → θ = π − arctan|y/x|; Q3 → θ = −π + arctan|y/x|; Q4 → θ = −arctan|y/x|. Finally I confirm θ ∈ (−π, π].</li></ol>
+</div>
+<div class="section-block block-mechanic">
+<h3>Mechanic — Concrete operations</h3>
+<ol><li>Identify signs of Re(z) and Im(z) to determine the quadrant</li><li>Compute the reference angle α = arctan|Im(z)/Re(z)|</li><li>Apply the quadrant rule: Q1 → α; Q2 → π − α; Q3 → −(π − α); Q4 → −α</li><li>Handle special cases: pure positive real → 0; pure negative real → π; pure positive imaginary → π/2; pure negative imaginary → −π/2</li><li>Confirm the result lies in (−π, π] (or [0, 2π) if the question specifies that convention)</li><li>Round/express as required (e.g. exact multiple of π, or to 2 d.p. in radians)</li></ol>
+</div>
+<div class="section-block block-example">
+<h3>Worked Micro-Example</h3>
+<p>Find arg(w) where w = 1/2 + (1/2)i.\\ Re(w) = 1/2 > 0, Im(w) = 1/2 > 0, so w is in Q1.\\ Reference angle: \arctan(1/2 \div 1/2) = \arctan(1) = \pi/4.\\ Since w is in Q1, arg(w) = \pi/4 \approx 0.79 radians, which lies in (-\pi, \pi]. ✓</p>
+</div>
+<div class="section-block block-variants">
+<h3>Variants — Same move, different surface</h3>
+<div class="variant-row">
+<div class="scenario">z = −1 + i in Q2</div>
+<div class="adjustment">Reference angle α = arctan(1) = π/4; arg(z) = π − π/4 = 3π/4.</div>
+</div><div class="variant-row">
+<div class="scenario">z = −1 − i in Q3</div>
+<div class="adjustment">Reference angle α = π/4; arg(z) = −(π − π/4) = −3π/4.</div>
+</div><div class="variant-row">
+<div class="scenario">z = 1 − i in Q4</div>
+<div class="adjustment">Reference angle α = π/4; arg(z) = −π/4.</div>
+</div><div class="variant-row">
+<div class="scenario">Purely imaginary z = bi (b ≠ 0)</div>
+<div class="adjustment">arg(z) = π/2 if b &gt; 0; arg(z) = −π/2 if b &lt; 0; arctan is not used.</div>
+</div><div class="variant-row">
+<div class="scenario">Negative real z = a (a &lt; 0)</div>
+<div class="adjustment">arg(z) = π directly; do not use arctan(0/a) = 0, which would be wrong.</div>
+</div><div class="variant-row">
+<div class="scenario">Question requires argument in [0, 2π)</div>
+<div class="adjustment">Convert any negative principal value θ to θ + 2π.</div>
+</div><div class="variant-row">
+<div class="scenario">Argument of a quotient z₁/z₂ or product z₁z₂</div>
+<div class="adjustment">Use arg(z₁z₂) = arg(z₁) + arg(z₂) and arg(z₁/z₂) = arg(z₁) − arg(z₂), then re-adjust the result back into (−π, π] by adding/subtracting 2π if needed.</div>
+</div>
+</div>
+<div class="section-block block-misread">
+<h3>Common Misreadings</h3>
+<ul><li>Assuming arctan(y/x) always returns the principal argument without checking the quadrant.</li><li>Treating arctan(y/x) for z = −1 − i as π/4 (correct quadrant ignored), instead of −3π/4.</li><li>Confusing the required range: giving an answer in [0, 2π) when (−π, π] is asked, or vice versa.</li><li>Reading &#x27;modulus-argument form&#x27; as requiring degrees, when radians are expected in IAL.</li></ul>
+</div>
+<div class="section-block block-pitfalls">
+<h3>Pitfalls</h3>
+<ul><li>Giving the argument in degrees when the question specifies radians (or vice versa).</li><li>For purely real or purely imaginary z, mechanically applying arctan instead of assigning 0, π, ±π/2 directly.</li><li>Forgetting to round to the required number of decimal places, or losing exactness when an exact multiple of π was expected.</li><li>After combining arguments via products/quotients, leaving the result outside (−π, π] without the ±2π correction.</li><li>Sign error in the reference angle when |y/x| is used but the quadrant adjustment is then misapplied.</li></ul>
+</div>
+<div class="section-block block-scope">
+<h3>A-level Scope Notes</h3>
+<p>Fully within Edexcel IAL Further Pure (FP1/FP2) treatment of complex numbers: principal argument in (−π, π], modulus-argument form, and arguments of products and quotients. No use of atan2 or branch-cut theory beyond this level.</p>
+</div>
+<div class="section-block block-example">
+<h3>Example Questions (1)</h3>
+<div class="example-grid"><a href="../FP1/ch1/q-Jun_2024-Q2.html" class="example-chip">FP1 Jun 2024 Q2</a></div>
+</div>
+</article>
+</div>
+<footer>Strategic Atlas · strategic_atlas · Edexcel IAL Maths/Further Maths · 7 units (P1–P4, FP1–FP3)</footer>
+</body>
+</html>
