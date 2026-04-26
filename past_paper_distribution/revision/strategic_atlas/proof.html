@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/close-induction-with-a-complete-formal-conclusion-to-secure-the-final-a-mark.html" class="cs-card">
+<a href="move/close-induction-with-a-complete-formal-conclusion-to-secure-the-final-a-mark.html" class="cs-card lazy-tex">
   <div class="cs-name">Close induction with a complete formal conclusion to secure the final A-mark</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Base case }(n=1)\checkmark,\quad \text{Inductive step }(n=k \Rightarrow n=k+1)\checkmark\;$</div><div class="cs-line cs-step">$\;\text{True for }n=1;\; n=k \Rightarrow n=k+1;\; \therefore \text{ true for all } n\in\mathbb{Z}^{+} \text{ by induction.}\;$</div></div>
   <div class="cs-meta">
@@ -278,7 +313,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-the-target-divisor-as-an-explicit-factor-to-close-a-divisibilityparity-p.html" class="cs-card">
+<a href="move/extract-the-target-divisor-as-an-explicit-factor-to-close-a-divisibilityparity-p.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract the target divisor as an explicit factor to close a divisibility/parity proof</div>
   <div class="cs-example"><div class="cs-line">$\;6n + 4,\quad n \in \mathbb{Z}\;$</div><div class="cs-line cs-step">$\;6n + 4 = 2(3n + 2) = 2k,\quad k = 3n+2 \in \mathbb{Z} \Rightarrow 2 \mid (6n+4)\;$</div></div>
   <div class="cs-meta">
@@ -293,7 +328,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-assumed-closed-form-into-the-recurrence-to-bridge-k-to-k1.html" class="cs-card">
+<a href="move/substitute-the-assumed-closed-form-into-the-recurrence-to-bridge-k-to-k1.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the assumed closed form into the recurrence to bridge k to k+1</div>
   <div class="cs-example"><div class="cs-line">$\;u_{k+1} = 2u_k + 1,\quad u_k = 2^k - 1\;$</div><div class="cs-line cs-step">$\;u_{k+1} = 2(2^k - 1) + 1 = 2^{k+1} - 2 + 1 = 2^{k+1} - 1\;$</div></div>
   <div class="cs-meta">
@@ -308,7 +343,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-sign-analysis-on-the-domain-to-fix-square-root-signs-or-disprove-inequalitie.html" class="cs-card">
+<a href="move/use-sign-analysis-on-the-domain-to-fix-square-root-signs-or-disprove-inequalitie.html" class="cs-card lazy-tex">
   <div class="cs-name">Use sign analysis on the domain to fix square-root signs or disprove inequalities</div>
   <div class="cs-example"><div class="cs-line">$\;0 < y < \dfrac{\pi}{4},\quad \sin^2(2y) = \dfrac{x}{6}\;$</div><div class="cs-line cs-step">$\;0 < 2y < \dfrac{\pi}{2} \Rightarrow \sin(2y) > 0 \Rightarrow \sin(2y) = +\sqrt{\dfrac{x}{6}}\;$</div></div>
   <div class="cs-meta">
@@ -323,7 +358,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-rearranged-inductive-hypothesis-to-expose-the-divisor-as-a-common-fac.html" class="cs-card">
+<a href="move/substitute-rearranged-inductive-hypothesis-to-expose-the-divisor-as-a-common-fac.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute rearranged inductive hypothesis to expose the divisor as a common factor</div>
   <div class="cs-example"><div class="cs-line">$\;f(k)=4^k+6k-1=9M \Rightarrow 4^k=9M-6k+1\;$</div><div class="cs-line cs-step">$\;f(k{+}1)=4(9M-6k+1)+6k+5=36M-18k+9=9(4M-2k+1)\;$</div></div>
   <div class="cs-meta">
@@ -338,7 +373,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-ak1-via-index-laws-to-expose-the-pk-sub-expression.html" class="cs-card">
+<a href="move/split-ak1-via-index-laws-to-expose-the-pk-sub-expression.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a^{k+1} via index laws to expose the P(k) sub-expression</div>
   <div class="cs-example"><div class="cs-line">$\;4^{k+3} + 5^{2k+3}\;$</div><div class="cs-line cs-step">$\;4\cdot 4^{k+2} + 25\cdot 5^{2k+1} = 4\bigl(4^{k+2}+5^{2k+1}\bigr) + 21\cdot 5^{2k+1}\;$</div></div>
   <div class="cs-meta">
@@ -353,7 +388,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rearrange-the-inductive-hypothesis-to-isolate-one-exponential-term-for-direct-su.html" class="cs-card">
+<a href="move/rearrange-the-inductive-hypothesis-to-isolate-one-exponential-term-for-direct-su.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange the inductive hypothesis to isolate one exponential term for direct substitution</div>
   <div class="cs-example"><div class="cs-line">$\;5^{k+1} - 1 = 4M,\; M \in \mathbb{Z} \Rightarrow 5^{k+1} = 4M + 1\;$</div><div class="cs-line cs-step">$\;5^{k+2} - 1 = 5 \cdot 5^{k+1} - 1 = 5(4M+1) - 1 = 20M + 4 = 4(5M+1)\;$</div></div>
   <div class="cs-meta">
@@ -368,7 +403,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-the-k1-case-to-expose-the-inductive-hypothesis.html" class="cs-card">
+<a href="move/decompose-the-k1-case-to-expose-the-inductive-hypothesis.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose the (k+1) case to expose the inductive hypothesis</div>
   <div class="cs-example"><div class="cs-line">$\;f(k) = 3^{k+1} - 2k - 3,\quad 4 \mid f(k)\;$</div><div class="cs-line cs-step">$\;f(k+1) - 3f(k) = (3^{k+2}-2k-5) - 3(3^{k+1}-2k-3) = 4k+4 = 4(k+1) \Rightarrow f(k+1)=3f(k)+4(k+1)\;$</div></div>
   <div class="cs-meta">
@@ -383,7 +418,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/write-series-forwards-and-backwards-then-add-to-pair-terms.html" class="cs-card">
+<a href="move/write-series-forwards-and-backwards-then-add-to-pair-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Write series forwards and backwards then add to pair terms</div>
   <div class="cs-example"><div class="cs-line">$\;S_n = a + (a+d) + \dots + [a+(n-1)d]\quad(1);\quad S_n = [a+(n-1)d] + \dots + a\quad(2)\;$</div><div class="cs-line cs-step">$\;(1)+(2):\; 2S_n = \underbrace{[2a+(n-1)d] + \cdots + [2a+(n-1)d]}_{n} = n[2a+(n-1)d] \Rightarrow S_n = \tfrac{n}{2}[2a+(n-1)d]\;$</div></div>
   <div class="cs-meta">
@@ -398,7 +433,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-sum-by-common-ratio-then-subtract-to-telescope.html" class="cs-card">
+<a href="move/multiply-sum-by-common-ratio-then-subtract-to-telescope.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply sum by common ratio then subtract to telescope</div>
   <div class="cs-example"><div class="cs-line">$\;S = 1 + r + r^2 + \cdots + r^{n-1}\;$</div><div class="cs-line cs-step">$\;rS - S = r^n - 1 \Rightarrow S = \dfrac{r^n - 1}{r - 1}\;$</div></div>
   <div class="cs-meta">
@@ -413,7 +448,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bound-integer-variable-using-positivity-to-enumerate-finite-cases.html" class="cs-card">
+<a href="move/bound-integer-variable-using-positivity-to-enumerate-finite-cases.html" class="cs-card lazy-tex">
   <div class="cs-name">Bound integer variable using positivity to enumerate finite cases</div>
   <div class="cs-example"><div class="cs-line">$\;a,\, b \in \mathbb{Z}^+,\quad a = 6 - 2b\;$</div><div class="cs-line cs-step">$\;a > 0 \Rightarrow 6-2b>0 \Rightarrow b<3,\; b\geq 1 \Rightarrow b\in\{1,2\}\;$</div></div>
   <div class="cs-meta">
@@ -428,7 +463,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-proof-by-exhaustion-over-a-small-finite-case-set.html" class="cs-card">
+<a href="move/apply-proof-by-exhaustion-over-a-small-finite-case-set.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply proof by exhaustion over a small finite case set</div>
   <div class="cs-example"><div class="cs-line">$\;n \in \{1,2,3\},\quad P(n): n^2 + n \text{ is even}\;$</div><div class="cs-line cs-step">$\;n=1: 2,\quad n=2: 6,\quad n=3: 12 \quad \checkmark\ \text{all even} \quad \square\;$</div></div>
   <div class="cs-meta">
@@ -443,7 +478,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/disprove-a-universal-claim-by-exhibiting-one-counterexample.html" class="cs-card">
+<a href="move/disprove-a-universal-claim-by-exhibiting-one-counterexample.html" class="cs-card lazy-tex">
   <div class="cs-name">Disprove a universal claim by exhibiting one counterexample</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Claim: } n^2 + n + 1 \text{ is prime for all } n \in \mathbb{N}\;$</div><div class="cs-line cs-step">$\;n=4:\; 4^2+4+1=21=3\times 7 \Rightarrow \text{not prime; statement is false}\;$</div></div>
   <div class="cs-meta">
@@ -458,7 +493,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-derived-constraint-into-curve-equation-to-force-a-contradiction.html" class="cs-card">
+<a href="move/substitute-derived-constraint-into-curve-equation-to-force-a-contradiction.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute derived constraint into curve equation to force a contradiction</div>
   <div class="cs-example"><div class="cs-line">$\;C: x^2 + y^2 + 6 = 0 \text{ if } y = x\;$</div><div class="cs-line cs-step">$\;x^2 + x^2 + 6 = 0 \Rightarrow 2x^2 = -6 \Rightarrow x^2 = -3,\ \text{no real solution } \blacksquare\;$</div></div>
   <div class="cs-meta">
@@ -473,7 +508,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reverse-engineer-a-perfect-square-from-the-target-inequality.html" class="cs-card">
+<a href="move/reverse-engineer-a-perfect-square-from-the-target-inequality.html" class="cs-card lazy-tex">
   <div class="cs-name">Reverse-engineer a perfect square from the target inequality</div>
   <div class="cs-example"><div class="cs-line">$\;k > 0,\quad k + \dfrac{4}{k} \geq 4\;$</div><div class="cs-line cs-step">$\;(k-2)^2 \geq 0 \Rightarrow k^2 - 4k + 4 \geq 0 \Rightarrow k - 4 + \dfrac{4}{k} \geq 0 \Rightarrow k + \dfrac{4}{k} \geq 4\;$</div></div>
   <div class="cs-meta">
@@ -488,7 +523,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-a-polynomial-inequality-by-a-positive-variable-to-introduce-a-reciprocal-.html" class="cs-card">
+<a href="move/divide-a-polynomial-inequality-by-a-positive-variable-to-introduce-a-reciprocal-.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide a polynomial inequality by a positive variable to introduce a reciprocal term</div>
   <div class="cs-example"><div class="cs-line">$\;k^2 - 6k + 9 \geq 0,\quad k > 0\;$</div><div class="cs-line cs-step">$\;\div\, k:\quad k - 6 + \dfrac{9}{k} \geq 0 \Rightarrow k + \dfrac{9}{k} \geq 6\;$</div></div>
   <div class="cs-meta">
@@ -503,7 +538,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/encode-divisibility-hypothesis-as-an-algebraic-equation-with-integer-parameter.html" class="cs-card">
+<a href="move/encode-divisibility-hypothesis-as-an-algebraic-equation-with-integer-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Encode divisibility hypothesis as an algebraic equation with integer parameter</div>
   <div class="cs-example"><div class="cs-line">$\;P(k){:}\ 3^{2k}+8 = 5m,\quad m \in \mathbb{Z} \quad (1)\;$</div><div class="cs-line cs-step">$\;(1) \Rightarrow 3^{2k} = 5m - 8,\ \text{ready to substitute into } 3^{2(k+1)}+8\;$</div></div>
   <div class="cs-meta">
@@ -518,7 +553,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sum-to-k1-into-sum-to-k-plus-new-term.html" class="cs-card">
+<a href="move/split-sum-to-k1-into-sum-to-k-plus-new-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sum to k+1 into sum to k plus new term</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Assume } \sum_{r=1}^{k} r = \tfrac{1}{2}k(k+1)\;$</div><div class="cs-line cs-step">$\;\sum_{r=1}^{k+1} r = \tfrac{1}{2}k(k+1) + (k+1) = \tfrac{1}{2}(k+1)(k+2)\;$</div></div>
   <div class="cs-meta">
@@ -533,7 +568,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sum-to-k1-as-sum-to-k-plus-the-k1th-term.html" class="cs-card">
+<a href="move/split-sum-to-k1-as-sum-to-k-plus-the-k1th-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sum to k+1 as sum to k plus the (k+1)th term</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=1}^{k+1} r = \sum_{r=1}^{k} r + (k+1)\;$</div><div class="cs-line cs-step">$\;\dfrac{k(k+1)}{2} + (k+1) = \dfrac{(k+1)(k+2)}{2}\;$</div></div>
   <div class="cs-meta">
@@ -548,7 +583,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-shared-product-to-assemble-target-consecutive-integer-form.html" class="cs-card">
+<a href="move/factor-out-shared-product-to-assemble-target-consecutive-integer-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out shared product to assemble target consecutive-integer form</div>
   <div class="cs-example"><div class="cs-line">$\;\tfrac{1}{3}k(k+1)(k+2) + (k+1)(k+2)\;$</div><div class="cs-line cs-step">$\;(k+1)(k+2)\!\left[\tfrac{k}{3}+1\right] = (k+1)(k+2)\cdot\tfrac{k+3}{3} = \tfrac{1}{3}(k+1)(k+2)(k+3)\;$</div></div>
   <div class="cs-meta">
@@ -563,7 +598,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-exponent-via-index-laws-to-expose-induction-hypothesis-term.html" class="cs-card">
+<a href="move/split-exponent-via-index-laws-to-expose-induction-hypothesis-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Split exponent via index laws to expose induction hypothesis term</div>
   <div class="cs-example"><div class="cs-line">$\;3^{2k+4} - 8k - 17\;$</div><div class="cs-line cs-step">$\;3^{2k+4} = 3^2 \cdot 3^{2k+2} = 9\,\cdot\,3^{2k+2}\;$</div></div>
   <div class="cs-meta">
@@ -578,7 +613,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/write-the-explicit-pk1-target-before-manipulating.html" class="cs-card">
+<a href="move/write-the-explicit-pk1-target-before-manipulating.html" class="cs-card lazy-tex">
   <div class="cs-name">Write the explicit P(k+1) target before manipulating</div>
   <div class="cs-example"><div class="cs-line">$\;P(k)\!: \sum_{r=1}^{k} r = \tfrac{k(k+1)}{2}.\quad \text{Target } P(k{+}1)\!: \tfrac{(k+1)(k+2)}{2}\;$</div><div class="cs-line cs-step">$\;\underbrace{\tfrac{k(k+1)}{2}}_{P(k)} + (k+1) = (k+1)\!\left(\tfrac{k}{2}+1\right) = \dfrac{(k+1)(k+2)}{2}\;\checkmark\;$</div></div>
   <div class="cs-meta">
@@ -593,7 +628,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-base-case-by-evaluating-both-sides-explicitly.html" class="cs-card">
+<a href="move/verify-base-case-by-evaluating-both-sides-explicitly.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify base case by evaluating both sides explicitly</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Claim: } \sum_{r=1}^{n} r = \tfrac{n(n+1)}{2},\quad n=1\;$</div><div class="cs-line cs-step">$\;\text{LHS} = 1,\quad \text{RHS} = \tfrac{1(2)}{2} = 1 \quad \Rightarrow \text{LHS}=\text{RHS}\ \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -608,7 +643,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-at-endpoints-and-invoke-ivt-sign-change-for-root-existence.html" class="cs-card">
+<a href="move/evaluate-at-endpoints-and-invoke-ivt-sign-change-for-root-existence.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate at endpoints and invoke IVT sign-change for root existence</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - x - 1\;$</div><div class="cs-line cs-step">$\;f(1) = -1 < 0,\; f(2) = 5 > 0,\; f \text{ continuous} \Rightarrow \exists\;\alpha \in (1,2):\; f(\alpha)=0\;$</div></div>
   <div class="cs-meta">
@@ -623,7 +658,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-proof-by-induction-for-a-universal-summation-identity.html" class="cs-card">
+<a href="move/select-proof-by-induction-for-a-universal-summation-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Select proof by induction for a universal summation identity</div>
   <div class="cs-example"><div class="cs-line">$\;P(n):\; \sum_{r=1}^{n} r = \tfrac{1}{2}n(n+1)\;$</div><div class="cs-line cs-step">$\;\sum_{r=1}^{k+1} r = \tfrac{1}{2}k(k+1) + (k+1) = \tfrac{1}{2}(k+1)(k+2)\;$</div></div>
   <div class="cs-meta">
@@ -638,7 +673,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/state-the-target-pk1-before-manipulating-the-lhs.html" class="cs-card">
+<a href="move/state-the-target-pk1-before-manipulating-the-lhs.html" class="cs-card lazy-tex">
   <div class="cs-name">State the target P(k+1) before manipulating the LHS</div>
   <div class="cs-example"><div class="cs-line">$\;P(k):\; \sum_{r=1}^{k} r = \tfrac{k(k+1)}{2}\;$</div><div class="cs-line cs-step">$\;\text{RTP } P(k\!+\!1):\; \sum_{r=1}^{k+1} r = \tfrac{(k+1)(k+2)}{2} \Rightarrow \text{LHS} = \tfrac{k(k+1)}{2} + (k+1) = \tfrac{(k+1)(k+2)}{2}\;\checkmark\;$</div></div>
   <div class="cs-meta">
@@ -653,7 +688,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-divisibility-claim-as-equation-with-named-integer-parameter.html" class="cs-card">
+<a href="move/rewrite-divisibility-claim-as-equation-with-named-integer-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite divisibility claim as equation with named integer parameter</div>
   <div class="cs-example"><div class="cs-line">$\;f(k) = 3^k + 5 \text{ divisible by } 2:\quad 3^k + 5 = 2m,\; m \in \mathbb{Z}\;$</div><div class="cs-line cs-step">$\;3^k = 2m - 5 \Rightarrow 3^{k+1}+5 = 3(2m-5)+5 = 6m-10 = 2(3m-5),\; 3m-5 \in \mathbb{Z}\;$</div></div>
   <div class="cs-meta">
@@ -668,7 +703,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/close-induction-with-the-three-part-conclusion-statement.html" class="cs-card">
+<a href="move/close-induction-with-the-three-part-conclusion-statement.html" class="cs-card lazy-tex">
   <div class="cs-name">Close induction with the three-part conclusion statement</div>
   <div class="cs-example"><div class="cs-line">$\;P(1)\text{ true; } P(k) \Rightarrow P(k+1)\text{ proven.}\;$</div><div class="cs-line cs-step">$\;\therefore \text{by mathematical induction, } P(n) \text{ is true for all } n \in \mathbb{Z}^{+}\;$</div></div>
   <div class="cs-meta">
@@ -683,7 +718,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-the-larger-coefficient-as-inductive-multiplier-plus-target-divisor.html" class="cs-card">
+<a href="move/split-the-larger-coefficient-as-inductive-multiplier-plus-target-divisor.html" class="cs-card lazy-tex">
   <div class="cs-name">Split the larger coefficient as inductive multiplier plus target divisor</div>
   <div class="cs-example"><div class="cs-line">$\;f(k) = 2^{k+2} + 3^{2k+1},\quad 7\mid f(k)\;$</div><div class="cs-line cs-step">$\;f(k+1) = 2\cdot 2^{k+2} + 9\cdot 3^{2k+1} = 2\,f(k) + 7\cdot 3^{2k+1}\;$</div></div>
   <div class="cs-meta">
@@ -698,7 +733,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-strong-induction-with-two-base-cases-for-a-second-order-linear-recurrence.html" class="cs-card">
+<a href="move/apply-strong-induction-with-two-base-cases-for-a-second-order-linear-recurrence.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply strong induction with two base cases for a second-order linear recurrence</div>
   <div class="cs-example"><div class="cs-line">$\;u_1=0,\ u_2=-6,\ u_{n+2}=5u_{n+1}-6u_n,\quad P(n): u_n=3\cdot2^n-2\cdot3^n\;$</div><div class="cs-line cs-step">$\;u_{k+2}=5(3\cdot2^{k+1}-2\cdot3^{k+1})-6(3\cdot2^k-2\cdot3^k)=3\cdot2^k(10-6)-2\cdot3^k(15-6)=3\cdot2^{k+2}-2\cdot3^{k+2}\;$</div></div>
   <div class="cs-meta">
@@ -713,7 +748,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-k1²-to-match-the-target-closed-form-in-induction.html" class="cs-card">
+<a href="move/factor-out-k1²-to-match-the-target-closed-form-in-induction.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out (k+1)² to match the target closed form in induction</div>
   <div class="cs-example"><div class="cs-line">$\;\tfrac{1}{4}k^2(k+1)^2 + (k+1)^3\;$</div><div class="cs-line cs-step">$\;(k+1)^2\!\left[\tfrac{k^2}{4} + (k+1)\right] = (k+1)^2 \cdot \tfrac{k^2+4k+4}{4} = \tfrac{1}{4}(k+1)^2(k+2)^2\;$</div></div>
   <div class="cs-meta">
@@ -728,7 +763,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/peel-one-growth-factor-from-each-exponential-to-expose-fk-components.html" class="cs-card">
+<a href="move/peel-one-growth-factor-from-each-exponential-to-expose-fk-components.html" class="cs-card lazy-tex">
   <div class="cs-name">Peel one growth factor from each exponential to expose f(k) components</div>
   <div class="cs-example"><div class="cs-line">$\;f(k{+}1) = 2^{k+3} + 3^{2k+3}\;$</div><div class="cs-line cs-step">$\;2^{k+3} + 3^{2k+3} = 2 \cdot 2^{k+2} + 9 \cdot 3^{2k+1}\;$</div></div>
   <div class="cs-meta">
@@ -743,7 +778,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-rhs-via-exponential-definitions-to-verify-hyperbolic-identity.html" class="cs-card">
+<a href="move/expand-rhs-via-exponential-definitions-to-verify-hyperbolic-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand RHS via exponential definitions to verify hyperbolic identity</div>
   <div class="cs-example"><div class="cs-line">$\;\cosh A\cosh B + \sinh A\sinh B\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{4}(e^A+e^{-A})(e^B+e^{-B}) + \tfrac{1}{4}(e^A-e^{-A})(e^B-e^{-B}) = \tfrac{e^{A+B}+e^{-(A+B)}}{2} = \cosh(A+B)\;$</div></div>
   <div class="cs-meta">
@@ -758,7 +793,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/drive-the-inductive-step-through-the-recurrence-not-the-closed-form.html" class="cs-card">
+<a href="move/drive-the-inductive-step-through-the-recurrence-not-the-closed-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Drive the inductive step through the recurrence, not the closed form</div>
   <div class="cs-example"><div class="cs-line">$\;u_{k+2} = 5u_{k+1} - 6u_k,\quad u_k = 3\cdot2^k - 2\cdot3^k,\quad u_{k+1} = 3\cdot2^{k+1} - 2\cdot3^{k+1}\;$</div><div class="cs-line cs-step">$\;5(3\cdot2^{k+1} - 2\cdot3^{k+1}) - 6(3\cdot2^k - 2\cdot3^k) = 2^k(30-18) - 3^k(30-18) = 12\cdot2^k - 12\cdot3^k = 3\cdot2^{k+2} - 2\cdot3^{k+2}\;$</div></div>
   <div class="cs-meta">
@@ -773,7 +808,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-shared-linear-factor-to-reduce-conic-distance-ratio-to-eccentricity.html" class="cs-card">
+<a href="move/cancel-shared-linear-factor-to-reduce-conic-distance-ratio-to-eccentricity.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel shared linear factor to reduce conic distance ratio to eccentricity</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{QF}{PF} = \dfrac{3(5 - 3\cos\theta)/5}{5 - 3\cos\theta}\;$</div><div class="cs-line cs-step">$\;\dfrac{3}{5} \cdot \dfrac{5 - 3\cos\theta}{5 - 3\cos\theta} = \dfrac{3}{5} = e\;$</div></div>
   <div class="cs-meta">

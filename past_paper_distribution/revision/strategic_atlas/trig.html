@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">35 moves · 80 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-pythagorean-identity-cos²x-1-sin²x-to-create-self-referencing-reduction-re.html" class="cs-card">
+<a href="move/apply-pythagorean-identity-cos²x-1-sin²x-to-create-self-referencing-reduction-re.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagorean identity cos²x = 1 − sin²x to create self-referencing reduction recurrence</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = (n-1)\int_0^{\pi/2} \sin^{n-2}x\,\cos^2 x\,dx\;$</div><div class="cs-line cs-step">$\;I_n = (n-1)\int_0^{\pi/2} \sin^{n-2}x\,(1-\sin^2 x)\,dx = (n-1)\,I_{n-2} - (n-1)\,I_n \Rightarrow I_n = \dfrac{n-1}{n}\,I_{n-2}\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/convert-tan-or-cotsec-into-sincos-to-homogenize-the-equation.html" class="cs-card">
+<a href="move/convert-tan-or-cotsec-into-sincos-to-homogenize-the-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert tan (or cot/sec) into sin/cos to homogenize the equation</div>
   <div class="cs-example"><div class="cs-line">$\;2\tan\theta = 3\cos\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{2\sin\theta}{\cos\theta} = 3\cos\theta \Rightarrow 2\sin\theta = 3\cos^2\theta = 3(1-\sin^2\theta)\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-targeted-pythagoreandouble-angle-identity-to-unify-trig-equation-in-one-fu.html" class="cs-card">
+<a href="move/apply-targeted-pythagoreandouble-angle-identity-to-unify-trig-equation-in-one-fu.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply targeted Pythagorean/double-angle identity to unify trig equation in one function</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2 x + \sin x = 1\;$</div><div class="cs-line cs-step">$\;2(1-\sin^2 x) + \sin x = 1 \Rightarrow 2\sin^2 x - \sin x - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/select-the-double-anglepythagorean-form-that-cancels-constants-or-eliminates-unw.html" class="cs-card">
+<a href="move/select-the-double-anglepythagorean-form-that-cancels-constants-or-eliminates-unw.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the double-angle/Pythagorean form that cancels constants or eliminates unwanted variables</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin 2x}{1 - \cos 2x}\;$</div><div class="cs-line cs-step">$\;\dfrac{2\sin x\cos x}{1-(1-2\sin^2 x)} = \dfrac{2\sin x\cos x}{2\sin^2 x} = \cot x\;$</div></div>
   <div class="cs-meta">
@@ -295,7 +330,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-pythagoreanreciprocal-identity-to-homogenize-equation-into-one-trig-functi.html" class="cs-card">
+<a href="move/apply-pythagoreanreciprocal-identity-to-homogenize-equation-into-one-trig-functi.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagorean/reciprocal identity to homogenize equation into one trig function</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin^2 x + \cos x = 1\;$</div><div class="cs-line cs-step">$\;2(1-\cos^2 x) + \cos x = 1 \Rightarrow 2\cos^2 x - \cos x - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -303,7 +338,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/select-the-pythagoreandouble-angle-form-that-matches-the-existing-trig-function.html" class="cs-card">
+<a href="move/select-the-pythagoreandouble-angle-form-that-matches-the-existing-trig-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the Pythagorean/double-angle form that matches the existing trig function</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 2x + 3\sin x = 2\;$</div><div class="cs-line cs-step">$\;(1 - 2\sin^2 x) + 3\sin x = 2 \Rightarrow 2\sin^2 x - 3\sin x + 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -311,7 +346,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-pythagorean-identity-sin²θ-cos²θ-1-to-collapse-squared-trig-terms.html" class="cs-card">
+<a href="move/apply-pythagorean-identity-sin²θ-cos²θ-1-to-collapse-squared-trig-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagorean identity sin²θ + cos²θ = 1 to collapse squared trig terms</div>
   <div class="cs-example"><div class="cs-line">$\;4\cos^2\theta + 4\sin^2\theta - 12\cos\theta + 9\;$</div><div class="cs-line cs-step">$\;4(\cos^2\theta+\sin^2\theta) - 12\cos\theta + 9 = 13 - 12\cos\theta\;$</div></div>
   <div class="cs-meta">
@@ -319,7 +354,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-pythagorean-identity-to-unify-equation-in-a-single-trig-function.html" class="cs-card">
+<a href="move/apply-pythagorean-identity-to-unify-equation-in-a-single-trig-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagorean identity to unify equation in a single trig function</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2 x + \sin x = 1\;$</div><div class="cs-line cs-step">$\;2(1-\sin^2 x) + \sin x = 1 \Rightarrow 2\sin^2 x - \sin x - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -327,7 +362,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/select-a-trig-identity-that-bridges-current-form-to-target-form.html" class="cs-card">
+<a href="move/select-a-trig-identity-that-bridges-current-form-to-target-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Select a trig identity that bridges current form to target form</div>
   <div class="cs-example"><div class="cs-line">$\;6\sin x\cos x\;$</div><div class="cs-line cs-step">$\;6 \cdot \tfrac{1}{2}\sin 2x = 3\sin 2x\;$</div></div>
   <div class="cs-meta">
@@ -335,7 +370,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-tan²θ-sec²θ-1-to-unify-a-mixed-tansec-expression.html" class="cs-card">
+<a href="move/apply-tan²θ-sec²θ-1-to-unify-a-mixed-tansec-expression.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply tan²θ = sec²θ − 1 to unify a mixed tan/sec expression</div>
   <div class="cs-example"><div class="cs-line">$\;\tan^2\theta + 3\sec\theta - 5 = 0\;$</div><div class="cs-line cs-step">$\;(\sec^2\theta - 1) + 3\sec\theta - 5 = 0 \Rightarrow \sec^2\theta + 3\sec\theta - 6 = 0\;$</div></div>
   <div class="cs-meta">
@@ -343,7 +378,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-power-reduction-identity-to-linearise-sin²θ-or-cos²θ-before-integrating.html" class="cs-card">
+<a href="move/apply-power-reduction-identity-to-linearise-sin²θ-or-cos²θ-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply power-reduction identity to linearise sin²θ or cos²θ before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int \sin^2 \theta\, d\theta\;$</div><div class="cs-line cs-step">$\;\int \tfrac{1-\cos 2\theta}{2}\, d\theta = \tfrac{\theta}{2} - \tfrac{\sin 2\theta}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -351,7 +386,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/choose-the-sin-only-or-cos-only-form-of-cos-2θ-to-match-the-target-variable.html" class="cs-card">
+<a href="move/choose-the-sin-only-or-cos-only-form-of-cos-2θ-to-match-the-target-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose the sin-only (or cos-only) form of cos 2θ to match the target variable</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 2x = \sin x\;$</div><div class="cs-line cs-step">$\;1 - 2\sin^2 x = \sin x \Rightarrow 2\sin^2 x + \sin x - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -359,7 +394,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-power-reduction-identity-to-linearise-cos²θ-or-sin²θ-for-direct-integratio.html" class="cs-card">
+<a href="move/apply-power-reduction-identity-to-linearise-cos²θ-or-sin²θ-for-direct-integratio.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply power-reduction identity to linearise cos²θ or sin²θ for direct integration</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos^2\theta\,d\theta\;$</div><div class="cs-line cs-step">$\;\int \tfrac{1}{2}(1+\cos 2\theta)\,d\theta = \tfrac{1}{2}\theta + \tfrac{1}{4}\sin 2\theta + C\;$</div></div>
   <div class="cs-meta">
@@ -367,7 +402,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/multiply-tangent-equation-by-a-trig-factor-to-invoke-a-pythagorean-identity.html" class="cs-card">
+<a href="move/multiply-tangent-equation-by-a-trig-factor-to-invoke-a-pythagorean-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply tangent equation by a trig factor to invoke a Pythagorean identity</div>
   <div class="cs-example"><div class="cs-line">$\;ay\sin\theta - ab\sin^2\theta = -bx\cos\theta + ab\cos^2\theta\;$</div><div class="cs-line cs-step">$\;bx\cos\theta + ay\sin\theta = ab(\cos^2\theta + \sin^2\theta) = ab\;$</div></div>
   <div class="cs-meta">
@@ -375,7 +410,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-double-angle-identities-to-collapse-mixed-frequency-or-squared-trig-terms.html" class="cs-card">
+<a href="move/apply-double-angle-identities-to-collapse-mixed-frequency-or-squared-trig-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply double-angle identities to collapse mixed-frequency or squared trig terms</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta + \cos 2\theta = 0\;$</div><div class="cs-line cs-step">$\;\cos\theta + (2\cos^2\theta - 1) = 0 \Rightarrow 2\cos^2\theta + \cos\theta - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -383,7 +418,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-a-pythagorean-identity-to-homogenise-into-a-single-trig-function.html" class="cs-card">
+<a href="move/apply-a-pythagorean-identity-to-homogenise-into-a-single-trig-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply a Pythagorean identity to homogenise into a single trig function</div>
   <div class="cs-example"><div class="cs-line">$\;2\sec^2 x + 3\tan^2 x\;$</div><div class="cs-line cs-step">$\;2(1+\tan^2 x) + 3\tan^2 x = 5\tan^2 x + 2\;$</div></div>
   <div class="cs-meta">
@@ -391,7 +426,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-a-pythagorean-or-double-angle-identity-to-convert-an-awkward-trig-form-int.html" class="cs-card">
+<a href="move/apply-a-pythagorean-or-double-angle-identity-to-convert-an-awkward-trig-form-int.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply a Pythagorean or double-angle identity to convert an awkward trig form into a tractable one</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = \dfrac{3}{5},\quad \theta \text{ obtuse}\;$</div><div class="cs-line cs-step">$\;\cos\theta = -\sqrt{1 - \tfrac{9}{25}} = -\dfrac{4}{5}\;$</div></div>
   <div class="cs-meta">
@@ -399,7 +434,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/clear-sin-θ-denominator-then-collapse-via-sin²θ-cos²θ-1.html" class="cs-card">
+<a href="move/clear-sin-θ-denominator-then-collapse-via-sin²θ-cos²θ-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear sin θ denominator then collapse via sin²θ + cos²θ = 1</div>
   <div class="cs-example"><div class="cs-line">$\;3y\sin\theta - 6\sin^2\theta = -2x\cos\theta + 6\cos^2\theta\;$</div><div class="cs-line cs-step">$\;2x\cos\theta + 3y\sin\theta = 6(\cos^2\theta + \sin^2\theta) = 6 \Rightarrow \dfrac{x\cos\theta}{3} + \dfrac{y\sin\theta}{2} = 1\;$</div></div>
   <div class="cs-meta">
@@ -407,7 +442,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/linearise-cos²θ-or-sin²θ-via-the-half-angle-identity-before-integrating.html" class="cs-card">
+<a href="move/linearise-cos²θ-or-sin²θ-via-the-half-angle-identity-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Linearise cos²θ or sin²θ via the half-angle identity before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos^2\theta\,d\theta\;$</div><div class="cs-line cs-step">$\;\int \tfrac{1}{2}(1+\cos 2\theta)\,d\theta = \tfrac{\theta}{2} + \tfrac{\sin 2\theta}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -415,7 +450,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/expand-sin²2θ-via-double-angle-to-cancel-against-sec²θ.html" class="cs-card">
+<a href="move/expand-sin²2θ-via-double-angle-to-cancel-against-sec²θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand sin²2θ via double-angle to cancel against sec²θ</div>
   <div class="cs-example"><div class="cs-line">$\;\sin^2 2\theta \sec^2 \theta\;$</div><div class="cs-line cs-step">$\;4\sin^2\theta\cos^2\theta \cdot \dfrac{1}{\cos^2\theta} = 4\sin^2\theta\;$</div></div>
   <div class="cs-meta">
@@ -423,7 +458,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/bridge-tan-t-and-sec²t-parametric-equations-via-1tan²tsec²t.html" class="cs-card">
+<a href="move/bridge-tan-t-and-sec²t-parametric-equations-via-1tan²tsec²t.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge tan t and sec²t parametric equations via 1+tan²t=sec²t</div>
   <div class="cs-example"><div class="cs-line">$\;x = 1 + \tan t,\quad y = 3\sec^2 t\;$</div><div class="cs-line cs-step">$\;y = 3(1 + \tan^2 t) = 3\bigl(1 + (x-1)^2\bigr) = 3(x-1)^2 + 3\;$</div></div>
   <div class="cs-meta">
@@ -431,7 +466,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/choose-the-double-angle-form-that-matches-the-denominators-trig-function.html" class="cs-card">
+<a href="move/choose-the-double-angle-form-that-matches-the-denominators-trig-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose the double-angle form that matches the denominator&#x27;s trig function</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\cos 2x}{\sin x}\;$</div><div class="cs-line cs-step">$\;\dfrac{1 - 2\sin^2 x}{\sin x} = \csc x - 2\sin x\;$</div></div>
   <div class="cs-meta">
@@ -439,7 +474,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-cos²-power-reduction-identity-to-linearize-squared-cosine.html" class="cs-card">
+<a href="move/apply-cos²-power-reduction-identity-to-linearize-squared-cosine.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply cos² power-reduction identity to linearize squared cosine</div>
   <div class="cs-example"><div class="cs-line">$\;\cos^2 x\;$</div><div class="cs-line cs-step">$\;\cos^2 x = \tfrac{1}{2} + \tfrac{1}{2}\cos 2x\;$</div></div>
   <div class="cs-meta">
@@ -447,7 +482,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/expand-squared-linear-combination-and-collapse-via-pythagorean-identity-to-homog.html" class="cs-card">
+<a href="move/expand-squared-linear-combination-and-collapse-via-pythagorean-identity-to-homog.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand squared linear combination and collapse via Pythagorean identity to homogeneous form</div>
   <div class="cs-example"><div class="cs-line">$\;(\sin\theta - \cos\theta)^2 = 1\;$</div><div class="cs-line cs-step">$\;\sin^2\theta - 2\sin\theta\cos\theta + \cos^2\theta = 1 \Rightarrow -2\sin\theta\cos\theta = 0\;$</div></div>
   <div class="cs-meta">
@@ -455,7 +490,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/specialize-a-compound-angle-formula-by-setting-b-a-to-obtain-a-double-angle-iden.html" class="cs-card">
+<a href="move/specialize-a-compound-angle-formula-by-setting-b-a-to-obtain-a-double-angle-iden.html" class="cs-card lazy-tex">
   <div class="cs-name">Specialize a compound angle formula by setting B = A to obtain a double angle identity</div>
   <div class="cs-example"><div class="cs-line">$\;\cos(A+B) \equiv \cos A\cos B - \sin A\sin B\;$</div><div class="cs-line cs-step">$\;B=A:\quad \cos 2A \equiv \cos^2 A - \sin^2 A\;$</div></div>
   <div class="cs-meta">
@@ -463,7 +498,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-sec²x-1-tan²x-to-reduce-equation-to-a-quadratic-in-tan-x.html" class="cs-card">
+<a href="move/apply-sec²x-1-tan²x-to-reduce-equation-to-a-quadratic-in-tan-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply sec²x ≡ 1 + tan²x to reduce equation to a quadratic in tan x</div>
   <div class="cs-example"><div class="cs-line">$\;\sec^2 x - 3\tan x + 1 = 0\;$</div><div class="cs-line cs-step">$\;(1+\tan^2 x) - 3\tan x + 1 = 0 \Rightarrow \tan^2 x - 3\tan x + 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -471,7 +506,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/convert-cosine-equation-to-sine-via-co-function-identity.html" class="cs-card">
+<a href="move/convert-cosine-equation-to-sine-via-co-function-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert cosine equation to sine via co-function identity</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta = \sin\alpha\;$</div><div class="cs-line cs-step">$\;\sin\!\left(\tfrac{\pi}{2} - \theta\right) = \sin\alpha \Rightarrow \tfrac{\pi}{2} - \theta = \alpha \Rightarrow \theta = \tfrac{\pi}{2} - \alpha\;$</div></div>
   <div class="cs-meta">
@@ -479,7 +514,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/combine-over-cos²θ-and-factor-sin²θ-to-invoke-sin²cos²1.html" class="cs-card">
+<a href="move/combine-over-cos²θ-and-factor-sin²θ-to-invoke-sin²cos²1.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine over cos²θ and factor sin²θ to invoke sin²+cos²=1</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin^4\theta}{\cos^2\theta} + \sin^2\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{\sin^4\theta + \sin^2\theta\cos^2\theta}{\cos^2\theta} = \dfrac{\sin^2\theta(\sin^2\theta+\cos^2\theta)}{\cos^2\theta} = \tan^2\theta\;$</div></div>
   <div class="cs-meta">
@@ -487,7 +522,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/collapse-cos²θ-sin²θ-to-cos2θ-before-evaluating.html" class="cs-card">
+<a href="move/collapse-cos²θ-sin²θ-to-cos2θ-before-evaluating.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse cos²θ − sin²θ to cos2θ before evaluating</div>
   <div class="cs-example"><div class="cs-line">$\;\cos^2\theta - \sin^2\theta + 3\cos\theta\;$</div><div class="cs-line cs-step">$\;\cos 2\theta + 3\cos\theta\;$</div></div>
   <div class="cs-meta">
@@ -495,7 +530,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/select-r-sinx-α-form-to-match-sin-cos-sign-pattern.html" class="cs-card">
+<a href="move/select-r-sinx-α-form-to-match-sin-cos-sign-pattern.html" class="cs-card lazy-tex">
   <div class="cs-name">Select R sin(x − α) form to match +sin, −cos sign pattern</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin x - 4\cos x\;$</div><div class="cs-line cs-step">$\;R\sin(x-\alpha):\quad R=\sqrt{9+16}=5,\quad \alpha=\arctan\!\tfrac{4}{3} \Rightarrow 5\sin\!\left(x-\arctan\tfrac{4}{3}\right)\;$</div></div>
   <div class="cs-meta">
@@ -503,7 +538,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/pick-cos-2θ-2cos²θ-1-to-build-a-quadratic-in-cos-θ.html" class="cs-card">
+<a href="move/pick-cos-2θ-2cos²θ-1-to-build-a-quadratic-in-cos-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Pick cos 2θ = 2cos²θ − 1 to build a quadratic in cos θ</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 2\theta + \cos \theta = 0\;$</div><div class="cs-line cs-step">$\;(2\cos^2\theta - 1) + \cos\theta = 0 \Rightarrow 2\cos^2\theta + \cos\theta - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -511,7 +546,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/apply-½ab-sin-c-to-get-equilateral-triangle-area-in-one-step.html" class="cs-card">
+<a href="move/apply-½ab-sin-c-to-get-equilateral-triangle-area-in-one-step.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply ½ab sin C to get equilateral triangle area in one step</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Equilateral triangle, side } x\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}x \cdot x \cdot \sin 60° = \tfrac{\sqrt{3}}{4}\,x^2\;$</div></div>
   <div class="cs-meta">
@@ -519,7 +554,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/reduce-sin180α-using-quadrant-symmetry-rules.html" class="cs-card">
+<a href="move/reduce-sin180α-using-quadrant-symmetry-rules.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce sin(180°±α) using quadrant symmetry rules</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(180°-\alpha) + \sin(180°+\alpha)\;$</div><div class="cs-line cs-step">$\;\sin\alpha + (-\sin\alpha) = 0\;$</div></div>
   <div class="cs-meta">
@@ -527,7 +562,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/clear-denominators-in-parametric-tangent-to-expose-sin²θcos²θ1.html" class="cs-card">
+<a href="move/clear-denominators-in-parametric-tangent-to-expose-sin²θcos²θ1.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear denominators in parametric tangent to expose sin²θ+cos²θ=1</div>
   <div class="cs-example"><div class="cs-line">$\;2x\cos\theta + 3y\sin\theta = 6\sin^2\theta + 6\cos^2\theta\;$</div><div class="cs-line cs-step">$\;2x\cos\theta + 3y\sin\theta = 6(\sin^2\theta + \cos^2\theta) = 6\;$</div></div>
   <div class="cs-meta">
@@ -535,7 +570,7 @@ window.MathJax = {
     <span>identity selection</span>
   </div>
 </a>
-<a href="move/combine-sec-θ-cos-θ-over-common-denominator-to-get-sin²θcos-θ.html" class="cs-card">
+<a href="move/combine-sec-θ-cos-θ-over-common-denominator-to-get-sin²θcos-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine sec θ − cos θ over common denominator to get sin²θ/cos θ</div>
   <div class="cs-example"><div class="cs-line">$\;\sec\theta - \cos\theta\;$</div><div class="cs-line cs-step">$\;\frac{1}{\cos\theta} - \cos\theta = \frac{1-\cos^2\theta}{\cos\theta} = \frac{\sin^2\theta}{\cos\theta}\;$</div></div>
   <div class="cs-meta">
@@ -550,7 +585,7 @@ window.MathJax = {
     <span class="meta">15 moves · 25 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-single-letter-for-the-trig-function-to-expose-a-standard-quadratic.html" class="cs-card">
+<a href="move/substitute-a-single-letter-for-the-trig-function-to-expose-a-standard-quadratic.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a single letter for the trig function to expose a standard quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin^2 x + \sin x - 1 = 0\;$</div><div class="cs-line cs-step">$\;u = \sin x:\quad 2u^2 + u - 1 = 0 \Rightarrow (2u-1)(u+1) = 0\;$</div></div>
   <div class="cs-meta">
@@ -558,7 +593,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-u-for-the-compound-argument-and-remap-the-domain.html" class="cs-card">
+<a href="move/substitute-u-for-the-compound-argument-and-remap-the-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u for the compound argument and remap the domain</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(2x + 30°) = \tfrac{1}{2},\quad 0° \le x \le 180°\;$</div><div class="cs-line cs-step">$\;u = 2x+30°,\; 30° \le u \le 390° \Rightarrow \sin u = \tfrac{1}{2},\; u = 150°, 390° \Rightarrow x = 60°, 180°\;$</div></div>
   <div class="cs-meta">
@@ -566,7 +601,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-a-parameter-into-part-as-proven-identity-to-bridge-to-part-b.html" class="cs-card">
+<a href="move/substitute-a-parameter-into-part-as-proven-identity-to-bridge-to-part-b.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a parameter into part (a)&#x27;s proven identity to bridge to part (b)</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a):}\ 2\cos\theta = 3\sin\theta \Rightarrow 4\cos^2\theta + 6\cos\theta - 4 = 0\;$</div><div class="cs-line cs-step">$\;\theta = 3x:\quad 4\cos^2 3x + 6\cos 3x - 4 = 0 \Rightarrow (2\cos 3x - 1)(2\cos 3x + 4) = 0\;$</div></div>
   <div class="cs-meta">
@@ -574,7 +609,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-to-map-part-b-onto-part-as-proven-identity.html" class="cs-card">
+<a href="move/substitute-to-map-part-b-onto-part-as-proven-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute to map part (b) onto part (a)&#x27;s proven identity</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \dfrac{\sin 2x}{1+\cos 2x}\equiv\tan x;\quad \text{(b)}\ \dfrac{\sin 4\theta}{1+\cos 4\theta}=1\;$</div><div class="cs-line cs-step">$\;x=2\theta:\quad \dfrac{\sin 4\theta}{1+\cos 4\theta}\equiv\tan 2\theta \Rightarrow \tan 2\theta=1\;$</div></div>
   <div class="cs-meta">
@@ -582,7 +617,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/bridge-y-to-x-via-original-equation-plus-pythagorean-identity.html" class="cs-card">
+<a href="move/bridge-y-to-x-via-original-equation-plus-pythagorean-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge y to x via original equation plus Pythagorean identity</div>
   <div class="cs-example"><div class="cs-line">$\;x = \ln(\sin y),\quad 0 < y < \tfrac{\pi}{2},\quad \dfrac{dy}{dx} = \tan y = \dfrac{\sin y}{\cos y}\;$</div><div class="cs-line cs-step">$\;\sin y = e^{x},\; \cos y = \sqrt{1 - \sin^2 y} = \sqrt{1 - e^{2x}} \;\Rightarrow\; \dfrac{dy}{dx} = \dfrac{e^{x}}{\sqrt{1 - e^{2x}}}\;$</div></div>
   <div class="cs-meta">
@@ -590,7 +625,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/cross-multiply-rational-trig-and-rearrange-into-a-sin-x-b-cos-x-c-form.html" class="cs-card">
+<a href="move/cross-multiply-rational-trig-and-rearrange-into-a-sin-x-b-cos-x-c-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Cross-multiply rational trig and rearrange into a sin x + b cos x = c form</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{3 + 4\sin x}{5 - 3\cos x}\;$</div><div class="cs-line cs-step">$\;5y - 3y\cos x = 3 + 4\sin x \Rightarrow 4\sin x + 3y\cos x = 5y - 3\;$</div></div>
   <div class="cs-meta">
@@ -598,7 +633,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-a-surrogate-variable-to-reuse-a-previous-r-form-result.html" class="cs-card">
+<a href="move/substitute-a-surrogate-variable-to-reuse-a-previous-r-form-result.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a surrogate variable to reuse a previous R-form result</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ 3\sin x - 4\cos x = 5\sin(x - \alpha),\quad g(\theta) = 1 + 3\sin(2\theta - \tfrac{\pi}{6}) - 4\cos(2\theta - \tfrac{\pi}{6})\;$</div><div class="cs-line cs-step">$\;X = 2\theta - \tfrac{\pi}{6}:\quad g(\theta) = 1 + 3\sin X - 4\cos X = 1 + 5\sin\!\left(2\theta - \tfrac{\pi}{6} - \alpha\right)\;$</div></div>
   <div class="cs-meta">
@@ -606,7 +641,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-s-sinθ-cosθ-to-bridge-denominator-with-sin2θ.html" class="cs-card">
+<a href="move/substitute-s-sinθ-cosθ-to-bridge-denominator-with-sin2θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute s = sinθ − cosθ to bridge denominator with sin2θ</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{1 - \sin 2\theta}{\sin\theta - \cos\theta}\;$</div><div class="cs-line cs-step">$\;s = \sin\theta - \cos\theta,\; s^2 = 1 - \sin 2\theta \Rightarrow \dfrac{s^2}{s} = s = \sin\theta - \cos\theta\;$</div></div>
   <div class="cs-meta">
@@ -614,7 +649,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-the-explicit-form-of-f-before-solving-a-transformed-equation.html" class="cs-card">
+<a href="move/substitute-the-explicit-form-of-f-before-solving-a-transformed-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the explicit form of f before solving a transformed equation</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = 2\cos x,\quad y = f\!\left(x + \dfrac{\pi}{3}\right),\quad 0 \le x \le 2\pi\;$</div><div class="cs-line cs-step">$\;y = 2\cos\!\left(x + \dfrac{\pi}{3}\right) = 0 \Rightarrow x + \dfrac{\pi}{3} = \dfrac{\pi}{2},\,\dfrac{3\pi}{2} \Rightarrow x = \dfrac{\pi}{6},\,\dfrac{7\pi}{6}\;$</div></div>
   <div class="cs-meta">
@@ -622,7 +657,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-linear-argument-to-reduce-compound-trig-equation.html" class="cs-card">
+<a href="move/substitute-linear-argument-to-reduce-compound-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute linear argument to reduce compound trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(2\theta - 30°) = \tfrac{1}{2},\quad 0° \le \theta \le 360°\;$</div><div class="cs-line cs-step">$\;X = 2\theta - 30°,\; -30° \le X \le 690° \Rightarrow X = 30°,\,150°,\,390°,\,510° \Rightarrow \theta = 30°,\,90°,\,210°,\,270°\;$</div></div>
   <div class="cs-meta">
@@ -630,7 +665,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/divide-quadratic-in-sin-by-sin²-to-convert-to-quadratic-in-cosec.html" class="cs-card">
+<a href="move/divide-quadratic-in-sin-by-sin²-to-convert-to-quadratic-in-cosec.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide quadratic in sin by sin² to convert to quadratic in cosec</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin^2 x + 3\sin x - 1 = 0\;$</div><div class="cs-line cs-step">$\;\div \sin^2 x:\quad 2 + 3\,\operatorname{cosec} x - \operatorname{cosec}^2 x = 0 \Rightarrow \operatorname{cosec}^2 x - 3\,\operatorname{cosec} x - 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -638,7 +673,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/bridge-trig-derivative-to-algebraic-form-via-pythagorean-identity.html" class="cs-card">
+<a href="move/bridge-trig-derivative-to-algebraic-form-via-pythagorean-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge trig derivative to algebraic form via Pythagorean identity</div>
   <div class="cs-example"><div class="cs-line">$\;x = 2\sin y \Rightarrow \dfrac{dy}{dx} = \dfrac{1}{2\cos y}\;$</div><div class="cs-line cs-step">$\;\cos y = \sqrt{1 - \sin^2 y} = \sqrt{1 - x^2/4} = \tfrac{1}{2}\sqrt{4-x^2} \Rightarrow \dfrac{dy}{dx} = \dfrac{1}{\sqrt{4-x^2}}\;$</div></div>
   <div class="cs-meta">
@@ -646,7 +681,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/rewrite-every-trig-function-in-terms-of-tan-x-using-t-tan-x.html" class="cs-card">
+<a href="move/rewrite-every-trig-function-in-terms-of-tan-x-using-t-tan-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite every trig function in terms of tan x using t = tan x</div>
   <div class="cs-example"><div class="cs-line">$\;\tan 2x + \cot x = 0,\quad t = \tan x\;$</div><div class="cs-line cs-step">$\;\dfrac{2t}{1-t^2} + \dfrac{1}{t} = 0 \Rightarrow 2t^2 + 1 - t^2 = 0 \Rightarrow t^2 + 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -654,7 +689,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/convert-multiple-angle-trig-equation-to-polynomial-via-proved-identity.html" class="cs-card">
+<a href="move/convert-multiple-angle-trig-equation-to-polynomial-via-proved-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert multiple-angle trig equation to polynomial via proved identity</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 3\theta = 4\cos^3\theta - 3\cos\theta,\quad \cos 3\theta = 0\;$</div><div class="cs-line cs-step">$\;c = \cos\theta:\quad 4c^3 - 3c = 0 \Rightarrow c(4c^2 - 3) = 0 \Rightarrow c = 0,\;\pm\tfrac{\sqrt{3}}{2}\;$</div></div>
   <div class="cs-meta">
@@ -662,7 +697,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/revert-double-angle-to-quadratic-in-cosx-for-solving.html" class="cs-card">
+<a href="move/revert-double-angle-to-quadratic-in-cosx-for-solving.html" class="cs-card lazy-tex">
   <div class="cs-name">Revert double-angle to quadratic in cosx for solving</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 2x - 3\cos x + 2 = 0\;$</div><div class="cs-line cs-step">$\;2\cos^2 x - 1 - 3\cos x + 2 = 0 \Rightarrow 2\cos^2 x - 3\cos x + 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -677,7 +712,7 @@ window.MathJax = {
     <span class="meta">10 moves · 16 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/enumerate-all-trig-solutions-using-reference-angles-and-range-checking.html" class="cs-card">
+<a href="move/enumerate-all-trig-solutions-using-reference-angles-and-range-checking.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate all trig solutions using reference angles and range-checking</div>
   <div class="cs-example"><div class="cs-line">$\;\sin 2x = \tfrac{1}{2},\quad x \in [0,\pi]\;$</div><div class="cs-line cs-step">$\;2x \in [0,2\pi],\; 2x = \tfrac{\pi}{6},\;\pi - \tfrac{\pi}{6} \Rightarrow x = \tfrac{\pi}{12},\;\tfrac{5\pi}{12}\;$</div></div>
   <div class="cs-meta">
@@ -685,7 +720,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-all-solutions-via-general-solution-within-the-transformed-interval.html" class="cs-card">
+<a href="move/enumerate-all-solutions-via-general-solution-within-the-transformed-interval.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate all solutions via general solution within the transformed interval</div>
   <div class="cs-example"><div class="cs-line">$\;\tan(2x) = 1,\quad 0 \le x \le 2\pi,\quad u = 2x \in [0,4\pi]\;$</div><div class="cs-line cs-step">$\;u = \tfrac{\pi}{4} + n\pi,\ n=0,1,2,3 \Rightarrow x = \tfrac{\pi}{8},\, \tfrac{5\pi}{8},\, \tfrac{9\pi}{8},\, \tfrac{13\pi}{8}\;$</div></div>
   <div class="cs-meta">
@@ -693,7 +728,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-all-general-solutions-of-sin-θ-k-using-reference-angle-and-quadrant-sy.html" class="cs-card">
+<a href="move/enumerate-all-general-solutions-of-sin-θ-k-using-reference-angle-and-quadrant-sy.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate all general solutions of sin θ = k using reference angle and quadrant symmetry</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = -\tfrac{1}{2},\quad 0\le\theta<360°\;$</div><div class="cs-line cs-step">$\;\alpha=30°,\ k<0 \Rightarrow \theta=180°+30°=210°,\quad \theta=360°-30°=330°\;$</div></div>
   <div class="cs-meta">
@@ -701,7 +736,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-general-solutions-then-match-to-diagram-position.html" class="cs-card">
+<a href="move/enumerate-general-solutions-then-match-to-diagram-position.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate general solutions then match to diagram position</div>
   <div class="cs-example"><div class="cs-line">$\;y = \cos 2x,\quad \text{3rd positive } x\text{-intercept}\;$</div><div class="cs-line cs-step">$\;\cos 2x = 0 \Rightarrow x = 45°, 135°, 225°, \dots \Rightarrow x = 225°\;$</div></div>
   <div class="cs-meta">
@@ -709,7 +744,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/apply-general-solution-of-cosine-then-filter-by-domain.html" class="cs-card">
+<a href="move/apply-general-solution-of-cosine-then-filter-by-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply general solution of cosine then filter by domain</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\!\left(x + \tfrac{\pi}{4}\right) = 0,\quad 0 \le x \le 2\pi\;$</div><div class="cs-line cs-step">$\;x + \tfrac{\pi}{4} = \tfrac{\pi}{2} + n\pi \Rightarrow x = \tfrac{\pi}{4} + n\pi;\; n\in\{0,1\} \Rightarrow x = \tfrac{\pi}{4},\;\tfrac{5\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -717,7 +752,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-cosine-solutions-using-symmetry-and-filter-by-range.html" class="cs-card">
+<a href="move/enumerate-cosine-solutions-using-symmetry-and-filter-by-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate cosine solutions using symmetry and filter by range</div>
   <div class="cs-example"><div class="cs-line">$\;\cos u = \tfrac{1}{2},\quad u \in [0°,\, 400°)\;$</div><div class="cs-line cs-step">$\;\alpha = 60°\; \checkmark,\quad 360°-60°=300°\; \checkmark,\quad 60°+360°=420°\; \times \;\Rightarrow\; u=60°,\,300°\;$</div></div>
   <div class="cs-meta">
@@ -725,7 +760,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-roots-of-tannθ-k-using-general-solution-over-one-period.html" class="cs-card">
+<a href="move/enumerate-roots-of-tannθ-k-using-general-solution-over-one-period.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate roots of tan(nθ) = k using general solution over one period</div>
   <div class="cs-example"><div class="cs-line">$\;\tan 3\theta = 1,\quad 0 \le \theta < \pi\;$</div><div class="cs-line cs-step">$\;3\theta = \tfrac{\pi}{4} + m\pi \Rightarrow \theta = \tfrac{\pi}{12},\; \tfrac{5\pi}{12},\; \tfrac{3\pi}{4} \quad (m=0,1,2)\;$</div></div>
   <div class="cs-meta">
@@ -733,7 +768,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-cosine-solutions-to-select-the-k-th-positive-root.html" class="cs-card">
+<a href="move/enumerate-cosine-solutions-to-select-the-k-th-positive-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate cosine solutions to select the k-th positive root</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 2x = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;2x = \tfrac{\pi}{3},\ \tfrac{5\pi}{3},\ \tfrac{7\pi}{3} \Rightarrow x = \tfrac{\pi}{6},\ \tfrac{5\pi}{6},\ \tfrac{7\pi}{6} \Rightarrow x_2 = \tfrac{5\pi}{6}\;$</div></div>
   <div class="cs-meta">
@@ -741,7 +776,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-tan-solutions-on-a-restricted-interval-using-period-π.html" class="cs-card">
+<a href="move/enumerate-tan-solutions-on-a-restricted-interval-using-period-π.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate tan solutions on a restricted interval using period π</div>
   <div class="cs-example"><div class="cs-line">$\;\tan x = 1,\quad 0 \le x < 2\pi\;$</div><div class="cs-line cs-step">$\;x = \tfrac{\pi}{4} + n\pi \Rightarrow x = \tfrac{\pi}{4},\; \tfrac{5\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -749,7 +784,7 @@ window.MathJax = {
     <span>solution enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-tan-solutions-using-180-periodicity-across-the-range.html" class="cs-card">
+<a href="move/enumerate-tan-solutions-using-180-periodicity-across-the-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate tan solutions using 180° periodicity across the range</div>
   <div class="cs-example"><div class="cs-line">$\;\tan x = 1,\quad 0^\circ \le x < 360^\circ\;$</div><div class="cs-line cs-step">$\;x = 45^\circ,\; 45^\circ + 180^\circ = 225^\circ\;$</div></div>
   <div class="cs-meta">
@@ -764,7 +799,7 @@ window.MathJax = {
     <span class="meta">9 moves · 15 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-or-invert-sectortriangle-area-formulas-to-extract-the-unknown.html" class="cs-card">
+<a href="move/apply-or-invert-sectortriangle-area-formulas-to-extract-the-unknown.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply or invert sector/triangle area formulas to extract the unknown</div>
   <div class="cs-example"><div class="cs-line">$\;A = 8,\quad \theta = 1\;$</div><div class="cs-line cs-step">$\;8 = \tfrac{1}{2}r^2(1) \Rightarrow r^2 = 16 \Rightarrow r = 4\;$</div></div>
   <div class="cs-meta">
@@ -772,7 +807,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/select-or-invert-the-area-with-included-angle-sector-area-formula-to-isolate-the.html" class="cs-card">
+<a href="move/select-or-invert-the-area-with-included-angle-sector-area-formula-to-isolate-the.html" class="cs-card lazy-tex">
   <div class="cs-name">Select or invert the area-with-included-angle / sector-area formula to isolate the unknown</div>
   <div class="cs-example"><div class="cs-line">$\;A = 12,\quad r = 4,\quad A = \tfrac{1}{2}r^2\theta\;$</div><div class="cs-line cs-step">$\;12 = \tfrac{1}{2}(16)\,\theta \Rightarrow \theta = \dfrac{12}{8} = 1.5\;$</div></div>
   <div class="cs-meta">
@@ -780,7 +815,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/apply-r-formula-to-combine-a-sin-x-b-cos-x-into-a-single-sinusoid.html" class="cs-card">
+<a href="move/apply-r-formula-to-combine-a-sin-x-b-cos-x-into-a-single-sinusoid.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply R-formula to combine a sin x ± b cos x into a single sinusoid</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin x - 4\cos x\;$</div><div class="cs-line cs-step">$\;R^2 = 3^2+4^2 = 25,\; \tan\alpha = \tfrac{4}{3} \Rightarrow 3\sin x - 4\cos x = 5\sin(x - \alpha)\;$</div></div>
   <div class="cs-meta">
@@ -788,7 +823,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/select-r-formula-form-to-match-the-sign-pattern-of-the-expression.html" class="cs-card">
+<a href="move/select-r-formula-form-to-match-the-sign-pattern-of-the-expression.html" class="cs-card lazy-tex">
   <div class="cs-name">Select R-formula form to match the sign pattern of the expression</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin x - 4\cos x\;$</div><div class="cs-line cs-step">$\;R\sin(x-\alpha):\ R\cos\alpha=3,\ R\sin\alpha=4 \Rightarrow R=5,\ \alpha=\arctan\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -796,7 +831,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/invert-an-r-formula-lrθ-a½r²θ-a½ab-sin-c-to-extract-a-missing-length-or-angle.html" class="cs-card">
+<a href="move/invert-an-r-formula-lrθ-a½r²θ-a½ab-sin-c-to-extract-a-missing-length-or-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert an r-formula (L=rθ, A=½r²θ, A=½ab sin C) to extract a missing length or angle</div>
   <div class="cs-example"><div class="cs-line">$\;A = \tfrac{1}{2}(4)(b)\sin\!\left(\tfrac{\pi}{6}\right),\quad A = 5\;$</div><div class="cs-line cs-step">$\;5 = 2b \cdot \tfrac{1}{2} \Rightarrow b = 5\;$</div></div>
   <div class="cs-meta">
@@ -804,7 +839,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/rearrange-arc-length-formula-to-extract-unknown-radius.html" class="cs-card">
+<a href="move/rearrange-arc-length-formula-to-extract-unknown-radius.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange arc-length formula to extract unknown radius</div>
   <div class="cs-example"><div class="cs-line">$\;s = 6,\quad \theta = 2\;$</div><div class="cs-line cs-step">$\;r = \dfrac{s}{\theta} = \dfrac{6}{2} = 3\;$</div></div>
   <div class="cs-meta">
@@ -812,7 +847,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/convert-asinx-bcosx-to-rsinxα-to-solve-linear-trig-equation.html" class="cs-card">
+<a href="move/convert-asinx-bcosx-to-rsinxα-to-solve-linear-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert a·sinx + b·cosx to R·sin(x+α) to solve linear trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x + \cos x = 1\;$</div><div class="cs-line cs-step">$\;R = \sqrt{2},\; \alpha = \tfrac{\pi}{4} \Rightarrow \sqrt{2}\,\sin\!\left(x + \tfrac{\pi}{4}\right) = 1 \Rightarrow \sin\!\left(x + \tfrac{\pi}{4}\right) = \tfrac{1}{\sqrt{2}}\;$</div></div>
   <div class="cs-meta">
@@ -820,7 +855,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/expand-rcosx-α-and-equate-coefficients-of-cos-x-and-sin-x.html" class="cs-card">
+<a href="move/expand-rcosx-α-and-equate-coefficients-of-cos-x-and-sin-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand R·cos(x − α) and equate coefficients of cos x and sin x</div>
   <div class="cs-example"><div class="cs-line">$\;3\cos x + 4\sin x = R\cos(x - \alpha)\;$</div><div class="cs-line cs-step">$\;R\cos\alpha = 3,\quad R\sin\alpha = 4 \Rightarrow R = 5,\quad \alpha = \arctan\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -828,7 +863,7 @@ window.MathJax = {
     <span>r formula</span>
   </div>
 </a>
-<a href="move/pick-matching-r-formula-form-to-merge-asinθ-bcosθ-into-one-sinusoid.html" class="cs-card">
+<a href="move/pick-matching-r-formula-form-to-merge-asinθ-bcosθ-into-one-sinusoid.html" class="cs-card lazy-tex">
   <div class="cs-name">Pick matching R-formula form to merge a·sinθ ± b·cosθ into one sinusoid</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin\theta + 4\cos\theta\;$</div><div class="cs-line cs-step">$\;R\sin(\theta+\alpha),\quad R=\sqrt{9+16}=5,\quad \tan\alpha=\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -843,7 +878,7 @@ window.MathJax = {
     <span class="meta">8 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/transform-parent-sinecosine-key-points-to-sketch-or-locate-features.html" class="cs-card">
+<a href="move/transform-parent-sinecosine-key-points-to-sketch-or-locate-features.html" class="cs-card lazy-tex">
   <div class="cs-name">Transform parent sine/cosine key points to sketch or locate features</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2\sin\theta + 1\;$</div><div class="cs-line cs-step">$\;(0°,0),(90°,1),(180°,0),(270°,-1),(360°,0) \Rightarrow (0°,1),(90°,3),(180°,1),(270°,-1),(360°,1)\;$</div></div>
   <div class="cs-meta">
@@ -851,7 +886,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/read-negative-amplitude-as-x-axis-reflection-to-locate-maxmin.html" class="cs-card">
+<a href="move/read-negative-amplitude-as-x-axis-reflection-to-locate-maxmin.html" class="cs-card lazy-tex">
   <div class="cs-name">Read negative amplitude as x-axis reflection to locate max/min</div>
   <div class="cs-example"><div class="cs-line">$\;y = A\cos(x - 30)°,\quad \text{minimum at } (30,\,-3)\;$</div><div class="cs-line cs-step">$\;A = \frac{-3}{\cos 0°} = -3 \Rightarrow y = -3\cos(x-30)°,\; y_{\max}=3 \text{ when } \cos(x-30)°=-1\;$</div></div>
   <div class="cs-meta">
@@ -859,7 +894,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/read-period-of-sincos-from-coefficient-of-x.html" class="cs-card">
+<a href="move/read-period-of-sincos-from-coefficient-of-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Read period of sin/cos from coefficient of x</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin(3x)\;$</div><div class="cs-line cs-step">$\;\text{Period} = \dfrac{2\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -867,7 +902,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/catalogue-parent-cosine-key-points-then-scale-y-values-by-amplitude.html" class="cs-card">
+<a href="move/catalogue-parent-cosine-key-points-then-scale-y-values-by-amplitude.html" class="cs-card lazy-tex">
   <div class="cs-name">Catalogue parent cosine key points then scale y-values by amplitude</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3\cos x^\circ,\quad P\text{ is first minimum for }x>0\;$</div><div class="cs-line cs-step">$\;\text{Parent min: }(180^\circ,\,-1) \Rightarrow P = (180^\circ,\, 3(-1)) = (180^\circ,\,-3)\;$</div></div>
   <div class="cs-meta">
@@ -875,7 +910,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/translate-graph-vertically-by-recognising-outside-function-constant.html" class="cs-card">
+<a href="move/translate-graph-vertically-by-recognising-outside-function-constant.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate graph vertically by recognising outside-function constant</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin x \quad \longrightarrow \quad y = \sin x - 2\;$</div><div class="cs-line cs-step">$\;\text{midline: } y=0\to y=-2,\quad \max: 1\to -1,\quad \min: -1\to -3\;$</div></div>
   <div class="cs-meta">
@@ -883,7 +918,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/halve-the-period-via-horizontal-compression-for-y-sinkx.html" class="cs-card">
+<a href="move/halve-the-period-via-horizontal-compression-for-y-sinkx.html" class="cs-card lazy-tex">
   <div class="cs-name">Halve the period via horizontal compression for y = sin(kx)</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin 2x\;$</div><div class="cs-line cs-step">$\;k = 2 \Rightarrow T = \dfrac{360°}{2} = 180°\;$</div></div>
   <div class="cs-meta">
@@ -891,7 +926,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/map-parent-sines-critical-argument-through-the-transformation.html" class="cs-card">
+<a href="move/map-parent-sines-critical-argument-through-the-transformation.html" class="cs-card lazy-tex">
   <div class="cs-name">Map parent sine&#x27;s critical argument through the transformation</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin\!\left(\dfrac{x}{2}\right),\quad x \ge 0,\quad \text{first minimum}\;$</div><div class="cs-line cs-step">$\;\dfrac{x}{2} = \dfrac{3\pi}{2} \Rightarrow x = 3\pi,\quad y = -1 \Rightarrow M = (3\pi,\,-1)\;$</div></div>
   <div class="cs-meta">
@@ -899,7 +934,7 @@ window.MathJax = {
     <span>graph transformation</span>
   </div>
 </a>
-<a href="move/convert-a-sin-x-b-cos-x-into-single-r-form-sinusoid.html" class="cs-card">
+<a href="move/convert-a-sin-x-b-cos-x-into-single-r-form-sinusoid.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert a sin x + b cos x into single R-form sinusoid</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin x + 4\cos x\;$</div><div class="cs-line cs-step">$\;R = \sqrt{3^2+4^2} = 5,\quad \tan\alpha = \tfrac{4}{3} \Rightarrow 3\sin x + 4\cos x = 5\sin(x+\alpha)\;$</div></div>
   <div class="cs-meta">
@@ -914,7 +949,7 @@ window.MathJax = {
     <span class="meta">3 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-cast-quadrant-symmetry-to-enumerate-all-trig-solutions-in-range.html" class="cs-card">
+<a href="move/apply-cast-quadrant-symmetry-to-enumerate-all-trig-solutions-in-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply CAST quadrant symmetry to enumerate all trig solutions in range</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = -\tfrac{1}{2},\quad \theta \in [0°,\,360°)\;$</div><div class="cs-line cs-step">$\;\alpha = 30° \Rightarrow \theta = 180°+30° = 210°,\quad \theta = 360°-30° = 330°\;$</div></div>
   <div class="cs-meta">
@@ -922,7 +957,7 @@ window.MathJax = {
     <span>cast enumeration</span>
   </div>
 </a>
-<a href="move/enumerate-cosine-solutions-via-360θ-symmetry-in-range.html" class="cs-card">
+<a href="move/enumerate-cosine-solutions-via-360θ-symmetry-in-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate cosine solutions via 360°−θ symmetry in range</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta = \tfrac{1}{2},\quad \theta \in [0°,\,360°)\;$</div><div class="cs-line cs-step">$\;\theta_1 = 60°,\quad \theta_2 = 360° - 60° = 300°\;$</div></div>
   <div class="cs-meta">
@@ -930,7 +965,7 @@ window.MathJax = {
     <span>cast enumeration</span>
   </div>
 </a>
-<a href="move/use-sine-symmetry-to-capture-the-second-quadrant-solution.html" class="cs-card">
+<a href="move/use-sine-symmetry-to-capture-the-second-quadrant-solution.html" class="cs-card lazy-tex">
   <div class="cs-name">Use sine symmetry to capture the second-quadrant solution</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x = 0.5,\quad 0°\le x < 360°\;$</div><div class="cs-line cs-step">$\;\alpha = 30° \Rightarrow x = 30°,\; 180° - 30° = 150°\;$</div></div>
   <div class="cs-meta">
@@ -945,7 +980,7 @@ window.MathJax = {
     <span class="meta">2 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-exact-special-angle-trig-values-to-finalise-an-exact-answer.html" class="cs-card">
+<a href="move/substitute-exact-special-angle-trig-values-to-finalise-an-exact-answer.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute exact special-angle trig values to finalise an exact answer</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin\dfrac{\pi}{3} + \cos\dfrac{\pi}{4}\;$</div><div class="cs-line cs-step">$\;2 \cdot \dfrac{\sqrt{3}}{2} + \dfrac{\sqrt{2}}{2} = \sqrt{3} + \dfrac{\sqrt{2}}{2}\;$</div></div>
   <div class="cs-meta">
@@ -953,7 +988,7 @@ window.MathJax = {
     <span>exact value recall</span>
   </div>
 </a>
-<a href="move/recall-exact-trig-values-via-reference-angle-and-quadrant-signs.html" class="cs-card">
+<a href="move/recall-exact-trig-values-via-reference-angle-and-quadrant-signs.html" class="cs-card lazy-tex">
   <div class="cs-name">Recall exact trig values via reference angle and quadrant signs</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\!\left(\dfrac{2\pi}{3}\right)\;$</div><div class="cs-line cs-step">$\;\cos\!\left(\pi - \dfrac{\pi}{3}\right) = -\cos\dfrac{\pi}{3} = -\dfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -968,7 +1003,7 @@ window.MathJax = {
     <span class="meta">4 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reject-trig-roots-outside-1-1-to-filter-valid-quadratic-solutions.html" class="cs-card">
+<a href="move/reject-trig-roots-outside-1-1-to-filter-valid-quadratic-solutions.html" class="cs-card lazy-tex">
   <div class="cs-name">Reject trig roots outside [−1, 1] to filter valid quadratic solutions</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2\theta + 3\cos\theta - 2 = 0\;$</div><div class="cs-line cs-step">$\;(2\cos\theta -1)(\cos\theta +2)=0 \Rightarrow \cos\theta = \tfrac{1}{2}\ (\cos\theta = -2 \text{ rejected, } |\cos\theta|\le 1)\;$</div></div>
   <div class="cs-meta">
@@ -976,7 +1011,7 @@ window.MathJax = {
     <span>domain filtering</span>
   </div>
 </a>
-<a href="move/reject-trig-roots-outside-the-functions-range-to-filter-valid-solutions.html" class="cs-card">
+<a href="move/reject-trig-roots-outside-the-functions-range-to-filter-valid-solutions.html" class="cs-card lazy-tex">
   <div class="cs-name">Reject trig roots outside the function&#x27;s range to filter valid solutions</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2 x - 3\cos x + 2 = 0 \Rightarrow \cos x = 2 \text{ or } \cos x = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;\text{Reject } \cos x = 2\ (|\cos x|\le 1);\quad \cos x = \tfrac{1}{2} \Rightarrow x = 60°,\,300°\;$</div></div>
   <div class="cs-meta">
@@ -984,7 +1019,7 @@ window.MathJax = {
     <span>domain filtering</span>
   </div>
 </a>
-<a href="move/discard-candidate-root-outside-sine-or-cosines-range-1-1.html" class="cs-card">
+<a href="move/discard-candidate-root-outside-sine-or-cosines-range-1-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Discard candidate root outside sine or cosine&#x27;s range [−1, 1]</div>
   <div class="cs-example"><div class="cs-line">$\;(u - \tfrac{1}{2})(u - 3) = 0,\quad u = \sin x\;$</div><div class="cs-line cs-step">$\;u = \tfrac{1}{2}\ \text{or}\ u = 3 \Rightarrow \text{reject } u = 3\ (|\sin x| \le 1),\quad \sin x = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -992,7 +1027,7 @@ window.MathJax = {
     <span>domain filtering</span>
   </div>
 </a>
-<a href="move/filter-trig-solutions-against-the-stated-x-domain.html" class="cs-card">
+<a href="move/filter-trig-solutions-against-the-stated-x-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Filter trig solutions against the stated x-domain</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x = \tfrac{1}{2},\quad 0 \le x \le 2\pi\;$</div><div class="cs-line cs-step">$\;x = \tfrac{\pi}{6} + 2n\pi,\; \pi - \tfrac{\pi}{6} + 2n\pi \xRightarrow{n=0} x = \tfrac{\pi}{6},\; \tfrac{5\pi}{6}\;$</div></div>
   <div class="cs-meta">
@@ -1007,7 +1042,7 @@ window.MathJax = {
     <span class="meta">3 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-reference-angle-and-cast-quadrants-to-enumerate-all-trig-solutions.html" class="cs-card">
+<a href="move/use-reference-angle-and-cast-quadrants-to-enumerate-all-trig-solutions.html" class="cs-card lazy-tex">
   <div class="cs-name">Use reference angle and CAST quadrants to enumerate all trig solutions</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x = -\tfrac{1}{2},\quad 0^\circ \le x < 360^\circ\;$</div><div class="cs-line cs-step">$\;\alpha = 30^\circ,\ \sin<0 \Rightarrow Q3,Q4:\ x = 180^\circ+30^\circ,\;360^\circ-30^\circ = 210^\circ,\;330^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1015,7 +1050,7 @@ window.MathJax = {
     <span>cast diagram analysis</span>
   </div>
 </a>
-<a href="move/apply-supplementary-angle-symmetry-to-recover-the-second-sine-solution.html" class="cs-card">
+<a href="move/apply-supplementary-angle-symmetry-to-recover-the-second-sine-solution.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply supplementary-angle symmetry to recover the second sine solution</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x = \tfrac{1}{2},\quad x \in [0°,360°]\;$</div><div class="cs-line cs-step">$\;x = 30° \Rightarrow x = 180° - 30° = 150°\;$</div></div>
   <div class="cs-meta">
@@ -1023,7 +1058,7 @@ window.MathJax = {
     <span>cast diagram analysis</span>
   </div>
 </a>
-<a href="move/enumerate-all-solutions-of-cos-θ-k-using-q1q4-symmetry.html" class="cs-card">
+<a href="move/enumerate-all-solutions-of-cos-θ-k-using-q1q4-symmetry.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate all solutions of cos θ = k using Q1/Q4 symmetry</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta = \tfrac{1}{2},\quad 0°\le\theta<360°\;$</div><div class="cs-line cs-step">$\;\alpha = 60° \Rightarrow \theta = 60°,\; 360°-60° = 300°\;$</div></div>
   <div class="cs-meta">
@@ -1038,7 +1073,7 @@ window.MathJax = {
     <span class="meta">4 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/enumerate-general-solution-candidates-then-select-correct-cycle-from-graph.html" class="cs-card">
+<a href="move/enumerate-general-solution-candidates-then-select-correct-cycle-from-graph.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate general-solution candidates then select correct cycle from graph</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2\cos x°,\quad Q = \text{2nd trough}\;$</div><div class="cs-line cs-step">$\;\cos x° = -1 \Rightarrow x = 180 + 360n;\quad n=0,1:\; 180°,\,540° \Rightarrow Q = (540°,\,-2)\;$</div></div>
   <div class="cs-meta">
@@ -1046,7 +1081,7 @@ window.MathJax = {
     <span>general solution selection</span>
   </div>
 </a>
-<a href="move/enumerate-general-solution-branches-and-filter-by-transformed-domain.html" class="cs-card">
+<a href="move/enumerate-general-solution-branches-and-filter-by-transformed-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate general-solution branches and filter by transformed domain</div>
   <div class="cs-example"><div class="cs-line">$\;\cos(2x - \tfrac{\pi}{6}) = 0,\quad 0 \le x \le \pi\;$</div><div class="cs-line cs-step">$\;2x - \tfrac{\pi}{6} = \tfrac{\pi}{2} + n\pi \Rightarrow x = \tfrac{\pi}{3}\;(n=0),\; x = \tfrac{5\pi}{6}\;(n=1)\;$</div></div>
   <div class="cs-meta">
@@ -1054,7 +1089,7 @@ window.MathJax = {
     <span>general solution selection</span>
   </div>
 </a>
-<a href="move/enumerate-both-sine-solution-branches-then-pick-by-proximity.html" class="cs-card">
+<a href="move/enumerate-both-sine-solution-branches-then-pick-by-proximity.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate both sine solution branches then pick by proximity</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\!\left(\tfrac{x}{2}\right) = k,\quad \alpha \in (0,\pi):\quad x = \alpha + 4n\pi \;\text{or}\; x = 2\pi - \alpha + 4n\pi\;$</div><div class="cs-line cs-step">$\;n=-1:\; x = \alpha - 4\pi,\; x = -2\pi - \alpha \;\Rightarrow\; |{-2\pi - \alpha}| < |{\alpha - 4\pi}| \;\Rightarrow\; x = -(2\pi + \alpha)\;$</div></div>
   <div class="cs-meta">
@@ -1062,7 +1097,7 @@ window.MathJax = {
     <span>general solution selection</span>
   </div>
 </a>
-<a href="move/take-arcsin-for-principal-value-then-halve-to-find-smallest-positive-θ.html" class="cs-card">
+<a href="move/take-arcsin-for-principal-value-then-halve-to-find-smallest-positive-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Take arcsin for principal value then halve to find smallest positive θ</div>
   <div class="cs-example"><div class="cs-line">$\;\sin 2\theta = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;2\theta = \arcsin\!\tfrac{1}{2} = 30^\circ \Rightarrow \theta = 15^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1077,7 +1112,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-and-add-coefficient-equations-to-isolate-r-via-the-pythagorean-identity.html" class="cs-card">
+<a href="move/square-and-add-coefficient-equations-to-isolate-r-via-the-pythagorean-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Square and add coefficient equations to isolate R via the Pythagorean identity</div>
   <div class="cs-example"><div class="cs-line">$\;R\cos\alpha = 3,\quad R\sin\alpha = 4,\quad R>0\;$</div><div class="cs-line cs-step">$\;R^2\cos^2\alpha + R^2\sin^2\alpha = 9+16 \Rightarrow R^2 = 25 \Rightarrow R = 5\;$</div></div>
   <div class="cs-meta">
@@ -1092,7 +1127,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-cosine-rule-in-an-sas-triangle-to-find-the-third-side.html" class="cs-card">
+<a href="move/apply-the-cosine-rule-in-an-sas-triangle-to-find-the-third-side.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the cosine rule in an SAS triangle to find the third side</div>
   <div class="cs-example"><div class="cs-line">$\;a=5,\; b=3,\; C=60^\circ\;$</div><div class="cs-line cs-step">$\;c^2 = 25 + 9 - 2(5)(3)\cos 60^\circ = 34 - 15 = 19 \Rightarrow c = \sqrt{19}\;$</div></div>
   <div class="cs-meta">
@@ -1107,7 +1142,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-by-cos-to-convert-homogeneous-sincos-equation-into-tan.html" class="cs-card">
+<a href="move/divide-by-cos-to-convert-homogeneous-sincos-equation-into-tan.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide by cos to convert homogeneous sin–cos equation into tan</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin x = \cos x\;$</div><div class="cs-line cs-step">$\;\frac{3\sin x}{\cos x} = 1 \Rightarrow \tan x = \dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1122,7 +1157,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/resolve-ssa-ambiguous-case-by-selecting-180arcsin-when-obtuse-angle-required.html" class="cs-card">
+<a href="move/resolve-ssa-ambiguous-case-by-selecting-180arcsin-when-obtuse-angle-required.html" class="cs-card lazy-tex">
   <div class="cs-name">Resolve SSA ambiguous case by selecting 180°−arcsin when obtuse angle required</div>
   <div class="cs-example"><div class="cs-line">$\;\sin C = 0.6,\quad C \text{ obtuse}\;$</div><div class="cs-line cs-step">$\;\alpha = \arcsin(0.6) \approx 36.9^\circ \Rightarrow C = 180^\circ - 36.9^\circ = 143.1^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1137,7 +1172,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-the-two-coefficient-equations-to-isolate-tan-α-and-recover-the-auxiliary-.html" class="cs-card">
+<a href="move/divide-the-two-coefficient-equations-to-isolate-tan-α-and-recover-the-auxiliary-.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide the two coefficient equations to isolate tan α and recover the auxiliary angle</div>
   <div class="cs-example"><div class="cs-line">$\;R\cos\alpha = 3,\quad R\sin\alpha = 4\;$</div><div class="cs-line cs-step">$\;\frac{R\sin\alpha}{R\cos\alpha} = \frac{4}{3} \Rightarrow \tan\alpha = \frac{4}{3} \Rightarrow \alpha = \arctan\!\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1152,7 +1187,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-trig-parameter-using-pythagorean-or-double-angle-identity-bridge.html" class="cs-card">
+<a href="move/eliminate-trig-parameter-using-pythagorean-or-double-angle-identity-bridge.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate trig parameter using Pythagorean or double-angle identity bridge</div>
   <div class="cs-example"><div class="cs-line">$\;x = 2\sin^2\theta,\quad y = \cos 2\theta\;$</div><div class="cs-line cs-step">$\;\sin^2\theta = \tfrac{x}{2},\quad \cos 2\theta = 1 - 2\sin^2\theta \Rightarrow y = 1 - x\;$</div></div>
   <div class="cs-meta">
@@ -1167,7 +1202,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-pythagorean-identity-to-reduce-mixed-sincos-equation-to-a-single-variable-.html" class="cs-card">
+<a href="move/apply-pythagorean-identity-to-reduce-mixed-sincos-equation-to-a-single-variable-.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagorean identity to reduce mixed sin/cos equation to a single-variable quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2 x + \sin x = 1\;$</div><div class="cs-line cs-step">$\;2(1-\sin^2 x) + \sin x = 1 \Rightarrow 2\sin^2 x - \sin x - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1182,7 +1217,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-period-from-coefficient-b-using-p-2πb.html" class="cs-card">
+<a href="move/extract-period-from-coefficient-b-using-p-2πb.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract period from coefficient B using P = 2π/|B|</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin(3x + 1)\;$</div><div class="cs-line cs-step">$\;P = \dfrac{2\pi}{|B|} = \dfrac{2\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1197,7 +1232,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-part-a-identity-into-part-b-to-collapse-the-lhs.html" class="cs-card">
+<a href="move/substitute-the-part-a-identity-into-part-b-to-collapse-the-lhs.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the part (a) identity into part (b) to collapse the LHS</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \dfrac{1-\cos 2x}{\sin 2x} \equiv \tan x;\quad \text{(b)}\ \dfrac{3(1-\cos 2\theta)}{\sin 2\theta} = 4\;$</div><div class="cs-line cs-step">$\;3\tan\theta = 4 \Rightarrow \tan\theta = \tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1212,7 +1247,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-cosine-rule-in-sas-configuration-to-find-the-third-side.html" class="cs-card">
+<a href="move/apply-the-cosine-rule-in-sas-configuration-to-find-the-third-side.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the Cosine Rule in SAS configuration to find the third side</div>
   <div class="cs-example"><div class="cs-line">$\;b = 5,\; c = 3,\; A = 60^\circ\;$</div><div class="cs-line cs-step">$\;a^2 = 25 + 9 - 2(5)(3)\cos 60^\circ = 34 - 15 = 19 \Rightarrow a = \sqrt{19}\;$</div></div>
   <div class="cs-meta">
@@ -1227,7 +1262,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-sine-rule-in-ssa-configuration-to-find-an-angle-opposite-a-known-side.html" class="cs-card">
+<a href="move/apply-the-sine-rule-in-ssa-configuration-to-find-an-angle-opposite-a-known-side.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the Sine Rule in SSA configuration to find an angle opposite a known side</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC:\; a=5,\; b=8,\; A=30^\circ,\; \text{find } B\;$</div><div class="cs-line cs-step">$\;\dfrac{\sin B}{8} = \dfrac{\sin 30^\circ}{5} \Rightarrow \sin B = \dfrac{8 \cdot \tfrac{1}{2}}{5} = \dfrac{4}{5}\;$</div></div>
   <div class="cs-meta">
@@ -1242,7 +1277,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-sine-area-formula-to-relate-two-sides-included-angle-and-area.html" class="cs-card">
+<a href="move/apply-the-sine-area-formula-to-relate-two-sides-included-angle-and-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the sine area formula to relate two sides, included angle, and area</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC,\quad a=5,\; b=8,\; C=30^\circ\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2}(5)(8)\sin 30^\circ = 20 \times \tfrac{1}{2} = 10\;$</div></div>
   <div class="cs-meta">
@@ -1257,7 +1292,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-double-angle-identity-to-rewrite-quadratic-trig-terms-or-sincos-products-a.html" class="cs-card">
+<a href="move/apply-double-angle-identity-to-rewrite-quadratic-trig-terms-or-sincos-products-a.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply double-angle identity to rewrite quadratic trig terms or sin·cos products as 2θ form</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin\theta\cos\theta\;$</div><div class="cs-line cs-step">$\;2\sin\theta\cos\theta = \sin 2\theta\;$</div></div>
   <div class="cs-meta">
@@ -1272,7 +1307,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-known-feature-into-the-equation-to-solve-for-the-unknown-parameter.html" class="cs-card">
+<a href="move/substitute-a-known-feature-into-the-equation-to-solve-for-the-unknown-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a known feature into the equation to solve for the unknown parameter</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2\sin x + k,\quad y_{\max} = 5\;$</div><div class="cs-line cs-step">$\;2 + k = 5 \Rightarrow k = 3\;$</div></div>
   <div class="cs-meta">
@@ -1287,7 +1322,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-function-to-standard-form-and-substitute-extremes-to-identify-parameters.html" class="cs-card">
+<a href="move/match-function-to-standard-form-and-substitute-extremes-to-identify-parameters.html" class="cs-card lazy-tex">
   <div class="cs-name">Match function to standard form and substitute extremes to identify parameters</div>
   <div class="cs-example"><div class="cs-line">$\;y = A + B\cos x,\quad y_{\max}=5,\; y_{\min}=1\;$</div><div class="cs-line cs-step">$\;A + B(1)=5,\; A + B(-1)=1 \Rightarrow B=2,\; A=3\;$</div></div>
   <div class="cs-meta">
@@ -1302,7 +1337,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-sine-rule-for-ssa-configuration-to-find-an-unknown-angle.html" class="cs-card">
+<a href="move/select-sine-rule-for-ssa-configuration-to-find-an-unknown-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Select Sine Rule for SSA configuration to find an unknown angle</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC:\; a=5,\; b=8,\; A=30^\circ,\; \text{find } B\;$</div><div class="cs-line cs-step">$\;\sin B = \dfrac{b\sin A}{a} = \dfrac{8\sin 30^\circ}{5} = \dfrac{4}{5} \Rightarrow B = \arcsin\!\left(\tfrac{4}{5}\right)\;$</div></div>
   <div class="cs-meta">
@@ -1317,7 +1352,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-cosine-rule-to-find-an-angle-from-three-known-sides-sss.html" class="cs-card">
+<a href="move/apply-cosine-rule-to-find-an-angle-from-three-known-sides-sss.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply cosine rule to find an angle from three known sides (SSS)</div>
   <div class="cs-example"><div class="cs-line">$\;a=7,\; b=5,\; c=3\;$</div><div class="cs-line cs-step">$\;\cos A = \dfrac{5^2+3^2-7^2}{2(5)(3)} = \dfrac{-15}{30} = -\tfrac{1}{2} \Rightarrow A=120^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1332,7 +1367,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-angles-on-a-line-or-around-a-point-to-find-an-unknown-central-angle.html" class="cs-card">
+<a href="move/use-angles-on-a-line-or-around-a-point-to-find-an-unknown-central-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Use angles-on-a-line or around-a-point to find an unknown central angle</div>
   <div class="cs-example"><div class="cs-line">$\;\angle AOB = 1.2,\quad \angle AOC = \angle BOC,\quad \text{radii from } O\;$</div><div class="cs-line cs-step">$\;1.2 + 2\angle AOC = 2\pi \Rightarrow \angle AOC = \pi - 0.6\;$</div></div>
   <div class="cs-meta">
@@ -1347,7 +1382,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-composite-sector-based-shape-into-arcs-sectors-and-triangles-to-comput.html" class="cs-card">
+<a href="move/decompose-composite-sector-based-shape-into-arcs-sectors-and-triangles-to-comput.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose composite sector-based shape into arcs, sectors, and triangles to compute perimeter and area</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Annular sector: } R=4,\; r=2,\; \theta=\tfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;P = R\theta + r\theta + 2(R-r) = \tfrac{4\pi}{3}+\tfrac{2\pi}{3}+4 = 2\pi+4,\quad A = \tfrac{1}{2}(R^2-r^2)\theta = \tfrac{1}{2}(16-4)\cdot\tfrac{\pi}{3} = 2\pi\;$</div></div>
   <div class="cs-meta">
@@ -1362,7 +1397,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recast-equation-as-two-curve-intersection-to-count-roots-graphically.html" class="cs-card">
+<a href="move/recast-equation-as-two-curve-intersection-to-count-roots-graphically.html" class="cs-card lazy-tex">
   <div class="cs-name">Recast equation as two-curve intersection to count roots graphically</div>
   <div class="cs-example"><div class="cs-line">$\;\tan\theta = 2\cos\theta,\quad \theta\in[0°,360°]\;$</div><div class="cs-line cs-step">$\;y_1=\tan\theta,\; y_2=2\cos\theta \Rightarrow \text{3 intersections}\;$</div></div>
   <div class="cs-meta">
@@ -1377,7 +1412,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/partition-the-region-into-independently-computable-sectors-and-triangles.html" class="cs-card">
+<a href="move/partition-the-region-into-independently-computable-sectors-and-triangles.html" class="cs-card lazy-tex">
   <div class="cs-name">Partition the region into independently-computable sectors and triangles</div>
   <div class="cs-example"><div class="cs-line">$\;R = \text{sector } OAB\ (r=4,\;\theta=\tfrac{\pi}{3}) \;\cup\; \triangle OBC\ (OB=4,\;OC=3,\;\angle BOC=\tfrac{\pi}{6})\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}(4)^2\!\left(\tfrac{\pi}{3}\right) + \tfrac{1}{2}(4)(3)\sin\tfrac{\pi}{6} = \dfrac{8\pi}{3} + 3\;$</div></div>
   <div class="cs-meta">
@@ -1392,7 +1427,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-cos²θ-1-sin²θ-to-obtain-a-quadratic-in-sin-θ.html" class="cs-card">
+<a href="move/substitute-cos²θ-1-sin²θ-to-obtain-a-quadratic-in-sin-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute cos²θ = 1 − sin²θ to obtain a quadratic in sin θ</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin\theta + \cos^2\theta = 1\;$</div><div class="cs-line cs-step">$\;2\sin\theta + (1-\sin^2\theta) = 1 \Rightarrow \sin^2\theta - 2\sin\theta = 0\;$</div></div>
   <div class="cs-meta">
@@ -1407,7 +1442,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-reciprocal-ratios-to-sincos-and-cross-multiply-to-clear-fractions.html" class="cs-card">
+<a href="move/convert-reciprocal-ratios-to-sincos-and-cross-multiply-to-clear-fractions.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert reciprocal ratios to sin/cos and cross-multiply to clear fractions</div>
   <div class="cs-example"><div class="cs-line">$\;\cot x = 2\sin x\;$</div><div class="cs-line cs-step">$\;\dfrac{\cos x}{\sin x} = 2\sin x \Rightarrow \cos x = 2\sin^2 x = 2(1-\cos^2 x)\;$</div></div>
   <div class="cs-meta">
@@ -1422,7 +1457,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-a-compound-angle-into-a-known-sum-or-difference-to-unlock-identities.html" class="cs-card">
+<a href="move/decompose-a-compound-angle-into-a-known-sum-or-difference-to-unlock-identities.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose a compound angle into a known sum or difference to unlock identities</div>
   <div class="cs-example"><div class="cs-line">$\;\sin 3x\;$</div><div class="cs-line cs-step">$\;\sin(2x + x) = \sin 2x\cos x + \cos 2x\sin x\;$</div></div>
   <div class="cs-meta">
@@ -1437,7 +1472,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/transform-domain-bounds-under-linear-substitution-to-enumerate-trig-solutions-co.html" class="cs-card">
+<a href="move/transform-domain-bounds-under-linear-substitution-to-enumerate-trig-solutions-co.html" class="cs-card lazy-tex">
   <div class="cs-name">Transform domain bounds under linear substitution to enumerate trig solutions correctly</div>
   <div class="cs-example"><div class="cs-line">$\;\tan(2x + 30°) = 1,\quad 0° \le x \le 360°\;$</div><div class="cs-line cs-step">$\;y = 2x+30°,\ 30° \le y \le 750° \Rightarrow y = 45°,\,225°,\,405°,\,585° \Rightarrow x = 7.5°,\,97.5°,\,187.5°,\,277.5°\;$</div></div>
   <div class="cs-meta">
@@ -1452,7 +1487,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/subtract-the-minor-angle-from-2π-to-obtain-the-reflex-angle-for-major-arcs-and-s.html" class="cs-card">
+<a href="move/subtract-the-minor-angle-from-2π-to-obtain-the-reflex-angle-for-major-arcs-and-s.html" class="cs-card lazy-tex">
   <div class="cs-name">Subtract the minor angle from 2π to obtain the reflex angle for major arcs and sectors</div>
   <div class="cs-example"><div class="cs-line">$\;r = 5,\quad \theta_{\text{minor}} = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;A_{\text{major}} = \tfrac{1}{2}(5)^2\!\left(2\pi - \tfrac{\pi}{3}\right) = \dfrac{25}{2}\cdot\dfrac{5\pi}{3} = \dfrac{125\pi}{6}\;$</div></div>
   <div class="cs-meta">
@@ -1467,7 +1502,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-through-by-the-trig-denominator-to-clear-fractions.html" class="cs-card">
+<a href="move/multiply-through-by-the-trig-denominator-to-clear-fractions.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply through by the trig denominator to clear fractions</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\cos\theta}{\sin\theta} - \sin\theta = 0\;$</div><div class="cs-line cs-step">$\;\cos\theta - \sin^2\theta = 0 \Rightarrow \cos\theta - (1-\cos^2\theta) = 0\;$</div></div>
   <div class="cs-meta">
@@ -1482,7 +1517,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-through-by-the-strategic-factor-to-manufacture-the-targets-structure.html" class="cs-card">
+<a href="move/multiply-through-by-the-strategic-factor-to-manufacture-the-targets-structure.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply through by the strategic factor to manufacture the target&#x27;s structure</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin\alpha}{\cos\alpha} = \tfrac{3}{2}\sin\alpha\;$</div><div class="cs-line cs-step">$\;\times\,\cos\alpha:\quad \sin\alpha = \tfrac{3}{2}\sin\alpha\cos\alpha \Rightarrow 2\sin\alpha - 3\sin\alpha\cos\alpha = 0\;$</div></div>
   <div class="cs-meta">
@@ -1497,7 +1532,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-trigonometric-polynomial-then-filter-roots-by-sinecosine-range.html" class="cs-card">
+<a href="move/factor-trigonometric-polynomial-then-filter-roots-by-sinecosine-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor trigonometric polynomial then filter roots by sine/cosine range</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin^2 x - 3\sin x + 1 = 0\;$</div><div class="cs-line cs-step">$\;(2\sin x - 1)(\sin x - 1) = 0 \Rightarrow \sin x = \tfrac{1}{2},\ 1 \quad (\text{both } |s|\le1,\ \text{none rejected})\;$</div></div>
   <div class="cs-meta">
@@ -1512,7 +1547,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-½ab-sin-c-for-sas-triangle-area-doubling-for-symmetric-composites.html" class="cs-card">
+<a href="move/apply-½ab-sin-c-for-sas-triangle-area-doubling-for-symmetric-composites.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply ½ab sin C for SAS triangle area, doubling for symmetric composites</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Kite: two triangles with } a=3,\; b=5,\; C=60^\circ\;$</div><div class="cs-line cs-step">$\;A = 2 \cdot \tfrac{1}{2}(3)(5)\sin 60^\circ = 15 \cdot \tfrac{\sqrt{3}}{2} = \dfrac{15\sqrt{3}}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1527,7 +1562,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-turning-points-and-intercepts-directly-from-a-labelled-trig-graph.html" class="cs-card">
+<a href="move/read-turning-points-and-intercepts-directly-from-a-labelled-trig-graph.html" class="cs-card lazy-tex">
   <div class="cs-name">Read turning points and intercepts directly from a labelled trig graph</div>
   <div class="cs-example"><div class="cs-line">$\;y = a\cos x,\text{ ticks at }0,\,\pi;\;\text{peak at }x=0,\;y=3;\;\text{crossing between }0\text{ and }\pi\;$</div><div class="cs-line cs-step">$\;\text{Max} = (0,\,3),\quad x\text{-intercept} = \!\left(\tfrac{\pi}{2},\,0\right)\;$</div></div>
   <div class="cs-meta">
@@ -1542,7 +1577,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-correct-quadrant-solutions-using-sine-symmetry-and-reference-angles.html" class="cs-card">
+<a href="move/select-correct-quadrant-solutions-using-sine-symmetry-and-reference-angles.html" class="cs-card lazy-tex">
   <div class="cs-name">Select correct quadrant solutions using sine symmetry and reference angles</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = \tfrac{1}{2},\quad 0°\le\theta\le360°\;$</div><div class="cs-line cs-step">$\;\alpha = 30° \Rightarrow \theta = 30°\;(\text{Q1}),\; 180°-30°=150°\;(\text{Q2})\;$</div></div>
   <div class="cs-meta">
@@ -1557,7 +1592,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-the-x-domain-into-the-compound-argument-domain-before-solving.html" class="cs-card">
+<a href="move/translate-the-x-domain-into-the-compound-argument-domain-before-solving.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate the x-domain into the compound-argument domain before solving</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(x + 30\degree) = \tfrac{1}{2},\quad 0\degree \le x < 360\degree\;$</div><div class="cs-line cs-step">$\;y = x + 30\degree,\; 30\degree \le y < 390\degree \Rightarrow y = 30\degree,\,150\degree,\,390\degree\;$</div></div>
   <div class="cs-meta">
@@ -1572,7 +1607,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-a-sincos-equation-by-cos-to-homogenise-into-tan-form.html" class="cs-card">
+<a href="move/divide-a-sincos-equation-by-cos-to-homogenise-into-tan-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide a sin–cos equation by cos to homogenise into tan form</div>
   <div class="cs-example"><div class="cs-line">$\;3\sin\theta - 5\cos\theta = 0\;$</div><div class="cs-line cs-step">$\;\dfrac{3\sin\theta - 5\cos\theta}{\cos\theta} = 0 \Rightarrow 3\tan\theta - 5 = 0 \Rightarrow \tan\theta = \dfrac{5}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1587,7 +1622,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-square-root-to-split-a-squared-trig-equation.html" class="cs-card">
+<a href="move/take-square-root-to-split-a-squared-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Take ± square root to split a squared-trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\tan^2 x = 3\;$</div><div class="cs-line cs-step">$\;\tan x = \pm\sqrt{3} \Rightarrow x = 60^\circ,\,120^\circ,\,240^\circ,\,300^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1602,7 +1637,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-off-extremum-from-bounded-sinesine-squared-range.html" class="cs-card">
+<a href="move/read-off-extremum-from-bounded-sinesine-squared-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Read off extremum from bounded sine/sine-squared range</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = 3 + 2\sin x\;$</div><div class="cs-line cs-step">$\;-1 \le \sin x \le 1 \Rightarrow 1 \le f(x) \le 5\;$</div></div>
   <div class="cs-meta">
@@ -1617,7 +1652,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/locate-tan-asymptotes-by-solving-cos-x-0.html" class="cs-card">
+<a href="move/locate-tan-asymptotes-by-solving-cos-x-0.html" class="cs-card lazy-tex">
   <div class="cs-name">Locate tan asymptotes by solving cos x = 0</div>
   <div class="cs-example"><div class="cs-line">$\;y = \tan x,\quad x \in (\pi,\,2\pi)\;$</div><div class="cs-line cs-step">$\;\cos x = 0 \Rightarrow x = \tfrac{(2n+1)\pi}{2} \Rightarrow x = \tfrac{3\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1632,7 +1667,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/identify-sin-vs-cos-from-origin-behavior-then-extract-b-from-period.html" class="cs-card">
+<a href="move/identify-sin-vs-cos-from-origin-behavior-then-extract-b-from-period.html" class="cs-card lazy-tex">
   <div class="cs-name">Identify sin vs cos from origin behavior, then extract B from period</div>
   <div class="cs-example"><div class="cs-line">$\;y(0)=0,\; y'(0)>0,\; T=\pi\;$</div><div class="cs-line cs-step">$\;y(0)=0 \Rightarrow \sin,\quad B=\dfrac{2\pi}{\pi}=2 \Rightarrow y=\sin(2x)\;$</div></div>
   <div class="cs-meta">
@@ -1647,7 +1682,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-vertical-shift-k-by-equating-shifted-extremum-to-given-value.html" class="cs-card">
+<a href="move/find-vertical-shift-k-by-equating-shifted-extremum-to-given-value.html" class="cs-card lazy-tex">
   <div class="cs-name">Find vertical shift k by equating shifted extremum to given value</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3\cos x + k,\quad y_{\min} = 1\;$</div><div class="cs-line cs-step">$\;-3 + k = 1 \Rightarrow k = 4\;$</div></div>
   <div class="cs-meta">
@@ -1662,7 +1697,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-interval-length-by-period-to-count-complete-cycles.html" class="cs-card">
+<a href="move/divide-interval-length-by-period-to-count-complete-cycles.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide interval length by period to count complete cycles</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \sin 3x,\quad x \in [0,\,4\pi],\quad P = \dfrac{2\pi}{3}\;$</div><div class="cs-line cs-step">$\;\dfrac{4\pi - 0}{2\pi/3} = \dfrac{4\pi \cdot 3}{2\pi} = 6 \text{ cycles}\;$</div></div>
   <div class="cs-meta">
@@ -1677,7 +1712,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-x-for-the-linear-argument-to-reduce-to-a-standard-trig-equation.html" class="cs-card">
+<a href="move/substitute-x-for-the-linear-argument-to-reduce-to-a-standard-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute X for the linear argument to reduce to a standard trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\cos(2x + \tfrac{\pi}{3}) = \tfrac{1}{2},\quad 0 \le x \le \pi\;$</div><div class="cs-line cs-step">$\;X = 2x + \tfrac{\pi}{3},\quad \tfrac{\pi}{3} \le X \le \tfrac{7\pi}{3},\quad \cos X = \tfrac{1}{2} \Rightarrow X = \tfrac{5\pi}{3} \Rightarrow x = \tfrac{2\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1692,7 +1727,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-correct-family-member-using-diagram-constraints.html" class="cs-card">
+<a href="move/select-correct-family-member-using-diagram-constraints.html" class="cs-card lazy-tex">
   <div class="cs-name">Select correct family member using diagram constraints</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3\cos x,\quad P\text{ is a minimum with }x < 0\;$</div><div class="cs-line cs-step">$\;x = 180^\circ + 360^\circ n,\; x < 0 \Rightarrow x = -180^\circ,\; P = (-180^\circ,\,-3)\;$</div></div>
   <div class="cs-meta">
@@ -1707,7 +1742,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-bounded-range-of-sine-to-read-off-extrema-of-a-sinusoidal-curve.html" class="cs-card">
+<a href="move/use-bounded-range-of-sine-to-read-off-extrema-of-a-sinusoidal-curve.html" class="cs-card lazy-tex">
   <div class="cs-name">Use bounded range of sine to read off extrema of a sinusoidal curve</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2\sin x + 5,\quad 0° \le x \le 360°\;$</div><div class="cs-line cs-step">$\;-1 \le \sin x \le 1 \Rightarrow y_{\min} = 3\ \text{at}\ (270°,\,3),\quad y_{\max} = 7\ \text{at}\ (90°,\,7)\;$</div></div>
   <div class="cs-meta">
@@ -1722,7 +1757,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-straight-line-supplementary-angles-to-bridge-adjacent-triangles.html" class="cs-card">
+<a href="move/use-straight-line-supplementary-angles-to-bridge-adjacent-triangles.html" class="cs-card lazy-tex">
   <div class="cs-name">Use straight-line supplementary angles to bridge adjacent triangles</div>
   <div class="cs-example"><div class="cs-line">$\;\angle ACB = 120^\circ,\quad A,\,C,\,D \text{ collinear}\;$</div><div class="cs-line cs-step">$\;\angle BCD = 180^\circ - 120^\circ = 60^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1737,7 +1772,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/resolve-sine-ambiguity-by-selecting-the-obtuse-angle.html" class="cs-card">
+<a href="move/resolve-sine-ambiguity-by-selecting-the-obtuse-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Resolve sine ambiguity by selecting the obtuse angle</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = \dfrac{3}{5},\quad \theta \text{ obtuse}\;$</div><div class="cs-line cs-step">$\;\theta = 180° - \arcsin\!\left(\tfrac{3}{5}\right) = 180° - 36.87° = 143.13°\;$</div></div>
   <div class="cs-meta">
@@ -1752,7 +1787,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-point-whose-x-value-zeroes-the-trig-argument.html" class="cs-card">
+<a href="move/substitute-the-point-whose-x-value-zeroes-the-trig-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the point whose x-value zeroes the trig argument</div>
   <div class="cs-example"><div class="cs-line">$\;y = A\cos(x - 50)^\circ,\quad P(50,\,-4)\text{ min}\;$</div><div class="cs-line cs-step">$\;-4 = A\cos(0^\circ) = A \cdot 1 \Rightarrow A = -4\;$</div></div>
   <div class="cs-meta">
@@ -1767,7 +1802,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-equal-sides-of-isosceles-triangle-to-deduce-base-angles.html" class="cs-card">
+<a href="move/use-equal-sides-of-isosceles-triangle-to-deduce-base-angles.html" class="cs-card lazy-tex">
   <div class="cs-name">Use equal sides of isosceles triangle to deduce base angles</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC,\; AB = AC = 5,\; \angle ABC = 40^\circ\;$</div><div class="cs-line cs-step">$\;\angle ACB = 40^\circ,\; \angle BAC = 180^\circ - 2(40^\circ) = 100^\circ\;$</div></div>
   <div class="cs-meta">
@@ -1782,7 +1817,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/test-sin-and-cos-at-special-angles-to-identify-the-parent-function.html" class="cs-card">
+<a href="move/test-sin-and-cos-at-special-angles-to-identify-the-parent-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Test sin and cos at special angles to identify the parent function</div>
   <div class="cs-example"><div class="cs-line">$\;(180°,\,-3),\quad A=3,\quad y=A\sin x \text{ or } y=A\cos x?\;$</div><div class="cs-line cs-step">$\;3\sin 180°=0\neq -3\;(\times);\quad 3\cos 180°=3(-1)=-3\;\checkmark \Rightarrow y=3\cos x\;$</div></div>
   <div class="cs-meta">
@@ -1797,7 +1832,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-amplitude-directly-from-extremum-y-coordinate-at-a-special-angle.html" class="cs-card">
+<a href="move/read-amplitude-directly-from-extremum-y-coordinate-at-a-special-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Read amplitude directly from extremum y-coordinate at a special angle</div>
   <div class="cs-example"><div class="cs-line">$\;y = A\cos x,\quad (360°,\,3)\;$</div><div class="cs-line cs-step">$\;3 = A\cos 360° = A(1) \Rightarrow A = 3\;$</div></div>
   <div class="cs-meta">
@@ -1812,7 +1847,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/negate-amplitude-to-reflect-cosine-graph-across-x-axis.html" class="cs-card">
+<a href="move/negate-amplitude-to-reflect-cosine-graph-across-x-axis.html" class="cs-card lazy-tex">
   <div class="cs-name">Negate amplitude to reflect cosine graph across x-axis</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3\cos x \text{ gives } y(0°)=3,\; \text{but graph shows } y(0°)=-3\;$</div><div class="cs-line cs-step">$\;y = -3\cos x \Rightarrow y(0°) = -3\;\checkmark,\; y(180°) = 3\;\checkmark\;$</div></div>
   <div class="cs-meta">
@@ -1827,7 +1862,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-inner-argument-equal-to-π-to-locate-first-minimum-of-cosine.html" class="cs-card">
+<a href="move/set-inner-argument-equal-to-π-to-locate-first-minimum-of-cosine.html" class="cs-card lazy-tex">
   <div class="cs-name">Set inner argument equal to π to locate first minimum of cosine</div>
   <div class="cs-example"><div class="cs-line">$\;y = \cos(2x),\quad x > 0\;$</div><div class="cs-line cs-step">$\;2x = \pi \Rightarrow x = \dfrac{\pi}{2},\quad y = -1\;$</div></div>
   <div class="cs-meta">
@@ -1842,7 +1877,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-ambiguous-case-solution-using-longest-side-opposite-largest-angle.html" class="cs-card">
+<a href="move/eliminate-ambiguous-case-solution-using-longest-side-opposite-largest-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate ambiguous-case solution using longest-side-opposite-largest-angle</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC:\; A=30°,\; \sin C=0.5 \Rightarrow C=30° \text{ or } 150°,\; AB>BC\;$</div><div class="cs-line cs-step">$\;C=150°\Rightarrow B=0°\ (\text{invalid});\; C=30°\Rightarrow B=120°,\; \angle B \text{ largest opp.\ longest } AB\ \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -1857,7 +1892,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-angle-modulo-360-using-cosines-period.html" class="cs-card">
+<a href="move/reduce-angle-modulo-360-using-cosines-period.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce angle modulo 360° using cosine&#x27;s period</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 720°\;$</div><div class="cs-line cs-step">$\;\cos 720° = \cos(720° - 2 \times 360°) = \cos 0° = 1\;$</div></div>
   <div class="cs-meta">
@@ -1872,7 +1907,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-segment-perimeter-as-arc-length-plus-chord.html" class="cs-card">
+<a href="move/assemble-segment-perimeter-as-arc-length-plus-chord.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble segment perimeter as arc length plus chord</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2,\quad \theta = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;P = r\theta + 2r\sin\!\left(\dfrac{\theta}{2}\right) = \dfrac{2\pi}{3} + 2 = \dfrac{2\pi + 6}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1887,7 +1922,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/flip-the-extremum-when-a-negative-coefficient-scales-a-bounded-trig-function.html" class="cs-card">
+<a href="move/flip-the-extremum-when-a-negative-coefficient-scales-a-bounded-trig-function.html" class="cs-card lazy-tex">
   <div class="cs-name">Flip the extremum when a negative coefficient scales a bounded trig function</div>
   <div class="cs-example"><div class="cs-line">$\;y = -2\cos x,\quad 0 \le x \le 2\pi\;$</div><div class="cs-line cs-step">$\;\cos x = -1 \Rightarrow y_{\max} = -2(-1) = 2 \text{ at } x = \pi\;$</div></div>
   <div class="cs-meta">
@@ -1902,7 +1937,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-circular-segment-as-sector-minus-triangle.html" class="cs-card">
+<a href="move/decompose-circular-segment-as-sector-minus-triangle.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose circular segment as sector minus triangle</div>
   <div class="cs-example"><div class="cs-line">$\;r = 4,\quad \theta = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;A_{\text{seg}} = \tfrac{1}{2}(4)^2\!\left(\tfrac{\pi}{3}\right) - \tfrac{1}{2}(4)^2 \sin\tfrac{\pi}{3} = 8\!\left(\tfrac{\pi}{3} - \dfrac{\sqrt{3}}{2}\right)\;$</div></div>
   <div class="cs-meta">
@@ -1917,7 +1952,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-cosine-rule-to-find-chord-from-two-radii-and-included-angle.html" class="cs-card">
+<a href="move/apply-cosine-rule-to-find-chord-from-two-radii-and-included-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply cosine rule to find chord from two radii and included angle</div>
   <div class="cs-example"><div class="cs-line">$\;OB = OD = 5,\quad \angle BOD = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;BD^2 = 5^2 + 5^2 - 2(5)(5)\cos\dfrac{\pi}{3} = 50 - 25 = 25 \Rightarrow BD = 5\;$</div></div>
   <div class="cs-meta">
@@ -1932,7 +1967,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assign-reflex-angle-2π-θ-to-the-inner-arc-of-a-composite-annular-sector.html" class="cs-card">
+<a href="move/assign-reflex-angle-2π-θ-to-the-inner-arc-of-a-composite-annular-sector.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign reflex angle 2π − θ to the inner arc of a composite annular sector</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Outer arc: } R=5,\; \theta=1;\quad \text{Inner arc: } r=3,\; \varphi=2\pi-\theta\;$</div><div class="cs-line cs-step">$\;s_{\text{inner}} = 3(2\pi - 1) = 6\pi - 3,\quad A_{\text{inner}} = \tfrac{1}{2}(3)^2(2\pi-1) = 9\pi - \tfrac{9}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1947,7 +1982,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/count-solutions-in-one-fundamental-period-then-scale-by-cycle-count.html" class="cs-card">
+<a href="move/count-solutions-in-one-fundamental-period-then-scale-by-cycle-count.html" class="cs-card lazy-tex">
   <div class="cs-name">Count solutions in one fundamental period then scale by cycle count</div>
   <div class="cs-example"><div class="cs-line">$\;\sin 2x = 0,\quad 0 \le x \le 6\pi\;$</div><div class="cs-line cs-step">$\;T = \pi,\; n = 2 \text{ on } [0,\pi),\; k = 6,\; \text{total} = 2 \times 6 + 1 = 13\;$</div></div>
   <div class="cs-meta">
@@ -1962,7 +1997,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recover-included-angle-via-triangle-angle-sum-to-apply-½ab-sin-c.html" class="cs-card">
+<a href="move/recover-included-angle-via-triangle-angle-sum-to-apply-½ab-sin-c.html" class="cs-card lazy-tex">
   <div class="cs-name">Recover included angle via triangle angle-sum to apply ½ab sin C</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC,\ a=5,\ b=8,\ \angle A=0.6,\ \angle B=1.2\;$</div><div class="cs-line cs-step">$\;C = \pi - 0.6 - 1.2 = 1.3416,\quad \text{Area} = \tfrac{1}{2}(5)(8)\sin(1.3416) \approx 19.4\;$</div></div>
   <div class="cs-meta">
@@ -1977,7 +2012,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-½ab-sin-c-area-formula-with-included-angle.html" class="cs-card">
+<a href="move/apply-½ab-sin-c-area-formula-with-included-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply ½ab sin C area formula with included angle</div>
   <div class="cs-example"><div class="cs-line">$\;a = 3,\quad b = 4,\quad C = 30^\circ\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2}(3)(4)\sin 30^\circ = \tfrac{1}{2}\cdot 12 \cdot \tfrac{1}{2} = 3\;$</div></div>
   <div class="cs-meta">
@@ -1992,7 +2027,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-sector-perimeter-into-two-radii-plus-arc-length.html" class="cs-card">
+<a href="move/decompose-sector-perimeter-into-two-radii-plus-arc-length.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose sector perimeter into two radii plus arc length</div>
   <div class="cs-example"><div class="cs-line">$\;r = 5,\quad \theta = 0.8\;$</div><div class="cs-line cs-step">$\;P = 2r + r\theta = 5(2 + 0.8) = 14\;$</div></div>
   <div class="cs-meta">
@@ -2007,7 +2042,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/map-partial-period-remainder-back-to-a-reference-interval-via-periodicity.html" class="cs-card">
+<a href="move/map-partial-period-remainder-back-to-a-reference-interval-via-periodicity.html" class="cs-card lazy-tex">
   <div class="cs-name">Map partial-period remainder back to a reference interval via periodicity</div>
   <div class="cs-example"><div class="cs-line">$\;\sin x = 0 \text{ on } (0,\, 5\pi],\quad T = 2\pi,\; \text{base solutions } x' \in \{\pi,\, 2\pi\}\;$</div><div class="cs-line cs-step">$\;5\pi = 2(2\pi) + \pi \Rightarrow 2 \text{ full periods} \times 2 + \bigl|\{\pi\} \subset (0,\pi]\bigr| = 4 + 1 = 5\;$</div></div>
   <div class="cs-meta">
@@ -2022,7 +2057,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/sketch-tan-curve-using-asymptotes-and-zeros-as-structural-anchors.html" class="cs-card">
+<a href="move/sketch-tan-curve-using-asymptotes-and-zeros-as-structural-anchors.html" class="cs-card lazy-tex">
   <div class="cs-name">Sketch tan curve using asymptotes and zeros as structural anchors</div>
   <div class="cs-example"><div class="cs-line">$\;y = \tan\theta,\quad 0° \le \theta \le 360°\;$</div><div class="cs-line cs-step">$\;\text{Asymptotes: } \theta=90°,\,270° \quad\text{Zeros: } 0°,\,180°,\,360° \quad\text{Period }180°,\ \text{3 rising branches between anchors}\;$</div></div>
   <div class="cs-meta">
@@ -2037,7 +2072,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-s-rθ-for-arc-length-using-stored-exact-radian-angle.html" class="cs-card">
+<a href="move/apply-s-rθ-for-arc-length-using-stored-exact-radian-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply s = rθ for arc length using stored exact radian angle</div>
   <div class="cs-example"><div class="cs-line">$\;r = 5,\quad \theta = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;s = r\theta = 5 \times \dfrac{\pi}{3} = \dfrac{5\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2052,7 +2087,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/drop-perpendicular-from-circle-point-to-form-right-triangle-for-central-angle.html" class="cs-card">
+<a href="move/drop-perpendicular-from-circle-point-to-form-right-triangle-for-central-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Drop perpendicular from circle point to form right triangle for central angle</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Circle centre }O,\ r=2,\quad M\text{ foot of perp from }B\text{ to }OA,\quad OM=1\;$</div><div class="cs-line cs-step">$\;\cos(\angle AOB)=\dfrac{OM}{OB}=\dfrac{1}{2} \Rightarrow \angle AOB=\dfrac{\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2067,7 +2102,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/scale-per-cycle-solution-count-by-lcm-period-repetitions-over-extended-domain.html" class="cs-card">
+<a href="move/scale-per-cycle-solution-count-by-lcm-period-repetitions-over-extended-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Scale per-cycle solution count by LCM-period repetitions over extended domain</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = \cos 2\theta \text{ has } 3 \text{ solutions in } [0°,\,360°]\;$</div><div class="cs-line cs-step">$\;\text{LCM}(360°,180°)=360°,\quad \dfrac{1080°}{360°}=3 \Rightarrow 3\times 3=9 \text{ solutions}\;$</div></div>
   <div class="cs-meta">
@@ -2082,7 +2117,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-2π-minus-the-interior-angle-to-get-the-major-sector-angle.html" class="cs-card">
+<a href="move/take-2π-minus-the-interior-angle-to-get-the-major-sector-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Take 2π minus the interior angle to get the major sector angle</div>
   <div class="cs-example"><div class="cs-line">$\;\theta = \dfrac{\pi}{3},\quad r = 4\;$</div><div class="cs-line cs-step">$\;\alpha = 2\pi - \dfrac{\pi}{3} = \dfrac{5\pi}{3},\quad A = \tfrac{1}{2}(4)^2\!\left(\dfrac{5\pi}{3}\right) = \dfrac{40\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2097,7 +2132,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-transformed-cosine-argument-to-locate-critical-point.html" class="cs-card">
+<a href="move/invert-transformed-cosine-argument-to-locate-critical-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert transformed cosine argument to locate critical point</div>
   <div class="cs-example"><div class="cs-line">$\;y = \cos(2x^\circ),\quad 0 \le x \le 180\;$</div><div class="cs-line cs-step">$\;\cos\theta = -1 \Rightarrow 2x = 180 \Rightarrow x = 90,\quad \text{min } (90,\,-1)\;$</div></div>
   <div class="cs-meta">
@@ -2112,7 +2147,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bound-the-unknown-reference-angle-to-rank-candidate-solution-magnitudes.html" class="cs-card">
+<a href="move/bound-the-unknown-reference-angle-to-rank-candidate-solution-magnitudes.html" class="cs-card lazy-tex">
   <div class="cs-name">Bound the unknown reference angle to rank candidate solution magnitudes</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta = k,\; \alpha \text{ smallest positive root, candidates } \alpha - 4\pi,\; -2\pi - \alpha\;$</div><div class="cs-line cs-step">$\;\alpha < 2\pi - \alpha \Rightarrow \alpha < \pi \Rightarrow |\alpha - 4\pi| - |{-2\pi - \alpha}| = 2\pi - 2\alpha > 0 \Rightarrow |-2\pi - \alpha| < |\alpha - 4\pi|\;$</div></div>
   <div class="cs-meta">
@@ -2127,7 +2162,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/chain-modulus-then-vertical-shift-to-update-range-incrementally.html" class="cs-card">
+<a href="move/chain-modulus-then-vertical-shift-to-update-range-incrementally.html" class="cs-card lazy-tex">
   <div class="cs-name">Chain modulus then vertical shift to update range incrementally</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) \in [-3,\,3],\quad g(x) = |f(x)| + 2\;$</div><div class="cs-line cs-step">$\;|f(x)| \in [0,\,3] \Rightarrow g(x) \in [2,\,5]\;$</div></div>
   <div class="cs-meta">
@@ -2142,7 +2177,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-both-square-roots-when-extracting-from-a-squared-trig-equation.html" class="cs-card">
+<a href="move/take-both-square-roots-when-extracting-from-a-squared-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Take both ± square roots when extracting from a squared trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\sin^2 x = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;\sin x = \pm\dfrac{1}{\sqrt{2}} \Rightarrow x = 45°,\,135°,\,225°,\,315°\;$</div></div>
   <div class="cs-meta">
@@ -2157,7 +2192,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-kite-symmetry-axis-to-halve-the-vertex-angle.html" class="cs-card">
+<a href="move/use-kite-symmetry-axis-to-halve-the-vertex-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Use kite symmetry axis to halve the vertex angle</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Kite } OABC,\; OA=OC=1,\; AB=CB=2,\; \angle AOC=\theta\;$</div><div class="cs-line cs-step">$\;\angle AOB = \tfrac{\theta}{2},\; \cos\tfrac{\theta}{2} = \frac{1^2+OB^2-2^2}{2(1)(OB)} \Rightarrow \theta = 2\angle AOB\;$</div></div>
   <div class="cs-meta">
@@ -2172,7 +2207,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-cos-x-as-a-common-factor-with-explicit-non-zero-justification.html" class="cs-card">
+<a href="move/cancel-cos-x-as-a-common-factor-with-explicit-non-zero-justification.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel cos x as a common factor with explicit non-zero justification</div>
   <div class="cs-example"><div class="cs-line">$\;2\tan x \sin 2x = 3\;$</div><div class="cs-line cs-step">$\;2\cdot\dfrac{\sin x}{\cos x}\cdot 2\sin x\cos x = 3,\quad \cos x\neq 0 \Rightarrow 4\sin^2 x = 3\;$</div></div>
   <div class="cs-meta">
@@ -2187,7 +2222,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/plot-quarter-period-key-points-to-sketch-transformed-trig-on-restricted-domain.html" class="cs-card">
+<a href="move/plot-quarter-period-key-points-to-sketch-transformed-trig-on-restricted-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Plot quarter-period key points to sketch transformed trig on restricted domain</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin(2x^\circ),\quad 0 \le x \le 270\;$</div><div class="cs-line cs-step">$\;T = 180,\; T/4 = 45:\quad (0,0),\,(45,1),\,(90,0),\,(135,-1),\,(180,0),\,(225,1),\,(270,0)\;$</div></div>
   <div class="cs-meta">
@@ -2202,7 +2237,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-sine-rule-to-extract-a-target-angle-once-a-complete-sideangle-pair-exi.html" class="cs-card">
+<a href="move/apply-the-sine-rule-to-extract-a-target-angle-once-a-complete-sideangle-pair-exi.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the Sine Rule to extract a target angle once a complete side–angle pair exists</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle ABC:\quad A=30^\circ,\; a=4,\; b=3,\; B=?\;$</div><div class="cs-line cs-step">$\;\dfrac{\sin B}{3}=\dfrac{\sin 30^\circ}{4} \Rightarrow \sin B=\dfrac{3}{8} \Rightarrow B=\arcsin\!\tfrac{3}{8}\;$</div></div>
   <div class="cs-meta">
@@ -2217,7 +2252,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/solve-quadratic-in-cosθ-and-reject-out-of-range-root.html" class="cs-card">
+<a href="move/solve-quadratic-in-cosθ-and-reject-out-of-range-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Solve quadratic in cosθ and reject out-of-range root</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2\theta - 3\cos\theta - 2 = 0\;$</div><div class="cs-line cs-step">$\;\cos\theta = \dfrac{3 \pm 5}{4} = 2\ (\text{reject: } |u|>1)\ \text{or}\ -\tfrac{1}{2}\ (\text{accept})\;$</div></div>
   <div class="cs-meta">
@@ -2232,7 +2267,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/sweep-a-horizontal-line-across-critical-y-values-to-count-intersections.html" class="cs-card">
+<a href="move/sweep-a-horizontal-line-across-critical-y-values-to-count-intersections.html" class="cs-card lazy-tex">
   <div class="cs-name">Sweep a horizontal line across critical y-values to count intersections</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin x,\quad 0 \le x \le 2\pi,\quad y = k\;$</div><div class="cs-line cs-step">$\;k=1{:}\,1,\quad k\in(0,1){:}\,2,\quad k=0{:}\,3,\quad k\in(-1,0){:}\,2,\quad k=-1{:}\,1\;$</div></div>
   <div class="cs-meta">
@@ -2247,7 +2282,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/shift-domain-bounds-to-match-compound-angle-substitution.html" class="cs-card">
+<a href="move/shift-domain-bounds-to-match-compound-angle-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Shift domain bounds to match compound-angle substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(\theta + 30°) = \tfrac{1}{2},\quad 0° \le \theta < 360°\;$</div><div class="cs-line cs-step">$\;X = \theta + 30° \Rightarrow 30° \le X < 390°\;$</div></div>
   <div class="cs-meta">
@@ -2262,7 +2297,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-maxmin-and-its-location-directly-from-r-cosxα-form.html" class="cs-card">
+<a href="move/read-maxmin-and-its-location-directly-from-r-cosxα-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Read max/min and its location directly from R cos(x+α) form</div>
   <div class="cs-example"><div class="cs-line">$\;3\cos x + 4\sin x = 5\cos(x - 53.13°)\;$</div><div class="cs-line cs-step">$\;\max = 5 \text{ at } x = 53.1°,\quad \min = -5 \text{ at } x = 233.1°\;$</div></div>
   <div class="cs-meta">
@@ -2277,7 +2312,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-solutions-against-original-denominators-after-cross-multiplying.html" class="cs-card">
+<a href="move/verify-solutions-against-original-denominators-after-cross-multiplying.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify solutions against original denominators after cross-multiplying</div>
   <div class="cs-example"><div class="cs-line">$\;\tan\theta = \dfrac{1}{2\sin\theta - 1},\quad \theta = \tfrac{\pi}{6} \text{ candidate}\;$</div><div class="cs-line cs-step">$\;2\sin\tfrac{\pi}{6} - 1 = 2\!\cdot\!\tfrac{1}{2} - 1 = 0 \Rightarrow \text{reject } \theta = \tfrac{\pi}{6}\;$</div></div>
   <div class="cs-meta">
@@ -2292,7 +2327,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bound-a-linear-in-sine-expression-using-sines-range.html" class="cs-card">
+<a href="move/bound-a-linear-in-sine-expression-using-sines-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Bound a linear-in-sine expression using sine&#x27;s range</div>
   <div class="cs-example"><div class="cs-line">$\;3 + 5\sin x\;$</div><div class="cs-line cs-step">$\;-1 \le \sin x \le 1 \Rightarrow 3 + 5(-1) \le 3 + 5\sin x \le 3 + 5(1) \Rightarrow -2 \le 3+5\sin x \le 8\;$</div></div>
   <div class="cs-meta">
@@ -2307,7 +2342,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-sin-x-to-split-zero-and-reduced-equation-cases.html" class="cs-card">
+<a href="move/factor-out-sin-x-to-split-zero-and-reduced-equation-cases.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out sin x to split zero and reduced-equation cases</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin x \cos x - \sin x = 0\;$</div><div class="cs-line cs-step">$\;\sin x\,(2\cos x - 1) = 0 \Rightarrow \sin x = 0 \text{ or } \cos x = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2322,7 +2357,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-trig-argument-mod-2π-then-apply-reference-angle-and-quadrant-sign.html" class="cs-card">
+<a href="move/reduce-trig-argument-mod-2π-then-apply-reference-angle-and-quadrant-sign.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce trig argument mod 2π then apply reference-angle and quadrant sign</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\!\left(-\dfrac{17\pi}{6}\right)\;$</div><div class="cs-line cs-step">$\;-\dfrac{17\pi}{6} + \dfrac{24\pi}{6} = \dfrac{7\pi}{6}\;\Rightarrow\;\sin\!\left(\dfrac{7\pi}{6}\right) = -\sin\dfrac{\pi}{6} = -\dfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2337,7 +2372,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-the-θ-range-to-match-a-compound-trig-argument.html" class="cs-card">
+<a href="move/translate-the-θ-range-to-match-a-compound-trig-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate the θ-range to match a compound trig argument</div>
   <div class="cs-example"><div class="cs-line">$\;\tan(\theta + 30^\circ) = 1,\quad 0^\circ < \theta < 360^\circ\;$</div><div class="cs-line cs-step">$\;u = \theta+30^\circ,\; 30^\circ<u<390^\circ \Rightarrow u = 45^\circ,\,225^\circ \Rightarrow \theta = 15^\circ,\,195^\circ\;$</div></div>
   <div class="cs-meta">
@@ -2352,7 +2387,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-arctan-to-both-sides-to-isolate-the-angle-variable.html" class="cs-card">
+<a href="move/apply-arctan-to-both-sides-to-isolate-the-angle-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply arctan to both sides to isolate the angle variable</div>
   <div class="cs-example"><div class="cs-line">$\;\tan\!\left(\dfrac{x}{2}\right) = 3,\quad x \in (0,\pi)\;$</div><div class="cs-line cs-step">$\;\dfrac{x}{2} = \arctan 3 \Rightarrow x = 2\arctan 3\;$</div></div>
   <div class="cs-meta">
@@ -2367,7 +2402,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/resolve-square-root-sign-ambiguity-using-the-range-of-arcsin.html" class="cs-card">
+<a href="move/resolve-square-root-sign-ambiguity-using-the-range-of-arcsin.html" class="cs-card lazy-tex">
   <div class="cs-name">Resolve square-root sign ambiguity using the range of arcsin</div>
   <div class="cs-example"><div class="cs-line">$\;y = \arcsin x,\quad \cos^2 y = 1 - x^2\;$</div><div class="cs-line cs-step">$\;-\tfrac{\pi}{2} \le y \le \tfrac{\pi}{2} \Rightarrow \cos y \ge 0 \Rightarrow \cos y = +\sqrt{1-x^2}\;$</div></div>
   <div class="cs-meta">
@@ -2382,7 +2417,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/map-x-bounds-to-inner-variable-bounds-before-solving-compound-trig-equation.html" class="cs-card">
+<a href="move/map-x-bounds-to-inner-variable-bounds-before-solving-compound-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Map x-bounds to inner-variable bounds before solving compound trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\tan(2x) = 1,\quad 0 < x < \pi\;$</div><div class="cs-line cs-step">$\;\theta = 2x,\; 0 < \theta < 2\pi \Rightarrow \theta = \tfrac{\pi}{4},\;\tfrac{5\pi}{4} \Rightarrow x = \tfrac{\pi}{8},\;\tfrac{5\pi}{8}\;$</div></div>
   <div class="cs-meta">
@@ -2397,7 +2432,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reject-trig-roots-violating-range-bounds-cos-sin-1-sec-csc-1.html" class="cs-card">
+<a href="move/reject-trig-roots-violating-range-bounds-cos-sin-1-sec-csc-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Reject trig roots violating range bounds (|cos|, |sin| ≤ 1; |sec|, |csc| ≥ 1)</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2\theta - 3\cos\theta + 1 = 0\;$</div><div class="cs-line cs-step">$\;\cos\theta = 1 \text{ or } \cos\theta = \tfrac{1}{2} \Rightarrow \text{both satisfy } |\cos\theta| \le 1, \text{ so both retained}\;$</div></div>
   <div class="cs-meta">
@@ -2412,7 +2447,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/resolve-square-root-sign-ambiguity-using-the-stated-domain.html" class="cs-card">
+<a href="move/resolve-square-root-sign-ambiguity-using-the-stated-domain.html" class="cs-card lazy-tex">
   <div class="cs-name">Resolve square-root sign ambiguity using the stated domain</div>
   <div class="cs-example"><div class="cs-line">$\;\sin^2 y = \tfrac{1}{2}(1-x),\quad 0 \le y \le \pi\;$</div><div class="cs-line cs-step">$\;\sqrt{\sin^2 y} = |\sin y|,\ 0 \le y \le \pi \Rightarrow \sin y \ge 0 \Rightarrow \sin y = +\sqrt{\tfrac{1}{2}(1-x)}\;$</div></div>
   <div class="cs-meta">
@@ -2427,7 +2462,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/discard-cossin-roots-outside-11-before-inverting.html" class="cs-card">
+<a href="move/discard-cossin-roots-outside-11-before-inverting.html" class="cs-card lazy-tex">
   <div class="cs-name">Discard cos/sin roots outside [−1,1] before inverting</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2 x + 3\cos x - 2 = 0\;$</div><div class="cs-line cs-step">$\;\cos x = \tfrac{-3 \pm 5}{4} \Rightarrow \cos x = \tfrac{1}{2}\ (\text{keep}),\quad \cos x = -2\ (\text{reject: } |{-2}|>1)\;$</div></div>
   <div class="cs-meta">
@@ -2442,7 +2477,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-r-form-expression-into-ordered-stretch-and-translation.html" class="cs-card">
+<a href="move/decompose-r-form-expression-into-ordered-stretch-and-translation.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose R-form expression into ordered stretch and translation</div>
   <div class="cs-example"><div class="cs-line">$\;y = \cos\theta \;\to\; y = 2\cos\!\left(\theta + \tfrac{\pi}{3}\right)\;$</div><div class="cs-line cs-step">$\;\text{(i)}\; y=2\cos\theta \;[\text{stretch }\parallel y,\; \times2], \quad \text{(ii)}\; y=2\cos\!\left(\theta+\tfrac{\pi}{3}\right) \;\left[\text{translation } \begin{pmatrix}-\pi/3\\0\end{pmatrix}\right]\;$</div></div>
   <div class="cs-meta">
@@ -2457,7 +2492,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-acosθ-bsinθ-to-r-form-by-expanding-and-matching-coefficients.html" class="cs-card">
+<a href="move/convert-acosθ-bsinθ-to-r-form-by-expanding-and-matching-coefficients.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert a·cosθ + b·sinθ to R-form by expanding and matching coefficients</div>
   <div class="cs-example"><div class="cs-line">$\;3\cos\theta + 4\sin\theta = R\cos(\theta - \alpha)\;$</div><div class="cs-line cs-step">$\;R\cos\alpha = 3,\; R\sin\alpha = 4 \Rightarrow R = \sqrt{9+16} = 5,\; \alpha = \arctan\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2472,7 +2507,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-trig-fractions-over-a-common-denominator-to-expose-a-compound-angle-iden.html" class="cs-card">
+<a href="move/combine-trig-fractions-over-a-common-denominator-to-expose-a-compound-angle-iden.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine trig fractions over a common denominator to expose a compound-angle identity</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\cos x}{\sin x} - \dfrac{\sin x}{\cos x}\;$</div><div class="cs-line cs-step">$\;\dfrac{\cos^2 x - \sin^2 x}{\sin x \cos x} = \dfrac{\cos 2x}{\tfrac{1}{2}\sin 2x} = \dfrac{2\cos 2x}{\sin 2x}\;$</div></div>
   <div class="cs-meta">
@@ -2487,7 +2522,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-and-add-then-divide-to-decouple-r-and-α.html" class="cs-card">
+<a href="move/square-and-add-then-divide-to-decouple-r-and-α.html" class="cs-card lazy-tex">
   <div class="cs-name">Square-and-add then divide to decouple R and α</div>
   <div class="cs-example"><div class="cs-line">$\;R\cos\alpha = 3,\quad R\sin\alpha = 4,\quad R>0\;$</div><div class="cs-line cs-step">$\;R^2 = 3^2 + 4^2 = 25 \Rightarrow R = 5,\quad \tan\alpha = \tfrac{4}{3} \Rightarrow \alpha = \arctan\tfrac{4}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2502,7 +2537,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-off-maxmin-from-p-qcos-using-bounded-range.html" class="cs-card">
+<a href="move/read-off-maxmin-from-p-qcos-using-bounded-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Read off max/min from p + q·cos(·) using bounded range</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = 4 + 3\cos(x - \alpha)\;$</div><div class="cs-line cs-step">$\;-1 \le \cos(x-\alpha) \le 1 \Rightarrow f_{\min} = 4 - 3 = 1,\quad f_{\max} = 4 + 3 = 7\;$</div></div>
   <div class="cs-meta">
@@ -2517,7 +2552,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-perfect-square-trig-equation-to-its-base-equals-zero.html" class="cs-card">
+<a href="move/reduce-perfect-square-trig-equation-to-its-base-equals-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce perfect-square trig equation to its base equals zero</div>
   <div class="cs-example"><div class="cs-line">$\;(1 + 2\cos x)^2 = 0\;$</div><div class="cs-line cs-step">$\;1 + 2\cos x = 0 \Rightarrow \cos x = -\tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2532,7 +2567,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-sec-x-as-1cos-x-to-reduce-to-a-primary-trig-equation.html" class="cs-card">
+<a href="move/rewrite-sec-x-as-1cos-x-to-reduce-to-a-primary-trig-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite sec x as 1/cos x to reduce to a primary trig equation</div>
   <div class="cs-example"><div class="cs-line">$\;\sec x = 2\;$</div><div class="cs-line cs-step">$\;\frac{1}{\cos x} = 2 \Rightarrow \cos x = \frac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2547,7 +2582,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/scale-the-interval-for-the-multiple-angle-and-enumerate-every-branch.html" class="cs-card">
+<a href="move/scale-the-interval-for-the-multiple-angle-and-enumerate-every-branch.html" class="cs-card lazy-tex">
   <div class="cs-name">Scale the interval for the multiple angle and enumerate every branch</div>
   <div class="cs-example"><div class="cs-line">$\;\sin 2\theta = \tfrac{1}{2},\quad \theta \in (0,2\pi)\;$</div><div class="cs-line cs-step">$\;\varphi = 2\theta \in (0,4\pi):\quad \varphi = \tfrac{\pi}{6},\ \tfrac{5\pi}{6},\ \tfrac{13\pi}{6},\ \tfrac{17\pi}{6} \Rightarrow \theta = \tfrac{\pi}{12},\ \tfrac{5\pi}{12},\ \tfrac{13\pi}{12},\ \tfrac{17\pi}{12}\;$</div></div>
   <div class="cs-meta">
@@ -2562,7 +2597,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-through-by-cos-θ-to-clear-sec-θ-and-form-sin-2θ.html" class="cs-card">
+<a href="move/multiply-through-by-cos-θ-to-clear-sec-θ-and-form-sin-2θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply through by cos θ to clear sec θ and form sin 2θ</div>
   <div class="cs-example"><div class="cs-line">$\;2\sin\theta = 3\sec\theta\;$</div><div class="cs-line cs-step">$\;2\sin\theta\cos\theta = 3 \Rightarrow \sin 2\theta = 3\;$</div></div>
   <div class="cs-meta">
@@ -2577,7 +2612,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-the-domain-bounds-when-substituting-y-x-α.html" class="cs-card">
+<a href="move/translate-the-domain-bounds-when-substituting-y-x-α.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate the domain bounds when substituting y = x − α</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(x - 30°) = \tfrac{1}{2},\quad 0° \le x < 360°\;$</div><div class="cs-line cs-step">$\;y = x - 30° \Rightarrow -30° \le y < 330°,\quad y = 30°,\,150° \Rightarrow x = 60°,\,180°\;$</div></div>
   <div class="cs-meta">
@@ -2592,7 +2627,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-a-sum-to-extract-the-denominator-factor-and-cancel.html" class="cs-card">
+<a href="move/split-a-sum-to-extract-the-denominator-factor-and-cancel.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a sum to extract the denominator factor and cancel</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin 3\theta - \cos 3\theta}{\sin\theta - \cos\theta}\;$</div><div class="cs-line cs-step">$\;\frac{(\sin\theta - \cos\theta)(\sin 2\theta + \cos 2\theta) + 2\sin 2\theta\cos\theta}{\sin\theta - \cos\theta} = \sin 2\theta + \cos 2\theta + \frac{\sin 3\theta + \sin\theta}{\sin\theta - \cos\theta} \Rightarrow 2 + \sin 2\theta\;$</div></div>
   <div class="cs-meta">
@@ -2607,7 +2642,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-amplitude-bound-a²b²c²-to-extract-range-of-trig-rational-expression.html" class="cs-card">
+<a href="move/apply-amplitude-bound-a²b²c²-to-extract-range-of-trig-rational-expression.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply amplitude bound a²+b²≥c² to extract range of trig-rational expression</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{3 + \sin x}{2 + \cos x}\;$</div><div class="cs-line cs-step">$\;\sin x - y\cos x = 2y - 3 \Rightarrow (2y-3)^2 \le 1 + y^2 \Rightarrow 3y^2 - 12y + 8 \le 0\;$</div></div>
   <div class="cs-meta">
@@ -2622,7 +2657,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-by-x-then-divide-by-cos-x-to-expose-tan-x-in-target-form.html" class="cs-card">
+<a href="move/multiply-by-x-then-divide-by-cos-x-to-expose-tan-x-in-target-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply by x then divide by cos x to expose tan x in target form</div>
   <div class="cs-example"><div class="cs-line">$\;\cos x\,\ln x + \dfrac{\sin x}{x} = 0\;$</div><div class="cs-line cs-step">$\;\xrightarrow{\times\, x} x\cos x\,\ln x + \sin x = 0 \xrightarrow{\div\,\cos x} x\ln x + \tan x = 0\;$</div></div>
   <div class="cs-meta">
@@ -2637,7 +2672,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/generate-the-supplementary-second-solution-for-sinφ-k.html" class="cs-card">
+<a href="move/generate-the-supplementary-second-solution-for-sinφ-k.html" class="cs-card lazy-tex">
   <div class="cs-name">Generate the supplementary second solution for sin(φ) = k</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\theta = 0.5,\quad 0°\le\theta<360°\;$</div><div class="cs-line cs-step">$\;\theta_1 = 30° \Rightarrow \theta_2 = 180° - 30° = 150°\;$</div></div>
   <div class="cs-meta">
@@ -2652,7 +2687,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-the-domain-when-substituting-a-phase-shifted-argument.html" class="cs-card">
+<a href="move/translate-the-domain-when-substituting-a-phase-shifted-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate the domain when substituting a phase-shifted argument</div>
   <div class="cs-example"><div class="cs-line">$\;\sin(\theta - 30°) = \tfrac{1}{2},\quad 0° \le \theta < 360°\;$</div><div class="cs-line cs-step">$\;\varphi = \theta - 30°,\; -30° \le \varphi < 330°:\quad \varphi = 30°,\,150° \Rightarrow \theta = 60°,\,180°\;$</div></div>
   <div class="cs-meta">
@@ -2667,7 +2702,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cross-multiply-and-reduce-trig-equation-to-quadratic-in-sinθ.html" class="cs-card">
+<a href="move/cross-multiply-and-reduce-trig-equation-to-quadratic-in-sinθ.html" class="cs-card lazy-tex">
   <div class="cs-name">Cross-multiply and reduce trig equation to quadratic in sinθ</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin\theta}{2} = 1 - 2\sin\theta - 4\sin^2\theta\;$</div><div class="cs-line cs-step">$\;\sin\theta = 2 - 4\sin\theta - 8\sin^2\theta \;\Rightarrow\; 8\sin^2\theta + 5\sin\theta - 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -2682,7 +2717,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-numerator-divides-denominator-by-expanding-the-conjectured-factorisation.html" class="cs-card">
+<a href="move/verify-numerator-divides-denominator-by-expanding-the-conjectured-factorisation.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify numerator divides denominator by expanding the conjectured factorisation</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\cos\theta + \sin\theta}{\cos 2\theta + \sin\theta}\;$</div><div class="cs-line cs-step">$\;(\cos\theta + \sin\theta)(1 - \sin\theta) = \cos\theta - \cos\theta\sin\theta + \sin\theta - \sin^2\theta = (1-2\sin^2\theta) + \sin\theta = \cos 2\theta + \sin\theta \;\checkmark\;$</div></div>
   <div class="cs-meta">
@@ -2697,7 +2732,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-sin²φ-to-tan-φ-via-pythagorean-quotient.html" class="cs-card">
+<a href="move/bridge-sin²φ-to-tan-φ-via-pythagorean-quotient.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge sin²φ to tan φ via Pythagorean quotient</div>
   <div class="cs-example"><div class="cs-line">$\;\sin^2\varphi = \tfrac{1}{4},\quad 0 < \varphi < \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;\tan^2\varphi = \dfrac{1/4}{3/4} = \tfrac{1}{3} \Rightarrow \tan\varphi = \dfrac{\sqrt{3}}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2712,7 +2747,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-sinarccos-k-using-pythagorean-identity.html" class="cs-card">
+<a href="move/evaluate-sinarccos-k-using-pythagorean-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate sin(arccos k) using Pythagorean identity</div>
   <div class="cs-example"><div class="cs-line">$\;\sin\!\left(\arccos \tfrac{3}{5}\right)\;$</div><div class="cs-line cs-step">$\;\sin\theta = \sqrt{1 - \cos^2\theta} = \sqrt{1 - \tfrac{9}{25}} = \tfrac{4}{5}\;$</div></div>
   <div class="cs-meta">
@@ -2727,7 +2762,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cascade-double-angle-identities-from-known-sin²φ-to-evaluate-sin-4φ-exactly.html" class="cs-card">
+<a href="move/cascade-double-angle-identities-from-known-sin²φ-to-evaluate-sin-4φ-exactly.html" class="cs-card lazy-tex">
   <div class="cs-name">Cascade double-angle identities from known sin²φ to evaluate sin 4φ exactly</div>
   <div class="cs-example"><div class="cs-line">$\;\sin^2\!\phi = \tfrac{1}{3},\quad \phi \text{ acute}\;$</div><div class="cs-line cs-step">$\;\sin 4\phi = 2\sin 2\phi\cos 2\phi = 2\!\cdot\!\tfrac{2\sqrt{2}}{3}\!\cdot\!\tfrac{1}{3} = \tfrac{4\sqrt{2}}{9}\;$</div></div>
   <div class="cs-meta">
@@ -2742,7 +2777,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pre-compute-exact-trig-values-once-before-substituting-into-taylor-coefficients.html" class="cs-card">
+<a href="move/pre-compute-exact-trig-values-once-before-substituting-into-taylor-coefficients.html" class="cs-card lazy-tex">
   <div class="cs-name">Pre-compute exact trig values once before substituting into Taylor coefficients</div>
   <div class="cs-example"><div class="cs-line">$\;f(x)=\tan x,\quad a=\tfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;\sin\tfrac{\pi}{3}=\tfrac{\sqrt{3}}{2},\ \cos\tfrac{\pi}{3}=\tfrac{1}{2},\ \sec^2\!\tfrac{\pi}{3}=4 \Rightarrow f(a)=\sqrt{3},\; f'(a)=4,\; f(x)\approx \sqrt{3}+4\!\left(x-\tfrac{\pi}{3}\right)\;$</div></div>
   <div class="cs-meta">
@@ -2757,7 +2792,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-half-angle-identities-to-collapse-1-cos-θ-denominators.html" class="cs-card">
+<a href="move/apply-half-angle-identities-to-collapse-1-cos-θ-denominators.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply half-angle identities to collapse (1 ± cos θ) denominators</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{\sin\theta}{1+\cos\theta}\;$</div><div class="cs-line cs-step">$\;\dfrac{2\sin(\theta/2)\cos(\theta/2)}{2\cos^2(\theta/2)} = \tan(\theta/2)\;$</div></div>
   <div class="cs-meta">
@@ -2772,7 +2807,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reverse-read-a-power-linearisation-identity-to-collapse-a-multi-angle-equation-i.html" class="cs-card">
+<a href="move/reverse-read-a-power-linearisation-identity-to-collapse-a-multi-angle-equation-i.html" class="cs-card lazy-tex">
   <div class="cs-name">Reverse-read a power-linearisation identity to collapse a multi-angle equation into a polynomial in cosθ</div>
   <div class="cs-example"><div class="cs-line">$\;\cos 6\theta + 6\cos 4\theta + 15\cos 2\theta = 0,\quad 32\cos^6\theta = \cos 6\theta + 6\cos 4\theta + 15\cos 2\theta + 10\;$</div><div class="cs-line cs-step">$\;32\cos^6\theta - 10 = 0 \Rightarrow \cos^6\theta = \tfrac{5}{16} \Rightarrow \cos\theta = \pm\!\left(\tfrac{5}{16}\right)^{1/6}\;$</div></div>
   <div class="cs-meta">

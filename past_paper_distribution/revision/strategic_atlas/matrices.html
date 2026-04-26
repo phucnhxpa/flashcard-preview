@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">1 moves · 11 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/row-reduce-a-λi-to-extract-eigenvectors-from-the-null-space.html" class="cs-card">
+<a href="move/row-reduce-a-λi-to-extract-eigenvectors-from-the-null-space.html" class="cs-card lazy-tex">
   <div class="cs-name">Row-reduce (A − λI) to extract eigenvectors from the null space</div>
   <div class="cs-example"><div class="cs-line">$\;A - 3I = \begin{pmatrix} -1 & 1 & 0 \\ 0 & 0 & 0 \\ 0 & 1 & -1 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\xrightarrow{R_3} \begin{pmatrix} -1 & 1 & 0 \\ 0 & 1 & -1 \\ 0 & 0 & 0 \end{pmatrix},\ z=t:\, y=t,\, x=t \Rightarrow \mathbf{e} = \begin{pmatrix}1\\1\\1\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -278,7 +313,7 @@ window.MathJax = {
     <span class="meta">5 moves · 9 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/diagonalise-a-pdp¹-to-reduce-matrix-powers-to-scalar-powers.html" class="cs-card">
+<a href="move/diagonalise-a-pdp¹-to-reduce-matrix-powers-to-scalar-powers.html" class="cs-card lazy-tex">
   <div class="cs-name">Diagonalise A = PDP⁻¹ to reduce matrix powers to scalar powers</div>
   <div class="cs-example"><div class="cs-line">$\;A = PDP^{-1},\quad D = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;A^n = P D^n P^{-1} = P \begin{pmatrix} 1 & 0 \\ 0 & 2^n \end{pmatrix} P^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -286,7 +321,7 @@ window.MathJax = {
     <span>diagonalisation</span>
   </div>
 </a>
-<a href="move/assemble-p-from-eigenvectors-and-d-from-eigenvalues-to-write-a-pdp¹.html" class="cs-card">
+<a href="move/assemble-p-from-eigenvectors-and-d-from-eigenvalues-to-write-a-pdp¹.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble P from eigenvectors and D from eigenvalues to write A = PDP⁻¹</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda_1=2,\;\mathbf{v}_1=\begin{pmatrix}1\\0\end{pmatrix},\quad \lambda_2=3,\;\mathbf{v}_2=\begin{pmatrix}1\\1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;P=\begin{pmatrix}1&1\\0&1\end{pmatrix},\; D=\begin{pmatrix}2&0\\0&3\end{pmatrix},\; A=PDP^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -294,7 +329,7 @@ window.MathJax = {
     <span>diagonalisation</span>
   </div>
 </a>
-<a href="move/assemble-a-pdp¹-with-matched-eigenvectoreigenvalue-column-ordering.html" class="cs-card">
+<a href="move/assemble-a-pdp¹-with-matched-eigenvectoreigenvalue-column-ordering.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble A = PDP⁻¹ with matched eigenvector–eigenvalue column ordering</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda_1=1,\; \mathbf{e}_1=\begin{pmatrix}1\\1\end{pmatrix},\quad \lambda_2=3,\; \mathbf{e}_2=\begin{pmatrix}1\\-1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;P=\begin{pmatrix}1&1\\1&-1\end{pmatrix},\; D=\begin{pmatrix}1&0\\0&3\end{pmatrix} \Rightarrow A=PDP^{-1}=\begin{pmatrix}2&-1\\-1&2\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -302,7 +337,7 @@ window.MathJax = {
     <span>diagonalisation</span>
   </div>
 </a>
-<a href="move/diagonalise-a-as-pdp¹-using-eigenvector-columns.html" class="cs-card">
+<a href="move/diagonalise-a-as-pdp¹-using-eigenvector-columns.html" class="cs-card lazy-tex">
   <div class="cs-name">Diagonalise A as PDP⁻¹ using eigenvector columns</div>
   <div class="cs-example"><div class="cs-line">$\;A=\begin{pmatrix}2&1\\0&3\end{pmatrix},\quad \lambda_1=2,\ e_1=\binom{1}{0},\quad \lambda_2=3,\ e_2=\binom{1}{1}\;$</div><div class="cs-line cs-step">$\;P=\begin{pmatrix}1&1\\0&1\end{pmatrix},\ D=\begin{pmatrix}2&0\\0&3\end{pmatrix},\ P^{-1}=\begin{pmatrix}1&-1\\0&1\end{pmatrix} \Rightarrow A=PDP^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -310,7 +345,7 @@ window.MathJax = {
     <span>diagonalisation</span>
   </div>
 </a>
-<a href="move/compute-matrix-powers-via-an-pdnp-1.html" class="cs-card">
+<a href="move/compute-matrix-powers-via-an-pdnp-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute matrix powers via A^n = PD^nP^{-1}</div>
   <div class="cs-example"><div class="cs-line">$\;A = PDP^{-1},\quad P = \begin{pmatrix} 1 & 1 \\ 0 & -1 \end{pmatrix},\quad D = \begin{pmatrix} 3 & 0 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;A^n = P\begin{pmatrix} 3^n & 0 \\ 0 & 2^n \end{pmatrix}P^{-1} = \begin{pmatrix} 3^n & 3^n - 2^n \\ 0 & 2^n \end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -325,7 +360,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-row-or-column-with-most-zeros-for-cofactor-expansion-to-minimise-work.html" class="cs-card">
+<a href="move/choose-row-or-column-with-most-zeros-for-cofactor-expansion-to-minimise-work.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose row or column with most zeros for cofactor expansion to minimise work</div>
   <div class="cs-example"><div class="cs-line">$\;\det\begin{pmatrix} 3 & 0 & 0 \\ 1 & 2 & 5 \\ 4 & 1 & 3 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;R1:\;(+1)(3)\det\begin{pmatrix}2&5\\1&3\end{pmatrix} = 3(6-5)=3\;$</div></div>
   <div class="cs-meta">
@@ -340,7 +375,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/form-characteristic-equation-deta-λi-0-to-find-eigenvalues.html" class="cs-card">
+<a href="move/form-characteristic-equation-deta-λi-0-to-find-eigenvalues.html" class="cs-card lazy-tex">
   <div class="cs-name">Form characteristic equation det(A − λI) = 0 to find eigenvalues</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det(A - \lambda I) = (3-\lambda)(2-\lambda) = 0 \Rightarrow \lambda = 2,\,3\;$</div></div>
   <div class="cs-meta">
@@ -355,7 +390,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-adjugate-over-determinant-formula-to-invert-a-parametric-33-matrix.html" class="cs-card">
+<a href="move/apply-the-adjugate-over-determinant-formula-to-invert-a-parametric-33-matrix.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the adjugate-over-determinant formula to invert a parametric 3×3 matrix</div>
   <div class="cs-example"><div class="cs-line">$\;M = \begin{pmatrix} 1 & 0 & 0 \\ 0 & k & 1 \\ 0 & 2 & 3 \end{pmatrix},\quad \det M = 3k-2\;$</div><div class="cs-line cs-step">$\;M^{-1} = \dfrac{1}{3k-2}\begin{pmatrix} 3k-2 & 0 & 0 \\ 0 & 3 & -1 \\ 0 & -2 & k \end{pmatrix},\quad k \neq \tfrac{2}{3}\;$</div></div>
   <div class="cs-meta">
@@ -370,7 +405,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-diagonalisation-by-checking-ap-pd-column-by-column.html" class="cs-card">
+<a href="move/verify-diagonalisation-by-checking-ap-pd-column-by-column.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify diagonalisation by checking AP = PD column-by-column</div>
   <div class="cs-example"><div class="cs-line">$\;A=\begin{pmatrix}2&1\\0&3\end{pmatrix},\ P=\begin{pmatrix}1&1\\0&1\end{pmatrix},\ D=\begin{pmatrix}2&0\\0&3\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;AP=\begin{pmatrix}2&3\\0&3\end{pmatrix},\ PD=\begin{pmatrix}2&3\\0&3\end{pmatrix} \Rightarrow AP=PD\ \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -385,7 +420,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/form-deta-λi-0-to-extract-eigenvalues.html" class="cs-card">
+<a href="move/form-deta-λi-0-to-extract-eigenvalues.html" class="cs-card lazy-tex">
   <div class="cs-name">Form det(A − λI) = 0 to extract eigenvalues</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det(A - \lambda I) = (3-\lambda)(2-\lambda) = 0 \Rightarrow \lambda = 2,\,3\;$</div></div>
   <div class="cs-meta">
@@ -400,7 +435,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-cayley-hamilton-to-reduce-high-matrix-powers-and-polynomials.html" class="cs-card">
+<a href="move/apply-cayley-hamilton-to-reduce-high-matrix-powers-and-polynomials.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Cayley-Hamilton to reduce high matrix powers and polynomials</div>
   <div class="cs-example"><div class="cs-line">$\;A^2 - 4A + 3I = 0,\quad \text{find } A^3\;$</div><div class="cs-line cs-step">$\;A^3 = A \cdot A^2 = A(4A - 3I) = 4A^2 - 3A = 4(4A - 3I) - 3A = 13A - 12I\;$</div></div>
   <div class="cs-meta">
@@ -415,7 +450,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-an-pdnp-1-to-reduce-matrix-powers-to-scalar-powers.html" class="cs-card">
+<a href="move/apply-an-pdnp-1-to-reduce-matrix-powers-to-scalar-powers.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply A^n = PD^nP^(-1) to reduce matrix powers to scalar powers</div>
   <div class="cs-example"><div class="cs-line">$\;A = PDP^{-1},\quad D = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;A^n = P \begin{pmatrix} 1^n & 0 \\ 0 & 2^n \end{pmatrix} P^{-1} = P \begin{pmatrix} 1 & 0 \\ 0 & 2^n \end{pmatrix} P^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -430,7 +465,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/form-the-characteristic-equation-deta-λi-0-to-extract-eigenvalues.html" class="cs-card">
+<a href="move/form-the-characteristic-equation-deta-λi-0-to-extract-eigenvalues.html" class="cs-card lazy-tex">
   <div class="cs-name">Form the characteristic equation det(A − λI) = 0 to extract eigenvalues</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det(A - \lambda I) = (3-\lambda)(2-\lambda) - 0 = 0 \Rightarrow \lambda = 2,\,3\;$</div></div>
   <div class="cs-meta">
@@ -445,7 +480,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-characteristic-polynomial-by-known-eigenvalue-factor-to-find-remaining-ei.html" class="cs-card">
+<a href="move/divide-characteristic-polynomial-by-known-eigenvalue-factor-to-find-remaining-ei.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide characteristic polynomial by known eigenvalue factor to find remaining eigenvalues</div>
   <div class="cs-example"><div class="cs-line">$\;p(\lambda) = -\lambda^3 + 6\lambda^2 - 11\lambda + 6,\quad \lambda_1 = 1\;$</div><div class="cs-line cs-step">$\;\frac{-\lambda^3 + 6\lambda^2 - 11\lambda + 6}{\lambda - 1} = -\lambda^2 + 5\lambda - 6 \Rightarrow \lambda^2 - 5\lambda + 6 = 0 \Rightarrow \lambda = 2,\,3\;$</div></div>
   <div class="cs-meta">
@@ -460,7 +495,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-detm-λi-0-to-solve-for-unknown-matrix-entry.html" class="cs-card">
+<a href="move/use-detm-λi-0-to-solve-for-unknown-matrix-entry.html" class="cs-card lazy-tex">
   <div class="cs-name">Use det(M − λI) = 0 to solve for unknown matrix entry</div>
   <div class="cs-example"><div class="cs-line">$\;M=\begin{pmatrix}k&1\\4&k\end{pmatrix},\quad \lambda=3\;$</div><div class="cs-line cs-step">$\;\det\!\begin{pmatrix}k-3&1\\4&k-3\end{pmatrix}=(k-3)^2-4=0 \Rightarrow k=1,\;5\;$</div></div>
   <div class="cs-meta">
@@ -475,7 +510,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-determinant-to-zero-to-find-singular-parameter-values.html" class="cs-card">
+<a href="move/set-determinant-to-zero-to-find-singular-parameter-values.html" class="cs-card lazy-tex">
   <div class="cs-name">Set determinant to zero to find singular parameter values</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} k & 1 \\ 4 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det(A) = 2k - 4 = 0 \Rightarrow k = 2\;$</div></div>
   <div class="cs-meta">
@@ -490,7 +525,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-along-the-row-or-column-whose-entries-are-parameter-free.html" class="cs-card">
+<a href="move/expand-along-the-row-or-column-whose-entries-are-parameter-free.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand along the row or column whose entries are parameter-free</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} 1 & 0 & 0 \\ 2 & k & 3 \\ 1 & 2 & k \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\text{R1: } \det(A) = 1\begin{vmatrix}k & 3\\2 & k\end{vmatrix} - 0 + 0 = k^2 - 6\;$</div></div>
   <div class="cs-meta">
@@ -505,7 +540,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-shared-parameter-from-adjugate-entries-to-cancel-against-determinant.html" class="cs-card">
+<a href="move/factor-shared-parameter-from-adjugate-entries-to-cancel-against-determinant.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor shared parameter from adjugate entries to cancel against determinant</div>
   <div class="cs-example"><div class="cs-line">$\;\det A = 3(k-1),\quad \operatorname{adj}(A) = \begin{pmatrix} k-1 & 2(k-1) \\ -3 & 6 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;A^{-1} = \dfrac{1}{3(k-1)}\begin{pmatrix} k-1 & 2(k-1) \\ -3 & 6 \end{pmatrix} = \begin{pmatrix} \frac{1}{3} & \frac{2}{3} \\[4pt] \frac{-1}{k-1} & \frac{2}{k-1} \end{pmatrix},\quad k\neq 1\;$</div></div>
   <div class="cs-meta">
@@ -520,7 +555,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-cubic-characteristic-polynomial-via-rational-root-theorem.html" class="cs-card">
+<a href="move/factor-cubic-characteristic-polynomial-via-rational-root-theorem.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor cubic characteristic polynomial via rational root theorem</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda^3 - 6\lambda^2 + 11\lambda - 6 = 0\;$</div><div class="cs-line cs-step">$\;p(1)=0 \Rightarrow (\lambda-1)(\lambda^2-5\lambda+6)=(\lambda-1)(\lambda-2)(\lambda-3)=0\;$</div></div>
   <div class="cs-meta">
@@ -535,7 +570,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-trace-as-sum-of-eigenvalues-to-constrain-or-sanity-check.html" class="cs-card">
+<a href="move/use-trace-as-sum-of-eigenvalues-to-constrain-or-sanity-check.html" class="cs-card lazy-tex">
   <div class="cs-name">Use trace as sum-of-eigenvalues to constrain or sanity-check</div>
   <div class="cs-example"><div class="cs-line">$\;\operatorname{tr}(M) = 10,\quad \lambda_1 = 3,\quad \lambda_2 = 5\;$</div><div class="cs-line cs-step">$\;\lambda_3 = 10 - 3 - 5 = 2\;$</div></div>
   <div class="cs-meta">
@@ -550,7 +585,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-trace-and-determinant-to-reduce-remaining-eigenvalues-to-a-quadratic.html" class="cs-card">
+<a href="move/use-trace-and-determinant-to-reduce-remaining-eigenvalues-to-a-quadratic.html" class="cs-card lazy-tex">
   <div class="cs-name">Use trace and determinant to reduce remaining eigenvalues to a quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda_1 = 1,\quad \operatorname{tr}(M) = 6,\quad \det(M) = 8\;$</div><div class="cs-line cs-step">$\;\lambda_2+\lambda_3 = 6-1 = 5,\quad \lambda_2\lambda_3 = \tfrac{8}{1} = 8 \Rightarrow t^2-5t+8=0 \Rightarrow t=\tfrac{5\pm i\sqrt{7}}{2}\;$</div></div>
   <div class="cs-meta">
@@ -565,7 +600,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/normalise-eigenvectors-and-assemble-orthogonal-p-with-matching-d.html" class="cs-card">
+<a href="move/normalise-eigenvectors-and-assemble-orthogonal-p-with-matching-d.html" class="cs-card lazy-tex">
   <div class="cs-name">Normalise eigenvectors and assemble orthogonal P with matching D</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda_1=1,\,\mathbf{v}_1=\begin{pmatrix}1\\1\end{pmatrix};\quad \lambda_2=3,\,\mathbf{v}_2=\begin{pmatrix}1\\-1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;P=\dfrac{1}{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix},\quad D=\begin{pmatrix}1&0\\0&3\end{pmatrix},\quad M=PDP^{\!\top}\;$</div></div>
   <div class="cs-meta">
@@ -580,7 +615,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-modal-matrix-p-and-diagonal-d-to-write-a-pdp¹.html" class="cs-card">
+<a href="move/assemble-modal-matrix-p-and-diagonal-d-to-write-a-pdp¹.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble modal matrix P and diagonal D to write A = PDP⁻¹</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda_1=1,\ e_1=\begin{pmatrix}1\\0\end{pmatrix};\quad \lambda_2=3,\ e_2=\begin{pmatrix}1\\1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;P=\begin{pmatrix}1&1\\0&1\end{pmatrix},\quad D=\begin{pmatrix}1&0\\0&3\end{pmatrix},\quad P^{-1}=\begin{pmatrix}1&-1\\0&1\end{pmatrix} \Rightarrow A=PDP^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -595,7 +630,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-a-cubic-characteristic-polynomial-via-the-factor-theorem.html" class="cs-card">
+<a href="move/factor-a-cubic-characteristic-polynomial-via-the-factor-theorem.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor a cubic characteristic polynomial via the factor theorem</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda^3 - 6\lambda^2 + 11\lambda - 6 = 0\;$</div><div class="cs-line cs-step">$\;p(1)=0 \Rightarrow (\lambda-1)(\lambda^2-5\lambda+6)=(\lambda-1)(\lambda-2)(\lambda-3)=0\;$</div></div>
   <div class="cs-meta">
@@ -610,7 +645,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-determinant-to-zero-to-find-singular-parameter-values-matrices.html" class="cs-card">
+<a href="move/set-determinant-to-zero-to-find-singular-parameter-values-matrices.html" class="cs-card lazy-tex">
   <div class="cs-name">Set determinant to zero to find singular parameter values</div>
   <div class="cs-example"><div class="cs-line">$\;M = \begin{pmatrix} p & 2 \\ 3 & p \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det M = p^2 - 6 = 0 \Rightarrow p = \pm\sqrt{6}\;$</div></div>
   <div class="cs-meta">
@@ -625,7 +660,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-symmetry-to-guarantee-orthogonal-eigenvectors.html" class="cs-card">
+<a href="move/exploit-symmetry-to-guarantee-orthogonal-eigenvectors.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit symmetry to guarantee orthogonal eigenvectors</div>
   <div class="cs-example"><div class="cs-line">$\;M = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix},\quad M = M^{\mathrm{T}} \Rightarrow \text{symmetric}\;$</div><div class="cs-line cs-step">$\;\lambda=3:\ \mathbf{v}_1=\binom{1}{1},\quad \lambda=1:\ \mathbf{v}_2=\binom{1}{-1},\quad \mathbf{v}_1\cdot\mathbf{v}_2=0\ \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -640,7 +675,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/form-the-characteristic-equation-via-deta-λi-0.html" class="cs-card">
+<a href="move/form-the-characteristic-equation-via-deta-λi-0.html" class="cs-card lazy-tex">
   <div class="cs-name">Form the characteristic equation via det(A − λI) = 0</div>
   <div class="cs-example"><div class="cs-line">$\;A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\det\!\begin{pmatrix} 3-\lambda & 1 \\ 0 & 2-\lambda \end{pmatrix} = (3-\lambda)(2-\lambda) = 0\;$</div></div>
   <div class="cs-meta">
@@ -655,7 +690,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-33-determinant-along-the-row-or-column-richest-in-zeros.html" class="cs-card">
+<a href="move/expand-33-determinant-along-the-row-or-column-richest-in-zeros.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand 3×3 determinant along the row or column richest in zeros</div>
   <div class="cs-example"><div class="cs-line">$\;\begin{vmatrix} 1-\lambda & 0 & 0 \\ 2 & 3-\lambda & 1 \\ 0 & 4 & -\lambda \end{vmatrix}\;$</div><div class="cs-line cs-step">$\;(1-\lambda)\begin{vmatrix}3-\lambda & 1\\4 & -\lambda\end{vmatrix} = (1-\lambda)(\lambda^2-3\lambda-4)\;$</div></div>
   <div class="cs-meta">
@@ -670,7 +705,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-image-volume-to-det-m-times-original-volume.html" class="cs-card">
+<a href="move/equate-image-volume-to-det-m-times-original-volume.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate image volume to |det M| times original volume</div>
   <div class="cs-example"><div class="cs-line">$\;V = 4,\quad \det M = k - 3,\quad V' = 20\;$</div><div class="cs-line cs-step">$\;|k-3| \cdot 4 = 20 \Rightarrow k-3 = \pm 5 \Rightarrow k = 8 \text{ or } k = -2\;$</div></div>
   <div class="cs-meta">
@@ -685,7 +720,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/spot-integer-eigenvalue-by-trial-then-deflate-cubic-via-division.html" class="cs-card">
+<a href="move/spot-integer-eigenvalue-by-trial-then-deflate-cubic-via-division.html" class="cs-card lazy-tex">
   <div class="cs-name">Spot integer eigenvalue by trial then deflate cubic via division</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda^3 - 6\lambda^2 + 11\lambda - 6 = 0\;$</div><div class="cs-line cs-step">$\;\lambda=1:\;1-6+11-6=0\;\checkmark,\quad (\lambda-1)(\lambda^2-5\lambda+6)=(\lambda-1)(\lambda-2)(\lambda-3)=0\;$</div></div>
   <div class="cs-meta">
@@ -700,7 +735,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/compute-matrix-powers-via-aⁿ-pdⁿp¹.html" class="cs-card">
+<a href="move/compute-matrix-powers-via-aⁿ-pdⁿp¹.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute matrix powers via Aⁿ = PDⁿP⁻¹</div>
   <div class="cs-example"><div class="cs-line">$\;A = PDP^{-1},\quad P = \begin{pmatrix}1&1\\1&-1\end{pmatrix},\quad D = \begin{pmatrix}3&0\\0&1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;A^n = P D^n P^{-1} = \tfrac{1}{2}\begin{pmatrix}3^n+1 & 3^n-1\\3^n-1 & 3^n+1\end{pmatrix}\;$</div></div>
   <div class="cs-meta">

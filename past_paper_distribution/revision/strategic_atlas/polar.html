@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-polar-tangent-direction-condition-into-dydθ-0-or-dxdθ-0-via-cartesian-pa.html" class="cs-card">
+<a href="move/convert-polar-tangent-direction-condition-into-dydθ-0-or-dxdθ-0-via-cartesian-pa.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert polar tangent-direction condition into dy/dθ = 0 or dx/dθ = 0 via Cartesian parametric form</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2\cos\theta,\quad y = r\sin\theta = 2\cos\theta\sin\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{d\theta} = -2\sin^2\theta + 2\cos^2\theta = 0 \Rightarrow \theta = \dfrac{\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -278,7 +313,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-up-polar-area-integral-with-correct-limits-and-symmetry.html" class="cs-card">
+<a href="move/set-up-polar-area-integral-with-correct-limits-and-symmetry.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up polar area integral with correct limits and symmetry</div>
   <div class="cs-example"><div class="cs-line">$\;r = \sin 2\theta,\quad \text{one petal}\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}\int_0^{\pi/2} \sin^2 2\theta\, d\theta = \tfrac{1}{4}\int_0^{\pi/2}(1-\cos 4\theta)\, d\theta = \dfrac{\pi}{8}\;$</div></div>
   <div class="cs-meta">
@@ -293,7 +328,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-reflection-symmetry-to-halve-the-polar-area-integration-range.html" class="cs-card">
+<a href="move/exploit-reflection-symmetry-to-halve-the-polar-area-integration-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit reflection symmetry to halve the polar area integration range</div>
   <div class="cs-example"><div class="cs-line">$\;A = \tfrac{1}{2}\int_{0}^{2\pi} a^2(1+\cos\theta)^2\,d\theta,\quad r(-\theta)=r(\theta)\;$</div><div class="cs-line cs-step">$\;A = 2 \cdot \tfrac{1}{2}\int_{0}^{\pi} a^2(1+\cos\theta)^2\,d\theta = a^2\int_{0}^{\pi}(1+\cos\theta)^2\,d\theta = \tfrac{3\pi a^2}{2}\;$</div></div>
   <div class="cs-meta">
@@ -308,7 +343,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-polar-curve-symmetry-to-halve-or-fraction-the-integration-range.html" class="cs-card">
+<a href="move/exploit-polar-curve-symmetry-to-halve-or-fraction-the-integration-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit polar-curve symmetry to halve (or fraction) the integration range</div>
   <div class="cs-example"><div class="cs-line">$\;A = \tfrac{1}{2}\int_{0}^{2\pi} (1+\cos\theta)^2\,d\theta\;$</div><div class="cs-line cs-step">$\;r(-\theta)=r(\theta) \Rightarrow A = 2 \cdot \tfrac{1}{2}\int_{0}^{\pi}(1+\cos\theta)^2\,d\theta\;$</div></div>
   <div class="cs-meta">
@@ -323,7 +358,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-polar-area-formula-a-½r²-dθ-with-correct-limits.html" class="cs-card">
+<a href="move/apply-the-polar-area-formula-a-½r²-dθ-with-correct-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the polar area formula A = ½∫r² dθ with correct limits</div>
   <div class="cs-example"><div class="cs-line">$\;r = \cos\theta,\quad 0 \le \theta \le \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}\int_0^{\pi/2} \cos^2\theta\,d\theta = \tfrac{1}{2}\int_0^{\pi/2} \tfrac{1+\cos 2\theta}{2}\,d\theta = \dfrac{\pi}{8}\;$</div></div>
   <div class="cs-meta">
@@ -338,7 +373,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-horizontal-tangent-condition-on-a-polar-curve-to-dydθ-0-via-y-r-sin-θ.html" class="cs-card">
+<a href="move/convert-horizontal-tangent-condition-on-a-polar-curve-to-dydθ-0-via-y-r-sin-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert horizontal-tangent condition on a polar curve to dy/dθ = 0 via y = r sin θ</div>
   <div class="cs-example"><div class="cs-line">$\;r = 1 + \cos\theta\;$</div><div class="cs-line cs-step">$\;y = (1+\cos\theta)\sin\theta \Rightarrow \dfrac{dy}{d\theta} = \cos\theta + \cos 2\theta = 0\;$</div></div>
   <div class="cs-meta">
@@ -353,7 +388,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-polar-to-parametric-via-xr-cosθ-yr-sinθ-for-dydx.html" class="cs-card">
+<a href="move/bridge-polar-to-parametric-via-xr-cosθ-yr-sinθ-for-dydx.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge polar to parametric via x=r cosθ, y=r sinθ for dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2\cos\theta,\quad x = 2\cos^2\theta,\quad y = 2\sin\theta\cos\theta = \sin 2\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{dy/d\theta}{dx/d\theta} = \dfrac{2\cos 2\theta}{-2\sin 2\theta} = -\cot 2\theta\;$</div></div>
   <div class="cs-meta">
@@ -368,7 +403,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-tangent-perpendicular-to-initial-line-into-dxdθ-0.html" class="cs-card">
+<a href="move/convert-tangent-perpendicular-to-initial-line-into-dxdθ-0.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert &#x27;tangent perpendicular to initial line&#x27; into dx/dθ = 0</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2\cos\theta,\quad x = 2\cos\theta\cdot\cos\theta = 2\cos^2\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{dx}{d\theta} = -4\cos\theta\sin\theta = -2\sin 2\theta = 0 \Rightarrow \theta = 0,\;\dfrac{\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -383,7 +418,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bound-r-values-to-confirm-one-polar-curve-dominates-another.html" class="cs-card">
+<a href="move/bound-r-values-to-confirm-one-polar-curve-dominates-another.html" class="cs-card lazy-tex">
   <div class="cs-name">Bound r-values to confirm one polar curve dominates another</div>
   <div class="cs-example"><div class="cs-line">$\;r_1 = 3 - 2\cos\theta,\quad r_2 = 1\;$</div><div class="cs-line cs-step">$\;-1 \le \cos\theta \le 1 \Rightarrow r_1 \in [1,\,5] \Rightarrow r_1 \ge r_2\ \forall\,\theta\;$</div></div>
   <div class="cs-meta">
@@ -398,7 +433,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/solve-r-0-to-find-polar-area-integration-limits.html" class="cs-card">
+<a href="move/solve-r-0-to-find-polar-area-integration-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Solve r = 0 to find polar area integration limits</div>
   <div class="cs-example"><div class="cs-line">$\;r = \sin(2\theta)\;$</div><div class="cs-line cs-step">$\;\sin(2\theta) = 0 \Rightarrow \theta = 0,\,\tfrac{\pi}{2} \Rightarrow A = \tfrac{1}{2}\int_0^{\pi/2} \sin^2(2\theta)\,d\theta\;$</div></div>
   <div class="cs-meta">
@@ -413,7 +448,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-key-polar-radii-to-classify-and-sketch-the-curve.html" class="cs-card">
+<a href="move/evaluate-key-polar-radii-to-classify-and-sketch-the-curve.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate key polar radii to classify and sketch the curve</div>
   <div class="cs-example"><div class="cs-line">$\;r = 1 + \cos\theta\;$</div><div class="cs-line cs-step">$\;r(0)=2,\; r\!\left(\tfrac{\pi}{2}\right)=1,\; r(\pi)=0,\; r(-\theta)=r(\theta) \Rightarrow \text{cardioid, max } r=2,\; \text{pole at } \theta=\pi\;$</div></div>
   <div class="cs-meta">
@@ -428,7 +463,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-polar-point-to-cartesian-using-x-r-cos-θ-y-r-sin-θ.html" class="cs-card">
+<a href="move/convert-polar-point-to-cartesian-using-x-r-cos-θ-y-r-sin-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert polar point to Cartesian using x = r cos θ, y = r sin θ</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2,\quad \theta = \dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;x = 2\cos\dfrac{\pi}{3} = 1,\quad y = 2\sin\dfrac{\pi}{3} = \sqrt{3}\;$</div></div>
   <div class="cs-meta">
@@ -443,7 +478,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-pole-crossings-maximum-r-and-symmetry-before-sketching-a-polar-curve.html" class="cs-card">
+<a href="move/extract-pole-crossings-maximum-r-and-symmetry-before-sketching-a-polar-curve.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract pole crossings, maximum r, and symmetry before sketching a polar curve</div>
   <div class="cs-example"><div class="cs-line">$\;r = 1 + \cos\theta,\quad \theta \in [0,2\pi)\;$</div><div class="cs-line cs-step">$\;r=0 \Rightarrow \theta=\pi;\quad r_{\max}=2 \text{ at } \theta=0;\quad f(-\theta)=f(\theta) \Rightarrow \text{sym about } \theta=0\;$</div></div>
   <div class="cs-meta">
@@ -458,7 +493,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-dydθ-0-via-product-rule-for-polar-horizontal-tangents.html" class="cs-card">
+<a href="move/use-dydθ-0-via-product-rule-for-polar-horizontal-tangents.html" class="cs-card lazy-tex">
   <div class="cs-name">Use dy/dθ = 0 via product rule for polar horizontal tangents</div>
   <div class="cs-example"><div class="cs-line">$\;r = 1 + \cos\theta,\quad y = r\sin\theta\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{d\theta} = -\sin\theta\sin\theta + (1+\cos\theta)\cos\theta = (2\cos\theta - 1)(\cos\theta + 1) = 0\;$</div></div>
   <div class="cs-meta">
@@ -473,7 +508,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-region-as-right-triangle-minus-polar-sector-area.html" class="cs-card">
+<a href="move/decompose-region-as-right-triangle-minus-polar-sector-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose region as right triangle minus polar sector area</div>
   <div class="cs-example"><div class="cs-line">$\;P = (a,0),\; Q = (0,b),\; A_{\text{sector}} = \tfrac{1}{2}\!\int_{\theta_P}^{\theta_Q}\![r(\theta)]^2\,d\theta,\; S = (a,b)\;$</div><div class="cs-line cs-step">$\;A_R = \underbrace{\tfrac{1}{2}\,a\,b}_{\triangle PSQ}\;-\;\Bigl(A_{\text{sector}} - \underbrace{\tfrac{1}{2}|x_P y_Q - x_Q y_P|}_{\triangle OPQ}\Bigr)\;$</div></div>
   <div class="cs-meta">

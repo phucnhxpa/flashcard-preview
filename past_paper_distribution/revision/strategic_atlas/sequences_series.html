@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">8 moves · 11 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-ap-sum-formula-matching-the-known-triple-of-variables.html" class="cs-card">
+<a href="move/choose-ap-sum-formula-matching-the-known-triple-of-variables.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose AP sum formula matching the known triple of variables</div>
   <div class="cs-example"><div class="cs-line">$\;a = 3,\; l = 7,\; n = 5\;$</div><div class="cs-line cs-step">$\;S_5 = \dfrac{5}{2}(3 + 7) = 25\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/apply-the-sum-to-infinity-formula-to-convert-s-into-algebra-in-a-and-r.html" class="cs-card">
+<a href="move/apply-the-sum-to-infinity-formula-to-convert-s-into-algebra-in-a-and-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the sum-to-infinity formula to convert S∞ into algebra in a and r</div>
   <div class="cs-example"><div class="cs-line">$\;a = 2,\quad S_\infty = 8\;$</div><div class="cs-line cs-step">$\;8 = \dfrac{2}{1-r} \Rightarrow 1-r = \tfrac{1}{4} \Rightarrow r = \tfrac{3}{4}\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/invert-ap-sum-formula-to-solve-for-the-common-difference.html" class="cs-card">
+<a href="move/invert-ap-sum-formula-to-solve-for-the-common-difference.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert AP sum formula to solve for the common difference</div>
   <div class="cs-example"><div class="cs-line">$\;a=2,\; n=5,\; S_5=40\;$</div><div class="cs-line cs-step">$\;\tfrac{5}{2}(2\cdot2+4d)=40 \Rightarrow 4+4d=16 \Rightarrow d=3\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/list-geometric-terms-explicitly-when-n-is-small-to-avoid-the-sum-formulas-denomi.html" class="cs-card">
+<a href="move/list-geometric-terms-explicitly-when-n-is-small-to-avoid-the-sum-formulas-denomi.html" class="cs-card lazy-tex">
   <div class="cs-name">List geometric terms explicitly when n is small to avoid the sum formula&#x27;s denominator</div>
   <div class="cs-example"><div class="cs-line">$\;a + ar + ar^2 = 13,\quad ar^2 = 9\;$</div><div class="cs-line cs-step">$\;a = \dfrac{9}{r^2},\quad \dfrac{9}{r^2}(1 + r + r^2) = 13 \Rightarrow 4r^2 - 9r - 9 = 0\;$</div></div>
   <div class="cs-meta">
@@ -295,7 +330,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/rewrite-finite-geometric-s-n-using-established-s-to-shortcut-computation.html" class="cs-card">
+<a href="move/rewrite-finite-geometric-s-n-using-established-s-to-shortcut-computation.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite finite geometric S_n using established S_∞ to shortcut computation</div>
   <div class="cs-example"><div class="cs-line">$\;S_\infty = 80,\quad r = \tfrac{1}{2},\quad n = 4\;$</div><div class="cs-line cs-step">$\;S_4 = S_\infty(1 - r^4) = 80\!\left(1 - \tfrac{1}{16}\right) = 80 \cdot \tfrac{15}{16} = 75\;$</div></div>
   <div class="cs-meta">
@@ -303,7 +338,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/translate-cumulative-total-into-arithmetic-series-sum-equation.html" class="cs-card">
+<a href="move/translate-cumulative-total-into-arithmetic-series-sum-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate cumulative total into arithmetic series sum equation</div>
   <div class="cs-example"><div class="cs-line">$\;a = 20,\; d = -1,\; S_N = 150\;$</div><div class="cs-line cs-step">$\;\dfrac{N}{2}(40 + (N-1)(-1)) = 150 \Rightarrow N^2 - 41N + 300 = 0\;$</div></div>
   <div class="cs-meta">
@@ -311,7 +346,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/instantiate-the-ap-sum-formula-at-two-n-values-to-form-a-linear-system.html" class="cs-card">
+<a href="move/instantiate-the-ap-sum-formula-at-two-n-values-to-form-a-linear-system.html" class="cs-card lazy-tex">
   <div class="cs-name">Instantiate the AP sum formula at two n-values to form a linear system</div>
   <div class="cs-example"><div class="cs-line">$\;S_3 = 12,\quad S_6 = 42\;$</div><div class="cs-line cs-step">$\;\tfrac{3}{2}(2a+2d)=12 \Rightarrow 2a+2d=8;\quad \tfrac{6}{2}(2a+5d)=42 \Rightarrow 2a+5d=14\;$</div></div>
   <div class="cs-meta">
@@ -319,7 +354,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/select-maclaurin-or-taylor-template-based-on-expansion-point.html" class="cs-card">
+<a href="move/select-maclaurin-or-taylor-template-based-on-expansion-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Select Maclaurin or Taylor template based on expansion point</div>
   <div class="cs-example"><div class="cs-line">$\;f(x)=\ln x,\quad a=1\;$</div><div class="cs-line cs-step">$\;\ln x = f(1)+f'(1)(x-1)+\tfrac{f''(1)}{2!}(x-1)^2+\cdots = (x-1)-\tfrac{1}{2}(x-1)^2+\cdots\;$</div></div>
   <div class="cs-meta">
@@ -334,7 +369,7 @@ window.MathJax = {
     <span class="meta">3 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-standard-formula-σn-nn12-to-evaluate-a-linear-sum-in-closed-form.html" class="cs-card">
+<a href="move/substitute-the-standard-formula-σn-nn12-to-evaluate-a-linear-sum-in-closed-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the standard formula Σn = N(N+1)/2 to evaluate a linear sum in closed form</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{n=1}^{10} 3n\;$</div><div class="cs-line cs-step">$\;3 \cdot \dfrac{10 \cdot 11}{2} = 165\;$</div></div>
   <div class="cs-meta">
@@ -342,7 +377,7 @@ window.MathJax = {
     <span>standard series substitution</span>
   </div>
 </a>
-<a href="move/substitute-known-maclaurin-series-instead-of-differentiating-repeatedly.html" class="cs-card">
+<a href="move/substitute-known-maclaurin-series-instead-of-differentiating-repeatedly.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known Maclaurin series instead of differentiating repeatedly</div>
   <div class="cs-example"><div class="cs-line">$\;e^{\sin x} \text{ up to } x^3\;$</div><div class="cs-line cs-step">$\;e^u = 1 + u + \tfrac{u^2}{2} + \tfrac{u^3}{6},\; u = x - \tfrac{x^3}{6} \Rightarrow 1 + x + \tfrac{x^2}{2} + \tfrac{x^3}{6}\;$</div></div>
   <div class="cs-meta">
@@ -350,7 +385,7 @@ window.MathJax = {
     <span>standard series substitution</span>
   </div>
 </a>
-<a href="move/substitute-into-a-standard-maclaurin-series-to-bypass-repeated-differentiation.html" class="cs-card">
+<a href="move/substitute-into-a-standard-maclaurin-series-to-bypass-repeated-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute into a standard Maclaurin series to bypass repeated differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;e^{x^2} \text{ up to } x^4\;$</div><div class="cs-line cs-step">$\;e^u = 1 + u + \tfrac{u^2}{2!} + \cdots \xrightarrow{u=x^2} 1 + x^2 + \tfrac{x^4}{2}\;$</div></div>
   <div class="cs-meta">
@@ -365,7 +400,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/iterate-the-recurrence-forward-or-downward-to-generate-required-terms.html" class="cs-card">
+<a href="move/iterate-the-recurrence-forward-or-downward-to-generate-required-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate the recurrence forward (or downward) to generate required terms</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 2,\quad u_{n+1} = 3u_n - 1\;$</div><div class="cs-line cs-step">$\;u_2 = 3(2)-1 = 5,\quad u_3 = 3(5)-1 = 14\;$</div></div>
   <div class="cs-meta">
@@ -380,7 +415,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-the-first-term-a-to-reduce-a-gp-system-to-one-equation-in-r.html" class="cs-card">
+<a href="move/eliminate-the-first-term-a-to-reduce-a-gp-system-to-one-equation-in-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate the first term a to reduce a GP system to one equation in r</div>
   <div class="cs-example"><div class="cs-line">$\;ar^2 = 12,\quad ar^5 = \tfrac{3}{2}\;$</div><div class="cs-line cs-step">$\;\dfrac{ar^5}{ar^2} = r^3 = \dfrac{3/2}{12} = \dfrac{1}{8} \Rightarrow r = \dfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -395,7 +430,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-truncated-standard-series-term-by-term-to-expand-a-product.html" class="cs-card">
+<a href="move/multiply-truncated-standard-series-term-by-term-to-expand-a-product.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply truncated standard series term-by-term to expand a product</div>
   <div class="cs-example"><div class="cs-line">$\;e^x \sin x \text{ to } x^3:\quad (1+x+\tfrac{x^2}{2}+\tfrac{x^3}{6})(x-\tfrac{x^3}{6})\;$</div><div class="cs-line cs-step">$\;0 + 1\cdot x + x\cdot x + \bigl(\tfrac{x^2}{2}\cdot x + 1\cdot(-\tfrac{x^3}{6})\bigr) = x + x^2 + \tfrac{x^3}{3}\;$</div></div>
   <div class="cs-meta">
@@ -410,7 +445,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/encode-apgp-conditions-as-simultaneous-equations-to-extract-a-and-d-or-r.html" class="cs-card">
+<a href="move/encode-apgp-conditions-as-simultaneous-equations-to-extract-a-and-d-or-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Encode AP/GP conditions as simultaneous equations to extract a and d (or r)</div>
   <div class="cs-example"><div class="cs-line">$\;u_3 = 8,\quad u_7 = 20\;$</div><div class="cs-line cs-step">$\;(a+6d)-(a+2d)=20-8 \Rightarrow d=3,\; a=2\;$</div></div>
   <div class="cs-meta">
@@ -425,7 +460,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-the-expansion-point-taylor-vs-maclaurin-to-match-the-question.html" class="cs-card">
+<a href="move/select-the-expansion-point-taylor-vs-maclaurin-to-match-the-question.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the expansion point (Taylor vs Maclaurin) to match the question</div>
   <div class="cs-example"><div class="cs-line">$\;e^x \text{ about } x=1,\text{ order 2}\;$</div><div class="cs-line cs-step">$\;e^x = e + e(x-1) + \dfrac{e}{2}(x-1)^2\;$</div></div>
   <div class="cs-meta">
@@ -440,7 +475,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-r-1-to-validate-or-filter-geometric-sum-to-infinity-solutions.html" class="cs-card">
+<a href="move/verify-r-1-to-validate-or-filter-geometric-sum-to-infinity-solutions.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify |r| &lt; 1 to validate or filter geometric sum-to-infinity solutions</div>
   <div class="cs-example"><div class="cs-line">$\;5r^2 - r - 6 = 0 \Rightarrow r = \tfrac{6}{5} \text{ or } r = -\tfrac{1}{5}\;$</div><div class="cs-line cs-step">$\;\left|\tfrac{6}{5}\right| > 1\ (\text{reject}),\quad \left|-\tfrac{1}{5}\right| < 1\ (\text{accept}) \Rightarrow r = -\tfrac{1}{5}\;$</div></div>
   <div class="cs-meta">
@@ -455,7 +490,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/iterate-recurrence-with-full-precision-or-set-u-n1u-nl-to-find-fixed-point-limit.html" class="cs-card">
+<a href="move/iterate-recurrence-with-full-precision-or-set-u-n1u-nl-to-find-fixed-point-limit.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate recurrence with full precision (or set u_{n+1}=u_n=L) to find fixed-point limit</div>
   <div class="cs-example"><div class="cs-line">$\;u_{n+1} = \sqrt{2u_n + 3},\quad u_1 = 1\;$</div><div class="cs-line cs-step">$\;u_{n+1}=u_n=L:\quad L = \sqrt{2L+3} \Rightarrow L^2 - 2L - 3 = 0 \Rightarrow L = 3\;$</div></div>
   <div class="cs-meta">
@@ -470,7 +505,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-one-series-equation-into-another-to-bridge-and-eliminate-a-shared-var.html" class="cs-card">
+<a href="move/substitute-one-series-equation-into-another-to-bridge-and-eliminate-a-shared-var.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute one series equation into another to bridge and eliminate a shared variable</div>
   <div class="cs-example"><div class="cs-line">$\;S_\infty = \dfrac{a}{1-r} = 8,\quad S_2 = \dfrac{a(1-r^2)}{1-r} = 6\;$</div><div class="cs-line cs-step">$\;a = 8(1-r) \Rightarrow 6 = 8(1-r)(1-r^2)/(1-r) = 8(1-r^2) \Rightarrow r^2 = \tfrac{1}{4},\ r = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -485,7 +520,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-maclaurin-polynomial-from-computed-derivative-values-at-zero.html" class="cs-card">
+<a href="move/assemble-maclaurin-polynomial-from-computed-derivative-values-at-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble Maclaurin polynomial from computed derivative values at zero</div>
   <div class="cs-example"><div class="cs-line">$\;y(0)=1,\ y'(0)=2,\ y''(0)=-6,\ y'''(0)=12\;$</div><div class="cs-line cs-step">$\;y \approx 1 + 2x + \dfrac{-6}{2!}x^2 + \dfrac{12}{3!}x^3 = 1 + 2x - 3x^2 + 2x^3\;$</div></div>
   <div class="cs-meta">
@@ -500,7 +535,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-r1-convergence-condition-to-select-the-valid-common-ratio.html" class="cs-card">
+<a href="move/apply-r1-convergence-condition-to-select-the-valid-common-ratio.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply |r|&lt;1 convergence condition to select the valid common ratio</div>
   <div class="cs-example"><div class="cs-line">$\;3r^2 - 4r - 4 = 0,\quad S_\infty \text{ exists}\;$</div><div class="cs-line cs-step">$\;(3r+2)(r-2)=0 \Rightarrow r=-\tfrac{2}{3}\ (|r|<1),\quad r=2\ \text{rejected}\;$</div></div>
   <div class="cs-meta">
@@ -515,7 +550,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-chosen-x-value-into-the-truncated-series-to-obtain-a-numerical-appr.html" class="cs-card">
+<a href="move/substitute-a-chosen-x-value-into-the-truncated-series-to-obtain-a-numerical-appr.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a chosen x-value into the truncated series to obtain a numerical approximation</div>
   <div class="cs-example"><div class="cs-line">$\;e^x \approx 1 + x + \tfrac{x^2}{2},\quad x = 0.1\;$</div><div class="cs-line cs-step">$\;1 + 0.1 + \tfrac{0.01}{2} = 1.105\;$</div></div>
   <div class="cs-meta">
@@ -530,7 +565,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-into-the-simpler-original-equation-to-recover-the-first-term.html" class="cs-card">
+<a href="move/back-substitute-into-the-simpler-original-equation-to-recover-the-first-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute into the simpler original equation to recover the first term</div>
   <div class="cs-example"><div class="cs-line">$\;ar = 6,\quad r = 2\;$</div><div class="cs-line cs-step">$\;a \cdot 2 = 6 \Rightarrow a = 3\;$</div></div>
   <div class="cs-meta">
@@ -545,7 +580,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-geometric-series-sum-formula-to-compute-cumulative-real-world-total.html" class="cs-card">
+<a href="move/apply-geometric-series-sum-formula-to-compute-cumulative-real-world-total.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply geometric series sum formula to compute cumulative real-world total</div>
   <div class="cs-example"><div class="cs-line">$\;a = 100,\; r = 1.05,\; n = 4\;$</div><div class="cs-line cs-step">$\;S_4 = \dfrac{100(1.05^4 - 1)}{1.05 - 1} = \dfrac{100(0.21550625)}{0.05} = 431.01\;$</div></div>
   <div class="cs-meta">
@@ -560,7 +595,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-unknown-powers-of-r-via-index-laws-on-the-known-gp-constraint.html" class="cs-card">
+<a href="move/bridge-unknown-powers-of-r-via-index-laws-on-the-known-gp-constraint.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge unknown powers of r via index laws on the known GP constraint</div>
   <div class="cs-example"><div class="cs-line">$\;a = 2,\quad r^6 = 64,\quad \text{find } ar^4\;$</div><div class="cs-line cs-step">$\;r^4 = (r^6)^{4/6} = 64^{2/3} = 16 \Rightarrow ar^4 = 32\;$</div></div>
   <div class="cs-meta">
@@ -575,7 +610,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/simplify-recurrence-algebraically-before-iterating-to-expose-apgp-structure.html" class="cs-card">
+<a href="move/simplify-recurrence-algebraically-before-iterating-to-expose-apgp-structure.html" class="cs-card lazy-tex">
   <div class="cs-name">Simplify recurrence algebraically before iterating to expose AP/GP structure</div>
   <div class="cs-example"><div class="cs-line">$\;a_{n+1} = \dfrac{3(a_n + 2)}{3} - 5,\quad a_1 = 20\;$</div><div class="cs-line cs-step">$\;a_{n+1} = a_n + 2 - 5 = a_n - 3 \Rightarrow \text{AP},\ d = -3\;$</div></div>
   <div class="cs-meta">
@@ -590,7 +625,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-known-a-and-d-into-nth-term-formula-to-evaluate-a-specific-term.html" class="cs-card">
+<a href="move/substitute-known-a-and-d-into-nth-term-formula-to-evaluate-a-specific-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known a and d into nth-term formula to evaluate a specific term</div>
   <div class="cs-example"><div class="cs-line">$\;a = 3,\quad d = 2,\quad n = 10\;$</div><div class="cs-line cs-step">$\;u_{10} = 3 + (10-1)(2) = 3 + 18 = 21\;$</div></div>
   <div class="cs-meta">
@@ -605,7 +640,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-logarithms-to-solve-for-an-unknown-exponent-in-an-inequality.html" class="cs-card">
+<a href="move/take-logarithms-to-solve-for-an-unknown-exponent-in-an-inequality.html" class="cs-card lazy-tex">
   <div class="cs-name">Take logarithms to solve for an unknown exponent in an inequality</div>
   <div class="cs-example"><div class="cs-line">$\;0.9^N < 0.5\;$</div><div class="cs-line cs-step">$\;N \ln 0.9 < \ln 0.5 \Rightarrow N > \dfrac{\ln 0.5}{\ln 0.9} \approx 6.58 \Rightarrow N = 7\;$</div></div>
   <div class="cs-meta">
@@ -620,7 +655,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-small-finite-sigma-sums-by-direct-term-by-term-enumeration.html" class="cs-card">
+<a href="move/evaluate-small-finite-sigma-sums-by-direct-term-by-term-enumeration.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate small finite sigma sums by direct term-by-term enumeration</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=1}^{4} (2r - 3)\;$</div><div class="cs-line cs-step">$\;(-1) + 1 + 3 + 5 = 8\;$</div></div>
   <div class="cs-meta">
@@ -635,7 +670,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/model-fixed-percentage-growth-as-a-geometric-common-ratio.html" class="cs-card">
+<a href="move/model-fixed-percentage-growth-as-a-geometric-common-ratio.html" class="cs-card lazy-tex">
   <div class="cs-name">Model fixed percentage growth as a geometric common ratio</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Population } 500,\ \text{grows } 3\%\text{ per year}\;$</div><div class="cs-line cs-step">$\;r = 1 + \tfrac{3}{100} = 1.03,\quad U_n = 500 \times 1.03^n\;$</div></div>
   <div class="cs-meta">
@@ -650,7 +685,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-parametric-term-expressions-into-sum-constraint-to-solve-for-the-para.html" class="cs-card">
+<a href="move/substitute-parametric-term-expressions-into-sum-constraint-to-solve-for-the-para.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute parametric term expressions into sum constraint to solve for the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;a_1 = p-1,\; a_2 = p-3,\; a_3 = p-5,\quad a_1+a_2+a_3 = p+6\;$</div><div class="cs-line cs-step">$\;(p-1)+(p-3)+(p-5) = p+6 \Rightarrow 3p-9 = p+6 \Rightarrow p = \tfrac{15}{2}\;$</div></div>
   <div class="cs-meta">
@@ -665,7 +700,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-a-hybrid-summand-into-independent-component-sums.html" class="cs-card">
+<a href="move/split-a-hybrid-summand-into-independent-component-sums.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a hybrid summand into independent component sums</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{n=1}^{N}(3n + 2^n)\;$</div><div class="cs-line cs-step">$\;3\sum_{n=1}^{N} n \;+\; \sum_{n=1}^{N} 2^n = \dfrac{3N(N+1)}{2} + 2(2^N - 1)\;$</div></div>
   <div class="cs-meta">
@@ -680,7 +715,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-ceiling-to-find-smallest-integer-satisfying-a-strict-inequality.html" class="cs-card">
+<a href="move/apply-ceiling-to-find-smallest-integer-satisfying-a-strict-inequality.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply ceiling to find smallest integer satisfying a strict inequality</div>
   <div class="cs-example"><div class="cs-line">$\;2^n > 10,\quad n \in \mathbb{Z}^+\;$</div><div class="cs-line cs-step">$\;n > \dfrac{\ln 10}{\ln 2} = 3.321\ldots \Rightarrow n = \lceil 3.321 \rceil = 4\;$</div></div>
   <div class="cs-meta">
@@ -695,7 +730,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pair-consecutive-alternating-terms-and-use-parity-to-find-residual.html" class="cs-card">
+<a href="move/pair-consecutive-alternating-terms-and-use-parity-to-find-residual.html" class="cs-card lazy-tex">
   <div class="cs-name">Pair consecutive alternating terms and use parity to find residual</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{n=1}^{7}(-1)^n\;$</div><div class="cs-line cs-step">$\;\underbrace{(-1+1)+(-1+1)+(-1+1)}_{3\text{ pairs}=0}+(-1)^7 = -1\;$</div></div>
   <div class="cs-meta">
@@ -710,7 +745,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-arithmetic-nth-term-formula-to-obtain-a-linear-expression-in-n.html" class="cs-card">
+<a href="move/apply-arithmetic-nth-term-formula-to-obtain-a-linear-expression-in-n.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply arithmetic nth-term formula to obtain a linear expression in n</div>
   <div class="cs-example"><div class="cs-line">$\;a = 3,\quad d = 2\;$</div><div class="cs-line cs-step">$\;u_n = 3 + (n-1)(2) = 3 + 2n - 2 = 1 + 2n\;$</div></div>
   <div class="cs-meta">
@@ -725,7 +760,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/classify-a-series-as-arithmetic-or-geometric-by-testing-differences-and-ratios.html" class="cs-card">
+<a href="move/classify-a-series-as-arithmetic-or-geometric-by-testing-differences-and-ratios.html" class="cs-card lazy-tex">
   <div class="cs-name">Classify a series as arithmetic or geometric by testing differences and ratios</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 3,\quad u_2 = 6,\quad u_3 = 9\;$</div><div class="cs-line cs-step">$\;6-3 = 3,\quad 9-6 = 3 \quad (\text{equal}) \Rightarrow \text{arithmetic},\ a=3,\ d=3\;$</div></div>
   <div class="cs-meta">
@@ -740,7 +775,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/link-gp-first-term-to-final-ap-term-at-phase-transition.html" class="cs-card">
+<a href="move/link-gp-first-term-to-final-ap-term-at-phase-transition.html" class="cs-card lazy-tex">
   <div class="cs-name">Link GP first term to final AP term at phase transition</div>
   <div class="cs-example"><div class="cs-line">$\;A_n = 20 - 3(n-1),\quad A_5 = 8;\quad \text{GP from term 6},\quad G_2 = 6\;$</div><div class="cs-line cs-step">$\;G_1 = A_5 = 8,\quad r = \dfrac{G_2}{G_1} = \dfrac{6}{8} = \dfrac{3}{4}\;$</div></div>
   <div class="cs-meta">
@@ -755,7 +790,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-paired-geometric-sequence-equations-to-eliminate-the-first-term.html" class="cs-card">
+<a href="move/divide-paired-geometric-sequence-equations-to-eliminate-the-first-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide paired geometric-sequence equations to eliminate the first term</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 r = 4,\quad u_1 r^4 = 32\;$</div><div class="cs-line cs-step">$\;\dfrac{u_1 r^4}{u_1 r} = \dfrac{32}{4} \Rightarrow r^3 = 8 \Rightarrow r = 2\;$</div></div>
   <div class="cs-meta">
@@ -770,7 +805,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-arithmetic-sum-s-n-equal-to-target-to-form-a-quadratic-in-n.html" class="cs-card">
+<a href="move/set-arithmetic-sum-s-n-equal-to-target-to-form-a-quadratic-in-n.html" class="cs-card lazy-tex">
   <div class="cs-name">Set arithmetic sum S_n equal to target to form a quadratic in n</div>
   <div class="cs-example"><div class="cs-line">$\;S_n = 100,\quad a = 1,\quad d = 1\;$</div><div class="cs-line cs-step">$\;\dfrac{n}{2}(2 + n - 1) = 100 \Rightarrow n^2 + n - 200 = 0\;$</div></div>
   <div class="cs-meta">
@@ -785,7 +820,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/round-up-to-next-integer-when-discrete-accumulation-must-meet-a-threshold.html" class="cs-card">
+<a href="move/round-up-to-next-integer-when-discrete-accumulation-must-meet-a-threshold.html" class="cs-card lazy-tex">
   <div class="cs-name">Round up to next integer when discrete accumulation must meet a threshold</div>
   <div class="cs-example"><div class="cs-line">$\;S_n = \tfrac{n}{2}(2 + n - 1) = \tfrac{n(n+1)}{2} \geq 50\;$</div><div class="cs-line cs-step">$\;n^2 + n - 100 \geq 0 \Rightarrow n \geq 9.51 \Rightarrow n = 10\;$</div></div>
   <div class="cs-meta">
@@ -800,7 +835,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-boundary-integers-to-confirm-smallest-n-threshold.html" class="cs-card">
+<a href="move/verify-boundary-integers-to-confirm-smallest-n-threshold.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify boundary integers to confirm smallest-n threshold</div>
   <div class="cs-example"><div class="cs-line">$\;n^2 > 50,\quad n \in \mathbb{Z}^+\;$</div><div class="cs-line cs-step">$\;n=7:\; 49 < 50\ \boldsymbol{\times};\quad n=8:\; 64 > 50\ \boldsymbol{\checkmark} \Rightarrow n_{\min}=8\;$</div></div>
   <div class="cs-meta">
@@ -815,7 +850,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/fencepost-count-calendar-years-to-fix-the-term-index.html" class="cs-card">
+<a href="move/fencepost-count-calendar-years-to-fix-the-term-index.html" class="cs-card lazy-tex">
   <div class="cs-name">Fencepost-count calendar years to fix the term index</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = a \text{ at year } 0,\; r = 1.05,\; \text{find value at year } 3\;$</div><div class="cs-line cs-step">$\;3 - 0 = 3 \text{ growth periods} \Rightarrow n = 4,\; u_4 = a \cdot (1.05)^3\;$</div></div>
   <div class="cs-meta">
@@ -830,7 +865,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-piecewise-sum-into-ap-block-plus-shifted-gp-partial-sum.html" class="cs-card">
+<a href="move/split-piecewise-sum-into-ap-block-plus-shifted-gp-partial-sum.html" class="cs-card lazy-tex">
   <div class="cs-name">Split piecewise sum into AP block plus shifted GP partial sum</div>
   <div class="cs-example"><div class="cs-line">$\;a_n = n\ (1\le n\le 5),\quad a_n = 3\!\cdot\!2^{n-6}\ (n\ge 6);\quad \text{find } S_N,\ N>5\;$</div><div class="cs-line cs-step">$\;S_N = \underbrace{\tfrac{5\cdot6}{2}}_{S_{\text{AP}}=15} +\; \underbrace{3\,\dfrac{1-2^{N-5}}{1-2}}_{S_{\text{GP}}} = 15 + 3(2^{N-5}-1)\;$</div></div>
   <div class="cs-meta">
@@ -845,7 +880,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-gp-result-to-ap-via-shared-first-term.html" class="cs-card">
+<a href="move/bridge-gp-result-to-ap-via-shared-first-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge GP result to AP via shared first term</div>
   <div class="cs-example"><div class="cs-line">$\;\text{GP: } a,\; r=\tfrac{1}{2},\; S_\infty=8 \Rightarrow \dfrac{a}{1-\frac{1}{2}}=8 \Rightarrow a=4;\quad \text{AP: same } a,\; S_5=65\;$</div><div class="cs-line cs-step">$\;\tfrac{5}{2}(2(4)+4d)=65 \Rightarrow 8+4d=26 \Rightarrow d=\tfrac{9}{2}\;$</div></div>
   <div class="cs-meta">
@@ -860,7 +895,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-two-gp-term-equations-to-eliminate-a-and-isolate-r.html" class="cs-card">
+<a href="move/divide-two-gp-term-equations-to-eliminate-a-and-isolate-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide two GP term equations to eliminate a and isolate r</div>
   <div class="cs-example"><div class="cs-line">$\;ar = 6,\quad ar^3 = 54\;$</div><div class="cs-line cs-step">$\;\dfrac{ar^3}{ar} = \dfrac{54}{6} \Rightarrow r^2 = 9 \Rightarrow r = 3\;$</div></div>
   <div class="cs-meta">
@@ -875,7 +910,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/validate-both-quadratic-roots-against-r-1-convergence-constraint.html" class="cs-card">
+<a href="move/validate-both-quadratic-roots-against-r-1-convergence-constraint.html" class="cs-card lazy-tex">
   <div class="cs-name">Validate both quadratic roots against |r| &lt; 1 convergence constraint</div>
   <div class="cs-example"><div class="cs-line">$\;r^2 - \tfrac{5}{2}r + 1 = 0 \Rightarrow r = \tfrac{5 \pm 3}{4},\quad r_1 = 2,\; r_2 = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;|r_1| = 2 \ge 1 \Rightarrow \text{reject};\quad |r_2| = \tfrac{1}{2} < 1 \Rightarrow r = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -890,7 +925,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/justify-sum-to-infinity-by-stating-r1-and-substituting-r.html" class="cs-card">
+<a href="move/justify-sum-to-infinity-by-stating-r1-and-substituting-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Justify sum to infinity by stating |r|&lt;1 and substituting r</div>
   <div class="cs-example"><div class="cs-line">$\;r = \tfrac{1}{4}\;$</div><div class="cs-line cs-step">$\;|r| = \left|\tfrac{1}{4}\right| = \tfrac{1}{4} < 1 \Rightarrow S_\infty \text{ exists}\;$</div></div>
   <div class="cs-meta">
@@ -905,7 +940,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/model-fixed-percentage-growth-as-a-geometric-sequence.html" class="cs-card">
+<a href="move/model-fixed-percentage-growth-as-a-geometric-sequence.html" class="cs-card lazy-tex">
   <div class="cs-name">Model fixed-percentage growth as a geometric sequence</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 500,\quad 5\%\text{ growth per year}\;$</div><div class="cs-line cs-step">$\;r = 1.05,\quad u_n = 500 \times 1.05^{\,n-1}\;$</div></div>
   <div class="cs-meta">
@@ -920,7 +955,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-series-sumterm-conditions-into-simultaneous-equations.html" class="cs-card">
+<a href="move/convert-series-sumterm-conditions-into-simultaneous-equations.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert series sum/term conditions into simultaneous equations</div>
   <div class="cs-example"><div class="cs-line">$\;u_5 = 17,\quad S_{10} = 125\;$</div><div class="cs-line cs-step">$\;a + 4d = 17,\quad \tfrac{10}{2}(2a + 9d) = 125 \Rightarrow 2a + 9d = 25\;$</div></div>
   <div class="cs-meta">
@@ -935,7 +970,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-recovered-ratio-to-find-first-term-then-apply-sum-formula.html" class="cs-card">
+<a href="move/back-substitute-recovered-ratio-to-find-first-term-then-apply-sum-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute recovered ratio to find first term, then apply sum formula</div>
   <div class="cs-example"><div class="cs-line">$\;r = \tfrac{1}{2},\; ar = 3\;$</div><div class="cs-line cs-step">$\;a = \dfrac{3}{1/2} = 6,\quad S_4 = \dfrac{6(1-(\tfrac{1}{2})^4)}{1-\tfrac{1}{2}} = \dfrac{45}{4}\;$</div></div>
   <div class="cs-meta">
@@ -950,7 +985,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/identify-arithmetic-model-from-constant-yearly-decrease.html" class="cs-card">
+<a href="move/identify-arithmetic-model-from-constant-yearly-decrease.html" class="cs-card lazy-tex">
   <div class="cs-name">Identify arithmetic model from constant yearly decrease</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 100,\; u_2 = 94,\; u_3 = 88\;$</div><div class="cs-line cs-step">$\;d = 94 - 100 = -6,\; a = 100 \Rightarrow u_n = 100 + (n-1)(-6)\;$</div></div>
   <div class="cs-meta">
@@ -965,7 +1000,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-apgp-term-conditions-into-simultaneous-equations-in-a-d-r.html" class="cs-card">
+<a href="move/translate-apgp-term-conditions-into-simultaneous-equations-in-a-d-r.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate AP/GP term conditions into simultaneous equations in a, d, r</div>
   <div class="cs-example"><div class="cs-line">$\;\text{AP: } a,\, a+d,\, a+2d,\dots\quad \text{GP: } a,\, ar,\, ar^2,\dots\quad T_3^{\text{AP}}=9,\; T_2^{\text{GP}}=6,\; T_2^{\text{AP}}=T_2^{\text{GP}}\;$</div><div class="cs-line cs-step">$\;a+2d=9,\quad ar=6,\quad a+d=ar \Rightarrow a+d=6\;$</div></div>
   <div class="cs-meta">
@@ -980,7 +1015,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reject-extraneous-quadratic-root-by-checking-physical-validity-of-model-term.html" class="cs-card">
+<a href="move/reject-extraneous-quadratic-root-by-checking-physical-validity-of-model-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Reject extraneous quadratic root by checking physical validity of model term</div>
   <div class="cs-example"><div class="cs-line">$\;a = 100,\; d = -5,\; S_N = 480 \Rightarrow N^2 - 41N + 192 = 0 \Rightarrow (N-8)(N-24) = 0\;$</div><div class="cs-line cs-step">$\;u_{8} = 100 + 7(-5) = 65 \geq 0\ \checkmark;\quad u_{24} = 100 + 23(-5) = -15 < 0\ \times \quad\Rightarrow N = 8\;$</div></div>
   <div class="cs-meta">
@@ -995,7 +1030,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-a-difference-of-gp-terms-as-ark1-rm-to-isolate-a.html" class="cs-card">
+<a href="move/factor-a-difference-of-gp-terms-as-ark1-rm-to-isolate-a.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor a difference of GP terms as ar^k(1 − r^m) to isolate a</div>
   <div class="cs-example"><div class="cs-line">$\;u_2 - u_4 = 5,\quad r = \tfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;ar - ar^3 = ar(1 - r^2) = a \cdot \tfrac{1}{2} \cdot \tfrac{3}{4} = \tfrac{3a}{8} = 5 \Rightarrow a = \tfrac{40}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1010,7 +1045,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-ceiling-to-a-strict-inequality-to-find-minimum-integer-n.html" class="cs-card">
+<a href="move/apply-ceiling-to-a-strict-inequality-to-find-minimum-integer-n.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply ceiling to a strict inequality to find minimum integer n</div>
   <div class="cs-example"><div class="cs-line">$\;n - 1 > 127.734\ldots\;$</div><div class="cs-line cs-step">$\;n - 1 \ge 128 \Rightarrow n \ge 129\;$</div></div>
   <div class="cs-meta">
@@ -1025,7 +1060,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-logarithms-to-linearise-an-exponential-inequality.html" class="cs-card">
+<a href="move/take-logarithms-to-linearise-an-exponential-inequality.html" class="cs-card lazy-tex">
   <div class="cs-name">Take logarithms to linearise an exponential inequality</div>
   <div class="cs-example"><div class="cs-line">$\;3^n > 1000\;$</div><div class="cs-line cs-step">$\;n \log 3 > 3 \Rightarrow n > \dfrac{3}{\log 3}\;$</div></div>
   <div class="cs-meta">
@@ -1040,7 +1075,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-finite-geometric-sum-formula-once-a-r-n-are-known.html" class="cs-card">
+<a href="move/apply-finite-geometric-sum-formula-once-a-r-n-are-known.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply finite geometric sum formula once a, r, n are known</div>
   <div class="cs-example"><div class="cs-line">$\;a = 6,\quad r = \tfrac{1}{3},\quad n = 3\;$</div><div class="cs-line cs-step">$\;S_3 = \dfrac{6\left(1 - \left(\tfrac{1}{3}\right)^3\right)}{1 - \tfrac{1}{3}} = \dfrac{6 \cdot \tfrac{26}{27}}{\tfrac{2}{3}} = \dfrac{26}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1055,7 +1090,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-a-via-the-simpler-product-equation-into-s.html" class="cs-card">
+<a href="move/eliminate-a-via-the-simpler-product-equation-into-s.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate a via the simpler product equation into S∞</div>
   <div class="cs-example"><div class="cs-line">$\;ar = -6,\quad \dfrac{a}{1-r} = 25\;$</div><div class="cs-line cs-step">$\;a = \dfrac{-6}{r} \Rightarrow \dfrac{-6}{r(1-r)} = 25 \Rightarrow 25r^2 - 25r - 6 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1070,7 +1105,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-recovered-parameter-to-evaluate-a-specific-term.html" class="cs-card">
+<a href="move/back-substitute-recovered-parameter-to-evaluate-a-specific-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute recovered parameter to evaluate a specific term</div>
   <div class="cs-example"><div class="cs-line">$\;a + 4d = 14,\quad d = 3\;$</div><div class="cs-line cs-step">$\;a = 14 - 4(3) = 2 \Rightarrow u_{10} = 2 + 9(3) = 29\;$</div></div>
   <div class="cs-meta">
@@ -1085,7 +1120,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-verbal-increasedecrease-into-signed-common-difference.html" class="cs-card">
+<a href="move/translate-verbal-increasedecrease-into-signed-common-difference.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate verbal increase/decrease into signed common difference</div>
   <div class="cs-example"><div class="cs-line">$\;\text{£}600\text{ in month 1, £}10\text{ less each month}\;$</div><div class="cs-line cs-step">$\;a = 600,\; d = -10 \Rightarrow u_n = 600 + (n-1)(-10) = 610 - 10n\;$</div></div>
   <div class="cs-meta">
@@ -1100,7 +1135,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-consecutive-ratio-expressions-to-form-equation-in-unknown.html" class="cs-card">
+<a href="move/equate-consecutive-ratio-expressions-to-form-equation-in-unknown.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate consecutive ratio expressions to form equation in unknown</div>
   <div class="cs-example"><div class="cs-line">$\;\text{GP: } k+1,\ k,\ 2k-3\;$</div><div class="cs-line cs-step">$\;\dfrac{k}{k+1} = \dfrac{2k-3}{k} \Rightarrow k^2 = (k+1)(2k-3) \Rightarrow k^2 - k - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1115,7 +1150,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-a-summation-constraint-into-a-polynomial-equation-in-the-parameter.html" class="cs-card">
+<a href="move/convert-a-summation-constraint-into-a-polynomial-equation-in-the-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert a summation constraint into a polynomial equation in the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 2,\; u_2 = 2k+1,\; u_3 = 2k^2+1,\; \sum_{n=1}^{3} u_n = 21\;$</div><div class="cs-line cs-step">$\;2+(2k+1)+(2k^2+1)=21 \Rightarrow 2k^2+2k-17=0\;$</div></div>
   <div class="cs-meta">
@@ -1130,7 +1165,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-arithmetic-sum-formula-to-target-to-form-quadratic-in-n.html" class="cs-card">
+<a href="move/equate-arithmetic-sum-formula-to-target-to-form-quadratic-in-n.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate arithmetic sum formula to target to form quadratic in n</div>
   <div class="cs-example"><div class="cs-line">$\;a = 5,\ d = 3,\ S_n = 50\;$</div><div class="cs-line cs-step">$\;\dfrac{n}{2}(10 + 3(n-1)) = 50 \Rightarrow 3n^2 + 7n - 100 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1145,7 +1180,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/filter-quadratic-roots-using-domain-bounds-and-convergence-constraints.html" class="cs-card">
+<a href="move/filter-quadratic-roots-using-domain-bounds-and-convergence-constraints.html" class="cs-card lazy-tex">
   <div class="cs-name">Filter quadratic roots using domain bounds and convergence constraints</div>
   <div class="cs-example"><div class="cs-line">$\;2\cos^2\theta - 3\cos\theta + 1 = 0,\quad r = \cos\theta\;$</div><div class="cs-line cs-step">$\;\cos\theta = 1 \text{ or } \tfrac{1}{2};\quad |\cos\theta|\le1 \Rightarrow \text{both survive};\quad |r|<1 \Rightarrow r = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1160,7 +1195,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-b²-ac-to-encode-three-terms-in-geometric-progression.html" class="cs-card">
+<a href="move/use-b²-ac-to-encode-three-terms-in-geometric-progression.html" class="cs-card lazy-tex">
   <div class="cs-name">Use b² = ac to encode three terms in geometric progression</div>
   <div class="cs-example"><div class="cs-line">$\;2,\ 3x,\ 18 \text{ are in GP}\;$</div><div class="cs-line cs-step">$\;(3x)^2 = 2 \cdot 18 \Rightarrow 9x^2 = 36 \Rightarrow x = 2\;$</div></div>
   <div class="cs-meta">
@@ -1175,7 +1210,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-s-out-of-the-gp-partial-sum-formula-to-reuse-a-known-value.html" class="cs-card">
+<a href="move/factor-s-out-of-the-gp-partial-sum-formula-to-reuse-a-known-value.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor S∞ out of the GP partial-sum formula to reuse a known value</div>
   <div class="cs-example"><div class="cs-line">$\;S_\infty = \dfrac{a}{1-r} = 10,\quad r = \tfrac{1}{2},\quad S_4 = ?\;$</div><div class="cs-line cs-step">$\;S_4 = S_\infty\!\left(1 - r^4\right) = 10\!\left(1 - \tfrac{1}{16}\right) = \dfrac{75}{8}\;$</div></div>
   <div class="cs-meta">
@@ -1190,7 +1225,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reject-algebraic-solution-by-checking-physical-validity-of-nth-term.html" class="cs-card">
+<a href="move/reject-algebraic-solution-by-checking-physical-validity-of-nth-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Reject algebraic solution by checking physical validity of nth term</div>
   <div class="cs-example"><div class="cs-line">$\;a=20,\ d=-2,\ S_n=54 \Rightarrow n=6 \text{ or } n=18\;$</div><div class="cs-line cs-step">$\;u_{18}=20+17(-2)=-14<0 \Rightarrow \text{reject } n=18,\ n=6\;$</div></div>
   <div class="cs-meta">
@@ -1205,7 +1240,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-lastspecific-row-phrase-into-nth-term-u-n-a-n1d.html" class="cs-card">
+<a href="move/translate-lastspecific-row-phrase-into-nth-term-u-n-a-n1d.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate &#x27;last/specific row&#x27; phrase into nth term u_n = a + (n−1)d</div>
   <div class="cs-example"><div class="cs-line">$\;a = 5,\ d = 3,\ n = 10\;$</div><div class="cs-line cs-step">$\;u_{10} = 5 + (10-1)(3) = 32\;$</div></div>
   <div class="cs-meta">
@@ -1220,7 +1255,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reapply-ap-sum-formula-with-n-as-the-unknown-to-obtain-a-quadratic.html" class="cs-card">
+<a href="move/reapply-ap-sum-formula-with-n-as-the-unknown-to-obtain-a-quadratic.html" class="cs-card lazy-tex">
   <div class="cs-name">Reapply AP sum formula with n as the unknown to obtain a quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;a=3,\; d=2,\; S_n=35\;$</div><div class="cs-line cs-step">$\;35 = \tfrac{n}{2}(6+(n-1)2) = \tfrac{n}{2}(2n+4) \Rightarrow n^2+2n-35=0\;$</div></div>
   <div class="cs-meta">
@@ -1235,7 +1270,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-up-simultaneous-equations-from-two-geometric-series-properties.html" class="cs-card">
+<a href="move/set-up-simultaneous-equations-from-two-geometric-series-properties.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up simultaneous equations from two geometric series properties</div>
   <div class="cs-example"><div class="cs-line">$\;S_\infty = 10,\quad u_2 = 2\;$</div><div class="cs-line cs-step">$\;\dfrac{a}{1-r} = 10,\quad ar = 2 \Rightarrow a = 10(1-r) = \dfrac{2}{r}\;$</div></div>
   <div class="cs-meta">
@@ -1250,7 +1285,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/iterate-recurrence-directly-to-reach-a-small-index-term.html" class="cs-card">
+<a href="move/iterate-recurrence-directly-to-reach-a-small-index-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate recurrence directly to reach a small-index term</div>
   <div class="cs-example"><div class="cs-line">$\;u_1 = 3,\quad u_{n+1} = 2u_n - 1\;$</div><div class="cs-line cs-step">$\;u_2 = 2(3)-1 = 5,\quad u_3 = 2(5)-1 = 9,\quad u_4 = 2(9)-1 = 17\;$</div></div>
   <div class="cs-meta">
@@ -1265,7 +1300,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/validate-candidate-r-against-r1-before-accepting-solutions.html" class="cs-card">
+<a href="move/validate-candidate-r-against-r1-before-accepting-solutions.html" class="cs-card lazy-tex">
   <div class="cs-name">Validate candidate r against |r|&lt;1 before accepting solutions</div>
   <div class="cs-example"><div class="cs-line">$\;3r^2 - 4r + 1 = 0 \Rightarrow r = 1 \text{ or } r = \tfrac{1}{3}\;$</div><div class="cs-line cs-step">$\;|1| = 1 \not< 1\ (\text{reject}),\quad \left|\tfrac{1}{3}\right| < 1\ (\checkmark) \Rightarrow r = \tfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1280,7 +1315,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/detect-period-4-cycle-when-u₅-returns-to-u₁-with-matching-sign-phase.html" class="cs-card">
+<a href="move/detect-period-4-cycle-when-u₅-returns-to-u₁-with-matching-sign-phase.html" class="cs-card lazy-tex">
   <div class="cs-name">Detect period-4 cycle when u₅ returns to u₁ with matching sign phase</div>
   <div class="cs-example"><div class="cs-line">$\;u_1=3,\ u_2=1,\ u_3=5,\ u_4=2,\ u_5=3=u_1 \Rightarrow \text{period } 4\;$</div><div class="cs-line cs-step">$\;\sum_{n=1}^{40} u_n = 10(3+1+5+2)=110,\quad u_{27}=u_{4\cdot6+3}=u_3=5\;$</div></div>
   <div class="cs-meta">
@@ -1295,7 +1330,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-large-periodic-sum-via-euclidean-division-of-index-by-period.html" class="cs-card">
+<a href="move/decompose-large-periodic-sum-via-euclidean-division-of-index-by-period.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose large periodic sum via Euclidean division of index by period</div>
   <div class="cs-example"><div class="cs-line">$\;u_r \text{ has period } 3,\; u_1=1,\; u_2=2,\; u_3=-3,\; S=0.\; \sum_{r=1}^{50} u_r = ?\;$</div><div class="cs-line cs-step">$\;50 = 3 \times 16 + 2 \Rightarrow \sum_{r=1}^{50} u_r = 16 \times 0 + (u_1+u_2) = 3\;$</div></div>
   <div class="cs-meta">
@@ -1310,7 +1345,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-index-independent-constant-out-of-a-finite-summation.html" class="cs-card">
+<a href="move/factor-index-independent-constant-out-of-a-finite-summation.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor index-independent constant out of a finite summation</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{n=1}^{10} 3n\;$</div><div class="cs-line cs-step">$\;3\sum_{n=1}^{10} n = 3 \cdot \dfrac{10 \cdot 11}{2} = 165\;$</div></div>
   <div class="cs-meta">
@@ -1325,7 +1360,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/sum-one-full-period-symbolically-to-collapse-into-a-linear-equation-in-the-param.html" class="cs-card">
+<a href="move/sum-one-full-period-symbolically-to-collapse-into-a-linear-equation-in-the-param.html" class="cs-card lazy-tex">
   <div class="cs-name">Sum one full period symbolically to collapse into a linear equation in the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;u_1=3,\; u_2=k-3,\; u_3=3,\; u_4=k-3,\quad \sum_{r=1}^{4}u_r=20\;$</div><div class="cs-line cs-step">$\;3+(k-3)+3+(k-3)=2k=20 \Rightarrow k=10\;$</div></div>
   <div class="cs-meta">
@@ -1340,7 +1375,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-three-term-ap-condition-into-2u₂-u₁-u₃-equation.html" class="cs-card">
+<a href="move/translate-three-term-ap-condition-into-2u₂-u₁-u₃-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate three-term AP condition into 2u₂ = u₁ + u₃ equation</div>
   <div class="cs-example"><div class="cs-line">$\;x,\ 5,\ x+4 \text{ are consecutive AP terms}\;$</div><div class="cs-line cs-step">$\;2(5) = x + (x+4) \Rightarrow 10 = 2x + 4 \Rightarrow x = 3\;$</div></div>
   <div class="cs-meta">
@@ -1355,7 +1390,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-cubic-product-into-r³-r-and-apply-standard-sum-formulae.html" class="cs-card">
+<a href="move/expand-cubic-product-into-r³-r-and-apply-standard-sum-formulae.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand cubic product into r³ − r and apply standard sum formulae</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=1}^{n} r(r+1)(r-1)\;$</div><div class="cs-line cs-step">$\;\sum_{r=1}^{n}(r^3 - r) = \tfrac{1}{4}n^2(n+1)^2 - \tfrac{1}{2}n(n+1) = \tfrac{1}{4}n(n+1)(n-1)(n+2)\;$</div></div>
   <div class="cs-meta">
@@ -1370,7 +1405,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sum-to-k1-into-sum-to-k-plus-the-k1th-term.html" class="cs-card">
+<a href="move/split-sum-to-k1-into-sum-to-k-plus-the-k1th-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sum to k+1 into sum to k plus the (k+1)th term</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=1}^{k+1} r^2 = \sum_{r=1}^{k} r^2 + (k+1)^2\;$</div><div class="cs-line cs-step">$\;\tfrac{k(k+1)(2k+1)}{6} + (k+1)^2 = \tfrac{(k+1)(k+2)(2k+3)}{6}\;$</div></div>
   <div class="cs-meta">
@@ -1385,7 +1420,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-a-partial-sum-with-non-unit-lower-bound-as-a-difference-of-sums-from-1.html" class="cs-card">
+<a href="move/split-a-partial-sum-with-non-unit-lower-bound-as-a-difference-of-sums-from-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a partial sum with non-unit lower bound as a difference of sums from 1</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=5}^{n} r^2 = \sum_{r=1}^{n} r^2 - \sum_{r=1}^{4} r^2\;$</div><div class="cs-line cs-step">$\;\sum_{r=5}^{n} r^2 = \dfrac{n(n+1)(2n+1)}{6} - 30\;$</div></div>
   <div class="cs-meta">
@@ -1400,7 +1435,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/carry-full-calculator-precision-through-iteration-round-only-at-output.html" class="cs-card">
+<a href="move/carry-full-calculator-precision-through-iteration-round-only-at-output.html" class="cs-card lazy-tex">
   <div class="cs-name">Carry full calculator precision through iteration, round only at output</div>
   <div class="cs-example"><div class="cs-line">$\;x_{n+1} = \sqrt{5 + x_n},\quad x_1 = 3\;$</div><div class="cs-line cs-step">$\;x_2 = \sqrt{5 + \underbrace{3}_{\text{ANS}}} = 2.8284\ldots,\quad x_3 = \sqrt{5 + \underbrace{2.8284\ldots}_{\text{ANS}}} \neq \sqrt{5 + 2.828}\;$</div></div>
   <div class="cs-meta">
@@ -1415,7 +1450,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-new-sum-to-earlier-result-via-additive-decomposition-of-summand.html" class="cs-card">
+<a href="move/bridge-new-sum-to-earlier-result-via-additive-decomposition-of-summand.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge new sum to earlier result via additive decomposition of summand</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Given } \sum_{r=1}^{n} r(r+1) = \tfrac{1}{3}n(n+1)(n+2),\quad \sum_{r=1}^{n} r(r+2)\;$</div><div class="cs-line cs-step">$\;r(r+2)=r(r+1)+r \Rightarrow \sum_{r=1}^{n} r(r+2)=\tfrac{1}{3}n(n+1)(n+2)+\tfrac{1}{2}n(n+1)=\tfrac{1}{6}n(n+1)(2n+7)\;$</div></div>
   <div class="cs-meta">
@@ -1430,7 +1465,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-maclaurin-series-by-repeated-differentiation-at-zero.html" class="cs-card">
+<a href="move/build-maclaurin-series-by-repeated-differentiation-at-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Build Maclaurin series by repeated differentiation at zero</div>
   <div class="cs-example"><div class="cs-line">$\;f(x)=e^x\;$</div><div class="cs-line cs-step">$\;f(0)=1,\; f'(0)=1,\; f''(0)=1 \Rightarrow e^x = 1 + x + \dfrac{x^2}{2!} + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1445,7 +1480,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-maclaurin-polynomial-from-evaluated-derivatives.html" class="cs-card">
+<a href="move/assemble-maclaurin-polynomial-from-evaluated-derivatives.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble Maclaurin polynomial from evaluated derivatives</div>
   <div class="cs-example"><div class="cs-line">$\;y(0)=1,\; y'(0)=2,\; y''(0)=6,\; y'''(0)=12\;$</div><div class="cs-line cs-step">$\;y = 1 + 2x + \dfrac{6}{2!}x^2 + \dfrac{12}{3!}x^3 = 1 + 2x + 3x^2 + 2x^3\;$</div></div>
   <div class="cs-meta">
@@ -1460,7 +1495,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-maclaurin-series-by-repeated-differentiation-at-zero-sequences-series.html" class="cs-card">
+<a href="move/build-maclaurin-series-by-repeated-differentiation-at-zero-sequences-series.html" class="cs-card lazy-tex">
   <div class="cs-name">Build Maclaurin series by repeated differentiation at zero</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = e^x\;$</div><div class="cs-line cs-step">$\;f(0)=1,\; f'(0)=1,\; f''(0)=1 \Rightarrow e^x = 1 + x + \dfrac{x^2}{2!} + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1475,7 +1510,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-differentiation-depth-from-the-highest-power-demanded.html" class="cs-card">
+<a href="move/set-differentiation-depth-from-the-highest-power-demanded.html" class="cs-card lazy-tex">
   <div class="cs-name">Set differentiation depth from the highest power demanded</div>
   <div class="cs-example"><div class="cs-line">$\;\cos x,\quad n=4 \Rightarrow \text{plan } f(0),f'(0),f''(0),f'''(0),f^{(4)}(0)\;$</div><div class="cs-line cs-step">$\;1,\,0,\,-1,\,0,\,1 \Rightarrow 1 - \dfrac{x^2}{2!} + \dfrac{x^4}{4!}\;$</div></div>
   <div class="cs-meta">
@@ -1490,7 +1525,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-established-closed-forms-to-reduce-a-summation-equation-to-algebra-in.html" class="cs-card">
+<a href="move/substitute-established-closed-forms-to-reduce-a-summation-equation-to-algebra-in.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute established closed forms to reduce a summation equation to algebra in n</div>
   <div class="cs-example"><div class="cs-line">$\;\sum_{r=1}^{n} r(r+1) = 5\sum_{r=1}^{n} r\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{3}n(n+1)(n+2) = \tfrac{5}{2}n(n+1) \Rightarrow \tfrac{1}{3}(n+2) = \tfrac{5}{2} \Rightarrow n = \tfrac{11}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1505,7 +1540,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-taylormaclaurin-coefficients-from-derivative-values.html" class="cs-card">
+<a href="move/assemble-taylormaclaurin-coefficients-from-derivative-values.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble Taylor/Maclaurin coefficients from derivative values</div>
   <div class="cs-example"><div class="cs-line">$\;f(0)=1,\quad f'(0)=2,\quad f''(0)=4\;$</div><div class="cs-line cs-step">$\;f(x)\approx \frac{1}{0!}+\frac{2}{1!}x+\frac{4}{2!}x^2 = 1+2x+2x^2\;$</div></div>
   <div class="cs-meta">
@@ -1520,7 +1555,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-ln10-to-collapse-logarithmic-taylor-coefficients-at-x1.html" class="cs-card">
+<a href="move/exploit-ln10-to-collapse-logarithmic-taylor-coefficients-at-x1.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit ln(1)=0 to collapse logarithmic Taylor coefficients at x=1</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \ln x + 1,\quad a = 1\;$</div><div class="cs-line cs-step">$\;f(1) = 0 + 1 = 1,\; f'(1) = \tfrac{1}{1} = 1,\; f''(1) = -1 \Rightarrow f(x) \approx 1 + (x-1) - \tfrac{1}{2}(x-1)^2\;$</div></div>
   <div class="cs-meta">
@@ -1535,7 +1570,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-standard-maclaurin-series-to-bypass-differentiation.html" class="cs-card">
+<a href="move/multiply-standard-maclaurin-series-to-bypass-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply standard Maclaurin series to bypass differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;e^x \cos x \text{ up to } x^2\;$</div><div class="cs-line cs-step">$\;\left(1+x+\tfrac{x^2}{2}+\cdots\right)\!\left(1-\tfrac{x^2}{2}+\cdots\right) = 1 + x + 0\cdot x^2 + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1550,7 +1585,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-known-maclaurin-series-instead-of-repeated-differentiation.html" class="cs-card">
+<a href="move/substitute-known-maclaurin-series-instead-of-repeated-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known Maclaurin series instead of repeated differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;e^{\sin x} \text{ up to } x^3\;$</div><div class="cs-line cs-step">$\;e^u = 1+u+\tfrac{u^2}{2}+\tfrac{u^3}{6},\; u=x-\tfrac{x^3}{6} \Rightarrow 1+x+\tfrac{x^2}{2}+\tfrac{x^3}{6}-\tfrac{x^3}{6} = 1+x+\tfrac{x^2}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1565,7 +1600,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-taylor-series-formula-centered-at-a-non-zero-point.html" class="cs-card">
+<a href="move/apply-taylor-series-formula-centered-at-a-non-zero-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Taylor series formula centered at a non-zero point</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \ln x,\quad a = 1,\quad f(1)=0,\ f'(1)=1,\ f''(1)=-1,\ f'''(1)=2\;$</div><div class="cs-line cs-step">$\;\ln x = (x-1) - \tfrac{1}{2}(x-1)^2 + \tfrac{1}{3}(x-1)^3 + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1580,7 +1615,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-maclaurintaylor-series-by-successive-differentiation-at-the-expansion-poin.html" class="cs-card">
+<a href="move/build-maclaurintaylor-series-by-successive-differentiation-at-the-expansion-poin.html" class="cs-card lazy-tex">
   <div class="cs-name">Build Maclaurin/Taylor series by successive differentiation at the expansion point</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = e^x\;$</div><div class="cs-line cs-step">$\;f(0)=1,\; f'(0)=1,\; f''(0)=1 \Rightarrow e^x \approx 1 + x + \dfrac{x^2}{2} + \dfrac{x^3}{6}\;$</div></div>
   <div class="cs-meta">
@@ -1595,7 +1630,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/truncate-intermediate-products-at-the-required-order-during-series-expansion.html" class="cs-card">
+<a href="move/truncate-intermediate-products-at-the-required-order-during-series-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Truncate intermediate products at the required order during series expansion</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{1/2}(1+x)^{-1} \text{ up to } x^2\;$</div><div class="cs-line cs-step">$\;\bigl(1+\tfrac{1}{2}x-\tfrac{1}{8}x^2+\cdots\bigr)\bigl(1-x+x^2+\cdots\bigr)=1-\tfrac{1}{2}x+\tfrac{3}{8}x^2\;$</div></div>
   <div class="cs-meta">
@@ -1610,7 +1645,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/truncate-series-early-to-control-algebraic-complexity.html" class="cs-card">
+<a href="move/truncate-series-early-to-control-algebraic-complexity.html" class="cs-card lazy-tex">
   <div class="cs-name">Truncate series early to control algebraic complexity</div>
   <div class="cs-example"><div class="cs-line">$\;e^x \sin x \text{ up to } x^3:\quad e^x = 1 + x + \tfrac{x^2}{2} + \tfrac{x^3}{6} + \cdots,\quad \sin x = x - \tfrac{x^3}{6} + \cdots\;$</div><div class="cs-line cs-step">$\;x + x^2 + \tfrac{x^2}{2}\cdot x + \bigl(\tfrac{x^3}{6} - \tfrac{x^3}{6}\bigr) + \cdots = x + x^2 + \tfrac{x^3}{2} + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1625,7 +1660,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-parity-to-skip-zero-coefficient-terms-in-maclaurin-expansions.html" class="cs-card">
+<a href="move/use-parity-to-skip-zero-coefficient-terms-in-maclaurin-expansions.html" class="cs-card lazy-tex">
   <div class="cs-name">Use parity to skip zero-coefficient terms in Maclaurin expansions</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \cos x \Rightarrow f(-x) = \cos(-x) = \cos x \quad (\text{even})\;$</div><div class="cs-line cs-step">$\;f^{(1)}(0) = f^{(3)}(0) = 0 \Rightarrow \cos x = 1 - \tfrac{1}{2}x^2 + \tfrac{1}{24}x^4 - \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1640,7 +1675,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-specific-value-into-a-truncated-series-to-approximate.html" class="cs-card">
+<a href="move/substitute-a-specific-value-into-a-truncated-series-to-approximate.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a specific value into a truncated series to approximate</div>
   <div class="cs-example"><div class="cs-line">$\;\ln(1+x) \approx x - \tfrac{x^2}{2} + \tfrac{x^3}{3},\quad x = 0.1\;$</div><div class="cs-line cs-step">$\;\ln(1.1) \approx 0.1 - 0.005 + 0.000\overline{3} = 0.09533\;$</div></div>
   <div class="cs-meta">
@@ -1655,7 +1690,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/unwind-a-reduction-formula-step-by-step-to-a-known-base-case.html" class="cs-card">
+<a href="move/unwind-a-reduction-formula-step-by-step-to-a-known-base-case.html" class="cs-card lazy-tex">
   <div class="cs-name">Unwind a reduction formula step-by-step to a known base case</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \tfrac{n-1}{n}\,I_{n-2},\quad I_0 = \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;I_4 = \tfrac{3}{4}\,I_2 = \tfrac{3}{4}\cdot\tfrac{1}{2}\,I_0 = \tfrac{3\pi}{16}\;$</div></div>
   <div class="cs-meta">
@@ -1670,7 +1705,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/iterate-reduction-formula-down-to-known-base-case.html" class="cs-card">
+<a href="move/iterate-reduction-formula-down-to-known-base-case.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate reduction formula down to known base case</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \tfrac{n-1}{n}\,I_{n-2},\quad I_0 = \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;I_4 = \tfrac{3}{4}\,I_2 = \tfrac{3}{4}\cdot\tfrac{1}{2}\,I_0 = \tfrac{3}{8}\cdot\tfrac{\pi}{2} = \tfrac{3\pi}{16}\;$</div></div>
   <div class="cs-meta">

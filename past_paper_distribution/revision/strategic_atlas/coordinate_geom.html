@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">4 moves · 30 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-negative-reciprocal-of-tangent-gradient-to-obtain-normal-gradient.html" class="cs-card">
+<a href="move/take-negative-reciprocal-of-tangent-gradient-to-obtain-normal-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Take negative reciprocal of tangent gradient to obtain normal gradient</div>
   <div class="cs-example"><div class="cs-line">$\;m_T = 3\;$</div><div class="cs-line cs-step">$\;m_N = -\dfrac{1}{m_T} = -\dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>perpendicularity condition</span>
   </div>
 </a>
-<a href="move/apply-m₁m₂-1-to-obtain-the-perpendicular-gradient.html" class="cs-card">
+<a href="move/apply-m₁m₂-1-to-obtain-the-perpendicular-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply m₁m₂ = −1 to obtain the perpendicular gradient</div>
   <div class="cs-example"><div class="cs-line">$\;m_1 = \dfrac{3}{2}\;$</div><div class="cs-line cs-step">$\;m_2 = \dfrac{-1}{m_1} = -\dfrac{2}{3}\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>perpendicularity condition</span>
   </div>
 </a>
-<a href="move/apply-m₁m₂-1-and-cancel-shared-parametric-factors.html" class="cs-card">
+<a href="move/apply-m₁m₂-1-and-cancel-shared-parametric-factors.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply m₁·m₂ = −1 and cancel shared parametric factors</div>
   <div class="cs-example"><div class="cs-line">$\;m_{PQ} = \dfrac{2}{p+q},\quad m_{OS} = \dfrac{p+q}{2}\cdot(-pq),\quad m_{PQ}\cdot m_{OS} = -1\;$</div><div class="cs-line cs-step">$\;\dfrac{2}{p+q}\cdot\dfrac{-(p+q)pq}{2} = -1 \Rightarrow pq = 1\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>perpendicularity condition</span>
   </div>
 </a>
-<a href="move/use-negative-reciprocal-of-gradient-for-perpendicular-line.html" class="cs-card">
+<a href="move/use-negative-reciprocal-of-gradient-for-perpendicular-line.html" class="cs-card lazy-tex">
   <div class="cs-name">Use negative reciprocal of gradient for perpendicular line</div>
   <div class="cs-example"><div class="cs-line">$\;m = 3,\quad P = (1,\,2)\;$</div><div class="cs-line cs-step">$\;m_\perp = -\tfrac{1}{3},\quad y - 2 = -\tfrac{1}{3}(x - 1)\;$</div></div>
   <div class="cs-meta">
@@ -302,7 +337,7 @@ window.MathJax = {
     <span class="meta">7 moves · 27 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-point-gradient-form-to-construct-a-line-equation-from-a-point-and-slope.html" class="cs-card">
+<a href="move/apply-point-gradient-form-to-construct-a-line-equation-from-a-point-and-slope.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply point-gradient form to construct a line equation from a point and slope</div>
   <div class="cs-example"><div class="cs-line">$\;(x_1,y_1)=(1,3),\quad m=2\;$</div><div class="cs-line cs-step">$\;y-3=2(x-1) \Rightarrow y=2x+1\;$</div></div>
   <div class="cs-meta">
@@ -310,7 +345,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/apply-point-gradient-form-then-clear-the-fractional-gradient-to-obtain-integer-c.html" class="cs-card">
+<a href="move/apply-point-gradient-form-then-clear-the-fractional-gradient-to-obtain-integer-c.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply point-gradient form then clear the fractional gradient to obtain integer coefficients</div>
   <div class="cs-example"><div class="cs-line">$\;y - 1 = \tfrac{2}{3}(x - 3)\;$</div><div class="cs-line cs-step">$\;3(y - 1) = 2(x - 3) \Rightarrow 2x - 3y - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -318,7 +353,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/apply-point-gradient-form-then-rearrange-to-required-line-equation-format.html" class="cs-card">
+<a href="move/apply-point-gradient-form-then-rearrange-to-required-line-equation-format.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply point-gradient form then rearrange to required line-equation format</div>
   <div class="cs-example"><div class="cs-line">$\;m = 3,\quad P(1,\,2)\;$</div><div class="cs-line cs-step">$\;y - 2 = 3(x - 1) \Rightarrow y = 3x - 1\;$</div></div>
   <div class="cs-meta">
@@ -326,7 +361,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/construct-the-equation-of-a-linecircle-from-a-known-point-and-second-datum.html" class="cs-card">
+<a href="move/construct-the-equation-of-a-linecircle-from-a-known-point-and-second-datum.html" class="cs-card lazy-tex">
   <div class="cs-name">Construct the equation of a line/circle from a known point and second datum</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Point }(1,2),\; m=3\;$</div><div class="cs-line cs-step">$\;y - 2 = 3(x - 1) \Rightarrow y = 3x - 1\;$</div></div>
   <div class="cs-meta">
@@ -334,7 +369,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/construct-perpendicular-through-origin-using-negative-reciprocal-gradient.html" class="cs-card">
+<a href="move/construct-perpendicular-through-origin-using-negative-reciprocal-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Construct perpendicular through origin using negative reciprocal gradient</div>
   <div class="cs-example"><div class="cs-line">$\;l_1:\, y = 3x + 5\;$</div><div class="cs-line cs-step">$\;m_2 = -\dfrac{1}{3},\quad l_2:\, y = -\dfrac{1}{3}x\;$</div></div>
   <div class="cs-meta">
@@ -342,7 +377,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/apply-point-gradient-form-through-the-origin-to-get-y-mx.html" class="cs-card">
+<a href="move/apply-point-gradient-form-through-the-origin-to-get-y-mx.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply point-gradient form through the origin to get y = mx</div>
   <div class="cs-example"><div class="cs-line">$\;m = 3,\quad \text{point} = (0,0)\;$</div><div class="cs-line cs-step">$\;y - 0 = 3(x - 0) \Rightarrow y = 3x\;$</div></div>
   <div class="cs-meta">
@@ -350,7 +385,7 @@ window.MathJax = {
     <span>line equation construction</span>
   </div>
 </a>
-<a href="move/construct-normal-line-via-negative-reciprocal-of-tangent-gradient.html" class="cs-card">
+<a href="move/construct-normal-line-via-negative-reciprocal-of-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Construct normal line via negative reciprocal of tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad P=(1,1),\quad m_{\text{tangent}} = 2x\big|_{x=1} = 2\;$</div><div class="cs-line cs-step">$\;m_{\text{normal}} = -\tfrac{1}{2},\quad y - 1 = -\tfrac{1}{2}(x - 1)\;$</div></div>
   <div class="cs-meta">
@@ -365,7 +400,7 @@ window.MathJax = {
     <span class="meta">5 moves · 11 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-the-parameter-to-obtain-a-cartesian-equation.html" class="cs-card">
+<a href="move/eliminate-the-parameter-to-obtain-a-cartesian-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate the parameter to obtain a Cartesian equation</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\quad y = 2t\;$</div><div class="cs-line cs-step">$\;t = \dfrac{y}{2} \Rightarrow x = \left(\dfrac{y}{2}\right)^2 = \dfrac{y^2}{4}\;$</div></div>
   <div class="cs-meta">
@@ -373,7 +408,7 @@ window.MathJax = {
     <span>parametric elimination</span>
   </div>
 </a>
-<a href="move/eliminate-the-parameter-θ-via-the-pythagorean-identity-to-obtain-a-cartesian-loc.html" class="cs-card">
+<a href="move/eliminate-the-parameter-θ-via-the-pythagorean-identity-to-obtain-a-cartesian-loc.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate the parameter θ via the Pythagorean identity to obtain a Cartesian locus</div>
   <div class="cs-example"><div class="cs-line">$\;x = 3\cos\theta,\quad y = 2\sin\theta\;$</div><div class="cs-line cs-step">$\;\cos^2\theta + \sin^2\theta = 1 \Rightarrow \dfrac{x^2}{9} + \dfrac{y^2}{4} = 1\;$</div></div>
   <div class="cs-meta">
@@ -381,7 +416,7 @@ window.MathJax = {
     <span>parametric elimination</span>
   </div>
 </a>
-<a href="move/isolate-the-parameter-from-each-line-then-equate-to-eliminate-it.html" class="cs-card">
+<a href="move/isolate-the-parameter-from-each-line-then-equate-to-eliminate-it.html" class="cs-card lazy-tex">
   <div class="cs-name">Isolate the parameter from each line, then equate to eliminate it</div>
   <div class="cs-example"><div class="cs-line">$\;\ell_1:\, y = tx,\quad \ell_2:\, ty = x - 1\;$</div><div class="cs-line cs-step">$\;t = \dfrac{y}{x} = \dfrac{x-1}{y} \Rightarrow y^2 = x^2 - x\;$</div></div>
   <div class="cs-meta">
@@ -389,7 +424,7 @@ window.MathJax = {
     <span>parametric elimination</span>
   </div>
 </a>
-<a href="move/compute-x²y²-to-bridge-parametric-point-to-x²y²²-form-locus.html" class="cs-card">
+<a href="move/compute-x²y²-to-bridge-parametric-point-to-x²y²²-form-locus.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute x²+y² to bridge parametric point to (x²+y²)²-form locus</div>
   <div class="cs-example"><div class="cs-line">$\;x = \dfrac{4\cos\theta}{1+\cos^2\theta},\quad y = \dfrac{4\sin\theta}{1+\cos^2\theta},\quad D = 1+\cos^2\theta\;$</div><div class="cs-line cs-step">$\;x^2+y^2 = \dfrac{16}{D^2}\cdot 1 = \dfrac{16}{D},\quad 4x^2+4y^2\cos^2\!\theta = \dfrac{16\cdot 4}{D^2} \Rightarrow (x^2+y^2)^2 = 4x^2+4y^2\;$</div></div>
   <div class="cs-meta">
@@ -397,7 +432,7 @@ window.MathJax = {
     <span>parametric elimination</span>
   </div>
 </a>
-<a href="move/substitute-parametric-coordinates-directly-into-the-cartesian-equation-of-the-ot.html" class="cs-card">
+<a href="move/substitute-parametric-coordinates-directly-into-the-cartesian-equation-of-the-ot.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute parametric coordinates directly into the Cartesian equation of the other curve</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\ y = 2t,\quad xy = 8\;$</div><div class="cs-line cs-step">$\;(t^2)(2t) = 8 \Rightarrow t^3 = 4 \Rightarrow t = \sqrt[3]{4}\;$</div></div>
   <div class="cs-meta">
@@ -412,7 +447,7 @@ window.MathJax = {
     <span class="meta">4 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-coordinates-of-a-known-point-into-a-curveline-equation-to-solve-for-t.html" class="cs-card">
+<a href="move/substitute-coordinates-of-a-known-point-into-a-curveline-equation-to-solve-for-t.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute coordinates of a known point into a curve/line equation to solve for the unknown parameter</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x + c,\quad (1,\,5) \text{ on the line}\;$</div><div class="cs-line cs-step">$\;5 = 3(1) + c \Rightarrow c = 2\;$</div></div>
   <div class="cs-meta">
@@ -420,7 +455,7 @@ window.MathJax = {
     <span>point on line substitution</span>
   </div>
 </a>
-<a href="move/substitute-a-linear-equation-into-a-curve-equation-to-reduce-to-a-single-variabl.html" class="cs-card">
+<a href="move/substitute-a-linear-equation-into-a-curve-equation-to-reduce-to-a-single-variabl.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a linear equation into a curve equation to reduce to a single-variable solve</div>
   <div class="cs-example"><div class="cs-line">$\;y = x + 1,\quad x^2 + y^2 = 5\;$</div><div class="cs-line cs-step">$\;x^2 + (x+1)^2 = 5 \Rightarrow 2x^2 + 2x - 4 = 0\;$</div></div>
   <div class="cs-meta">
@@ -428,7 +463,7 @@ window.MathJax = {
     <span>point on line substitution</span>
   </div>
 </a>
-<a href="move/substitute-known-point-coordinates-into-a-line-equation-to-solve-for-a-parameter.html" class="cs-card">
+<a href="move/substitute-known-point-coordinates-into-a-line-equation-to-solve-for-a-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known point coordinates into a line equation to solve for a parameter</div>
   <div class="cs-example"><div class="cs-line">$\;P(k,\,3) \text{ lies on } y = x + 1\;$</div><div class="cs-line cs-step">$\;3 = k + 1 \Rightarrow k = 2\;$</div></div>
   <div class="cs-meta">
@@ -436,7 +471,7 @@ window.MathJax = {
     <span>point on line substitution</span>
   </div>
 </a>
-<a href="move/write-line-equation-using-point-gradient-form-y-y₁-mx-x₁.html" class="cs-card">
+<a href="move/write-line-equation-using-point-gradient-form-y-y₁-mx-x₁.html" class="cs-card lazy-tex">
   <div class="cs-name">Write line equation using point-gradient form y − y₁ = m(x − x₁)</div>
   <div class="cs-example"><div class="cs-line">$\;m = 3,\quad (1,\,2)\;$</div><div class="cs-line cs-step">$\;y - 2 = 3(x - 1) \Rightarrow y = 3x - 1\;$</div></div>
   <div class="cs-meta">
@@ -451,7 +486,7 @@ window.MathJax = {
     <span class="meta">4 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-a-shaded-bounded-region-into-a-system-of-inequalities-from-its-boundar.html" class="cs-card">
+<a href="move/translate-a-shaded-bounded-region-into-a-system-of-inequalities-from-its-boundar.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate a shaded bounded region into a system of inequalities from its boundary curves</div>
   <div class="cs-example"><div class="cs-line">$\;R\text{: above } y = x^2,\text{ below } y = x + 2,\text{ between intersections } x = -1,\; x = 2\;$</div><div class="cs-line cs-step">$\;R:\; y \geq x^2,\; y \leq x+2,\; -1 \leq x \leq 2\;$</div></div>
   <div class="cs-meta">
@@ -459,7 +494,7 @@ window.MathJax = {
     <span>region inequality assignment</span>
   </div>
 </a>
-<a href="move/translate-regions-position-relative-to-each-boundary-into-directed-inequalities.html" class="cs-card">
+<a href="move/translate-regions-position-relative-to-each-boundary-into-directed-inequalities.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate region&#x27;s position relative to each boundary into directed inequalities</div>
   <div class="cs-example"><div class="cs-line">$\;R \text{ bounded by } y = x,\; y = 0,\; x = 2;\; \text{test point } (1,\tfrac{1}{2})\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{2} \le 1,\; \tfrac{1}{2} \ge 0,\; 1 \le 2 \;\Rightarrow\; y \le x,\; y \ge 0,\; x \le 2\;$</div></div>
   <div class="cs-meta">
@@ -467,7 +502,7 @@ window.MathJax = {
     <span>region inequality assignment</span>
   </div>
 </a>
-<a href="move/translate-abovebelow-boundary-positions-into-inequality-signs.html" class="cs-card">
+<a href="move/translate-abovebelow-boundary-positions-into-inequality-signs.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate above/below boundary positions into inequality signs</div>
   <div class="cs-example"><div class="cs-line">$\;R \text{ is below } y = x + 2 \text{ and above } y = 0\;$</div><div class="cs-line cs-step">$\;y \le x + 2,\quad y \ge 0\;$</div></div>
   <div class="cs-meta">
@@ -475,7 +510,7 @@ window.MathJax = {
     <span>region inequality assignment</span>
   </div>
 </a>
-<a href="move/assign-inequality-directions-for-a-bounded-multi-boundary-region.html" class="cs-card">
+<a href="move/assign-inequality-directions-for-a-bounded-multi-boundary-region.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign inequality directions for a bounded multi-boundary region</div>
   <div class="cs-example"><div class="cs-line">$\;R \text{ bounded by } y = x^2,\; y = 2,\; x \ge 0\;$</div><div class="cs-line cs-step">$\;\text{Test }(1,1):\; 1 \ge 1^2,\; 1 \le 2,\; 1 \ge 0 \;\Rightarrow\; x \ge 0,\; y \ge x^2,\; y \le 2\;$</div></div>
   <div class="cs-meta">
@@ -490,7 +525,7 @@ window.MathJax = {
     <span class="meta">1 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/complete-the-square-on-x-and-y-groups-to-extract-circle-centre-and-radius.html" class="cs-card">
+<a href="move/complete-the-square-on-x-and-y-groups-to-extract-circle-centre-and-radius.html" class="cs-card lazy-tex">
   <div class="cs-name">Complete the square on x and y groups to extract circle centre and radius</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 + 4x - 2y - 4 = 0\;$</div><div class="cs-line cs-step">$\;(x+2)^2 - 4 + (y-1)^2 - 1 = 4 \Rightarrow (x+2)^2 + (y-1)^2 = 9,\quad \text{centre }(-2,1),\ r=3\;$</div></div>
   <div class="cs-meta">
@@ -505,7 +540,7 @@ window.MathJax = {
     <span class="meta">3 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-zero-for-one-coordinate-to-find-an-axis-intersection.html" class="cs-card">
+<a href="move/substitute-zero-for-one-coordinate-to-find-an-axis-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute zero for one coordinate to find an axis intersection</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2x + 6\;$</div><div class="cs-line cs-step">$\;y = 0 \Rightarrow 2x + 6 = 0 \Rightarrow x = -3,\quad (-3,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -513,7 +548,7 @@ window.MathJax = {
     <span>axis intersection</span>
   </div>
 </a>
-<a href="move/set-x-0-and-pick-the-non-origin-root-for-y-axis-intersection.html" class="cs-card">
+<a href="move/set-x-0-and-pick-the-non-origin-root-for-y-axis-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Set x = 0 and pick the non-origin root for y-axis intersection</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 + x^2 = 5y\,e^{x},\quad x=0\;$</div><div class="cs-line cs-step">$\;y^2 = 5y \Rightarrow y(y-5)=0,\quad P\neq O \Rightarrow P=(0,\,5)\;$</div></div>
   <div class="cs-meta">
@@ -521,7 +556,7 @@ window.MathJax = {
     <span>axis intersection</span>
   </div>
 </a>
-<a href="move/find-x-axis-intersection-by-setting-y-0-in-the-line-equation.html" class="cs-card">
+<a href="move/find-x-axis-intersection-by-setting-y-0-in-the-line-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Find x-axis intersection by setting y = 0 in the line equation</div>
   <div class="cs-example"><div class="cs-line">$\;3x - 2y = 12\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow 3x = 12 \Rightarrow x = 4,\quad \text{so } (4,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -536,7 +571,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-the-algebraically-simpler-of-two-valid-equations-to-recover-the-missing-c.html" class="cs-card">
+<a href="move/choose-the-algebraically-simpler-of-two-valid-equations-to-recover-the-missing-c.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose the algebraically simpler of two valid equations to recover the missing coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x,\quad y = 4x - x^2,\quad x_P = 1\;$</div><div class="cs-line cs-step">$\;y_P = 3(1) = 3 \quad\text{(simpler than }4(1)-1^2=3\text{)}\;$</div></div>
   <div class="cs-meta">
@@ -551,7 +586,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-linear-equation-into-quadratic-curve-to-find-intersection-points.html" class="cs-card">
+<a href="move/substitute-linear-equation-into-quadratic-curve-to-find-intersection-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute linear equation into quadratic curve to find intersection points</div>
   <div class="cs-example"><div class="cs-line">$\;y = x + 1,\quad x^2 + y^2 = 5\;$</div><div class="cs-line cs-step">$\;x^2 + (x+1)^2 = 5 \Rightarrow 2x^2 + 2x - 4 = 0 \Rightarrow (x-1)(x+2) = 0\;$</div></div>
   <div class="cs-meta">
@@ -566,7 +601,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-composite-circular-region-into-sectors-and-triangles-to-compute-area.html" class="cs-card">
+<a href="move/decompose-composite-circular-region-into-sectors-and-triangles-to-compute-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose composite circular region into sectors and triangles to compute area</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Sector } OAB:\ r=4,\ \angle AOB=\tfrac{\pi}{3};\ \triangle OBC:\ OB=4,\ OC=5,\ \angle BOC=\tfrac{\pi}{6}\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}(4^2)\!\left(\tfrac{\pi}{3}\right) + \tfrac{1}{2}(4)(5)\sin\tfrac{\pi}{6} = \dfrac{8\pi}{3} + 5\;$</div></div>
   <div class="cs-meta">
@@ -581,7 +616,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-x0-and-y0-in-tangentnormal-equation-to-extract-axis-intercepts.html" class="cs-card">
+<a href="move/set-x0-and-y0-in-tangentnormal-equation-to-extract-axis-intercepts.html" class="cs-card lazy-tex">
   <div class="cs-name">Set x=0 and y=0 in tangent/normal equation to extract axis intercepts</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{x\cos\theta}{3} + \dfrac{y\sin\theta}{2} = 1\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow x=3\sec\theta;\quad x=0 \Rightarrow y=2\csc\theta\;$</div></div>
   <div class="cs-meta">
@@ -596,7 +631,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-a-composite-figure-into-elementary-sub-shapes-to-compute-length-or-are.html" class="cs-card">
+<a href="move/decompose-a-composite-figure-into-elementary-sub-shapes-to-compute-length-or-are.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose a composite figure into elementary sub-shapes to compute length or area</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Vertices } (0,0),\,(3,0),\,(3,2),\,(0,4)\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{2}(3)(4+2) = 9 \quad\text{or}\quad \underbrace{3\times2}_{\text{rect}} + \underbrace{\tfrac{1}{2}\times3\times2}_{\triangle} = 9\;$</div></div>
   <div class="cs-meta">
@@ -611,7 +646,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-y-expressions-to-reduce-intersection-to-a-single-equation-in-x.html" class="cs-card">
+<a href="move/equate-y-expressions-to-reduce-intersection-to-a-single-equation-in-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate y-expressions to reduce intersection to a single equation in x</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = 2x + 3\;$</div><div class="cs-line cs-step">$\;x^2 = 2x + 3 \Rightarrow x^2 - 2x - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -626,7 +661,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-into-the-simplerparameter-free-equation-to-find-the-missing-coor.html" class="cs-card">
+<a href="move/back-substitute-into-the-simplerparameter-free-equation-to-find-the-missing-coor.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute into the simpler/parameter-free equation to find the missing coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2x + 1,\quad x = 3\;$</div><div class="cs-line cs-step">$\;y = 2(3) + 1 = 7 \Rightarrow (3,\,7)\;$</div></div>
   <div class="cs-meta">
@@ -641,7 +676,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-point-on-conic-to-collapse-two-unknowns-to-one.html" class="cs-card">
+<a href="move/parametrise-point-on-conic-to-collapse-two-unknowns-to-one.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise point on conic to collapse two unknowns to one</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 8x,\quad P\text{ on curve}\;$</div><div class="cs-line cs-step">$\;P = (2t^2,\,4t) \Rightarrow (4t)^2 = 16t^2 = 8(2t^2)\ \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -656,7 +691,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-tangent-radius-perpendicularity-via-negative-reciprocal-gradient.html" class="cs-card">
+<a href="move/apply-tangent-radius-perpendicularity-via-negative-reciprocal-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply tangent-radius perpendicularity via negative-reciprocal gradient</div>
   <div class="cs-example"><div class="cs-line">$\;C(0,0),\; P(3,4)\;$</div><div class="cs-line cs-step">$\;m_{CP} = \tfrac{4}{3} \Rightarrow m_T = -\tfrac{3}{4},\; y - 4 = -\tfrac{3}{4}(x - 3)\;$</div></div>
   <div class="cs-meta">
@@ -671,7 +706,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/clear-fractions-by-multiplying-through-to-reach-required-standard-form.html" class="cs-card">
+<a href="move/clear-fractions-by-multiplying-through-to-reach-required-standard-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear fractions by multiplying through to reach required standard form</div>
   <div class="cs-example"><div class="cs-line">$\;y - 1 = -\tfrac{3}{2}(x - 4)\;$</div><div class="cs-line cs-step">$\;2y - 2 = -3x + 12 \Rightarrow 3x + 2y - 14 = 0\;$</div></div>
   <div class="cs-meta">
@@ -686,7 +721,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-geometric-position-conditions-into-algebraic-equations-by-substitution.html" class="cs-card">
+<a href="move/translate-geometric-position-conditions-into-algebraic-equations-by-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate geometric position conditions into algebraic equations by substitution</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 4x + 3,\quad y = 0\;$</div><div class="cs-line cs-step">$\;x^2 - 4x + 3 = 0 \Rightarrow (x-1)(x-3) = 0\;$</div></div>
   <div class="cs-meta">
@@ -701,7 +736,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/quote-standard-conic-results-directly-to-bypass-derivation.html" class="cs-card">
+<a href="move/quote-standard-conic-results-directly-to-bypass-derivation.html" class="cs-card lazy-tex">
   <div class="cs-name">Quote standard conic results directly to bypass derivation</div>
   <div class="cs-example"><div class="cs-line">$\;\frac{x^2}{9}+\frac{y^2}{4}=1,\quad P=(3\cos\theta,\,2\sin\theta)\;$</div><div class="cs-line cs-step">$\;\text{Tangent: } \frac{x\cos\theta}{3}+\frac{y\sin\theta}{2}=1\;$</div></div>
   <div class="cs-meta">
@@ -716,7 +751,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rearrange-linear-equation-to-ymxc-to-extract-gradient.html" class="cs-card">
+<a href="move/rearrange-linear-equation-to-ymxc-to-extract-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange linear equation to y=mx+c to extract gradient</div>
   <div class="cs-example"><div class="cs-line">$\;3x - 2y + 4 = 0\;$</div><div class="cs-line cs-step">$\;2y = 3x + 4 \Rightarrow y = \tfrac{3}{2}x + 2,\quad m = \tfrac{3}{2}\;$</div></div>
   <div class="cs-meta">
@@ -731,7 +766,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-x-into-the-curve-equation-to-recover-the-missing-y-coordinate.html" class="cs-card">
+<a href="move/substitute-x-into-the-curve-equation-to-recover-the-missing-y-coordinate.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute x into the curve equation to recover the missing y-coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 4x,\quad x = 2\;$</div><div class="cs-line cs-step">$\;y = (2)^3 - 4(2) = 8 - 8 = 0 \Rightarrow (2,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -746,7 +781,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-off-coordinates-and-distances-directly-from-axis-alignment-to-bypass-genera.html" class="cs-card">
+<a href="move/read-off-coordinates-and-distances-directly-from-axis-alignment-to-bypass-genera.html" class="cs-card lazy-tex">
   <div class="cs-name">Read off coordinates and distances directly from axis-alignment to bypass general formulae</div>
   <div class="cs-example"><div class="cs-line">$\;P=(1,0),\; Q=(5,0),\; R=(3,6)\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2} \times |5-1| \times |6| = 12\;$</div></div>
   <div class="cs-meta">
@@ -761,7 +796,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-region-boundaries-into-a-system-of-inequalities-by-side-selection.html" class="cs-card">
+<a href="move/convert-region-boundaries-into-a-system-of-inequalities-by-side-selection.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert region boundaries into a system of inequalities by side-selection</div>
   <div class="cs-example"><div class="cs-line">$\;R\text{: above } y = x,\ \text{below } y = 4,\ \text{right of } x = 0;\quad \text{test point } (1,2)\;$</div><div class="cs-line cs-step">$\;2 > 1,\; 2 < 4,\; 1 > 0 \Rightarrow x < y < 4,\; x > 0\;$</div></div>
   <div class="cs-meta">
@@ -776,7 +811,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-shoelace-formula-to-compute-triangle-area-from-vertex-coordinates.html" class="cs-card">
+<a href="move/apply-the-shoelace-formula-to-compute-triangle-area-from-vertex-coordinates.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the shoelace formula to compute triangle area from vertex coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;(0,0),\ (4,0),\ (0,3)\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2}|0(0-3)+4(3-0)+0(0-0)| = \tfrac{1}{2}(12) = 6\;$</div></div>
   <div class="cs-meta">
@@ -791,7 +826,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-composite-circular-region-into-standard-sub-shapes-to-compute-area-and.html" class="cs-card">
+<a href="move/decompose-composite-circular-region-into-standard-sub-shapes-to-compute-area-and.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose composite circular region into standard sub-shapes to compute area and perimeter</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Semicircle radius } r=2 \text{ atop rectangle } 4 \times 3\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}\pi(2)^2 + 4\times 3 = 2\pi + 12,\quad P = 4 + 3 + 3 + \pi(2) = 10 + 2\pi\;$</div></div>
   <div class="cs-meta">
@@ -806,7 +841,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-one-relation-into-another-to-collapse-a-two-variable-system-to-one-va.html" class="cs-card">
+<a href="move/substitute-one-relation-into-another-to-collapse-a-two-variable-system-to-one-va.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute one relation into another to collapse a two-variable system to one variable</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2x,\quad x^2 + y^2 = 5\;$</div><div class="cs-line cs-step">$\;x^2 + (2x)^2 = 5 \Rightarrow 5x^2 = 5 \Rightarrow x = \pm 1\;$</div></div>
   <div class="cs-meta">
@@ -821,7 +856,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-intercept-and-compute-gradient-from-two-points-to-write-y-mx-c.html" class="cs-card">
+<a href="move/read-intercept-and-compute-gradient-from-two-points-to-write-y-mx-c.html" class="cs-card lazy-tex">
   <div class="cs-name">Read intercept and compute gradient from two points to write y = mx + c</div>
   <div class="cs-example"><div class="cs-line">$\;(0,\,1),\;(2,\,5)\;$</div><div class="cs-line cs-step">$\;c = 1,\; m = \dfrac{5-1}{2-0} = 2 \Rightarrow y = 2x + 1\;$</div></div>
   <div class="cs-meta">
@@ -836,7 +871,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-a-known-total-along-collinear-points-or-straight-line-angles-to-find-t.html" class="cs-card">
+<a href="move/decompose-a-known-total-along-collinear-points-or-straight-line-angles-to-find-t.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose a known total along collinear points or straight-line angles to find the missing piece</div>
   <div class="cs-example"><div class="cs-line">$\;A,\ B,\ C \text{ collinear},\quad AC = 10,\quad AB = 7\;$</div><div class="cs-line cs-step">$\;BC = AC - AB = 10 - 7 = 3\;$</div></div>
   <div class="cs-meta">
@@ -851,7 +886,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-gradients-of-the-two-segments-at-the-vertex-to-verify-a-right-angle.html" class="cs-card">
+<a href="move/multiply-gradients-of-the-two-segments-at-the-vertex-to-verify-a-right-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply gradients of the two segments at the vertex to verify a right angle</div>
   <div class="cs-example"><div class="cs-line">$\;V(1,1),\; A(3,3),\; B(3,-1)\;$</div><div class="cs-line cs-step">$\;m_{VA} = \frac{3-1}{3-1} = 1,\quad m_{VB} = \frac{-1-1}{3-1} = -1,\quad m_{VA} \times m_{VB} = -1 \Rightarrow VA \perp VB\;$</div></div>
   <div class="cs-meta">
@@ -866,7 +901,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-point-gradient-form-once-point-and-slope-are-known.html" class="cs-card">
+<a href="move/apply-point-gradient-form-once-point-and-slope-are-known.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply point-gradient form once point and slope are known</div>
   <div class="cs-example"><div class="cs-line">$\;P(1,\,2),\quad m = 3\;$</div><div class="cs-line cs-step">$\;y - 2 = 3(x - 1) \Rightarrow y = 3x - 1\;$</div></div>
   <div class="cs-meta">
@@ -881,7 +916,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invoke-converse-of-angle-in-semicircle-theorem-to-identify-a-diameter.html" class="cs-card">
+<a href="move/invoke-converse-of-angle-in-semicircle-theorem-to-identify-a-diameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Invoke converse of angle-in-semicircle theorem to identify a diameter</div>
   <div class="cs-example"><div class="cs-line">$\;P(0,0),\; Q(2,2),\; R(4,0) \text{ lie on a circle.}\; m_{QP}=\frac{2-0}{2-0}=1,\; m_{QR}=\frac{2-0}{2-4}=-1.\;$</div><div class="cs-line cs-step">$\;m_{QP}\cdot m_{QR}=1\times(-1)=-1 \;\Rightarrow\; \angle PQR=90^\circ \;\Rightarrow\; PR \text{ is a diameter (converse of angle in semicircle), centre }=\left(2,0\right),\; r=2\;$</div></div>
   <div class="cs-meta">
@@ -896,7 +931,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-given-point-into-dydx-then-apply-point-gradient-formula.html" class="cs-card">
+<a href="move/substitute-the-given-point-into-dydx-then-apply-point-gradient-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the given point into dy/dx then apply point-gradient formula</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{x+y}{y-x},\quad (1,\,2)\;$</div><div class="cs-line cs-step">$\;m = \dfrac{1+2}{2-1} = 3 \Rightarrow y-2 = 3(x-1) \Rightarrow 3x - y - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -911,7 +946,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-discriminant-to-zero-to-enforce-line-curve-tangency.html" class="cs-card">
+<a href="move/set-discriminant-to-zero-to-enforce-line-curve-tangency.html" class="cs-card lazy-tex">
   <div class="cs-name">Set discriminant to zero to enforce line-curve tangency</div>
   <div class="cs-example"><div class="cs-line">$\;y = x + c \text{ tangent to } x^2 + y^2 = 1\;$</div><div class="cs-line cs-step">$\;x^2 + (x+c)^2 = 1 \Rightarrow 2x^2 + 2cx + (c^2-1)=0,\quad \Delta = 4c^2 - 8(c^2-1)=0 \Rightarrow c = \pm\sqrt{2}\;$</div></div>
   <div class="cs-meta">
@@ -926,7 +961,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-tangent-equations-and-solve-simultaneously-to-locate-their-intersection.html" class="cs-card">
+<a href="move/build-tangent-equations-and-solve-simultaneously-to-locate-their-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Build tangent equations and solve simultaneously to locate their intersection</div>
   <div class="cs-example"><div class="cs-line">$\;T_1:\, y = 2x,\quad T_2:\, y = -x + 3\;$</div><div class="cs-line cs-step">$\;2x = -x + 3 \Rightarrow x = 1,\; y = 2 \Rightarrow R = (1,\,2)\;$</div></div>
   <div class="cs-meta">
@@ -941,7 +976,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-line-equation-into-the-circle-to-find-intersections.html" class="cs-card">
+<a href="move/substitute-the-line-equation-into-the-circle-to-find-intersections.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the line equation into the circle to find intersections</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 5,\quad y = x + 1\;$</div><div class="cs-line cs-step">$\;x^2 + (x+1)^2 = 5 \Rightarrow 2x^2 + 2x - 4 = 0 \Rightarrow (x-1)(x+2) = 0\;$</div></div>
   <div class="cs-meta">
@@ -956,7 +991,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-diameter-endpoints-to-find-centre-midpoint-and-radius-distance.html" class="cs-card">
+<a href="move/use-diameter-endpoints-to-find-centre-midpoint-and-radius-distance.html" class="cs-card lazy-tex">
   <div class="cs-name">Use diameter endpoints to find centre (midpoint) and radius (distance)</div>
   <div class="cs-example"><div class="cs-line">$\;P(1,2),\; Q(5,6) \text{ diameter endpoints}\;$</div><div class="cs-line cs-step">$\;C = \left(\tfrac{1+5}{2},\tfrac{2+6}{2}\right) = (3,4),\; r = \sqrt{(5-3)^2+(6-4)^2} = 2\sqrt{2}\;$</div></div>
   <div class="cs-meta">
@@ -971,7 +1006,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parameterise-quadratic-by-roots-and-fix-scale-via-a-third-point.html" class="cs-card">
+<a href="move/parameterise-quadratic-by-roots-and-fix-scale-via-a-third-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Parameterise quadratic by roots and fix scale via a third point</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Roots } x=1,\,x=5;\quad \text{point } (3,\,-4)\;$</div><div class="cs-line cs-step">$\;-4 = A(3-1)(3-5) = -4A \Rightarrow A=1,\quad y=(x-1)(x-5)\;$</div></div>
   <div class="cs-meta">
@@ -986,7 +1021,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reflect-known-root-across-axis-of-symmetry-to-find-other-root.html" class="cs-card">
+<a href="move/reflect-known-root-across-axis-of-symmetry-to-find-other-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Reflect known root across axis of symmetry to find other root</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Axis: } x = 5,\quad r_1 = 2\;$</div><div class="cs-line cs-step">$\;r_2 = 2(5) - 2 = 8\;$</div></div>
   <div class="cs-meta">
@@ -1001,7 +1036,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-implicit-boundary-axis-from-the-figure-to-close-the-region.html" class="cs-card">
+<a href="move/read-implicit-boundary-axis-from-the-figure-to-close-the-region.html" class="cs-card lazy-tex">
   <div class="cs-name">Read implicit boundary (axis) from the figure to close the region</div>
   <div class="cs-example"><div class="cs-line">$\;R:\; y \le x,\; y \ge 0,\; \text{(figure shows }R\text{ bounded on the right by }x=4\text{)}\;$</div><div class="cs-line cs-step">$\;y \le x,\; y \ge 0,\; 0 \le x \le 4\;$</div></div>
   <div class="cs-meta">
@@ -1016,7 +1051,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-y-expressions-to-reduce-linecurve-intersection-to-one-equation.html" class="cs-card">
+<a href="move/equate-y-expressions-to-reduce-linecurve-intersection-to-one-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate y-expressions to reduce line–curve intersection to one equation</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x,\quad y = x^2 + 2\;$</div><div class="cs-line cs-step">$\;3x = x^2 + 2 \Rightarrow x^2 - 3x + 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1031,7 +1066,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-distance-between-collinear-points-as-difference-of-conjugate-quadratic-root.html" class="cs-card">
+<a href="move/find-distance-between-collinear-points-as-difference-of-conjugate-quadratic-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Find distance between collinear points as difference of conjugate quadratic roots</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 - 6x + 1 = 0,\quad \Delta = 32,\; a = 1\;$</div><div class="cs-line cs-step">$\;PQ = \frac{\sqrt{\Delta}}{|a|} = \frac{\sqrt{32}}{1} = 4\sqrt{2}\;$</div></div>
   <div class="cs-meta">
@@ -1046,7 +1081,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-l-shape-area-as-bounding-rectangle-minus-removed-corner.html" class="cs-card">
+<a href="move/find-l-shape-area-as-bounding-rectangle-minus-removed-corner.html" class="cs-card lazy-tex">
   <div class="cs-name">Find L-shape area as bounding rectangle minus removed corner</div>
   <div class="cs-example"><div class="cs-line">$\;\text{L-shape: bounding }5x \times 4x,\; \text{corner removed }3x \times 2x\;$</div><div class="cs-line cs-step">$\;A = 5x\cdot 4x - 3x\cdot 2x = 20x^2 - 6x^2 = 14x^2\;$</div></div>
   <div class="cs-meta">
@@ -1061,7 +1096,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-x-values-into-the-linear-equation-not-the-quadratic.html" class="cs-card">
+<a href="move/back-substitute-x-values-into-the-linear-equation-not-the-quadratic.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute x-values into the linear equation, not the quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2x + 1 \text{ meets } y = x^2 \text{ at } x = 1,\; x = -1\;$</div><div class="cs-line cs-step">$\;y = 2(1)+1 = 3,\; y = 2(-1)+1 = -1 \Rightarrow (1,3),\;(-1,-1)\;$</div></div>
   <div class="cs-meta">
@@ -1076,7 +1111,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bound-a-region-horizontally-using-intersection-x-coordinates.html" class="cs-card">
+<a href="move/bound-a-region-horizontally-using-intersection-x-coordinates.html" class="cs-card lazy-tex">
   <div class="cs-name">Bound a region horizontally using intersection x-coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;y = 4 - x,\quad y = \dfrac{2}{x}\;$</div><div class="cs-line cs-step">$\;4 - x = \dfrac{2}{x} \Rightarrow x = 2,\; x = 1 \Rightarrow 1 \le x \le 2\;$</div></div>
   <div class="cs-meta">
@@ -1091,7 +1126,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-origin-as-one-point-to-write-line-as-y-mx.html" class="cs-card">
+<a href="move/use-origin-as-one-point-to-write-line-as-y-mx.html" class="cs-card lazy-tex">
   <div class="cs-name">Use origin as one point to write line as y = mx</div>
   <div class="cs-example"><div class="cs-line">$\;l \text{ passes through } O(0,0) \text{ and } M(3,6)\;$</div><div class="cs-line cs-step">$\;m = \dfrac{6}{3} = 2 \Rightarrow y = 2x\;$</div></div>
   <div class="cs-meta">
@@ -1106,7 +1141,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-pairwise-line-intersections-to-pin-down-polygon-vertices.html" class="cs-card">
+<a href="move/find-pairwise-line-intersections-to-pin-down-polygon-vertices.html" class="cs-card lazy-tex">
   <div class="cs-name">Find pairwise line intersections to pin down polygon vertices</div>
   <div class="cs-example"><div class="cs-line">$\;y = 0,\quad x = 0,\quad y = -x + 3\;$</div><div class="cs-line cs-step">$\;x=0 \cap y=-x+3 \Rightarrow (0,3);\quad y=0 \cap y=-x+3 \Rightarrow (3,0);\quad x=0 \cap y=0 \Rightarrow (0,0)\;$</div></div>
   <div class="cs-meta">
@@ -1121,7 +1156,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-into-the-simpler-equation-to-recover-the-partner-coordinate.html" class="cs-card">
+<a href="move/back-substitute-into-the-simpler-equation-to-recover-the-partner-coordinate.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute into the simpler equation to recover the partner coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 3x + 5,\quad y = 2x,\quad x = 1\;$</div><div class="cs-line cs-step">$\;y = 2(1) = 2 \Rightarrow (1,\,2)\;$</div></div>
   <div class="cs-meta">
@@ -1136,7 +1171,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-arc-length-formula-l-rθ-to-solve-for-radius.html" class="cs-card">
+<a href="move/invert-arc-length-formula-l-rθ-to-solve-for-radius.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert arc-length formula L = rθ to solve for radius</div>
   <div class="cs-example"><div class="cs-line">$\;L = 3,\quad \theta = 2\;$</div><div class="cs-line cs-step">$\;r = \dfrac{L}{\theta} = \dfrac{3}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1151,7 +1186,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decode-on-the-negative-x-axis-as-y0-with-x0.html" class="cs-card">
+<a href="move/decode-on-the-negative-x-axis-as-y0-with-x0.html" class="cs-card lazy-tex">
   <div class="cs-name">Decode &#x27;on the negative x-axis&#x27; as y=0 with x&lt;0</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 9,\quad \text{meets negative } x\text{-axis}\;$</div><div class="cs-line cs-step">$\;y=0:\; x^2=9 \Rightarrow x=\pm3,\; x<0 \Rightarrow (-3,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -1166,7 +1201,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-boundary-lines-into-inequalities-using-an-interior-test-point.html" class="cs-card">
+<a href="move/convert-boundary-lines-into-inequalities-using-an-interior-test-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert boundary lines into inequalities using an interior test point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x,\; y = 0,\; x = 2;\quad \text{test point } (1,\tfrac{1}{2})\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{2} \le 1,\; \tfrac{1}{2} \ge 0,\; 1 \le 2 \Rightarrow y \le x,\; y \ge 0,\; x \le 2\;$</div></div>
   <div class="cs-meta">
@@ -1181,7 +1216,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/express-annular-sector-area-as-difference-of-two-sectors.html" class="cs-card">
+<a href="move/express-annular-sector-area-as-difference-of-two-sectors.html" class="cs-card lazy-tex">
   <div class="cs-name">Express annular sector area as difference of two sectors</div>
   <div class="cs-example"><div class="cs-line">$\;A = \tfrac{1}{2}(2)\bigl[(1+w)^2 - 1^2\bigr],\quad A = 3\;$</div><div class="cs-line cs-step">$\;w^2 + 2w = 3 \Rightarrow w^2 + 2w - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1196,7 +1231,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-composite-perimeter-into-arcs-plus-radial-segments.html" class="cs-card">
+<a href="move/decompose-composite-perimeter-into-arcs-plus-radial-segments.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose composite perimeter into arcs plus radial segments</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Annular sector: } r=2,\; R=5,\; \theta=\tfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;P = r\theta + R\theta + 2(R-r) = \tfrac{2\pi}{3} + \tfrac{5\pi}{3} + 6 = \tfrac{7\pi}{3} + 6\;$</div></div>
   <div class="cs-meta">
@@ -1211,7 +1246,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-trapezium-with-vertical-parallel-sides-and-horizontal-height.html" class="cs-card">
+<a href="move/recognise-trapezium-with-vertical-parallel-sides-and-horizontal-height.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise trapezium with vertical parallel sides and horizontal height</div>
   <div class="cs-example"><div class="cs-line">$\;A(0,0),\; B(0,4),\; C(3,3),\; D(3,1)\;$</div><div class="cs-line cs-step">$\;a=|AB|=4,\; b=|CD|=2,\; h=3 \Rightarrow A=\tfrac{1}{2}(4+2)(3)=9\;$</div></div>
   <div class="cs-meta">
@@ -1226,7 +1261,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/impose-geometric-lower-bound-on-parameter-using-sketch-after-discriminant.html" class="cs-card">
+<a href="move/impose-geometric-lower-bound-on-parameter-using-sketch-after-discriminant.html" class="cs-card lazy-tex">
   <div class="cs-name">Impose geometric lower bound on parameter using sketch after discriminant</div>
   <div class="cs-example"><div class="cs-line">$\;y = Ax \text{ meets } y = x(4 - x^2);\quad x(x^2 - 4 + A) = 0\;$</div><div class="cs-line cs-step">$\;\Delta > 0 \Rightarrow A < 4;\quad \text{sketch} \Rightarrow A > 0;\quad 0 < A < 4\;$</div></div>
   <div class="cs-meta">
@@ -1241,7 +1276,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-a-segment-via-a-point-on-a-known-radius.html" class="cs-card">
+<a href="move/decompose-a-segment-via-a-point-on-a-known-radius.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose a segment via a point on a known radius</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Circle centre }O,\ r=6,\ D\text{ on }OC,\ AD=5,\ \angle AOD=0.7,\ \angle ADO=2.257\;$</div><div class="cs-line cs-step">$\;\angle OAD=\pi-0.7-2.257=0.185,\quad OD=\dfrac{5\sin 0.185}{\sin 0.7}\approx1.43,\quad CD=6-1.43=4.57\;$</div></div>
   <div class="cs-meta">
@@ -1256,7 +1291,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-chord-parallel-to-diameter-symmetry-to-equate-central-angles.html" class="cs-card">
+<a href="move/use-chord-parallel-to-diameter-symmetry-to-equate-central-angles.html" class="cs-card lazy-tex">
   <div class="cs-name">Use chord-parallel-to-diameter symmetry to equate central angles</div>
   <div class="cs-example"><div class="cs-line">$\;BD \parallel AE,\; AE \text{ diameter},\; \angle BOA = 0.7\;$</div><div class="cs-line cs-step">$\;\angle DOE = \angle BOA = 0.7 \Rightarrow \angle BOD = \pi - 2(0.7) = \pi - 1.4\;$</div></div>
   <div class="cs-meta">
@@ -1271,7 +1306,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-rectangles-right-angle-to-reduce-triangle-to-right-angled.html" class="cs-card">
+<a href="move/use-rectangles-right-angle-to-reduce-triangle-to-right-angled.html" class="cs-card lazy-tex">
   <div class="cs-name">Use rectangle&#x27;s right angle to reduce triangle to right-angled</div>
   <div class="cs-example"><div class="cs-line">$\;ABCD \text{ rectangle},\ O \in DC,\ AD = 3,\ OD = 4\;$</div><div class="cs-line cs-step">$\;\angle ADC = 90^\circ \Rightarrow \triangle AOD \text{ rt-}\angle\text{d at } D,\ OA = \sqrt{3^2+4^2} = 5\;$</div></div>
   <div class="cs-meta">
@@ -1286,7 +1321,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/transfer-sector-angle-to-sub-triangle-when-point-lies-on-bounding-radius.html" class="cs-card">
+<a href="move/transfer-sector-angle-to-sub-triangle-when-point-lies-on-bounding-radius.html" class="cs-card lazy-tex">
   <div class="cs-name">Transfer sector angle to sub-triangle when point lies on bounding radius</div>
   <div class="cs-example"><div class="cs-line">$\;OA=4,\; \angle AOB=\tfrac{\pi}{6},\; P\text{ on }OB,\; \text{area}\,\triangle AOP=3\;$</div><div class="cs-line cs-step">$\;\angle AOP=\tfrac{\pi}{6}\Rightarrow \tfrac{1}{2}(4)(OP)\sin\tfrac{\pi}{6}=3 \Rightarrow OP=3\;$</div></div>
   <div class="cs-meta">
@@ -1301,7 +1336,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recover-missing-coordinate-of-a-point-on-a-circle-via-pythagoras.html" class="cs-card">
+<a href="move/recover-missing-coordinate-of-a-point-on-a-circle-via-pythagoras.html" class="cs-card lazy-tex">
   <div class="cs-name">Recover missing coordinate of a point on a circle via Pythagoras</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 25,\quad x = 3\;$</div><div class="cs-line cs-step">$\;y^2 = 25 - 9 = 16 \Rightarrow y = 4 \quad (y>0)\;$</div></div>
   <div class="cs-meta">
@@ -1316,7 +1351,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collapse-tangent-equation-to-y-fa-when-gradient-is-zero.html" class="cs-card">
+<a href="move/collapse-tangent-equation-to-y-fa-when-gradient-is-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse tangent equation to y = f(a) when gradient is zero</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - 3x,\quad a = 1,\quad f'(1) = 3(1)^2 - 3 = 0,\quad f(1) = -2\;$</div><div class="cs-line cs-step">$\;y - (-2) = 0\cdot(x - 1) \Rightarrow y = -2\;$</div></div>
   <div class="cs-meta">
@@ -1331,7 +1366,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-closed-perimeter-into-arc-and-radial-edge-components.html" class="cs-card">
+<a href="move/decompose-closed-perimeter-into-arc-and-radial-edge-components.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose closed perimeter into arc and radial-edge components</div>
   <div class="cs-example"><div class="cs-line">$\;n=2,\; r_{\text{in}}=3,\; r_{\text{out}}=5,\; \theta=\dfrac{\pi}{3}\;$</div><div class="cs-line cs-step">$\;P = 2\!\left(3\cdot\tfrac{\pi}{3}\right)+2\!\left(5\cdot\tfrac{\pi}{3}\right)+4(5-3) = 2\pi+\tfrac{10\pi}{3}+8 = \tfrac{16\pi}{3}+8\;$</div></div>
   <div class="cs-meta">
@@ -1346,7 +1381,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/replace-x-with-x---a-to-translate-a-curve-horizontally-by-a.html" class="cs-card">
+<a href="move/replace-x-with-x---a-to-translate-a-curve-horizontally-by-a.html" class="cs-card lazy-tex">
   <div class="cs-name">Replace x with (x - a) to translate a curve horizontally by +a</div>
   <div class="cs-example"><div class="cs-line">$\;y = (x-1)^2(x-3)\;$</div><div class="cs-line cs-step">$\;y = f(x-2) \Rightarrow y = (x-3)^2(x-5)\;$</div></div>
   <div class="cs-meta">
@@ -1361,7 +1396,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-horizontalvertical-tangent-geometry-instead-of-discriminant.html" class="cs-card">
+<a href="move/use-horizontalvertical-tangent-geometry-instead-of-discriminant.html" class="cs-card lazy-tex">
   <div class="cs-name">Use horizontal/vertical tangent geometry instead of discriminant</div>
   <div class="cs-example"><div class="cs-line">$\;(x-1)^2 + (y-3)^2 = 4\;$</div><div class="cs-line cs-step">$\;y = k \text{ tangent} \Rightarrow k = 3 \pm 2,\ k=1 \text{ or } 5\;$</div></div>
   <div class="cs-meta">
@@ -1376,7 +1411,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-using-factored-form-rather-than-expanded-form.html" class="cs-card">
+<a href="move/evaluate-using-factored-form-rather-than-expanded-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate using factored form rather than expanded form</div>
   <div class="cs-example"><div class="cs-line">$\;y = (x-1)(x-3)^2,\quad x = 5\;$</div><div class="cs-line cs-step">$\;y = (5-1)(5-3)^2 = 4 \times 4 = 16\;$</div></div>
   <div class="cs-meta">
@@ -1391,7 +1426,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-curve-and-line-to-find-intersection-x-coordinates.html" class="cs-card">
+<a href="move/equate-curve-and-line-to-find-intersection-x-coordinates.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate curve and line to find intersection x-coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = x + 2\;$</div><div class="cs-line cs-step">$\;x^2 = x + 2 \Rightarrow x^2 - x - 2 = 0 \Rightarrow (x-2)(x+1) = 0 \Rightarrow x = -1,\, 2\;$</div></div>
   <div class="cs-meta">
@@ -1406,7 +1441,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-curve-and-line-to-locate-intersection-points.html" class="cs-card">
+<a href="move/equate-curve-and-line-to-locate-intersection-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate curve and line to locate intersection points</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = 3x - 2\;$</div><div class="cs-line cs-step">$\;x^2 = 3x - 2 \Rightarrow x^2 - 3x + 2 = 0 \Rightarrow (x-1)(x-2) = 0\;$</div></div>
   <div class="cs-meta">
@@ -1421,7 +1456,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-two-curve-equations-to-form-a-single-polynomial-in-x.html" class="cs-card">
+<a href="move/equate-two-curve-equations-to-form-a-single-polynomial-in-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate two curve equations to form a single polynomial in x</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = 2x + 3\;$</div><div class="cs-line cs-step">$\;x^2 = 2x + 3 \Rightarrow x^2 - 2x - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1436,7 +1471,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-pythagoras-to-the-centremidpointendpoint-right-triangle-for-a-chord.html" class="cs-card">
+<a href="move/apply-pythagoras-to-the-centremidpointendpoint-right-triangle-for-a-chord.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Pythagoras to the centre–midpoint–endpoint right triangle for a chord</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 25,\quad \text{chord on } y = 3,\quad L = ?\;$</div><div class="cs-line cs-step">$\;d = 3,\quad d^2 + \left(\tfrac{L}{2}\right)^2 = 25 \Rightarrow 9 + \tfrac{L^2}{4} = 25 \Rightarrow L = 8\;$</div></div>
   <div class="cs-meta">
@@ -1451,7 +1486,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-farthest-point-on-circle-from-a-point-on-it-via-diameter-extension.html" class="cs-card">
+<a href="move/find-farthest-point-on-circle-from-a-point-on-it-via-diameter-extension.html" class="cs-card lazy-tex">
   <div class="cs-name">Find farthest point on circle from a point on it via diameter extension</div>
   <div class="cs-example"><div class="cs-line">$\;C:\text{ centre }(3,1),\quad Q=(1,-1)\in C\;$</div><div class="cs-line cs-step">$\;S = (2(3)-1,\ 2(1)-(-1)) = (5,\ 3)\;$</div></div>
   <div class="cs-meta">
@@ -1466,7 +1501,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/filter-algebraic-roots-by-domain-and-prior-assignment-to-identify-the-target-poi.html" class="cs-card">
+<a href="move/filter-algebraic-roots-by-domain-and-prior-assignment-to-identify-the-target-poi.html" class="cs-card lazy-tex">
   <div class="cs-name">Filter algebraic roots by domain and prior assignment to identify the target point</div>
   <div class="cs-example"><div class="cs-line">$\;x^3 - 4x^2 + x + 6 = 0 \Rightarrow x = -1,\, 2,\, 3;\quad x \geq 0,\; A \text{ at } x=2\;$</div><div class="cs-line cs-step">$\;\text{discard } x=-1\ (x\geq0),\ x=2\ (=A) \Rightarrow x=3,\; y=3^2-1=8 \Rightarrow B=(3,\,8)\;$</div></div>
   <div class="cs-meta">
@@ -1481,7 +1516,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-tangent-to-circle-at-a-point-using-radius-perpendicularity.html" class="cs-card">
+<a href="move/find-tangent-to-circle-at-a-point-using-radius-perpendicularity.html" class="cs-card lazy-tex">
   <div class="cs-name">Find tangent to circle at a point using radius-perpendicularity</div>
   <div class="cs-example"><div class="cs-line">$\;C(0,0),\; P(3,4) \text{ on the circle}\;$</div><div class="cs-line cs-step">$\;m_{CP}=\dfrac{4}{3} \Rightarrow m_T=-\dfrac{3}{4},\; y-4=-\tfrac{3}{4}(x-3) \Rightarrow 3x+4y=25\;$</div></div>
   <div class="cs-meta">
@@ -1496,7 +1531,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-axis-tangency-to-distance-equals-radius-equation.html" class="cs-card">
+<a href="move/convert-axis-tangency-to-distance-equals-radius-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert axis tangency to distance-equals-radius equation</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 - 4x + 6y + k = 0,\quad \text{tangent to } x\text{-axis}\;$</div><div class="cs-line cs-step">$\;\text{Centre }(2,-3),\ r=\sqrt{13-k};\quad |-3|=\sqrt{13-k} \Rightarrow 9=13-k \Rightarrow k=4\;$</div></div>
   <div class="cs-meta">
@@ -1511,7 +1546,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-perpendicular-bisector-into-midpoint-plus-perpendicular-gradient.html" class="cs-card">
+<a href="move/decompose-perpendicular-bisector-into-midpoint-plus-perpendicular-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose &#x27;perpendicular bisector&#x27; into midpoint plus perpendicular gradient</div>
   <div class="cs-example"><div class="cs-line">$\;A(1,0),\; B(3,4)\;$</div><div class="cs-line cs-step">$\;M=(2,2),\; m_{AB}=2,\; m_\perp=-\tfrac{1}{2} \Rightarrow y-2=-\tfrac{1}{2}(x-2)\;$</div></div>
   <div class="cs-meta">
@@ -1526,7 +1561,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-tangent-intercept-as-a-repeated-root-perfect-square.html" class="cs-card">
+<a href="move/recognise-tangent-intercept-as-a-repeated-root-perfect-square.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise tangent intercept as a repeated root (perfect square)</div>
   <div class="cs-example"><div class="cs-line">$\;(x-2)^2 + (y-3)^2 = 9,\quad y=0\;$</div><div class="cs-line cs-step">$\;(x-2)^2 + 9 = 9 \Rightarrow (x-2)^2 = 0 \Rightarrow x=2,\; \text{point }(2,0)\;$</div></div>
   <div class="cs-meta">
@@ -1541,7 +1576,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-centre-and-radius-into-standard-circle-equation-form.html" class="cs-card">
+<a href="move/substitute-centre-and-radius-into-standard-circle-equation-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute centre and radius into standard circle equation form</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Centre } (3,\,2),\quad r=4\;$</div><div class="cs-line cs-step">$\;(x-3)^2+(y-2)^2=16\;$</div></div>
   <div class="cs-meta">
@@ -1556,7 +1591,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-axis-aligned-verticalhorizontal-segment-as-triangle-base.html" class="cs-card">
+<a href="move/use-axis-aligned-verticalhorizontal-segment-as-triangle-base.html" class="cs-card lazy-tex">
   <div class="cs-name">Use axis-aligned vertical/horizontal segment as triangle base</div>
   <div class="cs-example"><div class="cs-line">$\;A=(0,1),\; B=(0,5),\; C=(3,2)\;$</div><div class="cs-line cs-step">$\;\text{base}=|5-1|=4,\; \text{height}=|3-0|=3,\; \text{Area}=\tfrac{1}{2}\times 4\times 3=6\;$</div></div>
   <div class="cs-meta">
@@ -1571,7 +1606,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/impose-r²-0-to-find-parameter-range-for-a-real-circle.html" class="cs-card">
+<a href="move/impose-r²-0-to-find-parameter-range-for-a-real-circle.html" class="cs-card lazy-tex">
   <div class="cs-name">Impose r² &gt; 0 to find parameter range for a real circle</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 - 2x - k = 0\;$</div><div class="cs-line cs-step">$\;(x-1)^2 + y^2 = k+1,\quad r^2 > 0 \Rightarrow k > -1\;$</div></div>
   <div class="cs-meta">
@@ -1586,7 +1621,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-radius-tangent-perpendicularity-to-fix-the-radius-gradient.html" class="cs-card">
+<a href="move/use-radius-tangent-perpendicularity-to-fix-the-radius-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Use radius-tangent perpendicularity to fix the radius gradient</div>
   <div class="cs-example"><div class="cs-line">$\;l:\, y = 3x + 1 \text{ touches circle at } P(0,1)\;$</div><div class="cs-line cs-step">$\;m_l = 3,\; m_{PN} = -\tfrac{1}{3} \Rightarrow y - 1 = -\tfrac{1}{3}(x - 0)\;$</div></div>
   <div class="cs-meta">
@@ -1601,7 +1636,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-quadratic-formula-and-simplify-surds-for-exact-intercepts.html" class="cs-card">
+<a href="move/apply-quadratic-formula-and-simplify-surds-for-exact-intercepts.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply quadratic formula and simplify surds for exact intercepts</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 + 6y + 2 = 0\;$</div><div class="cs-line cs-step">$\;y = \dfrac{-6 \pm \sqrt{36-8}}{2} = \dfrac{-6 \pm 2\sqrt{7}}{2} = -3 \pm \sqrt{7}\;$</div></div>
   <div class="cs-meta">
@@ -1616,7 +1651,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-radiustangent-to-form-right-triangle-and-apply-pythagoras.html" class="cs-card">
+<a href="move/use-radiustangent-to-form-right-triangle-and-apply-pythagoras.html" class="cs-card lazy-tex">
   <div class="cs-name">Use radius⊥tangent to form right triangle and apply Pythagoras</div>
   <div class="cs-example"><div class="cs-line">$\;X=(3,4),\; r=2,\; A=(0,0),\; XB\perp AB\;$</div><div class="cs-line cs-step">$\;AB^2 = AX^2 - r^2 = (9+16) - 4 = 21\;$</div></div>
   <div class="cs-meta">
@@ -1631,7 +1666,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/locate-circle-centre-as-midpoint-of-given-diameter.html" class="cs-card">
+<a href="move/locate-circle-centre-as-midpoint-of-given-diameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Locate circle centre as midpoint of given diameter</div>
   <div class="cs-example"><div class="cs-line">$\;Q=(0,0),\; R=(6,8) \text{ are endpoints of a diameter}\;$</div><div class="cs-line cs-step">$\;M=\left(\tfrac{0+6}{2},\tfrac{0+8}{2}\right)=(3,4),\; r^2=3^2+4^2=25 \Rightarrow (x-3)^2+(y-4)^2=25\;$</div></div>
   <div class="cs-meta">
@@ -1646,7 +1681,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-line-equation-into-circle-to-form-intersection-quadratic-in-x.html" class="cs-card">
+<a href="move/substitute-line-equation-into-circle-to-form-intersection-quadratic-in-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute line equation into circle to form intersection quadratic in x</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 4,\quad y = x + 1\;$</div><div class="cs-line cs-step">$\;x^2 + (x+1)^2 = 4 \Rightarrow 2x^2 + 2x - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1661,7 +1696,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-axis-aligned-side-as-base-for-triangle-area.html" class="cs-card">
+<a href="move/use-axis-aligned-side-as-base-for-triangle-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Use axis-aligned side as base for triangle area</div>
   <div class="cs-example"><div class="cs-line">$\;A(1,0),\; B(5,0),\; C(3,4)\;$</div><div class="cs-line cs-step">$\;\text{base } AB = |5-1|=4,\; h=|4-0|=4,\; \text{Area}=\tfrac{1}{2}\times 4\times 4=8\;$</div></div>
   <div class="cs-meta">
@@ -1676,7 +1711,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-y0-or-x0-in-line-equation-to-find-axis-intercepts.html" class="cs-card">
+<a href="move/set-y0-or-x0-in-line-equation-to-find-axis-intercepts.html" class="cs-card lazy-tex">
   <div class="cs-name">Set y=0 or x=0 in line equation to find axis intercepts</div>
   <div class="cs-example"><div class="cs-line">$\;2x + 3y = 6\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow x=3,\quad x=0 \Rightarrow y=2 \quad\Longrightarrow\quad (3,0),\;(0,2)\;$</div></div>
   <div class="cs-meta">
@@ -1691,7 +1726,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-the-given-point-satisfies-the-curve-equation-before-differentiating.html" class="cs-card">
+<a href="move/verify-the-given-point-satisfies-the-curve-equation-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify the given point satisfies the curve equation before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Curve: } x^2 + y\ln x = 1.\quad \text{Verify that } (1,\,2) \text{ lies on the curve.}\;$</div><div class="cs-line cs-step">$\;(1)^2 + (2)\ln(1) = 1 + 2(0) = 1 \quad \checkmark\;$</div></div>
   <div class="cs-meta">
@@ -1706,7 +1741,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-negative-reciprocal-of-tangent-gradient-to-get-the-normal.html" class="cs-card">
+<a href="move/take-negative-reciprocal-of-tangent-gradient-to-get-the-normal.html" class="cs-card lazy-tex">
   <div class="cs-name">Take negative reciprocal of tangent gradient to get the normal</div>
   <div class="cs-example"><div class="cs-line">$\;m_t = 3\;$</div><div class="cs-line cs-step">$\;m_n = -\dfrac{1}{m_t} = -\dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1721,7 +1756,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-tangent-via-point-gradient-form-and-set-y0-for-x-intercept.html" class="cs-card">
+<a href="move/build-tangent-via-point-gradient-form-and-set-y0-for-x-intercept.html" class="cs-card lazy-tex">
   <div class="cs-name">Build tangent via point-gradient form and set y=0 for x-intercept</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad P = (1,1),\quad m = 2x\big|_{x=1} = 2\;$</div><div class="cs-line cs-step">$\;y - 1 = 2(x - 1),\; y=0 \Rightarrow x = 1 - \tfrac{1}{2} = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1736,7 +1771,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pick-the-axis-aligned-side-as-base-for-triangle-area.html" class="cs-card">
+<a href="move/pick-the-axis-aligned-side-as-base-for-triangle-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Pick the axis-aligned side as base for triangle area</div>
   <div class="cs-example"><div class="cs-line">$\;A=(1,0),\; B=(5,0),\; C=(3,4)\;$</div><div class="cs-line cs-step">$\;\text{base } AB = |5-1|=4,\; \text{height} = 4 \Rightarrow \text{Area} = \tfrac{1}{2}(4)(4) = 8\;$</div></div>
   <div class="cs-meta">
@@ -1751,7 +1786,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-known-coordinate-into-inverted-form-to-recover-the-partner-coordinate.html" class="cs-card">
+<a href="move/substitute-known-coordinate-into-inverted-form-to-recover-the-partner-coordinate.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known coordinate into inverted form to recover the partner coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = \arcsin\!\left(\dfrac{x}{2}\right),\quad y = \dfrac{\pi}{6}\;$</div><div class="cs-line cs-step">$\;x = 2\sin\dfrac{\pi}{6} = 2 \cdot \dfrac{1}{2} = 1 \Rightarrow P = \!\left(1,\, \dfrac{\pi}{6}\right)\;$</div></div>
   <div class="cs-meta">
@@ -1766,7 +1801,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-parabola-equation-to-standard-form-y²4ax-to-extract-a.html" class="cs-card">
+<a href="move/match-parabola-equation-to-standard-form-y²4ax-to-extract-a.html" class="cs-card lazy-tex">
   <div class="cs-name">Match parabola equation to standard form y²=4ax to extract a</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 12x\;$</div><div class="cs-line cs-step">$\;4a = 12 \Rightarrow a = 3,\quad S = (3,\,0),\quad x = -3\;$</div></div>
   <div class="cs-meta">
@@ -1781,7 +1816,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-c-directly-from-y-axis-point-then-compute-gradient.html" class="cs-card">
+<a href="move/read-c-directly-from-y-axis-point-then-compute-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Read c directly from y-axis point, then compute gradient</div>
   <div class="cs-example"><div class="cs-line">$\;(0,\,2) \text{ and } (4,\,5)\;$</div><div class="cs-line cs-step">$\;c = 2,\quad m = \dfrac{5-2}{4-0} = \dfrac{3}{4} \Rightarrow y = \tfrac{3}{4}x + 2\;$</div></div>
   <div class="cs-meta">
@@ -1796,7 +1831,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/clear-gradient-fraction-by-multiplying-through-to-reach-axbyc0.html" class="cs-card">
+<a href="move/clear-gradient-fraction-by-multiplying-through-to-reach-axbyc0.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear gradient fraction by multiplying through to reach ax+by+c=0</div>
   <div class="cs-example"><div class="cs-line">$\;y - 1 = \tfrac{2}{3}(x - 4)\;$</div><div class="cs-line cs-step">$\;3(y-1) = 2(x-4) \Rightarrow 2x - 3y - 5 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1811,7 +1846,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-parametric-point-into-cartesian-curve-to-identify-constant.html" class="cs-card">
+<a href="move/substitute-parametric-point-into-cartesian-curve-to-identify-constant.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute parametric point into Cartesian curve to identify constant</div>
   <div class="cs-example"><div class="cs-line">$\;P(at,\, a/t) \text{ lies on } xy = 20\;$</div><div class="cs-line cs-step">$\;xy = at \cdot \dfrac{a}{t} = a^2 = 20 \Rightarrow a = 2\sqrt{5}\;$</div></div>
   <div class="cs-meta">
@@ -1826,7 +1861,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/clear-fractions-to-present-a-line-as-ax-by-c-0-with-integer-coefficients.html" class="cs-card">
+<a href="move/clear-fractions-to-present-a-line-as-ax-by-c-0-with-integer-coefficients.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear fractions to present a line as ax + by + c = 0 with integer coefficients</div>
   <div class="cs-example"><div class="cs-line">$\;y - 1 = \tfrac{3}{2}(x - 2)\;$</div><div class="cs-line cs-step">$\;2(y - 1) = 3(x - 2) \Rightarrow 3x - 2y - 4 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1841,7 +1876,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-parabola-parameter-a-from-directrix-then-recover-t-from-point-coordinate.html" class="cs-card">
+<a href="move/extract-parabola-parameter-a-from-directrix-then-recover-t-from-point-coordinate.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract parabola parameter a from directrix then recover t from point coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 4ax,\quad \text{directrix } x = -4,\quad P = (4,\,8)\;$</div><div class="cs-line cs-step">$\;a = 4,\quad 4t^2 = 4 \Rightarrow t = \pm1,\quad 2(4)t = 8 \Rightarrow t = 1\;$</div></div>
   <div class="cs-meta">
@@ -1856,7 +1891,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-axis-intercepts-to-find-right-triangle-area-with-origin.html" class="cs-card">
+<a href="move/use-axis-intercepts-to-find-right-triangle-area-with-origin.html" class="cs-card lazy-tex">
   <div class="cs-name">Use axis intercepts to find right-triangle area with origin</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x + 6\;$</div><div class="cs-line cs-step">$\;A=(-2,0),\; B=(0,6) \Rightarrow \text{Area} = \tfrac{1}{2}(2)(6) = 6\;$</div></div>
   <div class="cs-meta">
@@ -1871,7 +1906,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-focus-directrix-property-to-read-off-focal-distance-directly.html" class="cs-card">
+<a href="move/use-focus-directrix-property-to-read-off-focal-distance-directly.html" class="cs-card lazy-tex">
   <div class="cs-name">Use focus-directrix property to read off focal distance directly</div>
   <div class="cs-example"><div class="cs-line">$\;P \text{ on } y^2 = 8x,\quad a = 2,\quad x_P = 4\;$</div><div class="cs-line cs-step">$\;PS = x_P + a = 4 + 2 = 6\;$</div></div>
   <div class="cs-meta">
@@ -1886,7 +1921,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-y²-4ax-to-read-parabola-focus-directly.html" class="cs-card">
+<a href="move/match-y²-4ax-to-read-parabola-focus-directly.html" class="cs-card lazy-tex">
   <div class="cs-name">Match y² = 4ax to read parabola focus directly</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 8x\;$</div><div class="cs-line cs-step">$\;4a = 8 \Rightarrow a = 2,\quad S = (2,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -1901,7 +1936,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-line-equation-into-curve-to-find-intersection-coordinates.html" class="cs-card">
+<a href="move/substitute-line-equation-into-curve-to-find-intersection-coordinates.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute line equation into curve to find intersection coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2x,\quad x^2 + y^2 = 5\;$</div><div class="cs-line cs-step">$\;x^2 + (2x)^2 = 5 \Rightarrow 5x^2 = 5 \Rightarrow x=1,\ y=2\;$</div></div>
   <div class="cs-meta">
@@ -1916,7 +1951,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-second-points-known-parametric-coordinates-into-the-curvenormal-equat.html" class="cs-card">
+<a href="move/substitute-second-points-known-parametric-coordinates-into-the-curvenormal-equat.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute second point&#x27;s known parametric coordinates into the curve/normal equation</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Normal at }A:\; c^3 x - cy = a(c^4-1),\quad B = \!\left(-\tfrac{a}{2c},\,-2ac\right)\;$</div><div class="cs-line cs-step">$\;c^3\!\left(-\tfrac{a}{2c}\right) - c(-2ac) = a(c^4-1) \Rightarrow \tfrac{3}{2}ac^2 = a(c^4-1) \Rightarrow 2c^4 - 3c^2 - 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1931,7 +1966,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-tangent-line-via-point-gradient-form-and-simplify-constants.html" class="cs-card">
+<a href="move/build-tangent-line-via-point-gradient-form-and-simplify-constants.html" class="cs-card lazy-tex">
   <div class="cs-name">Build tangent line via point-gradient form and simplify constants</div>
   <div class="cs-example"><div class="cs-line">$\;y - 3 = 2(x - 1)\;$</div><div class="cs-line cs-step">$\;y = 2x - 2 + 3 = 2x + 1\;$</div></div>
   <div class="cs-meta">
@@ -1946,7 +1981,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-½x-ay-b-for-triangle-with-two-sides-on-axes.html" class="cs-card">
+<a href="move/use-½x-ay-b-for-triangle-with-two-sides-on-axes.html" class="cs-card lazy-tex">
   <div class="cs-name">Use ½|x_A||y_B| for triangle with two sides on axes</div>
   <div class="cs-example"><div class="cs-line">$\;O=(0,0),\; A=(6,\,0),\; B=(0,\,4)\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2}|6||4| = 12\;$</div></div>
   <div class="cs-meta">
@@ -1961,7 +1996,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-difference-of-squares-to-collapse-parametric-chord-gradient.html" class="cs-card">
+<a href="move/factor-difference-of-squares-to-collapse-parametric-chord-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor difference of squares to collapse parametric chord gradient</div>
   <div class="cs-example"><div class="cs-line">$\;m_{PQ} = \dfrac{4q - 4p}{2q^2 - 2p^2}\;$</div><div class="cs-line cs-step">$\;\dfrac{4(q-p)}{2(q-p)(q+p)} = \dfrac{2}{p+q}\;$</div></div>
   <div class="cs-meta">
@@ -1976,7 +2011,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-eccentricity-bounds-to-detect-swapped-directrixfocus-assignments.html" class="cs-card">
+<a href="move/use-eccentricity-bounds-to-detect-swapped-directrixfocus-assignments.html" class="cs-card lazy-tex">
   <div class="cs-name">Use eccentricity bounds to detect swapped directrix/focus assignments</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Hyperbola: } ae = \tfrac{5}{3},\; \tfrac{a}{e} = 3 \Rightarrow e = \tfrac{ae}{a/e} = \tfrac{5/3}{3} = \tfrac{5}{9} < 1\;$</div><div class="cs-line cs-step">$\;e < 1 \text{ fails; swap: } e \to \tfrac{1}{e} = \tfrac{9}{5} > 1 \;\checkmark,\; a^2 = \tfrac{5}{3} \cdot 3 = 5,\; b^2 = 5\!\left(\tfrac{81}{25}-1\right) = \tfrac{56}{5}\;$</div></div>
   <div class="cs-meta">
@@ -1991,7 +2026,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-ae-ratio-from-a-given-directrix-equation.html" class="cs-card">
+<a href="move/extract-ae-ratio-from-a-given-directrix-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract a/e ratio from a given directrix equation</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{x^2}{a^2} - \dfrac{y^2}{b^2} = 1,\quad \text{directrix } x = \dfrac{4}{3}\;$</div><div class="cs-line cs-step">$\;\dfrac{a}{e} = \dfrac{4}{3} \Rightarrow a = \dfrac{4e}{3}\;$</div></div>
   <div class="cs-meta">
@@ -2006,7 +2041,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/encode-hyperbola-data-as-paired-ae-and-ae-equations.html" class="cs-card">
+<a href="move/encode-hyperbola-data-as-paired-ae-and-ae-equations.html" class="cs-card lazy-tex">
   <div class="cs-name">Encode hyperbola data as paired a/e and ae equations</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Hyperbola: focus } (5,0),\; \text{directrix } x = \tfrac{9}{5}\;$</div><div class="cs-line cs-step">$\;ae = 5,\; \dfrac{a}{e} = \tfrac{9}{5} \Rightarrow a^2 = 5 \cdot \tfrac{9}{5} = 9,\; e^2 = \dfrac{5}{\,9/5\,} = \tfrac{25}{9}\;$</div></div>
   <div class="cs-meta">
@@ -2021,7 +2056,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/chain-a-e-foci-via-directrix-relation-for-hyperbola.html" class="cs-card">
+<a href="move/chain-a-e-foci-via-directrix-relation-for-hyperbola.html" class="cs-card lazy-tex">
   <div class="cs-name">Chain a → e → foci via directrix relation for hyperbola</div>
   <div class="cs-example"><div class="cs-line">$\;a = 2,\quad e = \tfrac{3a}{4}\;$</div><div class="cs-line cs-step">$\;e = \tfrac{3(2)}{4} = \tfrac{3}{2},\quad ae = 3 \Rightarrow \text{foci } (\pm 3,\,0)\;$</div></div>
   <div class="cs-meta">
@@ -2036,7 +2071,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/identify-vertical-and-oblique-asymptotes-for-rational-plus-linear-curve.html" class="cs-card">
+<a href="move/identify-vertical-and-oblique-asymptotes-for-rational-plus-linear-curve.html" class="cs-card lazy-tex">
   <div class="cs-name">Identify vertical and oblique asymptotes for rational-plus-linear curve</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{1}{x^2} + 2x\;$</div><div class="cs-line cs-step">$\;x=0 \text{ (vert.)};\quad y - 2x = \dfrac{1}{x^2} \to 0^+ \Rightarrow y=2x \text{ (oblique, curve above)}\;$</div></div>
   <div class="cs-meta">
@@ -2051,7 +2086,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-normal-line-via-negative-reciprocal-of-known-tangent-gradient.html" class="cs-card">
+<a href="move/build-normal-line-via-negative-reciprocal-of-known-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Build normal line via negative reciprocal of known tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;P(1,\,2),\quad m_{\text{tan}} = 3\;$</div><div class="cs-line cs-step">$\;m_{\text{nor}} = -\tfrac{1}{3},\quad y - 2 = -\tfrac{1}{3}(x - 1) \Rightarrow x + 3y = 7\;$</div></div>
   <div class="cs-meta">
@@ -2066,7 +2101,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-tangent-or-normal-line-into-conic-to-find-second-intersection.html" class="cs-card">
+<a href="move/substitute-tangent-or-normal-line-into-conic-to-find-second-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute tangent or normal line into conic to find second intersection</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 4x,\quad y = -x + 3\;$</div><div class="cs-line cs-step">$\;(-x+3)^2 = 4x \Rightarrow x^2 - 10x + 9 = 0,\quad x_1=1 \Rightarrow x_2 = \tfrac{9}{1} = 9,\; y_2 = -6\;$</div></div>
   <div class="cs-meta">
@@ -2081,7 +2116,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-hyperbola-identity-b²a²e²1-to-link-semi-axes-and-eccentricity.html" class="cs-card">
+<a href="move/apply-hyperbola-identity-b²a²e²1-to-link-semi-axes-and-eccentricity.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply hyperbola identity b²=a²(e²−1) to link semi-axes and eccentricity</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{x^2}{9} - \dfrac{y^2}{16} = 1\;$</div><div class="cs-line cs-step">$\;b^2 = a^2(e^2 - 1) \Rightarrow 16 = 9(e^2 - 1) \Rightarrow e^2 = \dfrac{25}{9}\;$</div></div>
   <div class="cs-meta">
@@ -2096,7 +2131,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-parametrically-then-negate-reciprocate-for-the-normal-gradient.html" class="cs-card">
+<a href="move/differentiate-parametrically-then-negate-reciprocate-for-the-normal-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate parametrically then negate-reciprocate for the normal gradient</div>
   <div class="cs-example"><div class="cs-line">$\;x = 2\cos\theta,\quad y = 2\sin\theta\;$</div><div class="cs-line cs-step">$\;\frac{dy}{dx} = \frac{2\cos\theta}{-2\sin\theta} = -\frac{\cos\theta}{\sin\theta} \Rightarrow m_N = \frac{\sin\theta}{\cos\theta}\;$</div></div>
   <div class="cs-meta">
@@ -2111,7 +2146,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-x0-then-y0-in-a-tangent-line-to-extract-axis-intercepts.html" class="cs-card">
+<a href="move/set-x0-then-y0-in-a-tangent-line-to-extract-axis-intercepts.html" class="cs-card lazy-tex">
   <div class="cs-name">Set x=0 then y=0 in a tangent line to extract axis intercepts</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Tangent: } \dfrac{x\cos\theta}{a} + \dfrac{y\sin\theta}{b} = 1\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow x = a\sec\theta;\quad x=0 \Rightarrow y = b\csc\theta;\quad \text{Area} = \tfrac{1}{2}|a\sec\theta||b\csc\theta| = \dfrac{ab}{|\sin 2\theta|}\;$</div></div>
   <div class="cs-meta">
@@ -2126,7 +2161,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/derive-conic-tangent-via-point-slope-then-collapse-to-standard-form.html" class="cs-card">
+<a href="move/derive-conic-tangent-via-point-slope-then-collapse-to-standard-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Derive conic tangent via point-slope then collapse to standard form</div>
   <div class="cs-example"><div class="cs-line">$\;\frac{x^2}{a^2}+\frac{y^2}{b^2}=1,\quad P=(a\cos\theta,\,b\sin\theta)\;$</div><div class="cs-line cs-step">$\;y - b\sin\theta = -\dfrac{b\cos\theta}{a\sin\theta}(x - a\cos\theta) \;\Rightarrow\; \dfrac{x\cos\theta}{a}+\dfrac{y\sin\theta}{b}=1\;$</div></div>
   <div class="cs-meta">
@@ -2141,7 +2176,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/quote-the-standard-conic-tangent-formula-instead-of-differentiating.html" class="cs-card">
+<a href="move/quote-the-standard-conic-tangent-formula-instead-of-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Quote the standard conic tangent formula instead of differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;\frac{x^2}{4}+\frac{y^2}{1}=1,\quad P=(2\cos\theta,\,\sin\theta)\;$</div><div class="cs-line cs-step">$\;\frac{x\cos\theta}{2}+y\sin\theta=1\;$</div></div>
   <div class="cs-meta">
@@ -2156,7 +2191,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/clear-fractional-gradient-to-expose-a²b²-ellipse-normal-structure.html" class="cs-card">
+<a href="move/clear-fractional-gradient-to-expose-a²b²-ellipse-normal-structure.html" class="cs-card lazy-tex">
   <div class="cs-name">Clear fractional gradient to expose a²−b² ellipse-normal structure</div>
   <div class="cs-example"><div class="cs-line">$\;y - 4\sin\theta = \dfrac{5\sin\theta}{4\cos\theta}(x - 5\cos\theta)\;$</div><div class="cs-line cs-step">$\;4y\cos\theta - 16\sin\theta\cos\theta = 5x\sin\theta - 25\sin\theta\cos\theta \Rightarrow 5x\sin\theta - 4y\cos\theta = 9\sin\theta\cos\theta\;$</div></div>
   <div class="cs-meta">

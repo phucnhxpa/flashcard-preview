@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">3 moves · 10 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-complex-number-to-modulus-argument-form-before-applying-de-moivre-for-ro.html" class="cs-card">
+<a href="move/convert-complex-number-to-modulus-argument-form-before-applying-de-moivre-for-ro.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert complex number to modulus-argument form before applying de Moivre for roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = -1 + i\;$</div><div class="cs-line cs-step">$\;-1 + i = \sqrt{2}\!\left(\cos\tfrac{3\pi}{4} + i\sin\tfrac{3\pi}{4}\right)\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>polar conversion</span>
   </div>
 </a>
-<a href="move/convert-complex-number-to-modulus-argument-polar-form-to-enable-de-moivre-or-geo.html" class="cs-card">
+<a href="move/convert-complex-number-to-modulus-argument-polar-form-to-enable-de-moivre-or-geo.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert complex number to modulus-argument polar form to enable de Moivre or geometric reasoning</div>
   <div class="cs-example"><div class="cs-line">$\;z = 1 + i\;$</div><div class="cs-line cs-step">$\;|z| = \sqrt{2},\quad \theta = \dfrac{\pi}{4} \Rightarrow z = \sqrt{2}\, e^{i\pi/4}\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>polar conversion</span>
   </div>
 </a>
-<a href="move/convert-roots-between-cartesian-and-polar-forms-as-the-question-demands.html" class="cs-card">
+<a href="move/convert-roots-between-cartesian-and-polar-forms-as-the-question-demands.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert roots between Cartesian and polar forms as the question demands</div>
   <div class="cs-example"><div class="cs-line">$\;z = 2\left(\cos\dfrac{2\pi}{3} + i\sin\dfrac{2\pi}{3}\right)\;$</div><div class="cs-line cs-step">$\;z = 2\left(-\dfrac{1}{2} + \dfrac{\sqrt{3}}{2}\,i\right) = -1 + \sqrt{3}\,i\;$</div></div>
   <div class="cs-meta">
@@ -294,7 +329,7 @@ window.MathJax = {
     <span class="meta">3 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/multiply-by-complex-conjugate-of-denominator-to-rationalise-into-abi-form.html" class="cs-card">
+<a href="move/multiply-by-complex-conjugate-of-denominator-to-rationalise-into-abi-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply by complex conjugate of denominator to rationalise into a+bi form</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{1}{3+2i}\;$</div><div class="cs-line cs-step">$\;\dfrac{1}{3+2i} \cdot \dfrac{3-2i}{3-2i} = \dfrac{3-2i}{13} = \tfrac{3}{13} - \tfrac{2}{13}i\;$</div></div>
   <div class="cs-meta">
@@ -302,7 +337,7 @@ window.MathJax = {
     <span>rationalisation</span>
   </div>
 </a>
-<a href="move/rationalise-a-complex-constant-ratio-by-conjugate-multiplication.html" class="cs-card">
+<a href="move/rationalise-a-complex-constant-ratio-by-conjugate-multiplication.html" class="cs-card lazy-tex">
   <div class="cs-name">Rationalise a complex constant ratio by conjugate multiplication</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{1+i}{2-i}\;$</div><div class="cs-line cs-step">$\;\dfrac{1+i}{2-i}\cdot\dfrac{2+i}{2+i} = \dfrac{1+3i}{5}\;$</div></div>
   <div class="cs-meta">
@@ -310,7 +345,7 @@ window.MathJax = {
     <span>rationalisation</span>
   </div>
 </a>
-<a href="move/realise-complex-denominator-by-multiplying-by-its-conjugate.html" class="cs-card">
+<a href="move/realise-complex-denominator-by-multiplying-by-its-conjugate.html" class="cs-card lazy-tex">
   <div class="cs-name">Realise complex denominator by multiplying by its conjugate</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{1+i}{2+i}\;$</div><div class="cs-line cs-step">$\;\dfrac{(1+i)(2-i)}{(2+i)(2-i)} = \dfrac{3+i}{5}\;$</div></div>
   <div class="cs-meta">
@@ -325,7 +360,7 @@ window.MathJax = {
     <span class="meta">1 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-conjugate-root-theorem-to-deduce-a-paired-complex-root.html" class="cs-card">
+<a href="move/apply-conjugate-root-theorem-to-deduce-a-paired-complex-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Conjugate Root Theorem to deduce a paired complex root</div>
   <div class="cs-example"><div class="cs-line">$\;P(z) = z^3 + az^2 + bz + 6,\quad a,b\in\mathbb{R},\quad z_1 = 1 - i\;$</div><div class="cs-line cs-step">$\;\text{coefficients real} \Rightarrow \overline{z_1} = 1 + i \text{ is also a root}\;$</div></div>
   <div class="cs-meta">
@@ -340,7 +375,7 @@ window.MathJax = {
     <span class="meta">5 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/interpret-nth-roots-of-a-complex-number-as-vertices-of-a-regular-n-gon.html" class="cs-card">
+<a href="move/interpret-nth-roots-of-a-complex-number-as-vertices-of-a-regular-n-gon.html" class="cs-card lazy-tex">
   <div class="cs-name">Interpret nth roots of a complex number as vertices of a regular n-gon</div>
   <div class="cs-example"><div class="cs-line">$\;z^4 = 16\;$</div><div class="cs-line cs-step">$\;R = 16^{1/4} = 2,\quad \text{args } \tfrac{2k\pi}{4},\ k=0,\dots,3 \Rightarrow \text{square on } |z|=2,\quad A = \tfrac{4}{2}\cdot 4 \cdot \sin\tfrac{\pi}{2} = 8\;$</div></div>
   <div class="cs-meta">
@@ -348,7 +383,7 @@ window.MathJax = {
     <span>geometric interpretation</span>
   </div>
 </a>
-<a href="move/plot-nth-roots-as-vertices-of-a-regular-polygon-on-a-circle.html" class="cs-card">
+<a href="move/plot-nth-roots-as-vertices-of-a-regular-polygon-on-a-circle.html" class="cs-card lazy-tex">
   <div class="cs-name">Plot nth roots as vertices of a regular polygon on a circle</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8\;$</div><div class="cs-line cs-step">$\;|z|=2,\quad z_k = 2\operatorname{cis}\!\left(\dfrac{2k\pi}{3}\right),\ k=0,1,2 \quad\text{(equilateral triangle on }|z|=2\text{)}\;$</div></div>
   <div class="cs-meta">
@@ -356,7 +391,7 @@ window.MathJax = {
     <span>geometric interpretation</span>
   </div>
 </a>
-<a href="move/recognise-real-scalar-multiple-of-a-fixed-complex-number-as-a-line-through-the-o.html" class="cs-card">
+<a href="move/recognise-real-scalar-multiple-of-a-fixed-complex-number-as-a-line-through-the-o.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise real-scalar multiple of a fixed complex number as a line through the origin</div>
   <div class="cs-example"><div class="cs-line">$\;w = t(1+2i),\quad t \in \mathbb{R}\;$</div><div class="cs-line cs-step">$\;u = t,\ v = 2t \Rightarrow v = 2u\;$</div></div>
   <div class="cs-meta">
@@ -364,7 +399,7 @@ window.MathJax = {
     <span>geometric interpretation</span>
   </div>
 </a>
-<a href="move/identify-nth-roots-as-vertices-of-a-regular-n-gon-on-circle-of-radius-r1n.html" class="cs-card">
+<a href="move/identify-nth-roots-as-vertices-of-a-regular-n-gon-on-circle-of-radius-r1n.html" class="cs-card lazy-tex">
   <div class="cs-name">Identify nth roots as vertices of a regular n-gon on circle of radius r^{1/n}</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8\;$</div><div class="cs-line cs-step">$\;z_k = 2e^{i \cdot 2\pi k/3},\ k=0,1,2 \Rightarrow \text{equilateral triangle on } |z|=2\;$</div></div>
   <div class="cs-meta">
@@ -372,7 +407,7 @@ window.MathJax = {
     <span>geometric interpretation</span>
   </div>
 </a>
-<a href="move/read-w---a-w---b-as-the-perpendicular-bisector-of-segment-ab.html" class="cs-card">
+<a href="move/read-w---a-w---b-as-the-perpendicular-bisector-of-segment-ab.html" class="cs-card lazy-tex">
   <div class="cs-name">Read |w - a| = |w - b| as the perpendicular bisector of segment ab</div>
   <div class="cs-example"><div class="cs-line">$\;|w - 1| = |w - 3|\;$</div><div class="cs-line cs-step">$\;\text{Perp.\ bisector of } [1,3] \Rightarrow \operatorname{Re}(w) = 2\;$</div></div>
   <div class="cs-meta">
@@ -387,7 +422,7 @@ window.MathJax = {
     <span class="meta">5 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-de-moivres-theorem-with-2kπ-offsets-to-extract-all-n-distinct-nth-roots.html" class="cs-card">
+<a href="move/apply-de-moivres-theorem-with-2kπ-offsets-to-extract-all-n-distinct-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply de Moivre&#x27;s theorem with 2kπ offsets to extract all n distinct nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i = 8\,\mathrm{cis}\!\left(\tfrac{\pi}{2} + 2k\pi\right)\;$</div><div class="cs-line cs-step">$\;z_k = 2\,\mathrm{cis}\!\left(\tfrac{\pi/2 + 2k\pi}{3}\right),\quad k=0,1,2 \Rightarrow \arg z = \tfrac{\pi}{6},\; \tfrac{5\pi}{6},\; -\tfrac{\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -395,7 +430,7 @@ window.MathJax = {
     <span>de moivre root extraction</span>
   </div>
 </a>
-<a href="move/extract-purely-imaginary-roots-from-x²-k.html" class="cs-card">
+<a href="move/extract-purely-imaginary-roots-from-x²-k.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract purely imaginary roots from x² = −k</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + 4 = 0\;$</div><div class="cs-line cs-step">$\;x^2 = -4 = (2i)^2 \Rightarrow x = \pm 2i\;$</div></div>
   <div class="cs-meta">
@@ -403,7 +438,7 @@ window.MathJax = {
     <span>de moivre root extraction</span>
   </div>
 </a>
-<a href="move/apply-zero-product-property-to-a-pre-factored-polynomial.html" class="cs-card">
+<a href="move/apply-zero-product-property-to-a-pre-factored-polynomial.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply zero-product property to a pre-factored polynomial</div>
   <div class="cs-example"><div class="cs-line">$\;(x^2+1)(x^2+4)=0\;$</div><div class="cs-line cs-step">$\;x^2+1=0 \Rightarrow x=\pm i;\quad x^2+4=0 \Rightarrow x=\pm 2i\;$</div></div>
   <div class="cs-meta">
@@ -411,7 +446,7 @@ window.MathJax = {
     <span>de moivre root extraction</span>
   </div>
 </a>
-<a href="move/convert-to-polar-form-and-apply-de-moivre-to-extract-all-nth-roots.html" class="cs-card">
+<a href="move/convert-to-polar-form-and-apply-de-moivre-to-extract-all-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert to polar form and apply de Moivre to extract all nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i = 8e^{i\pi/2}\;$</div><div class="cs-line cs-step">$\;z_k = 2\,\mathrm{cis}\!\left(\dfrac{\pi/2 + 2k\pi}{3}\right),\quad k=0,1,2 \Rightarrow z = \sqrt{3}+i,\; -\sqrt{3}+i,\; -2i\;$</div></div>
   <div class="cs-meta">
@@ -419,7 +454,7 @@ window.MathJax = {
     <span>de moivre root extraction</span>
   </div>
 </a>
-<a href="move/parameterise-all-nth-roots-via-2kπ-before-dividing-argument.html" class="cs-card">
+<a href="move/parameterise-all-nth-roots-via-2kπ-before-dividing-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Parameterise all nth roots via +2kπ before dividing argument</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i = 8\,\mathrm{cis}\!\left(\dfrac{\pi}{2}\right)\;$</div><div class="cs-line cs-step">$\;z_k = 2\,\mathrm{cis}\!\left(\dfrac{\frac{\pi}{2} + 2k\pi}{3}\right),\quad k=0,1,2 \Rightarrow \arg z = \dfrac{\pi}{6},\; \dfrac{5\pi}{6},\; -\dfrac{\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -434,7 +469,7 @@ window.MathJax = {
     <span class="meta">1 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pair-conjugate-roots-into-a-real-quadratic-factor-via-difference-of-squares.html" class="cs-card">
+<a href="move/pair-conjugate-roots-into-a-real-quadratic-factor-via-difference-of-squares.html" class="cs-card lazy-tex">
   <div class="cs-name">Pair conjugate roots into a real quadratic factor via difference of squares</div>
   <div class="cs-example"><div class="cs-line">$\;(z - (1+i))(z - (1-i))\;$</div><div class="cs-line cs-step">$\;((z-1)+i)((z-1)-i) = (z-1)^2 + 1 = z^2 - 2z + 2\;$</div></div>
   <div class="cs-meta">
@@ -449,7 +484,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-complex-locus-equation-to-standard-geometric-template.html" class="cs-card">
+<a href="move/match-complex-locus-equation-to-standard-geometric-template.html" class="cs-card lazy-tex">
   <div class="cs-name">Match complex locus equation to standard geometric template</div>
   <div class="cs-example"><div class="cs-line">$\;|z - (1+i)| = |z - (3+3i)|\;$</div><div class="cs-line cs-step">$\;\text{Perp.\ bisector: } M=(2,2),\; m_{AB}=1 \Rightarrow y - 2 = -(x - 2)\;$</div></div>
   <div class="cs-meta">
@@ -464,7 +499,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-de-moivres-theorem-with-2kπ-to-enumerate-all-n-distinct-nth-roots.html" class="cs-card">
+<a href="move/apply-de-moivres-theorem-with-2kπ-to-enumerate-all-n-distinct-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply de Moivre&#x27;s theorem with +2kπ to enumerate all n distinct nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8\;$</div><div class="cs-line cs-step">$\;z_k = 2\,e^{i\,2k\pi/3},\quad k=0,1,2 \Rightarrow z = 2,\; 2e^{i2\pi/3},\; 2e^{i4\pi/3}\;$</div></div>
   <div class="cs-meta">
@@ -479,7 +514,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/classify-standard-complex-locus-equations-as-circle-perpendicular-bisector-or-ha.html" class="cs-card">
+<a href="move/classify-standard-complex-locus-equations-as-circle-perpendicular-bisector-or-ha.html" class="cs-card lazy-tex">
   <div class="cs-name">Classify standard complex locus equations as circle, perpendicular bisector, or half-line</div>
   <div class="cs-example"><div class="cs-line">$\;|z - 2i| = 3,\quad |z - 1| = |z - 3|,\quad \arg(z - 1) = \tfrac{\pi}{4}\;$</div><div class="cs-line cs-step">$\;\text{circle centre }(0,2)\ r=3;\quad \text{perp.\ bisector } x=2;\quad \text{half-line from }(1,0),\ \theta=\tfrac{\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -494,7 +529,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-to-bridge-a-complex-equation-into-a-simpler-solvable-form.html" class="cs-card">
+<a href="move/substitute-to-bridge-a-complex-equation-into-a-simpler-solvable-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute to bridge a complex equation into a simpler solvable form</div>
   <div class="cs-example"><div class="cs-line">$\;z^4 + 5z^2 + 4 = 0\;$</div><div class="cs-line cs-step">$\;w = z^2:\quad w^2 + 5w + 4 = 0 \Rightarrow (w+1)(w+4) = 0 \Rightarrow z = \pm i,\;\pm 2i\;$</div></div>
   <div class="cs-meta">
@@ -509,7 +544,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-the-source-locus-with-one-real-parameter-to-substitute-into-the-targ.html" class="cs-card">
+<a href="move/parametrise-the-source-locus-with-one-real-parameter-to-substitute-into-the-targ.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise the source locus with one real parameter to substitute into the target equation</div>
   <div class="cs-example"><div class="cs-line">$\;\arg(z) = \tfrac{\pi}{4},\quad |z - 2| = \sqrt{2}\;$</div><div class="cs-line cs-step">$\;z = t(1+i),\; t>0:\quad (t-2)^2 + t^2 = 2 \Rightarrow t^2 - 2t + 1 = 0 \Rightarrow t=1,\; z=1+i\;$</div></div>
   <div class="cs-meta">
@@ -524,7 +559,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-the-möbius-transformation-to-express-z-in-terms-of-w.html" class="cs-card">
+<a href="move/invert-the-möbius-transformation-to-express-z-in-terms-of-w.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert the Möbius transformation to express z in terms of w</div>
   <div class="cs-example"><div class="cs-line">$\;w = \dfrac{z+1}{z-1},\quad |z|=1\;$</div><div class="cs-line cs-step">$\;z = \dfrac{w+1}{w-1} \Rightarrow \left|\dfrac{w+1}{w-1}\right| = 1 \Rightarrow |w+1| = |w-1|\;$</div></div>
   <div class="cs-meta">
@@ -539,7 +574,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-de-moivres-theorem-to-compute-a-power-of-a-complex-number.html" class="cs-card">
+<a href="move/apply-de-moivres-theorem-to-compute-a-power-of-a-complex-number.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply de Moivre&#x27;s theorem to compute a power of a complex number</div>
   <div class="cs-example"><div class="cs-line">$\;z = \sqrt{2}\!\left(\cos\dfrac{\pi}{4} + i\sin\dfrac{\pi}{4}\right),\quad n=6\;$</div><div class="cs-line cs-step">$\;z^6 = (\sqrt{2})^6\!\left(\cos\dfrac{6\pi}{4} + i\sin\dfrac{6\pi}{4}\right) = 8\!\left(\cos\dfrac{3\pi}{2} + i\sin\dfrac{3\pi}{2}\right) = -8i\;$</div></div>
   <div class="cs-meta">
@@ -554,7 +589,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-principal-argument-via-reference-angle-plus-quadrant-adjustment.html" class="cs-card">
+<a href="move/find-principal-argument-via-reference-angle-plus-quadrant-adjustment.html" class="cs-card lazy-tex">
   <div class="cs-name">Find principal argument via reference angle plus quadrant adjustment</div>
   <div class="cs-example"><div class="cs-line">$\;z = -1 + \sqrt{3}\,i\;$</div><div class="cs-line cs-step">$\;\alpha = \arctan\!\left(\dfrac{\sqrt{3}}{1}\right) = \dfrac{\pi}{3},\quad \text{Q2: } \arg z = \pi - \dfrac{\pi}{3} = \dfrac{2\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -569,7 +604,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-cartesian-complex-numbers-to-modulus-argument-form-with-quadrant-check.html" class="cs-card">
+<a href="move/convert-cartesian-complex-numbers-to-modulus-argument-form-with-quadrant-check.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert Cartesian complex numbers to modulus-argument form with quadrant check</div>
   <div class="cs-example"><div class="cs-line">$\;w = -1 + i\;$</div><div class="cs-line cs-step">$\;r = \sqrt{1+1} = \sqrt{2},\quad \theta = \arctan\!\left(\tfrac{1}{-1}\right)+\pi = \tfrac{3\pi}{4} \Rightarrow w = \sqrt{2}\!\left(\cos\tfrac{3\pi}{4}+i\sin\tfrac{3\pi}{4}\right)\;$</div></div>
   <div class="cs-meta">
@@ -584,7 +619,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-the-real-parameter-to-obtain-a-cartesian-equation-in-u-and-v.html" class="cs-card">
+<a href="move/eliminate-the-real-parameter-to-obtain-a-cartesian-equation-in-u-and-v.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate the real parameter to obtain a Cartesian equation in u and v</div>
   <div class="cs-example"><div class="cs-line">$\;u = \dfrac{t+1}{t-1},\quad v = \dfrac{-2}{t-1}\;$</div><div class="cs-line cs-step">$\;u = 1 + \dfrac{2}{t-1} = 1 - v \Rightarrow u + v - 1 = 0\;$</div></div>
   <div class="cs-meta">
@@ -599,7 +634,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-z²-rez²-imz²-to-solve-for-an-unknown-real-parameter.html" class="cs-card">
+<a href="move/use-z²-rez²-imz²-to-solve-for-an-unknown-real-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Use |z|² = Re(z)² + Im(z)² to solve for an unknown real parameter</div>
   <div class="cs-example"><div class="cs-line">$\;z = \lambda + 2i,\quad |z| = \sqrt{5},\quad \lambda > 0\;$</div><div class="cs-line cs-step">$\;\lambda^2 + 2^2 = 5 \Rightarrow \lambda^2 = 1 \Rightarrow \lambda = 1\;$</div></div>
   <div class="cs-meta">
@@ -614,7 +649,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reflect-z-in-the-real-axis-to-locate-its-conjugate-on-an-argand-diagram.html" class="cs-card">
+<a href="move/reflect-z-in-the-real-axis-to-locate-its-conjugate-on-an-argand-diagram.html" class="cs-card lazy-tex">
   <div class="cs-name">Reflect z in the real axis to locate its conjugate on an Argand diagram</div>
   <div class="cs-example"><div class="cs-line">$\;z = 3 + 2i \quad \Rightarrow \quad A(3,\,2)\;$</div><div class="cs-line cs-step">$\;z^* = 3 - 2i \quad \Rightarrow \quad B(3,\,-2)\;$</div></div>
   <div class="cs-meta">
@@ -629,7 +664,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-real-quadratic-factor-from-conjugate-pair-using-sum-and-product.html" class="cs-card">
+<a href="move/build-real-quadratic-factor-from-conjugate-pair-using-sum-and-product.html" class="cs-card lazy-tex">
   <div class="cs-name">Build real quadratic factor from conjugate pair using sum and product</div>
   <div class="cs-example"><div class="cs-line">$\;\alpha = 1 + 2i,\quad \bar{\alpha} = 1 - 2i\;$</div><div class="cs-line cs-step">$\;S = 2,\; P = 1^2 + 2^2 = 5 \Rightarrow z^2 - 2z + 5\;$</div></div>
   <div class="cs-meta">
@@ -644,7 +679,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/compute-argument-from-cartesian-form-using-sign-based-quadrant-check.html" class="cs-card">
+<a href="move/compute-argument-from-cartesian-form-using-sign-based-quadrant-check.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute argument from Cartesian form using sign-based quadrant check</div>
   <div class="cs-example"><div class="cs-line">$\;z = -1 + i\;$</div><div class="cs-line cs-step">$\;\text{Q2: } \arg z = \arctan\!\left(\tfrac{1}{-1}\right) + \pi = -\tfrac{\pi}{4} + \pi = \tfrac{3\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -659,7 +694,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-complex-square-by-foil-then-substitute-i²-1.html" class="cs-card">
+<a href="move/expand-complex-square-by-foil-then-substitute-i²-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand complex square by FOIL then substitute i² = −1</div>
   <div class="cs-example"><div class="cs-line">$\;(2+i)^2\;$</div><div class="cs-line cs-step">$\;4 + 2i + 2i + i^2 = 4 + 4i - 1 = 3 + 4i\;$</div></div>
   <div class="cs-meta">
@@ -674,7 +709,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-conjugate-pair-vertical-symmetry-to-compute-argand-triangle-area.html" class="cs-card">
+<a href="move/use-conjugate-pair-vertical-symmetry-to-compute-argand-triangle-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Use conjugate-pair vertical symmetry to compute Argand triangle area</div>
   <div class="cs-example"><div class="cs-line">$\;z = 1,\; 3+2i,\; 3-2i \text{ plotted on Argand diagram}\;$</div><div class="cs-line cs-step">$\;\text{Area} = |b|\,|a - x_3| = 2 \times |3-1| = 4\;$</div></div>
   <div class="cs-meta">
@@ -689,7 +724,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invoke-conjugate-root-theorem-to-obtain-second-root-for-free.html" class="cs-card">
+<a href="move/invoke-conjugate-root-theorem-to-obtain-second-root-for-free.html" class="cs-card lazy-tex">
   <div class="cs-name">Invoke Conjugate Root Theorem to obtain second root for free</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 - 4z^2 + 6z - 4 = 0,\quad z_1 = 1+i\;$</div><div class="cs-line cs-step">$\;\text{coeffs} \in \mathbb{R} \Rightarrow z_2 = \overline{1+i} = 1-i\;$</div></div>
   <div class="cs-meta">
@@ -704,7 +739,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/check-quadrant-to-select-correct-principal-argument.html" class="cs-card">
+<a href="move/check-quadrant-to-select-correct-principal-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Check quadrant to select correct principal argument</div>
   <div class="cs-example"><div class="cs-line">$\;z = -1 + i\;$</div><div class="cs-line cs-step">$\;\alpha = \arctan\tfrac{1}{1} = \tfrac{\pi}{4},\quad \text{Q2} \Rightarrow \arg(z) = \pi - \tfrac{\pi}{4} = \tfrac{3\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -719,7 +754,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-discriminant-sign-to-classify-root-type-at-specific-parameter-value.html" class="cs-card">
+<a href="move/evaluate-discriminant-sign-to-classify-root-type-at-specific-parameter-value.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate discriminant sign to classify root type at specific parameter value</div>
   <div class="cs-example"><div class="cs-line">$\;x = 3 \pm \sqrt{4 - d},\quad d = 7\;$</div><div class="cs-line cs-step">$\;4 - 7 = -3 < 0 \Rightarrow x = 3 \pm i\sqrt{3}\;$</div></div>
   <div class="cs-meta">
@@ -734,7 +769,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-conjugate-pair-product-to-collapse-to-a-real-number.html" class="cs-card">
+<a href="move/recognise-conjugate-pair-product-to-collapse-to-a-real-number.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise conjugate pair product to collapse to a real number</div>
   <div class="cs-example"><div class="cs-line">$\;(3-2i)(3+2i)\;$</div><div class="cs-line cs-step">$\;3^2 - (2i)^2 = 9 - (-4) = 13\;$</div></div>
   <div class="cs-meta">
@@ -749,7 +784,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-quadratic-formula-keeping-parametric-discriminant-unsimplified.html" class="cs-card">
+<a href="move/apply-quadratic-formula-keeping-parametric-discriminant-unsimplified.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply quadratic formula keeping parametric discriminant unsimplified</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 - 6x + k^2 = 0\;$</div><div class="cs-line cs-step">$\;x = \dfrac{6 \pm \sqrt{36 - 4k^2}}{2} = 3 \pm \sqrt{9 - k^2}\;$</div></div>
   <div class="cs-meta">
@@ -764,7 +799,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/identify-quadrant-before-applying-arctan-for-principal-argument.html" class="cs-card">
+<a href="move/identify-quadrant-before-applying-arctan-for-principal-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Identify quadrant before applying arctan for principal argument</div>
   <div class="cs-example"><div class="cs-line">$\;z = -1 + i\;$</div><div class="cs-line cs-step">$\;x<0,\; y>0\ (\text{Q2}): \arg(z) = \arctan\!\left(\tfrac{1}{-1}\right) + \pi = -\tfrac{\pi}{4} + \pi = \tfrac{3\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -779,7 +814,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-both-sides-of-a-modulus-equation-to-clear-the-surd.html" class="cs-card">
+<a href="move/square-both-sides-of-a-modulus-equation-to-clear-the-surd.html" class="cs-card lazy-tex">
   <div class="cs-name">Square both sides of a modulus equation to clear the surd</div>
   <div class="cs-example"><div class="cs-line">$\;z = 2 + i,\quad |z| = \sqrt{5}\;$</div><div class="cs-line cs-step">$\;|z|^2 = 2^2 + 1^2 = 5 = (\sqrt{5})^2\;$</div></div>
   <div class="cs-meta">
@@ -794,7 +829,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/write-every-root-in-explicit-a-ib-form-including-zeros.html" class="cs-card">
+<a href="move/write-every-root-in-explicit-a-ib-form-including-zeros.html" class="cs-card lazy-tex">
   <div class="cs-name">Write every root in explicit a + ib form, including zeros</div>
   <div class="cs-example"><div class="cs-line">$\;z^2 - 2z + 5 = 0 \Rightarrow z = 1 \pm 2i\;$</div><div class="cs-line cs-step">$\;z = 1 + 2i,\quad 1 - 2i\;$</div></div>
   <div class="cs-meta">
@@ -809,7 +844,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-cartesian-complex-product-and-substitute-i²-1.html" class="cs-card">
+<a href="move/expand-cartesian-complex-product-and-substitute-i²-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand Cartesian complex product and substitute i² = −1</div>
   <div class="cs-example"><div class="cs-line">$\;(1+2i)(3+i)\;$</div><div class="cs-line cs-step">$\;3 + i + 6i + 2i^2 = 3 + 7i - 2 = 1 + 7i\;$</div></div>
   <div class="cs-meta">
@@ -824,7 +859,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/plot-real-root-on-real-axis-and-conjugate-pair-symmetrically-on-argand-diagram.html" class="cs-card">
+<a href="move/plot-real-root-on-real-axis-and-conjugate-pair-symmetrically-on-argand-diagram.html" class="cs-card lazy-tex">
   <div class="cs-name">Plot real root on real axis and conjugate pair symmetrically on Argand diagram</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 - z^2 + z - 1 = 0 \Rightarrow z_1 = 1,\; z_2 = i,\; z_3 = -i\;$</div><div class="cs-line cs-step">$\;\text{Plot } (1,\,0),\; (0,\,1),\; (0,\,-1) \text{ on Re/Im axes — conjugate pair symmetric about Re-axis}\;$</div></div>
   <div class="cs-meta">
@@ -839,7 +874,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/compute-modulus-as-euclidean-distance-from-origin.html" class="cs-card">
+<a href="move/compute-modulus-as-euclidean-distance-from-origin.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute modulus as Euclidean distance from origin</div>
   <div class="cs-example"><div class="cs-line">$\;z = 3 + 4i\;$</div><div class="cs-line cs-step">$\;|z| = \sqrt{3^2 + 4^2} = \sqrt{25} = 5\;$</div></div>
   <div class="cs-meta">
@@ -854,7 +889,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/plot-complex-roots-on-argand-diagram-using-re-im-coordinates.html" class="cs-card">
+<a href="move/plot-complex-roots-on-argand-diagram-using-re-im-coordinates.html" class="cs-card lazy-tex">
   <div class="cs-name">Plot complex roots on Argand diagram using Re-Im coordinates</div>
   <div class="cs-example"><div class="cs-line">$\;z^2 + 4 = 0 \Rightarrow z = 2i,\ -2i\;$</div><div class="cs-line cs-step">$\;(0,\,2) \text{ labelled } 2i,\quad (0,\,-2) \text{ labelled } {-2i}\;$</div></div>
   <div class="cs-meta">
@@ -869,7 +904,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-vietas-formulas-to-recover-unknown-coefficients-from-known-roots.html" class="cs-card">
+<a href="move/use-vietas-formulas-to-recover-unknown-coefficients-from-known-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Use Vieta&#x27;s formulas to recover unknown coefficients from known roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 + az^2 + bz + 10 = 0,\quad z_1 = 1-2i,\; z_2 = 1+2i\;$</div><div class="cs-line cs-step">$\;z_1 z_2 z_3 = 5z_3 = -10 \Rightarrow z_3 = -2,\quad a = -(2+(-2))=0,\quad b = 5+(-2)(1\!-\!2i)+(-2)(1\!+\!2i)=1\;$</div></div>
   <div class="cs-meta">
@@ -884,7 +919,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collapse-conjugate-pair-product-to-a²b²-via-difference-of-squares.html" class="cs-card">
+<a href="move/collapse-conjugate-pair-product-to-a²b²-via-difference-of-squares.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse conjugate pair product to a²+b² via difference of squares</div>
   <div class="cs-example"><div class="cs-line">$\;(3-2i)(3+2i)\;$</div><div class="cs-line cs-step">$\;3^2 + 2^2 = 13\;$</div></div>
   <div class="cs-meta">
@@ -899,7 +934,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-product-of-roots-first-to-isolate-the-unknown-third-root.html" class="cs-card">
+<a href="move/use-product-of-roots-first-to-isolate-the-unknown-third-root.html" class="cs-card lazy-tex">
   <div class="cs-name">Use product-of-roots first to isolate the unknown third root</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 + az^2 + bz - 10 = 0,\quad z_1 = 1-2i,\; z_2 = 1+2i\;$</div><div class="cs-line cs-step">$\;z_1 z_2 = 5,\quad 5\,z_3 = 10 \Rightarrow z_3 = 2\;$</div></div>
   <div class="cs-meta">
@@ -914,7 +949,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/encode-invariant-point-by-setting-w-z-in-the-möbius-equation.html" class="cs-card">
+<a href="move/encode-invariant-point-by-setting-w-z-in-the-möbius-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Encode invariant point by setting w = z in the Möbius equation</div>
   <div class="cs-example"><div class="cs-line">$\;w = \dfrac{az + b}{z + d},\quad z_0 \text{ invariant}\;$</div><div class="cs-line cs-step">$\;z_0 = \dfrac{az_0 + b}{z_0 + d} \Rightarrow z_0^2 + dz_0 = az_0 + b \Rightarrow z_0^2 + (d-a)z_0 - b = 0\;$</div></div>
   <div class="cs-meta">
@@ -929,7 +964,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-i-from-numerator-and-denominator-to-cancel.html" class="cs-card">
+<a href="move/factor-i-from-numerator-and-denominator-to-cancel.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor i from numerator and denominator to cancel</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{2i + 3i}{4i + i}\;$</div><div class="cs-line cs-step">$\;\dfrac{i(2+3)}{i(4+1)} = \dfrac{5}{5} = 1\;$</div></div>
   <div class="cs-meta">
@@ -944,7 +979,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rearrange-equation-to-recycle-part-a-polar-form.html" class="cs-card">
+<a href="move/rearrange-equation-to-recycle-part-a-polar-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange equation to recycle part (a) polar form</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ 1+i = \sqrt{2}\,e^{i\pi/4}.\quad \text{(b)}\ z^2 + 1 + i = 0\;$</div><div class="cs-line cs-step">$\;z^2 = -(1+i) = \sqrt{2}\,e^{-i3\pi/4} \Rightarrow z = 2^{1/4}\,e^{i(-3\pi/4 + 2k\pi)/2},\ k=0,1\;$</div></div>
   <div class="cs-meta">
@@ -959,7 +994,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-real-and-imaginary-parts-to-solve-for-a-real-parameter.html" class="cs-card">
+<a href="move/equate-real-and-imaginary-parts-to-solve-for-a-real-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate real and imaginary parts to solve for a real parameter</div>
   <div class="cs-example"><div class="cs-line">$\;(2+i)p + 3i = 4 + 5i,\quad p \in \mathbb{R}\;$</div><div class="cs-line cs-step">$\;\text{Re: } 2p = 4,\quad \text{Im: } p+3 = 5 \Rightarrow p = 2\;$</div></div>
   <div class="cs-meta">
@@ -974,7 +1009,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/add-2kπ-to-argument-to-enumerate-all-n-distinct-nth-roots.html" class="cs-card">
+<a href="move/add-2kπ-to-argument-to-enumerate-all-n-distinct-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Add 2kπ to argument to enumerate all n distinct nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i = 8\,\text{cis}\!\left(\tfrac{\pi}{2} + 2k\pi\right)\;$</div><div class="cs-line cs-step">$\;z_k = 2\,\text{cis}\!\left(\tfrac{\pi/2 + 2k\pi}{3}\right),\quad k=0,1,2 \Rightarrow z = 2\,\text{cis}\tfrac{\pi}{6},\; 2\,\text{cis}\tfrac{5\pi}{6},\; 2\,\text{cis}\tfrac{3\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -989,7 +1024,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-de-moivre-to-compress-cosθisinθn-into-cosnθisinnθ.html" class="cs-card">
+<a href="move/apply-de-moivre-to-compress-cosθisinθn-into-cosnθisinnθ.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply de Moivre to compress (cosθ+isinθ)^n into cos(nθ)+isin(nθ)</div>
   <div class="cs-example"><div class="cs-line">$\;z = \cos\theta + i\sin\theta,\quad z^3 = (\cos\theta + i\sin\theta)^3\;$</div><div class="cs-line cs-step">$\;(\cos\theta + i\sin\theta)^3 = \cos 3\theta + i\sin 3\theta\;$</div></div>
   <div class="cs-meta">
@@ -1004,7 +1039,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-cosθ-i-sinθn-by-the-binomial-theorem-to-extract-real-and-imaginary-parts.html" class="cs-card">
+<a href="move/expand-cosθ-i-sinθn-by-the-binomial-theorem-to-extract-real-and-imaginary-parts.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand (cosθ + i sinθ)^n by the binomial theorem to extract real and imaginary parts</div>
   <div class="cs-example"><div class="cs-line">$\;(\cos\theta + i\sin\theta)^3\;$</div><div class="cs-line cs-step">$\;\cos^3\theta + 3i\cos^2\theta\sin\theta - 3\cos\theta\sin^2\theta - i\sin^3\theta = (\cos^3\theta - 3\cos\theta\sin^2\theta) + i(3\cos^2\theta\sin\theta - \sin^3\theta)\;$</div></div>
   <div class="cs-meta">
@@ -1019,7 +1054,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/shift-k-index-to-keep-nth-root-arguments-in-principal-range.html" class="cs-card">
+<a href="move/shift-k-index-to-keep-nth-root-arguments-in-principal-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Shift k-index to keep nth-root arguments in principal range</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = \operatorname{cis}(-\tfrac{4\pi}{3}),\quad z_k = \operatorname{cis}\!\left(\tfrac{-\tfrac{4\pi}{3} + 2\pi k}{3}\right),\; k\in\{0,1,2\}\;$</div><div class="cs-line cs-step">$\;k=2:\; \tfrac{-\frac{4\pi}{3}+4\pi}{3} = \tfrac{8\pi}{9}>\pi,\;\text{replace } k=2\to k=-1:\; \tfrac{-\frac{4\pi}{3}-2\pi}{3} = -\tfrac{10\pi}{9}\Rightarrow k\in\{0,1,-1\},\; \text{args}\;\in(-\pi,\pi]\;$</div></div>
   <div class="cs-meta">
@@ -1034,7 +1069,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-conjugate-pair-symmetry-to-halve-root-finding-work.html" class="cs-card">
+<a href="move/exploit-conjugate-pair-symmetry-to-halve-root-finding-work.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit conjugate-pair symmetry to halve root-finding work</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 - 3z^2 + 4z - 12 = 0,\quad z = 2i \text{ is a root}\;$</div><div class="cs-line cs-step">$\;z = -2i \Rightarrow (z^2+4)(z-3)=0 \Rightarrow z = \pm 2i,\, 3\;$</div></div>
   <div class="cs-meta">
@@ -1049,7 +1084,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-modulus-of-a-quotient-to-get-an-equation-in-the-new-variable.html" class="cs-card">
+<a href="move/split-modulus-of-a-quotient-to-get-an-equation-in-the-new-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Split modulus of a quotient to get an equation in the new variable</div>
   <div class="cs-example"><div class="cs-line">$\;z = \dfrac{w+1}{w-1},\quad |z| = 1\;$</div><div class="cs-line cs-step">$\;\dfrac{|w+1|}{|w-1|} = 1 \Rightarrow |w+1| = |w-1|\;$</div></div>
   <div class="cs-meta">
@@ -1064,7 +1099,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-z-eiθ-to-convert-cosθ-into-the-symmetric-sum-z-z-1.html" class="cs-card">
+<a href="move/set-z-eiθ-to-convert-cosθ-into-the-symmetric-sum-z-z-1.html" class="cs-card lazy-tex">
   <div class="cs-name">Set z = e^{iθ} to convert cosθ into the symmetric sum z + z^{-1}</div>
   <div class="cs-example"><div class="cs-line">$\;z = e^{i\theta},\quad (2\cos\theta)^2 = (z+z^{-1})^2\;$</div><div class="cs-line cs-step">$\;z^2 + 2 + z^{-2} = 2\cos 2\theta + 2 \Rightarrow \cos^2\theta = \tfrac{1}{2}\cos 2\theta + \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1079,7 +1114,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/enumerate-nth-roots-via-φ-2kπn-argument-shifts.html" class="cs-card">
+<a href="move/enumerate-nth-roots-via-φ-2kπn-argument-shifts.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate nth roots via (φ + 2kπ)/n argument shifts</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i = 8\operatorname{cis}\!\left(\tfrac{\pi}{2}\right)\;$</div><div class="cs-line cs-step">$\;z_k = 2\operatorname{cis}\!\left(\dfrac{\frac{\pi}{2}+2k\pi}{3}\right),\; k=0,1,2 \Rightarrow z = 2\operatorname{cis}\tfrac{\pi}{6},\; 2\operatorname{cis}\tfrac{5\pi}{6},\; 2\operatorname{cis}\!\left(-\tfrac{\pi}{2}\right)\;$</div></div>
   <div class="cs-meta">
@@ -1094,7 +1129,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-wuiv-and-square-moduli-to-extract-cartesian-locus.html" class="cs-card">
+<a href="move/substitute-wuiv-and-square-moduli-to-extract-cartesian-locus.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute w=u+iv and square moduli to extract Cartesian locus</div>
   <div class="cs-example"><div class="cs-line">$\;|w - 2| = |w + 2i|,\quad w = u + iv\;$</div><div class="cs-line cs-step">$\;(u-2)^2 + v^2 = u^2 + (v+2)^2 \Rightarrow -4u = 4v \Rightarrow v = -u\;$</div></div>
   <div class="cs-meta">
@@ -1109,7 +1144,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/test-a-convenient-point-to-identify-the-correct-inequality-region.html" class="cs-card">
+<a href="move/test-a-convenient-point-to-identify-the-correct-inequality-region.html" class="cs-card lazy-tex">
   <div class="cs-name">Test a convenient point to identify the correct inequality region</div>
   <div class="cs-example"><div class="cs-line">$\;|z - 2| \le |z + 2|}\;$</div><div class="cs-line cs-step">$\;z_0 = 0:\; |0-2| = 2,\; |0+2| = 2,\; 2 \le 2 \;\checkmark \Rightarrow \text{shade side containing } 0\;$</div></div>
   <div class="cs-meta">
@@ -1124,7 +1159,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-real-or-imaginary-parts-of-two-complex-representations.html" class="cs-card">
+<a href="move/equate-real-or-imaginary-parts-of-two-complex-representations.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate real or imaginary parts of two complex representations</div>
   <div class="cs-example"><div class="cs-line">$\;(\cos\theta + i\sin\theta)^3 = \cos^3\theta + 3i\cos^2\theta\sin\theta - 3\cos\theta\sin^2\theta - i\sin^3\theta = \cos 3\theta + i\sin 3\theta\;$</div><div class="cs-line cs-step">$\;\text{Equate real parts: } \cos 3\theta = \cos^3\theta - 3\cos\theta\sin^2\theta\;$</div></div>
   <div class="cs-meta">
@@ -1139,7 +1174,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-complex-number-to-exponential-form-before-extracting-nth-roots.html" class="cs-card">
+<a href="move/convert-complex-number-to-exponential-form-before-extracting-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert complex number to exponential form before extracting nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8i\;$</div><div class="cs-line cs-step">$\;8i = 8e^{i\pi/2} = 8e^{i(\pi/2 + 2\pi k)}\;$</div></div>
   <div class="cs-meta">
@@ -1154,7 +1189,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/insert-2kπ-before-taking-the-nth-root-to-capture-all-roots.html" class="cs-card">
+<a href="move/insert-2kπ-before-taking-the-nth-root-to-capture-all-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Insert +2kπ before taking the nth root to capture all roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8\;$</div><div class="cs-line cs-step">$\;8 = 8e^{i\cdot 2k\pi} \Rightarrow z = 2e^{i\cdot 2k\pi/3},\quad k=0,1,2\;$</div></div>
   <div class="cs-meta">
@@ -1169,7 +1204,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-k-values-so-all-nth-root-arguments-fall-in-the-required-range.html" class="cs-card">
+<a href="move/choose-k-values-so-all-nth-root-arguments-fall-in-the-required-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose k-values so all nth-root arguments fall in the required range</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = 8,\quad -\pi < \arg z \le \pi\;$</div><div class="cs-line cs-step">$\;\theta = \tfrac{0 + 2k\pi}{3}:\quad k=-1,0,1 \Rightarrow \theta = -\tfrac{2\pi}{3},\, 0,\, \tfrac{2\pi}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1184,7 +1219,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-cos-θ-i-sin-θn-binomially-to-extract-multiple-angle-identities.html" class="cs-card">
+<a href="move/expand-cos-θ-i-sin-θn-binomially-to-extract-multiple-angle-identities.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand (cos θ + i sin θ)^n binomially to extract multiple-angle identities</div>
   <div class="cs-example"><div class="cs-line">$\;(\cos\theta + i\sin\theta)^3\;$</div><div class="cs-line cs-step">$\;\cos^3\theta + 3i\cos^2\theta\sin\theta - 3\cos\theta\sin^2\theta - i\sin^3\theta \Rightarrow \cos 3\theta = \cos^3\theta - 3\cos\theta\sin^2\theta\;$</div></div>
   <div class="cs-meta">
@@ -1199,7 +1234,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-substituted-modulus-equation-to-cartesian-circle-or-line.html" class="cs-card">
+<a href="move/reduce-substituted-modulus-equation-to-cartesian-circle-or-line.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce substituted modulus equation to Cartesian circle or line</div>
   <div class="cs-example"><div class="cs-line">$\;|2w - 1| = |w + 1|,\quad w = u + iv\;$</div><div class="cs-line cs-step">$\;(2u-1)^2 + 4v^2 = (u+1)^2 + v^2 \Rightarrow (u-1)^2 + v^2 = 1\;$</div></div>
   <div class="cs-meta">
@@ -1214,7 +1249,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-vieta-to-conclude-sum-of-nth-roots-equals-zero.html" class="cs-card">
+<a href="move/use-vieta-to-conclude-sum-of-nth-roots-equals-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Use Vieta to conclude sum of nth roots equals zero</div>
   <div class="cs-example"><div class="cs-line">$\;z^4 - 16 = 0,\quad z_k = 2\,\mathrm{cis}\!\left(\tfrac{\pi k}{2}\right),\ k=0,1,2,3\;$</div><div class="cs-line cs-step">$\;\text{coeff of } z^3 = 0 \;\Rightarrow\; \sum_{k=0}^{3} z_k = -\frac{0}{1} = 0\;$</div></div>
   <div class="cs-meta">
@@ -1229,7 +1264,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-test-points-on-locus-and-inside-region-to-verify-image-and-fix-shading.html" class="cs-card">
+<a href="move/use-test-points-on-locus-and-inside-region-to-verify-image-and-fix-shading.html" class="cs-card lazy-tex">
   <div class="cs-name">Use test points on locus and inside region to verify image and fix shading</div>
   <div class="cs-example"><div class="cs-line">$\;|z|=1,\quad w=\dfrac{1}{z+2}\;$</div><div class="cs-line cs-step">$\;z=1\Rightarrow w=\tfrac{1}{3};\quad z=0\ (\text{inside } |z|<1)\Rightarrow w_0=\tfrac{1}{2},\quad w_0\ \text{outside image} \Rightarrow \text{shade opposite side}\;$</div></div>
   <div class="cs-meta">
@@ -1244,7 +1279,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-polar-roots-to-exact-cartesian-form-using-standard-angle-trig-values.html" class="cs-card">
+<a href="move/convert-polar-roots-to-exact-cartesian-form-using-standard-angle-trig-values.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert polar roots to exact Cartesian form using standard-angle trig values</div>
   <div class="cs-example"><div class="cs-line">$\;z = 2\,\text{cis}\!\left(\dfrac{\pi}{3}\right)\;$</div><div class="cs-line cs-step">$\;z = 2\!\left(\cos\dfrac{\pi}{3}+i\sin\dfrac{\pi}{3}\right) = 2\!\left(\dfrac{1}{2}+\dfrac{\sqrt{3}}{2}\,i\right) = 1+\sqrt{3}\,i\;$</div></div>
   <div class="cs-meta">
@@ -1259,7 +1294,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/add-2kπ-to-argument-before-dividing-by-n-to-generate-all-nth-roots.html" class="cs-card">
+<a href="move/add-2kπ-to-argument-before-dividing-by-n-to-generate-all-nth-roots.html" class="cs-card lazy-tex">
   <div class="cs-name">Add 2kπ to argument before dividing by n to generate all nth roots</div>
   <div class="cs-example"><div class="cs-line">$\;z^3 = \operatorname{cis}(\pi/2)\;$</div><div class="cs-line cs-step">$\;z_k = \operatorname{cis}\!\left(\dfrac{\pi/2 + 2k\pi}{3}\right),\; k=0,1,2 \Rightarrow z_0 = \operatorname{cis}\dfrac{\pi}{6},\; z_1 = \operatorname{cis}\dfrac{5\pi}{6},\; z_2 = \operatorname{cis}\!\left(-\dfrac{\pi}{2}\right)\;$</div></div>
   <div class="cs-meta">
@@ -1274,7 +1309,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-z-x-iy-to-convert-a-modulus-locus-to-cartesian-form.html" class="cs-card">
+<a href="move/substitute-z-x-iy-to-convert-a-modulus-locus-to-cartesian-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute z = x + iy to convert a modulus locus to Cartesian form</div>
   <div class="cs-example"><div class="cs-line">$\;|z - 1| = |z + 1|\;$</div><div class="cs-line cs-step">$\;(x-1)^2 + y^2 = (x+1)^2 + y^2 \Rightarrow x = 0\;$</div></div>
   <div class="cs-meta">
@@ -1289,7 +1324,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-a-straight-line-locus-in-the-z-plane-by-a-single-real-variable.html" class="cs-card">
+<a href="move/parametrise-a-straight-line-locus-in-the-z-plane-by-a-single-real-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise a straight-line locus in the z-plane by a single real variable</div>
   <div class="cs-example"><div class="cs-line">$\;w = \dfrac{z}{z - i},\quad \operatorname{Re}(z) = 0\;$</div><div class="cs-line cs-step">$\;z = iy,\ y \neq 1 \Rightarrow w = \dfrac{iy}{iy - i} = \dfrac{y}{y - 1}\;$</div></div>
   <div class="cs-meta">
@@ -1304,7 +1339,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-a-möbius-map-to-express-z-in-terms-of-w-before-substituting.html" class="cs-card">
+<a href="move/invert-a-möbius-map-to-express-z-in-terms-of-w-before-substituting.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert a Möbius map to express z in terms of w before substituting</div>
   <div class="cs-example"><div class="cs-line">$\;w = \dfrac{z+1}{z-1}\;$</div><div class="cs-line cs-step">$\;w(z-1) = z+1 \Rightarrow z(w-1) = w+1 \Rightarrow z = \dfrac{w+1}{w-1}\;$</div></div>
   <div class="cs-meta">
@@ -1319,7 +1354,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-standard-complex-loci-to-bypass-cartesian-expansion.html" class="cs-card">
+<a href="move/recognise-standard-complex-loci-to-bypass-cartesian-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise standard complex loci to bypass Cartesian expansion</div>
   <div class="cs-example"><div class="cs-line">$\;|z - 2| = |z + 2i|\;$</div><div class="cs-line cs-step">$\;\text{Perp.\ bisector of } (2,0) \text{ and } (0,-2) \Rightarrow y = -x\;$</div></div>
   <div class="cs-meta">
@@ -1334,7 +1369,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-both-sides-to-convert-modulus-locus-into-cartesian-circle-equation.html" class="cs-card">
+<a href="move/square-both-sides-to-convert-modulus-locus-into-cartesian-circle-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Square both sides to convert modulus locus into Cartesian circle equation</div>
   <div class="cs-example"><div class="cs-line">$\;|z - 3i| = 2|z - 3|,\quad z = x + iy\;$</div><div class="cs-line cs-step">$\;x^2 + (y-3)^2 = 4(x-3)^2 + 4y^2 \Rightarrow 3x^2 - 24x + 3y^2 + 6y + 27 = 0 \Rightarrow (x-4)^2 + (y+1)^2 = 8\;$</div></div>
   <div class="cs-meta">
@@ -1349,7 +1384,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-möbius-locus-conditions-into-modulusargument-equations-before-cartesia.html" class="cs-card">
+<a href="move/translate-möbius-locus-conditions-into-modulusargument-equations-before-cartesia.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate Möbius locus conditions into modulus/argument equations before Cartesian substitution</div>
   <div class="cs-example"><div class="cs-line">$\;w = \dfrac{z-1}{z+1},\quad |w| = 1\;$</div><div class="cs-line cs-step">$\;|z-1| = |z+1| \Rightarrow \operatorname{Re}(z) = 0\;$</div></div>
   <div class="cs-meta">
@@ -1364,7 +1399,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-inverse-map-into-modulus-locus-and-apply-quotient-rule.html" class="cs-card">
+<a href="move/substitute-inverse-map-into-modulus-locus-and-apply-quotient-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute inverse map into modulus locus and apply quotient rule</div>
   <div class="cs-example"><div class="cs-line">$\;\left|\dfrac{w+1}{w-1}+1\right|=2\;$</div><div class="cs-line cs-step">$\;\left|\dfrac{2w}{w-1}\right|=2 \Rightarrow \dfrac{2|w|}{|w-1|}=2 \Rightarrow |w|=|w-1|\;$</div></div>
   <div class="cs-meta">
@@ -1379,7 +1414,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/filter-intersection-points-using-half-line-directional-constraint-from-arg-locus.html" class="cs-card">
+<a href="move/filter-intersection-points-using-half-line-directional-constraint-from-arg-locus.html" class="cs-card lazy-tex">
   <div class="cs-name">Filter intersection points using half-line directional constraint from arg locus</div>
   <div class="cs-example"><div class="cs-line">$\;\arg(z - 2i) = \tfrac{3\pi}{4},\quad |z - 2i| = 2 \Rightarrow x^2 = 2,\; x = \pm\sqrt{2}\;$</div><div class="cs-line cs-step">$\;\theta = \tfrac{3\pi}{4} \Rightarrow x < 0,\; y > 2 \Rightarrow \text{reject } x = \sqrt{2};\quad z = -\sqrt{2} + (2+\sqrt{2})\,i\;$</div></div>
   <div class="cs-meta">
@@ -1394,7 +1429,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-arg-half-line-to-cartesian-via-tanθ-gradient-with-directional-restrictio.html" class="cs-card">
+<a href="move/convert-arg-half-line-to-cartesian-via-tanθ-gradient-with-directional-restrictio.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert arg half-line to Cartesian via tan(θ) gradient with directional restriction</div>
   <div class="cs-example"><div class="cs-line">$\;\arg(z - 1 - i) = \dfrac{\pi}{4}\;$</div><div class="cs-line cs-step">$\;m = \tan\tfrac{\pi}{4} = 1,\quad y - 1 = 1(x - 1),\quad x > 1\;$</div></div>
   <div class="cs-meta">

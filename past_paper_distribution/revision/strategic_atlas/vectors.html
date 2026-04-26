@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">2 moves · 10 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cross-two-in-plane-or-direction-vectors-to-obtain-a-perpendicular-normal.html" class="cs-card">
+<a href="move/cross-two-in-plane-or-direction-vectors-to-obtain-a-perpendicular-normal.html" class="cs-card lazy-tex">
   <div class="cs-name">Cross two in-plane (or direction) vectors to obtain a perpendicular normal</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{u} = \begin{pmatrix}1\\0\\2\end{pmatrix},\quad \mathbf{v} = \begin{pmatrix}0\\1\\1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\mathbf{n} = \mathbf{u} \times \mathbf{v} = \begin{vmatrix}\mathbf{i}&\mathbf{j}&\mathbf{k}\\1&0&2\\0&1&1\end{vmatrix} = \begin{pmatrix}-2\\-1\\1\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>cross product normal</span>
   </div>
 </a>
-<a href="move/use-half-the-cross-product-magnitude-for-triangle-area-in-3d.html" class="cs-card">
+<a href="move/use-half-the-cross-product-magnitude-for-triangle-area-in-3d.html" class="cs-card lazy-tex">
   <div class="cs-name">Use half the cross product magnitude for triangle area in 3D</div>
   <div class="cs-example"><div class="cs-line">$\;\overrightarrow{AB} = (1,0,2),\quad \overrightarrow{AC} = (0,1,1)\;$</div><div class="cs-line cs-step">$\;\overrightarrow{AB} \times \overrightarrow{AC} = (-2,-1,1),\quad \text{Area} = \tfrac{1}{2}\sqrt{4+1+1} = \tfrac{\sqrt{6}}{2}\;$</div></div>
   <div class="cs-meta">
@@ -286,7 +321,7 @@ window.MathJax = {
     <span class="meta">2 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-parametric-line-into-plane-equation-to-find-intersection-point.html" class="cs-card">
+<a href="move/substitute-parametric-line-into-plane-equation-to-find-intersection-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute parametric line into plane equation to find intersection point</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r} = (1,0,0) + t(1,1,1),\quad x + y + z = 6\;$</div><div class="cs-line cs-step">$\;(1+t)+(t)+(t)=6 \Rightarrow 1+3t=6 \Rightarrow t=\tfrac{5}{3} \Rightarrow \mathbf{r}=\bigl(\tfrac{8}{3},\,\tfrac{5}{3},\,\tfrac{5}{3}\bigr)\;$</div></div>
   <div class="cs-meta">
@@ -294,7 +329,7 @@ window.MathJax = {
     <span>parametric substitution</span>
   </div>
 </a>
-<a href="move/parametrise-symmetric-line-form-to-substitute-into-plane-equation.html" class="cs-card">
+<a href="move/parametrise-symmetric-line-form-to-substitute-into-plane-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise symmetric line form to substitute into plane equation</div>
   <div class="cs-example"><div class="cs-line">$\;\frac{x-1}{2} = \frac{y-2}{1} = \frac{z}{-1} = t,\quad x+y+z=5\;$</div><div class="cs-line cs-step">$\;(1+2t)+(2+t)+(0-t)=5 \Rightarrow 2t+3=5 \Rightarrow t=1 \Rightarrow (3,\,3,\,-1)\;$</div></div>
   <div class="cs-meta">
@@ -309,7 +344,7 @@ window.MathJax = {
     <span class="meta">2 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-dot-product-formula-with-modulus-to-find-angle-between-directions-in-3d.html" class="cs-card">
+<a href="move/apply-dot-product-formula-with-modulus-to-find-angle-between-directions-in-3d.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply dot product formula with modulus to find angle between directions in 3D</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{u} = \begin{pmatrix}1\\2\\2\end{pmatrix},\quad \mathbf{v} = \begin{pmatrix}2\\1\\-2\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\cos\theta = \dfrac{|\mathbf{u}\cdot\mathbf{v}|}{|\mathbf{u}||\mathbf{v}|} = \dfrac{|2+2-4|}{3\cdot3} = 0 \Rightarrow \theta = 90^\circ\;$</div></div>
   <div class="cs-meta">
@@ -317,7 +352,7 @@ window.MathJax = {
     <span>dot product angle</span>
   </div>
 </a>
-<a href="move/take-absolute-value-of-normals-dot-product-for-acute-dihedral-angle.html" class="cs-card">
+<a href="move/take-absolute-value-of-normals-dot-product-for-acute-dihedral-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Take absolute value of normals&#x27; dot product for acute dihedral angle</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{n_1} = (1,0,1),\quad \mathbf{n_2} = (0,1,-1)\;$</div><div class="cs-line cs-step">$\;\cos\theta = \dfrac{|\mathbf{n_1}\cdot\mathbf{n_2}|}{|\mathbf{n_1}||\mathbf{n_2}|} = \dfrac{|-1|}{\sqrt{2}\cdot\sqrt{2}} = \dfrac{1}{2} \Rightarrow \theta = 60^\circ\;$</div></div>
   <div class="cs-meta">
@@ -332,7 +367,7 @@ window.MathJax = {
     <span class="meta">2 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-parametric-position-vectors-componentwise-to-test-3d-line-intersection.html" class="cs-card">
+<a href="move/equate-parametric-position-vectors-componentwise-to-test-3d-line-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate parametric position vectors componentwise to test 3D line intersection</div>
   <div class="cs-example"><div class="cs-line">$\;l_1: \mathbf{r}=\begin{pmatrix}1\\0\\0\end{pmatrix}+\lambda\begin{pmatrix}1\\2\\1\end{pmatrix},\quad l_2: \mathbf{r}=\begin{pmatrix}0\\1\\1\end{pmatrix}+\mu\begin{pmatrix}2\\1\\0\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\text{(i)}\ 1+\lambda=2\mu,\quad \text{(ii)}\ 2\lambda=1+\mu \Rightarrow \lambda=1,\,\mu=1;\quad \text{(iii)}\ 0+1=1+0\ \checkmark \Rightarrow \text{intersection at } (2,2,1)\;$</div></div>
   <div class="cs-meta">
@@ -340,7 +375,7 @@ window.MathJax = {
     <span>parametric intersection test</span>
   </div>
 </a>
-<a href="move/equate-parametric-lines-with-distinct-parameters-to-test-3d-intersection.html" class="cs-card">
+<a href="move/equate-parametric-lines-with-distinct-parameters-to-test-3d-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate parametric lines with distinct parameters to test 3D intersection</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r}_1 = (1,0,0) + \lambda(1,1,0),\quad \mathbf{r}_2 = (0,1,0) + \mu(1,0,1)\;$</div><div class="cs-line cs-step">$\;\text{(i)}\ 1+\lambda = \mu,\quad \text{(ii)}\ \lambda = 1 \Rightarrow \mu = 2;\quad \text{(iii)}\ 0 \neq 2 \Rightarrow \text{skew}\;$</div></div>
   <div class="cs-meta">
@@ -355,7 +390,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/project-connecting-vector-onto-unit-normal-to-obtain-perpendicular-distance.html" class="cs-card">
+<a href="move/project-connecting-vector-onto-unit-normal-to-obtain-perpendicular-distance.html" class="cs-card lazy-tex">
   <div class="cs-name">Project connecting vector onto unit normal to obtain perpendicular distance</div>
   <div class="cs-example"><div class="cs-line">$\;P(1,2,3),\quad \pi:\,2x - y + 2z = 5,\quad \mathbf{n}=(2,-1,2)\;$</div><div class="cs-line cs-step">$\;d = \dfrac{|\mathbf{p}\cdot\mathbf{n} - k|}{|\mathbf{n}|} = \dfrac{|(2-2+6)-5|}{\sqrt{4+1+4}} = \dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -370,7 +405,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-sine-formula-directly-to-obtain-the-line-plane-angle.html" class="cs-card">
+<a href="move/use-sine-formula-directly-to-obtain-the-line-plane-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Use sine formula directly to obtain the line-plane angle</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d} = (1,\,0,\,2),\quad \mathbf{n} = (0,\,0,\,1)\;$</div><div class="cs-line cs-step">$\;\sin\alpha = \dfrac{|\mathbf{d}\cdot\mathbf{n}|}{|\mathbf{d}|\,|\mathbf{n}|} = \dfrac{2}{\sqrt{5}} \Rightarrow \alpha = \arcsin\!\dfrac{2}{\sqrt{5}}\;$</div></div>
   <div class="cs-meta">
@@ -385,7 +420,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-sin-formula-with-direction-and-normal-to-get-line-plane-angle-directly.html" class="cs-card">
+<a href="move/apply-sin-formula-with-direction-and-normal-to-get-line-plane-angle-directly.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply sin formula with direction and normal to get line-plane angle directly</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d} = (1,0,2),\quad \mathbf{n} = (0,0,1)\;$</div><div class="cs-line cs-step">$\;\sin\theta = \dfrac{|\mathbf{d}\cdot\mathbf{n}|}{|\mathbf{d}|\,|\mathbf{n}|} = \dfrac{2}{\sqrt{5}} \Rightarrow \theta = \arcsin\!\dfrac{2}{\sqrt{5}}\;$</div></div>
   <div class="cs-meta">
@@ -400,7 +435,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-point-on-line-and-impose-dot-product-perpendicularity-to-find-foot.html" class="cs-card">
+<a href="move/parametrise-point-on-line-and-impose-dot-product-perpendicularity-to-find-foot.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise point on line and impose dot-product perpendicularity to find foot</div>
   <div class="cs-example"><div class="cs-line">$\;P=(1,0,0),\quad l:\mathbf{r}=(0,0,0)+\mu(1,1,0)\;$</div><div class="cs-line cs-step">$\;\vec{PB}=(\mu-1,\mu,0),\quad \vec{PB}\cdot(1,1,0)=2\mu-1=0 \Rightarrow \mu=\tfrac{1}{2},\; B=\bigl(\tfrac{1}{2},\tfrac{1}{2},0\bigr)\;$</div></div>
   <div class="cs-meta">
@@ -415,7 +450,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/test-parallelism-by-extracting-k-from-two-components-and-seeking-contradiction.html" class="cs-card">
+<a href="move/test-parallelism-by-extracting-k-from-two-components-and-seeking-contradiction.html" class="cs-card lazy-tex">
   <div class="cs-name">Test parallelism by extracting k from two components and seeking contradiction</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d}_1 = (1,\,2,\,3),\quad \mathbf{d}_2 = (2,\,4,\,5)\;$</div><div class="cs-line cs-step">$\;k = \tfrac{2}{1} = 2,\quad k = \tfrac{5}{3} \neq 2 \Rightarrow \text{not parallel}\;$</div></div>
   <div class="cs-meta">
@@ -430,7 +465,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-known-parameter-into-its-own-line-equation-to-extract-the-interse.html" class="cs-card">
+<a href="move/substitute-the-known-parameter-into-its-own-line-equation-to-extract-the-interse.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the known parameter into its own line equation to extract the intersection point</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r} = (1,2,0) + \lambda(1,-1,2),\quad \lambda = 1\;$</div><div class="cs-line cs-step">$\;\mathbf{r} = (1+1,\,2-1,\,0+2) = (2,1,2)\;$</div></div>
   <div class="cs-meta">
@@ -445,7 +480,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-absolute-value-or-supplement-to-extract-the-acute-angle-for-lines.html" class="cs-card">
+<a href="move/take-absolute-value-or-supplement-to-extract-the-acute-angle-for-lines.html" class="cs-card lazy-tex">
   <div class="cs-name">Take absolute value or supplement to extract the acute angle for lines</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d_1}\cdot\mathbf{d_2} = -4,\quad |\mathbf{d_1}| = 2,\quad |\mathbf{d_2}| = 4\;$</div><div class="cs-line cs-step">$\;\theta = \arccos\!\left(\dfrac{|{-4}|}{2\cdot4}\right) = \arccos\tfrac{1}{2} = 60°\;$</div></div>
   <div class="cs-meta">
@@ -460,7 +495,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-point-on-line-and-square-distance-to-solve-for-parameter.html" class="cs-card">
+<a href="move/parametrise-point-on-line-and-square-distance-to-solve-for-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise point on line and square distance to solve for parameter</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r} = (1,0,0) + t(1,2,2),\quad P=(1,0,0),\quad |PE|=6\;$</div><div class="cs-line cs-step">$\;|PE|^2 = t^2(1+4+4)=9t^2=36 \Rightarrow t=\pm2,\quad E=(3,4,4)\text{ or }(-1,-4,-4)\;$</div></div>
   <div class="cs-meta">
@@ -475,7 +510,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-dot-product-formula-with-absolute-value-to-find-acute-angle-between-lines.html" class="cs-card">
+<a href="move/apply-dot-product-formula-with-absolute-value-to-find-acute-angle-between-lines.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply dot-product formula with absolute value to find acute angle between lines</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d}_1 = (1,2,2),\quad \mathbf{d}_2 = (2,-1,2)\;$</div><div class="cs-line cs-step">$\;\cos\theta = \frac{|\mathbf{d}_1 \cdot \mathbf{d}_2|}{|\mathbf{d}_1|\,|\mathbf{d}_2|} = \frac{|2-2+4|}{3\cdot3} = \frac{4}{9}\;$</div></div>
   <div class="cs-meta">
@@ -490,7 +525,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-point-to-plane-perpendicular-distance-formula-to-compute-shortest-dist.html" class="cs-card">
+<a href="move/apply-the-point-to-plane-perpendicular-distance-formula-to-compute-shortest-dist.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the point-to-plane perpendicular distance formula to compute shortest distance</div>
   <div class="cs-example"><div class="cs-line">$\;P=(1,\,2,\,3),\quad \Pi:\,2x + y - 2z = 3\;$</div><div class="cs-line cs-step">$\;D = \dfrac{|2(1)+1(2)-2(3)-3|}{\sqrt{4+1+4}} = \dfrac{|-3|}{3} = 1\;$</div></div>
   <div class="cs-meta">
@@ -505,7 +540,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-scalar-triple-product-to-compute-tetrahedron-volume.html" class="cs-card">
+<a href="move/apply-scalar-triple-product-to-compute-tetrahedron-volume.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply scalar triple product to compute tetrahedron volume</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{a} = \mathbf{i} + 2\mathbf{j} + 3\mathbf{k},\quad \mathbf{b} = 2\mathbf{i} + \mathbf{j},\quad \mathbf{c} = \mathbf{i} + \mathbf{k}\;$</div><div class="cs-line cs-step">$\;\mathbf{b} \times \mathbf{c} = \mathbf{i} - 2\mathbf{j} - \mathbf{k},\quad \mathbf{a} \cdot (\mathbf{b} \times \mathbf{c}) = 1 - 4 - 3 = -6 \Rightarrow V = \tfrac{1}{6}|{-6}| = 1\;$</div></div>
   <div class="cs-meta">
@@ -520,7 +555,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-plane-parametrically-from-anchor-on-contained-line-plus-two-spanning-direc.html" class="cs-card">
+<a href="move/build-plane-parametrically-from-anchor-on-contained-line-plus-two-spanning-direc.html" class="cs-card lazy-tex">
   <div class="cs-name">Build plane parametrically from anchor on contained line plus two spanning directions</div>
   <div class="cs-example"><div class="cs-line">$\;l_1: \mathbf{r} = \mathbf{i} + s(2\mathbf{i}+\mathbf{j}),\quad l_2: \mathbf{r} = 3\mathbf{i}+\mathbf{k} + t(\mathbf{i}-\mathbf{j}+\mathbf{k})\;$</div><div class="cs-line cs-step">$\;\mathbf{r} = (3\mathbf{i}+\mathbf{k}) + s(2\mathbf{i}+\mathbf{j}) + t(\mathbf{i}-\mathbf{j}+\mathbf{k})\;$</div></div>
   <div class="cs-meta">
@@ -535,7 +570,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-½ab-sin-c-when-two-sides-and-included-angle-are-already-known.html" class="cs-card">
+<a href="move/use-½ab-sin-c-when-two-sides-and-included-angle-are-already-known.html" class="cs-card lazy-tex">
   <div class="cs-name">Use ½ab sin C when two sides and included angle are already known</div>
   <div class="cs-example"><div class="cs-line">$\;|PA| = 3,\quad |PE| = 2\sqrt{2},\quad \cos(\angle APE) = \tfrac{1}{\sqrt{2}}\;$</div><div class="cs-line cs-step">$\;\sin(\angle APE) = \tfrac{1}{\sqrt{2}},\quad \text{Area} = \tfrac{1}{2}(3)(2\sqrt{2})\!\left(\tfrac{1}{\sqrt{2}}\right) = 3\;$</div></div>
   <div class="cs-meta">
@@ -550,7 +585,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/normalize-a-direction-vector-by-dividing-by-its-magnitude.html" class="cs-card">
+<a href="move/normalize-a-direction-vector-by-dividing-by-its-magnitude.html" class="cs-card lazy-tex">
   <div class="cs-name">Normalize a direction vector by dividing by its magnitude</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{d} = (1,\,2,\,2)\;$</div><div class="cs-line cs-step">$\;|\mathbf{d}| = \sqrt{1+4+4} = 3,\quad \hat{\mathbf{d}} = \tfrac{1}{3}(1,\,2,\,2)\;$</div></div>
   <div class="cs-meta">
@@ -565,7 +600,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/retain-both-roots-when-solving-λ²-k-for-points-on-a-line.html" class="cs-card">
+<a href="move/retain-both-roots-when-solving-λ²-k-for-points-on-a-line.html" class="cs-card lazy-tex">
   <div class="cs-name">Retain both ± roots when solving λ² = k for points on a line</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r} = (1,0,0) + \lambda(0,3,4),\quad |\mathbf{r} - (1,0,0)| = 10\;$</div><div class="cs-line cs-step">$\;25\lambda^2 = 100 \Rightarrow \lambda = \pm 2,\quad \mathbf{r} = (1,6,8) \text{ or } (1,-6,-8)\;$</div></div>
   <div class="cs-meta">
@@ -580,7 +615,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/isolate-cosθ-via-division-then-apply-arccos-to-extract-the-angle.html" class="cs-card">
+<a href="move/isolate-cosθ-via-division-then-apply-arccos-to-extract-the-angle.html" class="cs-card lazy-tex">
   <div class="cs-name">Isolate cosθ via division then apply arccos to extract the angle</div>
   <div class="cs-example"><div class="cs-line">$\;\cos\theta = \dfrac{\mathbf{a}\cdot\mathbf{b}}{|\mathbf{a}|\,|\mathbf{b}|} = \dfrac{1}{\sqrt{2}\cdot\sqrt{2}} = \dfrac{1}{2}\;$</div><div class="cs-line cs-step">$\;\theta = \arccos\!\left(\dfrac{1}{2}\right) = 60^{\circ}\;$</div></div>
   <div class="cs-meta">
@@ -595,7 +630,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reverse-one-vector-so-both-emanate-from-the-angles-vertex.html" class="cs-card">
+<a href="move/reverse-one-vector-so-both-emanate-from-the-angles-vertex.html" class="cs-card lazy-tex">
   <div class="cs-name">Reverse one vector so both emanate from the angle&#x27;s vertex</div>
   <div class="cs-example"><div class="cs-line">$\;\vec{AB} = \begin{pmatrix}1\\2\end{pmatrix},\quad \vec{BC} = \begin{pmatrix}3\\1\end{pmatrix},\quad \text{find } \angle ABC\;$</div><div class="cs-line cs-step">$\;\vec{BA} = -\vec{AB} = \begin{pmatrix}-1\\-2\end{pmatrix},\quad \cos\theta = \dfrac{\vec{BA}\cdot\vec{BC}}{|\vec{BA}|\,|\vec{BC}|} = \dfrac{-5}{\sqrt{5}\cdot\sqrt{10}}\;$</div></div>
   <div class="cs-meta">
@@ -610,7 +645,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reuse-part-a-angle-in-absinθ-for-parallelogram-area.html" class="cs-card">
+<a href="move/reuse-part-a-angle-in-absinθ-for-parallelogram-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Reuse part (a) angle in |a||b|sinθ for parallelogram area</div>
   <div class="cs-example"><div class="cs-line">$\;\lvert \vec{BA} \rvert = 3,\quad \lvert \vec{BC} \rvert = 5,\quad \cos(\angle ABC) = \tfrac{3}{5}\;$</div><div class="cs-line cs-step">$\;\text{Area} = 3 \cdot 5 \cdot \sin(\angle ABC) = 15\sqrt{1 - \tfrac{9}{25}} = 15 \cdot \tfrac{4}{5} = 12\;$</div></div>
   <div class="cs-meta">
@@ -625,7 +660,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-given-parameter-value-into-line-equation-to-recover-a-specific-point.html" class="cs-card">
+<a href="move/substitute-given-parameter-value-into-line-equation-to-recover-a-specific-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute given parameter value into line equation to recover a specific point</div>
   <div class="cs-example"><div class="cs-line">$\;l:\, \mathbf{r} = (1,2,3) + \lambda(2,1,-1),\quad \lambda = 2\;$</div><div class="cs-line cs-step">$\;\mathbf{r} = (1,2,3) + 2(2,1,-1) = (5,4,1)\;$</div></div>
   <div class="cs-meta">
@@ -640,7 +675,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-right-angle-at-vertex-to-reduce-triangle-area-to-half-product-of-legs.html" class="cs-card">
+<a href="move/exploit-right-angle-at-vertex-to-reduce-triangle-area-to-half-product-of-legs.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit right angle at vertex to reduce triangle area to half-product of legs</div>
   <div class="cs-example"><div class="cs-line">$\;\triangle OAX,\quad \angle X = 90^\circ,\quad \overrightarrow{OX} = (1,\,2,\,2),\quad |\overrightarrow{XA}| = 3\;$</div><div class="cs-line cs-step">$\;\text{Area} = \tfrac{1}{2}\,|\overrightarrow{OX}|\,|\overrightarrow{XA}| = \tfrac{1}{2}\cdot 3 \cdot 3 = \tfrac{9}{2}\;$</div></div>
   <div class="cs-meta">
@@ -655,7 +690,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/compute-direction-vector-as-displacement-between-two-given-points.html" class="cs-card">
+<a href="move/compute-direction-vector-as-displacement-between-two-given-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute direction vector as displacement between two given points</div>
   <div class="cs-example"><div class="cs-line">$\;A(1,2,3),\quad B(4,6,7)\;$</div><div class="cs-line cs-step">$\;\mathbf{d} = \mathbf{b}-\mathbf{a} = \begin{pmatrix}3\\4\\4\end{pmatrix},\quad \mathbf{r} = \begin{pmatrix}1\\2\\3\end{pmatrix}+\lambda\begin{pmatrix}3\\4\\4\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -670,7 +705,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/chain-displacement-vectors-via-triangle-law-to-find-a-position-vector.html" class="cs-card">
+<a href="move/chain-displacement-vectors-via-triangle-law-to-find-a-position-vector.html" class="cs-card lazy-tex">
   <div class="cs-name">Chain displacement vectors via triangle law to find a position vector</div>
   <div class="cs-example"><div class="cs-line">$\;\vec{OA} = \begin{pmatrix} 3 \\ 1 \\ 2 \end{pmatrix},\quad \vec{AB} = \begin{pmatrix} 1 \\ -2 \\ 4 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\vec{OB} = \vec{OA} + \vec{AB} = \begin{pmatrix} 3+1 \\ 1-2 \\ 2+4 \end{pmatrix} = \begin{pmatrix} 4 \\ -1 \\ 6 \end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -685,7 +720,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/subtract-position-vectors-to-obtain-a-displacement-vector.html" class="cs-card">
+<a href="move/subtract-position-vectors-to-obtain-a-displacement-vector.html" class="cs-card lazy-tex">
   <div class="cs-name">Subtract position vectors to obtain a displacement vector</div>
   <div class="cs-example"><div class="cs-line">$\;\vec{OA} = \begin{pmatrix} 1 \\ 3 \end{pmatrix},\quad \vec{OB} = \begin{pmatrix} 4 \\ 1 \end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\vec{AB} = \vec{OB} - \vec{OA} = \begin{pmatrix} 4-1 \\ 1-3 \end{pmatrix} = \begin{pmatrix} 3 \\ -2 \end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -700,7 +735,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-perpendicularity-condition-into-algebraic-equation-via-dot-product.html" class="cs-card">
+<a href="move/convert-perpendicularity-condition-into-algebraic-equation-via-dot-product.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert perpendicularity condition into algebraic equation via dot product</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{u}=(1,\,a,\,2),\quad \mathbf{v}=(3,\,1,\,-1),\quad \mathbf{u}\perp\mathbf{v}\;$</div><div class="cs-line cs-step">$\;\mathbf{u}\cdot\mathbf{v}= 3 + a - 2 = 0 \Rightarrow a = -1\;$</div></div>
   <div class="cs-meta">
@@ -715,7 +750,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-shortest-distance-as-magnitude-of-foot-of-perpendicular-displacement.html" class="cs-card">
+<a href="move/find-shortest-distance-as-magnitude-of-foot-of-perpendicular-displacement.html" class="cs-card lazy-tex">
   <div class="cs-name">Find shortest distance as magnitude of foot-of-perpendicular displacement</div>
   <div class="cs-example"><div class="cs-line">$\;\overrightarrow{XA} = \bigl(3,\,4,\,0\bigr)\;$</div><div class="cs-line cs-step">$\;|\overrightarrow{XA}|^2 = 9 + 16 + 0 = 25 \Rightarrow |\overrightarrow{XA}| = 5\;$</div></div>
   <div class="cs-meta">
@@ -730,7 +765,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/solve-two-equations-then-verify-the-third-to-confirm-intersection.html" class="cs-card">
+<a href="move/solve-two-equations-then-verify-the-third-to-confirm-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Solve two equations then verify the third to confirm intersection</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r}_1 = \begin{pmatrix}1\\0\\2\end{pmatrix}+\lambda\begin{pmatrix}1\\1\\1\end{pmatrix},\quad \mathbf{r}_2 = \begin{pmatrix}0\\1\\1\end{pmatrix}+\mu\begin{pmatrix}2\\1\\3\end{pmatrix} \\[4pt] \text{Equating: }1+\lambda=2\mu,\quad \lambda=1+\mu,\quad 2+\lambda=1+3\mu \\[4pt] \text{From (i) and (ii): } \lambda=3,\; \mu=2\;$</div><div class="cs-line cs-step">$\;\text{Check (iii): } 2+3=1+3(2) \;\Rightarrow\; 5=7 \;(\text{false}),\; \therefore \text{lines are skew}\;$</div></div>
   <div class="cs-meta">
@@ -745,7 +780,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-midpoint-relation-to-reflect-a-point-via-its-foot-of-perpendicular.html" class="cs-card">
+<a href="move/invert-midpoint-relation-to-reflect-a-point-via-its-foot-of-perpendicular.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert midpoint relation to reflect a point via its foot of perpendicular</div>
   <div class="cs-example"><div class="cs-line">$\;A = (1,\,3),\quad X = (2,\,1)\;$</div><div class="cs-line cs-step">$\;B = 2X - A = (4,\,2) - (1,\,3) = (3,\,-1)\;$</div></div>
   <div class="cs-meta">
@@ -760,7 +795,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks.html" class="cs-card">
+<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks.html" class="cs-card lazy-tex">
   <div class="cs-name">Split skew-lines proof into non-parallel and non-intersecting checks</div>
   <div class="cs-example"><div class="cs-line">$\;L_1: \mathbf{r}=(1,0,0)+\lambda(1,1,0),\quad L_2: \mathbf{r}=(0,1,1)+\mu(0,1,1)\;$</div><div class="cs-line cs-step">$\;(1,1,0)\neq k(0,1,1)\ \text{(not parallel)};\quad 1+\lambda=0,\ \lambda=1+\mu,\ 0=1+\mu \Rightarrow \mu=-1,\ \lambda=0,\ \text{but } 1+0\neq 0\ \text{(no intersection)}\Rightarrow \text{skew}\;$</div></div>
   <div class="cs-meta">
@@ -775,7 +810,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/impose-perpendicularity-via-dot-product-to-locate-foot-of-perpendicular.html" class="cs-card">
+<a href="move/impose-perpendicularity-via-dot-product-to-locate-foot-of-perpendicular.html" class="cs-card lazy-tex">
   <div class="cs-name">Impose perpendicularity via dot product to locate foot of perpendicular</div>
   <div class="cs-example"><div class="cs-line">$\;l:\mathbf{r}=(1,0,0)+\lambda(1,1,0),\quad A=(3,1,2),\quad X=(1+\lambda,\,\lambda,\,0)\;$</div><div class="cs-line cs-step">$\;\overrightarrow{XA}\cdot\mathbf{d}=(2-\lambda)(1)+(1-\lambda)(1)+(2)(0)=0 \Rightarrow \lambda=\tfrac{3}{2}\;$</div></div>
   <div class="cs-meta">
@@ -790,7 +825,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/solve-parameter-free-equations-first-use-third-as-consistency-check.html" class="cs-card">
+<a href="move/solve-parameter-free-equations-first-use-third-as-consistency-check.html" class="cs-card lazy-tex">
   <div class="cs-name">Solve parameter-free equations first, use third as consistency check</div>
   <div class="cs-example"><div class="cs-line">$\;(A)\ \lambda - \mu = 1,\quad (B)\ 2\lambda - b\mu = 3,\quad (C)\ \lambda + \mu = 3\;$</div><div class="cs-line cs-step">$\;(A)+(C):\; 2\lambda = 4 \Rightarrow \lambda=2,\; \mu=1;\quad (B):\; 4 - b = 3 \Rightarrow b=1\;$</div></div>
   <div class="cs-meta">
@@ -805,7 +840,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrise-a-general-point-on-a-line-using-λ.html" class="cs-card">
+<a href="move/parametrise-a-general-point-on-a-line-using-λ.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrise a general point on a line using λ</div>
   <div class="cs-example"><div class="cs-line">$\;L:\, \mathbf{r} = (1,0,2) + \lambda(2,1,-1)\;$</div><div class="cs-line cs-step">$\;P = (1+2\lambda,\; \lambda,\; 2-\lambda)\;$</div></div>
   <div class="cs-meta">
@@ -820,7 +855,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/form-displacement-vector-from-fixed-point-to-parametrised-point.html" class="cs-card">
+<a href="move/form-displacement-vector-from-fixed-point-to-parametrised-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Form displacement vector from fixed point to parametrised point</div>
   <div class="cs-example"><div class="cs-line">$\;l:\mathbf{r}=(1,0,2)+\lambda(1,0,-1),\quad A=(3,0,4)\;$</div><div class="cs-line cs-step">$\;\overrightarrow{AP}=(1+\lambda-3,\,0-0,\,2-\lambda-4)=(\lambda-2,\,0,\,-\lambda-2)\;$</div></div>
   <div class="cs-meta">
@@ -835,7 +870,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/solve-two-equations-substitute-into-the-third-to-expose-contradiction.html" class="cs-card">
+<a href="move/solve-two-equations-substitute-into-the-third-to-expose-contradiction.html" class="cs-card lazy-tex">
   <div class="cs-name">Solve two equations, substitute into the third to expose contradiction</div>
   <div class="cs-example"><div class="cs-line">$\;(i)\ \lambda + \mu = 1,\quad (ii)\ 2\lambda - \mu = 3,\quad (iii)\ \lambda + 2\mu = 5\;$</div><div class="cs-line cs-step">$\;(i),(ii)\Rightarrow \lambda=\tfrac{4}{3},\;\mu=-\tfrac{1}{3};\quad (iii):\ \tfrac{4}{3}+2(-\tfrac{1}{3})=\tfrac{2}{3}\neq 5 \quad\lightning\;$</div></div>
   <div class="cs-meta">
@@ -850,7 +885,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/back-substitute-parameter-values-into-line-equation-to-recover-position-vectors.html" class="cs-card">
+<a href="move/back-substitute-parameter-values-into-line-equation-to-recover-position-vectors.html" class="cs-card lazy-tex">
   <div class="cs-name">Back-substitute parameter values into line equation to recover position vectors</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r} = \begin{pmatrix}1\\0\\2\end{pmatrix} + \lambda\begin{pmatrix}1\\0\\-1\end{pmatrix},\quad \lambda = 3\;$</div><div class="cs-line cs-step">$\;\mathbf{p} = \begin{pmatrix}1+3\\0\\2-3\end{pmatrix} = \begin{pmatrix}4\\0\\-1\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -865,7 +900,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-vector-parametric-forms-component-wise-to-test-intersection.html" class="cs-card">
+<a href="move/equate-vector-parametric-forms-component-wise-to-test-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate vector parametric forms component-wise to test intersection</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{r}_1 = \begin{pmatrix}1\\0\\-1\end{pmatrix}+\lambda\begin{pmatrix}2\\1\\3\end{pmatrix},\quad \mathbf{r}_2 = \begin{pmatrix}4\\0\\2\end{pmatrix}+\mu\begin{pmatrix}1\\-1\\0\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;1+2\lambda=4+\mu\ \dots(1),\quad \lambda=-\mu\ \dots(2),\quad -1+3\lambda=2\ \dots(3) \Rightarrow \lambda=1,\ \mu=-1;\quad (1): 3=3\ \checkmark \Rightarrow \text{intersection }(3,1,2)\;$</div></div>
   <div class="cs-meta">
@@ -880,7 +915,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-parameters-in-the-unused-third-equation-to-confirm-intersection.html" class="cs-card">
+<a href="move/verify-parameters-in-the-unused-third-equation-to-confirm-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify parameters in the unused third equation to confirm intersection</div>
   <div class="cs-example"><div class="cs-line">$\;\lambda = 1,\; \mu = -1;\quad \text{check } i\!: \; 1 + 2\lambda \stackrel{?}{=} 4 + \mu\;$</div><div class="cs-line cs-step">$\;1 + 2(1) = 3,\; 4 + (-1) = 3 \;\Rightarrow\; \text{LHS} = \text{RHS} \;\Rightarrow\; \text{lines intersect}\;$</div></div>
   <div class="cs-meta">
@@ -895,7 +930,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-magnitude-equation-to-obtain-quadratic-in-parameter.html" class="cs-card">
+<a href="move/square-magnitude-equation-to-obtain-quadratic-in-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Square magnitude equation to obtain quadratic in parameter</div>
   <div class="cs-example"><div class="cs-line">$\;\overrightarrow{AP} = (\lambda - 1,\; \lambda + 2),\quad |\overrightarrow{AP}| = \sqrt{10}\;$</div><div class="cs-line cs-step">$\;(\lambda-1)^2 + (\lambda+2)^2 = 10 \Rightarrow 2\lambda^2 + 2\lambda + 5 = 10 \Rightarrow 2\lambda^2 + 2\lambda - 5 = 0\;$</div></div>
   <div class="cs-meta">
@@ -910,7 +945,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-normal-vector-by-its-gcd-before-plane-and-distance-work.html" class="cs-card">
+<a href="move/divide-normal-vector-by-its-gcd-before-plane-and-distance-work.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide normal vector by its GCD before plane and distance work</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{n} = (12, -8, 4)\;$</div><div class="cs-line cs-step">$\;\gcd(12,8,4)=4,\quad \mathbf{n}' = \tfrac{1}{4}(12,-8,4) = (3,-2,1),\quad |\mathbf{n}'| = \sqrt{14}\;$</div></div>
   <div class="cs-meta">
@@ -925,7 +960,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reuse-direction-vector-to-build-parallel-line-through-new-point.html" class="cs-card">
+<a href="move/reuse-direction-vector-to-build-parallel-line-through-new-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Reuse direction vector to build parallel line through new point</div>
   <div class="cs-example"><div class="cs-line">$\;l_1:\mathbf{r}=\begin{pmatrix}1\\0\\3\end{pmatrix}+\mu\begin{pmatrix}2\\1\\-1\end{pmatrix},\quad P(0,\,4,\,1)\;$</div><div class="cs-line cs-step">$\;l_2:\mathbf{r}=\begin{pmatrix}0\\4\\1\end{pmatrix}+t\begin{pmatrix}2\\1\\-1\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -940,7 +975,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks-vectors.html" class="cs-card">
+<a href="move/split-skew-lines-proof-into-non-parallel-and-non-intersecting-checks-vectors.html" class="cs-card lazy-tex">
   <div class="cs-name">Split skew-lines proof into non-parallel and non-intersecting checks</div>
   <div class="cs-example"><div class="cs-line">$\;L_1: \mathbf{r}=\begin{pmatrix}1\\0\\0\end{pmatrix}+\lambda\begin{pmatrix}1\\1\\0\end{pmatrix},\quad L_2: \mathbf{r}=\begin{pmatrix}0\\0\\1\end{pmatrix}+\mu\begin{pmatrix}0\\1\\1\end{pmatrix}\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{0}\neq\tfrac{1}{1}\Rightarrow \text{not parallel};\quad \lambda=0,\;\mu=0 \Rightarrow 0\neq1\;\text{(eq.3)}\Rightarrow \text{no intersection}\Rightarrow \text{skew}\;$</div></div>
   <div class="cs-meta">
@@ -955,7 +990,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-perpendicular-distance-formula-from-point-to-plane.html" class="cs-card">
+<a href="move/apply-perpendicular-distance-formula-from-point-to-plane.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply perpendicular distance formula from point to plane</div>
   <div class="cs-example"><div class="cs-line">$\;P(1,2,2),\quad 2x + y + 2z = 3\;$</div><div class="cs-line cs-step">$\;d = \dfrac{|2(1)+1(2)+2(2)-3|}{\sqrt{4+1+4}} = \dfrac{5}{3}\;$</div></div>
   <div class="cs-meta">
@@ -970,7 +1005,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-triangle-area-by-dropping-a-perpendicular-onto-a-known-line.html" class="cs-card">
+<a href="move/find-triangle-area-by-dropping-a-perpendicular-onto-a-known-line.html" class="cs-card lazy-tex">
   <div class="cs-name">Find triangle area by dropping a perpendicular onto a known line</div>
   <div class="cs-example"><div class="cs-line">$\;|\vec{AP}| = 5,\quad \cos\theta = \tfrac{3}{5},\quad PE = 4\;$</div><div class="cs-line cs-step">$\;h = \sqrt{|\vec{AP}|^2 - (|\vec{AP}|\cos\theta)^2} = \sqrt{25-9} = 4,\quad \text{Area} = \tfrac{1}{2}\cdot 4 \cdot 4 = 8\;$</div></div>
   <div class="cs-meta">
@@ -985,7 +1020,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/anchor-displacement-vectors-at-a-common-vertex-for-crosstriple-products.html" class="cs-card">
+<a href="move/anchor-displacement-vectors-at-a-common-vertex-for-crosstriple-products.html" class="cs-card lazy-tex">
   <div class="cs-name">Anchor displacement vectors at a common vertex for cross/triple products</div>
   <div class="cs-example"><div class="cs-line">$\;A=(0,0,0),\ B=(1,2,0),\ C=(0,1,3),\ D=(2,0,1)\;$</div><div class="cs-line cs-step">$\;\vec{AB}=(1,2,0),\ \vec{AC}=(0,1,3),\ \vec{AD}=(2,0,1)\;$</div></div>
   <div class="cs-meta">
@@ -1000,7 +1035,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/encode-line-lies-in-plane-by-setting-direction-perpendicular-to-normal.html" class="cs-card">
+<a href="move/encode-line-lies-in-plane-by-setting-direction-perpendicular-to-normal.html" class="cs-card lazy-tex">
   <div class="cs-name">Encode line-lies-in-plane by setting direction perpendicular to normal</div>
   <div class="cs-example"><div class="cs-line">$\;\Pi\colon x + 2y + z = 5,\quad \mathbf{n}=(1,2,1),\quad \mathbf{e}=(a,b,c)\;$</div><div class="cs-line cs-step">$\;\mathbf{e}\cdot\mathbf{n}=0 \Rightarrow a+2b+c=0 \Rightarrow c=-a-2b \Rightarrow \mathbf{e}=a(1,0,-1)+b(0,1,-2)\;$</div></div>
   <div class="cs-meta">
@@ -1015,7 +1050,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-one-coordinate-to-zero-to-find-a-point-on-a-planeplane-intersection-line.html" class="cs-card">
+<a href="move/set-one-coordinate-to-zero-to-find-a-point-on-a-planeplane-intersection-line.html" class="cs-card lazy-tex">
   <div class="cs-name">Set one coordinate to zero to find a point on a plane–plane intersection line</div>
   <div class="cs-example"><div class="cs-line">$\;\Pi_1: x + y + z = 2,\quad \Pi_2: 2x + y + z = 3\;$</div><div class="cs-line cs-step">$\;z=0:\; x+y=2,\; 2x+y=3 \Rightarrow x=1,\; y=1 \Rightarrow \mathbf{a}=\begin{pmatrix}1\\1\\0\end{pmatrix}\;$</div></div>
   <div class="cs-meta">
@@ -1030,7 +1065,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-homogeneous-direction-vector-equation-to-single-ratio-k-ab.html" class="cs-card">
+<a href="move/reduce-homogeneous-direction-vector-equation-to-single-ratio-k-ab.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce homogeneous direction-vector equation to single ratio k = a/b</div>
   <div class="cs-example"><div class="cs-line">$\;21(18k+26)^2 = 1400(5k^2+16k+17),\quad k = \tfrac{a}{b}\;$</div><div class="cs-line cs-step">$\;6804k^2 + 19656k + 14196 = 7000k^2 + 22400k + 23800 \Rightarrow 196k^2 + 2744k + 9604 = 0 \Rightarrow k^2 + 14k + 49 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1045,7 +1080,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rescale-normal-vector-by-its-gcd-to-match-target-plane-form.html" class="cs-card">
+<a href="move/rescale-normal-vector-by-its-gcd-to-match-target-plane-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Rescale normal vector by its GCD to match target plane form</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{n} = (6,\,2,\,-2),\quad \mathbf{a} = (1,\,2,\,1)\;$</div><div class="cs-line cs-step">$\;\gcd(6,2,2)=2,\quad \mathbf{n}' = (3,1,-1),\quad d = 3(1)+1(2)-1(1)=4 \Rightarrow 3x+y-z=4\;$</div></div>
   <div class="cs-meta">
@@ -1060,7 +1095,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-known-point-into-a-plane-equation-to-find-the-missing-constant-or-c.html" class="cs-card">
+<a href="move/substitute-a-known-point-into-a-plane-equation-to-find-the-missing-constant-or-c.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a known point into a plane equation to find the missing constant or coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;\mathbf{n} = (2,\,1,\,-1),\quad A = (1,\,3,\,2) \text{ on } \Pi:\; 2x + y - z = d\;$</div><div class="cs-line cs-step">$\;d = 2(1) + 1(3) + (-1)(2) = 3 \Rightarrow \Pi:\; 2x + y - z = 3\;$</div></div>
   <div class="cs-meta">

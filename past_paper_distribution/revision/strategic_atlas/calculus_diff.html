@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">9 moves · 43 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-implicitly-to-obtain-dydx-without-isolating-y.html" class="cs-card">
+<a href="move/differentiate-implicitly-to-obtain-dydx-without-isolating-y.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate implicitly to obtain dy/dx without isolating y</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + xy + y^2 = 7\;$</div><div class="cs-line cs-step">$\;2x + y + x\dfrac{dy}{dx} + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = \dfrac{-(2x+y)}{x+2y}\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/differentiate-implicitly-when-y-cannot-be-cleanly-isolated.html" class="cs-card">
+<a href="move/differentiate-implicitly-when-y-cannot-be-cleanly-isolated.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate implicitly when y cannot be cleanly isolated</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + xy + y^2 = 7\;$</div><div class="cs-line cs-step">$\;2x + y + x\dfrac{dy}{dx} + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = \dfrac{-(2x+y)}{x+2y}\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/implicitly-differentiate-a-conics-cartesian-equation-to-obtain-dydx-for-a-tangen.html" class="cs-card">
+<a href="move/implicitly-differentiate-a-conics-cartesian-equation-to-obtain-dydx-for-a-tangen.html" class="cs-card lazy-tex">
   <div class="cs-name">Implicitly differentiate a conic&#x27;s Cartesian equation to obtain dy/dx for a tangent/normal at a parametric point</div>
   <div class="cs-example"><div class="cs-line">$\;y^2 = 4x,\quad P(t^2,\, 2t)\;$</div><div class="cs-line cs-step">$\;2y\,\dfrac{dy}{dx} = 4 \Rightarrow \dfrac{dy}{dx} = \dfrac{2}{y} = \dfrac{2}{2t} = \dfrac{1}{t}\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/apply-implicit-differentiation-to-obtain-dydx-on-a-curve-given-by-fxy0.html" class="cs-card">
+<a href="move/apply-implicit-differentiation-to-obtain-dydx-on-a-curve-given-by-fxy0.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply implicit differentiation to obtain dy/dx on a curve given by F(x,y)=0</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 25\;$</div><div class="cs-line cs-step">$\;2x + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = -\dfrac{x}{y}\;$</div></div>
   <div class="cs-meta">
@@ -295,7 +330,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/differentiate-implicitly-treating-y-as-a-function-of-x-to-extract-dydx.html" class="cs-card">
+<a href="move/differentiate-implicitly-treating-y-as-a-function-of-x-to-extract-dydx.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate implicitly treating y as a function of x to extract dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + y^2 = 25\;$</div><div class="cs-line cs-step">$\;2x + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = -\dfrac{x}{y}\;$</div></div>
   <div class="cs-meta">
@@ -303,7 +338,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/differentiate-implicitly-term-by-term-using-product-and-chain-rules-to-obtain-dy.html" class="cs-card">
+<a href="move/differentiate-implicitly-term-by-term-using-product-and-chain-rules-to-obtain-dy.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate implicitly term-by-term using product and chain rules to obtain dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + xy + y^2 = 7\;$</div><div class="cs-line cs-step">$\;2x + y + x\dfrac{dy}{dx} + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = \dfrac{-(2x+y)}{x+2y}\;$</div></div>
   <div class="cs-meta">
@@ -311,7 +346,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/choose-expanded-polynomial-form-over-factored-form-before-differentiating.html" class="cs-card">
+<a href="move/choose-expanded-polynomial-form-over-factored-form-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose expanded polynomial form over factored form before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = (x-1)(x-3) = x^2 - 4x + 3\;$</div><div class="cs-line cs-step">$\;f'(x) = 2x - 4\;$</div></div>
   <div class="cs-meta">
@@ -319,7 +354,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/differentiate-implicitly-attaching-dydx-to-every-y-term-via-chain-rule.html" class="cs-card">
+<a href="move/differentiate-implicitly-attaching-dydx-to-every-y-term-via-chain-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate implicitly, attaching dy/dx to every y-term via chain rule</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + xy + y^2 = 7\;$</div><div class="cs-line cs-step">$\;2x + y + x\dfrac{dy}{dx} + 2y\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = \dfrac{-(2x+y)}{x+2y}\;$</div></div>
   <div class="cs-meta">
@@ -327,7 +362,7 @@ window.MathJax = {
     <span>implicit differentiation</span>
   </div>
 </a>
-<a href="move/choose-quotient-rule-over-logarithmic-differentiation-when-iterating-derivatives.html" class="cs-card">
+<a href="move/choose-quotient-rule-over-logarithmic-differentiation-when-iterating-derivatives.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose quotient rule over logarithmic differentiation when iterating derivatives</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{\sqrt{1+\ln x}}{x}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{\frac{1}{2x\sqrt{1+\ln x}}\cdot x - \sqrt{1+\ln x}\cdot 1}{x^2} = \dfrac{1 - 2(1+\ln x)}{2x^2\sqrt{1+\ln x}}\;$</div></div>
   <div class="cs-meta">
@@ -342,7 +377,7 @@ window.MathJax = {
     <span class="meta">6 moves · 31 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-product-rule-with-chain-rule-on-composite-factors-to-differentiate-uv.html" class="cs-card">
+<a href="move/apply-the-product-rule-with-chain-rule-on-composite-factors-to-differentiate-uv.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the product rule (with chain rule on composite factors) to differentiate uv</div>
   <div class="cs-example"><div class="cs-line">$\;y = x(x+1)^3\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = (x+1)^3 + x \cdot 3(x+1)^2 = (x+1)^2(4x+1)\;$</div></div>
   <div class="cs-meta">
@@ -350,7 +385,7 @@ window.MathJax = {
     <span>product rule selection</span>
   </div>
 </a>
-<a href="move/apply-the-product-rule-when-two-x-dependent-factors-are-multiplied.html" class="cs-card">
+<a href="move/apply-the-product-rule-when-two-x-dependent-factors-are-multiplied.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the product rule when two x-dependent factors are multiplied</div>
   <div class="cs-example"><div class="cs-line">$\;y = x e^{2x}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = (1)e^{2x} + x(2e^{2x}) = e^{2x} + 2x e^{2x}\;$</div></div>
   <div class="cs-meta">
@@ -358,7 +393,7 @@ window.MathJax = {
     <span>product rule selection</span>
   </div>
 </a>
-<a href="move/apply-the-product-rule-when-a-term-is-two-x-dependent-factors-multiplied.html" class="cs-card">
+<a href="move/apply-the-product-rule-when-a-term-is-two-x-dependent-factors-multiplied.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the product rule when a term is two x-dependent factors multiplied</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 e^x\;$</div><div class="cs-line cs-step">$\;y' = x^2 e^x + 2x e^x = e^x(x^2 + 2x)\;$</div></div>
   <div class="cs-meta">
@@ -366,7 +401,7 @@ window.MathJax = {
     <span>product rule selection</span>
   </div>
 </a>
-<a href="move/select-the-product-rule-to-differentiate-a-product-of-two-non-trivial-functions.html" class="cs-card">
+<a href="move/select-the-product-rule-to-differentiate-a-product-of-two-non-trivial-functions.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the product rule to differentiate a product of two non-trivial functions</div>
   <div class="cs-example"><div class="cs-line">$\;y = x e^{2x}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = x(2e^{2x}) + e^{2x}(1) = e^{2x}(2x+1)\;$</div></div>
   <div class="cs-meta">
@@ -374,7 +409,7 @@ window.MathJax = {
     <span>product rule selection</span>
   </div>
 </a>
-<a href="move/apply-the-product-rule-to-mixed-xy-terms-during-implicit-differentiation.html" class="cs-card">
+<a href="move/apply-the-product-rule-to-mixed-xy-terms-during-implicit-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the product rule to mixed x–y terms during implicit differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{d}{dx}(xy)\;$</div><div class="cs-line cs-step">$\;\dfrac{d}{dx}(xy) = 1\cdot y + x\cdot\dfrac{dy}{dx} = y + x\dfrac{dy}{dx}\;$</div></div>
   <div class="cs-meta">
@@ -382,7 +417,7 @@ window.MathJax = {
     <span>product rule selection</span>
   </div>
 </a>
-<a href="move/apply-product-rule-to-polynomial-times-exponential-with-internal-chain-rules.html" class="cs-card">
+<a href="move/apply-product-rule-to-polynomial-times-exponential-with-internal-chain-rules.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply product rule to polynomial-times-exponential with internal chain rules</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = (x-2)^2\, e^{3x}\;$</div><div class="cs-line cs-step">$\;f'(x) = 2(x-2)e^{3x} + 3(x-2)^2 e^{3x} = (x-2)(3x-4)\,e^{3x}\;$</div></div>
   <div class="cs-meta">
@@ -397,7 +432,7 @@ window.MathJax = {
     <span class="meta">3 moves · 10 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-parametrically-via-chain-rule-to-obtain-dydx-in-the-parameter.html" class="cs-card">
+<a href="move/differentiate-parametrically-via-chain-rule-to-obtain-dydx-in-the-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate parametrically via chain rule to obtain dy/dx in the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\; y = t^3\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{dy/dt}{dx/dt} = \dfrac{3t^2}{2t} = \dfrac{3t}{2}\;$</div></div>
   <div class="cs-meta">
@@ -405,7 +440,7 @@ window.MathJax = {
     <span>parametric differentiation</span>
   </div>
 </a>
-<a href="move/apply-the-parametric-chain-rule-dydx-dydtdxdt-to-find-a-gradient.html" class="cs-card">
+<a href="move/apply-the-parametric-chain-rule-dydx-dydtdxdt-to-find-a-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the parametric chain rule dy/dx = (dy/dt)/(dx/dt) to find a gradient</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\; y = 3t,\; t = 1\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{dy/dt}{dx/dt} = \dfrac{3}{2t} \;\xrightarrow{t=1}\; \dfrac{3}{2}\;$</div></div>
   <div class="cs-meta">
@@ -413,7 +448,7 @@ window.MathJax = {
     <span>parametric differentiation</span>
   </div>
 </a>
-<a href="move/differentiate-parametrically-instead-of-eliminating-the-parameter.html" class="cs-card">
+<a href="move/differentiate-parametrically-instead-of-eliminating-the-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate parametrically instead of eliminating the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\quad y = t^3\;$</div><div class="cs-line cs-step">$\;\frac{dy}{dx} = \frac{dy/dt}{dx/dt} = \frac{3t^2}{2t} = \frac{3t}{2}\;$</div></div>
   <div class="cs-meta">
@@ -428,7 +463,7 @@ window.MathJax = {
     <span class="meta">5 moves · 9 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-derivative-equal-to-zero-to-locate-stationary-points.html" class="cs-card">
+<a href="move/set-derivative-equal-to-zero-to-locate-stationary-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Set derivative equal to zero to locate stationary points</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2 - 3 = 0 \Rightarrow x = \pm 1\;$</div></div>
   <div class="cs-meta">
@@ -436,7 +471,7 @@ window.MathJax = {
     <span>stationary point condition</span>
   </div>
 </a>
-<a href="move/set-the-numerator-of-dydx-to-zero-to-locate-stationary-points.html" class="cs-card">
+<a href="move/set-the-numerator-of-dydx-to-zero-to-locate-stationary-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Set the numerator of dy/dx to zero to locate stationary points</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{3x - 6}{(x+1)^2}\;$</div><div class="cs-line cs-step">$\;3x - 6 = 0 \Rightarrow x = 2\;$</div></div>
   <div class="cs-meta">
@@ -444,7 +479,7 @@ window.MathJax = {
     <span>stationary point condition</span>
   </div>
 </a>
-<a href="move/differentiate-quadratic-and-solve-dydx-0-to-locate-vertex.html" class="cs-card">
+<a href="move/differentiate-quadratic-and-solve-dydx-0-to-locate-vertex.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate quadratic and solve dy/dx = 0 to locate vertex</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 4x + 7\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x - 4 = 0 \Rightarrow x = 2,\; y = 3 \Rightarrow \text{min } (2,\,3)\;$</div></div>
   <div class="cs-meta">
@@ -452,7 +487,7 @@ window.MathJax = {
     <span>stationary point condition</span>
   </div>
 </a>
-<a href="move/find-range-via-interior-minimum-when-both-endpoints-diverge-to.html" class="cs-card">
+<a href="move/find-range-via-interior-minimum-when-both-endpoints-diverge-to.html" class="cs-card lazy-tex">
   <div class="cs-name">Find range via interior minimum when both endpoints diverge to +∞</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x + \dfrac{4}{x},\quad x > 0\;$</div><div class="cs-line cs-step">$\;f'(x) = 1 - \dfrac{4}{x^2} = 0 \Rightarrow x = 2,\quad f(2) = 4 \Rightarrow \text{range } [4,\,\infty)\;$</div></div>
   <div class="cs-meta">
@@ -460,7 +495,7 @@ window.MathJax = {
     <span>stationary point condition</span>
   </div>
 </a>
-<a href="move/differentiate-composite-trig-via-chain-rule-and-set-derivative-to-zero.html" class="cs-card">
+<a href="move/differentiate-composite-trig-via-chain-rule-and-set-derivative-to-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate composite trig via chain rule and set derivative to zero</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin(2x) + x\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2\cos(2x) + 1 = 0 \Rightarrow \cos(2x) = -\tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -475,7 +510,7 @@ window.MathJax = {
     <span class="meta">5 moves · 9 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-chain-rule-to-differentiate-composite-function-as-outerinner-derivative.html" class="cs-card">
+<a href="move/apply-chain-rule-to-differentiate-composite-function-as-outerinner-derivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply chain rule to differentiate composite function as outer×inner derivative</div>
   <div class="cs-example"><div class="cs-line">$\;y = (2x+1)^5\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 5(2x+1)^4 \cdot 2 = 10(2x+1)^4\;$</div></div>
   <div class="cs-meta">
@@ -483,7 +518,7 @@ window.MathJax = {
     <span>chain rule</span>
   </div>
 </a>
-<a href="move/apply-chain-rule-to-differentiate-composite-functions-with-linear-inner-argument.html" class="cs-card">
+<a href="move/apply-chain-rule-to-differentiate-composite-functions-with-linear-inner-argument.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply chain rule to differentiate composite functions with linear inner argument</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sin(3x)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \cos(3x) \cdot 3 = 3\cos(3x)\;$</div></div>
   <div class="cs-meta">
@@ -491,7 +526,7 @@ window.MathJax = {
     <span>chain rule</span>
   </div>
 </a>
-<a href="move/apply-layered-chain-rule-preserving-structure-useful-for-back-substitution.html" class="cs-card">
+<a href="move/apply-layered-chain-rule-preserving-structure-useful-for-back-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply layered chain rule preserving structure useful for back-substitution</div>
   <div class="cs-example"><div class="cs-line">$\;y = (\sin(3t))^4\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dt} = 4(\sin(3t))^3 \cdot \cos(3t) \cdot 3 = 12\sin^3(3t)\cos(3t)\;$</div></div>
   <div class="cs-meta">
@@ -499,7 +534,7 @@ window.MathJax = {
     <span>chain rule</span>
   </div>
 </a>
-<a href="move/bridge-volume-and-depth-rates-via-chain-rule-dhdt-dvdtdvdh.html" class="cs-card">
+<a href="move/bridge-volume-and-depth-rates-via-chain-rule-dhdt-dvdtdvdh.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge volume and depth rates via chain rule dh/dt = (dV/dt)/(dV/dh)</div>
   <div class="cs-example"><div class="cs-line">$\;V = 9\pi h,\quad \dfrac{dV}{dt} = 3\pi\;$</div><div class="cs-line cs-step">$\;\dfrac{dh}{dt} = \dfrac{dV/dt}{dV/dh} = \dfrac{3\pi}{9\pi} = \dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -507,7 +542,7 @@ window.MathJax = {
     <span>chain rule</span>
   </div>
 </a>
-<a href="move/differentiate-dydx²-via-chain-rule-as-2yy.html" class="cs-card">
+<a href="move/differentiate-dydx²-via-chain-rule-as-2yy.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate (dy/dx)² via chain rule as 2y&#x27;·y&#x27;&#x27;</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{d}{dx}\left(\dfrac{dy}{dx}\right)^2\;$</div><div class="cs-line cs-step">$\;2\,\dfrac{dy}{dx}\cdot\dfrac{d^2y}{dx^2}\;$</div></div>
   <div class="cs-meta">
@@ -522,7 +557,7 @@ window.MathJax = {
     <span class="meta">2 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-point-coordinates-into-dydx-to-obtain-numerical-tangent-gradient.html" class="cs-card">
+<a href="move/substitute-point-coordinates-into-dydx-to-obtain-numerical-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute point coordinates into dy/dx to obtain numerical tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = 3x^2 - 1,\quad P = (2,\,3)\;$</div><div class="cs-line cs-step">$\;\left.\dfrac{dy}{dx}\right|_{x=2} = 3(4) - 1 = 11\;$</div></div>
   <div class="cs-meta">
@@ -530,7 +565,7 @@ window.MathJax = {
     <span>gradient evaluation</span>
   </div>
 </a>
-<a href="move/evaluate-derivative-at-given-x-to-obtain-gradient-at-a-point.html" class="cs-card">
+<a href="move/evaluate-derivative-at-given-x-to-obtain-gradient-at-a-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate derivative at given x to obtain gradient at a point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 2x,\quad x = 2\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2 - 2 \;\Rightarrow\; \left.\dfrac{dy}{dx}\right|_{x=2} = 3(4) - 2 = 10\;$</div></div>
   <div class="cs-meta">
@@ -545,7 +580,7 @@ window.MathJax = {
     <span class="meta">1 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-product-rule-to-a-mixed-xy-term-during-implicit-differentiation.html" class="cs-card">
+<a href="move/apply-the-product-rule-to-a-mixed-xy-term-during-implicit-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the product rule to a mixed x·y term during implicit differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;x^2 + xy = 5\;$</div><div class="cs-line cs-step">$\;\dfrac{d}{dx}(xy) = 1\cdot y + x\cdot\dfrac{dy}{dx} = y + x\dfrac{dy}{dx}\;$</div></div>
   <div class="cs-meta">
@@ -560,7 +595,7 @@ window.MathJax = {
     <span class="meta">3 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-surds-and-reciprocals-as-index-powers-before-applying-the-power-rule.html" class="cs-card">
+<a href="move/rewrite-surds-and-reciprocals-as-index-powers-before-applying-the-power-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite surds and reciprocals as index powers before applying the power rule</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{x} + \dfrac{1}{x}\;$</div><div class="cs-line cs-step">$\;y = x^{1/2} + x^{-1} \Rightarrow \dfrac{dy}{dx} = \tfrac{1}{2}x^{-1/2} - x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -568,7 +603,7 @@ window.MathJax = {
     <span>index law rewrite</span>
   </div>
 </a>
-<a href="move/rewrite-surd-as-fractional-exponent-to-enable-power-chain-differentiation.html" class="cs-card">
+<a href="move/rewrite-surd-as-fractional-exponent-to-enable-power-chain-differentiation.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite surd as fractional exponent to enable power-chain differentiation</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{4x-1}\;$</div><div class="cs-line cs-step">$\;y = (4x-1)^{1/2} \Rightarrow \dfrac{dy}{dx} = \tfrac{1}{2}(4x-1)^{-1/2} \cdot 4 = \dfrac{2}{\sqrt{4x-1}}\;$</div></div>
   <div class="cs-meta">
@@ -576,7 +611,7 @@ window.MathJax = {
     <span>index law rewrite</span>
   </div>
 </a>
-<a href="move/rewrite-roots-and-reciprocal-terms-as-xn-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-roots-and-reciprocal-terms-as-xn-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite roots and reciprocal terms as x^n before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3\sqrt{x} + \dfrac{2}{x}\;$</div><div class="cs-line cs-step">$\;y = 3x^{1/2} + 2x^{-1} \Rightarrow \dfrac{dy}{dx} = \tfrac{3}{2}x^{-1/2} - 2x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -591,7 +626,7 @@ window.MathJax = {
     <span class="meta">3 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-x-with-respect-to-y-then-reciprocate-to-obtain-dydx.html" class="cs-card">
+<a href="move/differentiate-x-with-respect-to-y-then-reciprocate-to-obtain-dydx.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate x with respect to y then reciprocate to obtain dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;x = \sin y\;$</div><div class="cs-line cs-step">$\;\dfrac{dx}{dy} = \cos y \Rightarrow \dfrac{dy}{dx} = \dfrac{1}{\cos y} = \sec y\;$</div></div>
   <div class="cs-meta">
@@ -599,7 +634,7 @@ window.MathJax = {
     <span>reciprocal derivative</span>
   </div>
 </a>
-<a href="move/invert-dydx-to-get-dxdy-via-reciprocal-identity.html" class="cs-card">
+<a href="move/invert-dydx-to-get-dxdy-via-reciprocal-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert dy/dx to get dx/dy via reciprocal identity</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{3x^2}{2}\;$</div><div class="cs-line cs-step">$\;\dfrac{dx}{dy} = \dfrac{1}{\,3x^2/2\,} = \dfrac{2}{3x^2}\;$</div></div>
   <div class="cs-meta">
@@ -607,7 +642,7 @@ window.MathJax = {
     <span>reciprocal derivative</span>
   </div>
 </a>
-<a href="move/differentiate-inverse-trig-via-x-siny-form-and-reciprocate.html" class="cs-card">
+<a href="move/differentiate-inverse-trig-via-x-siny-form-and-reciprocate.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate inverse trig via x = sin(y) form and reciprocate</div>
   <div class="cs-example"><div class="cs-line">$\;y = \arcsin x \Rightarrow x = \sin y\;$</div><div class="cs-line cs-step">$\;\dfrac{dx}{dy} = \cos y \Rightarrow \dfrac{dy}{dx} = \dfrac{1}{\cos y} = \dfrac{1}{\sqrt{1 - x^2}}\;$</div></div>
   <div class="cs-meta">
@@ -622,7 +657,7 @@ window.MathJax = {
     <span class="meta">6 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-f-is-increasing-into-the-inequality-fx-0.html" class="cs-card">
+<a href="move/convert-f-is-increasing-into-the-inequality-fx-0.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert &#x27;f is increasing&#x27; into the inequality f&#x27;(x) &gt; 0</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - 3x\;$</div><div class="cs-line cs-step">$\;f'(x) = 3x^2 - 3 > 0 \Rightarrow 3(x-1)(x+1) > 0 \Rightarrow x < -1 \text{ or } x > 1\;$</div></div>
   <div class="cs-meta">
@@ -630,7 +665,7 @@ window.MathJax = {
     <span>sign analysis</span>
   </div>
 </a>
-<a href="move/sign-analyze-derivative-components-to-conclude-monotonicity.html" class="cs-card">
+<a href="move/sign-analyze-derivative-components-to-conclude-monotonicity.html" class="cs-card lazy-tex">
   <div class="cs-name">Sign-analyze derivative components to conclude monotonicity</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \dfrac{6x}{x+1},\quad x > 0\;$</div><div class="cs-line cs-step">$\;f'(x) = \dfrac{6}{(x+1)^2},\quad 6>0,\ (x+1)^2>0 \Rightarrow f'(x)>0 \Rightarrow f \text{ increasing}\;$</div></div>
   <div class="cs-meta">
@@ -638,7 +673,7 @@ window.MathJax = {
     <span>sign analysis</span>
   </div>
 </a>
-<a href="move/reduce-fraction-equals-zero-to-numerator-equals-zero-via-positive-denominator.html" class="cs-card">
+<a href="move/reduce-fraction-equals-zero-to-numerator-equals-zero-via-positive-denominator.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce fraction-equals-zero to numerator-equals-zero via positive denominator</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{1 - 2x}{(1+x^2)^2}\;$</div><div class="cs-line cs-step">$\;(1+x^2)^2 > 0\ \forall x \Rightarrow \dfrac{dy}{dx}=0 \iff 1-2x=0 \iff x=\tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -646,7 +681,7 @@ window.MathJax = {
     <span>sign analysis</span>
   </div>
 </a>
-<a href="move/classify-a-stationary-point-via-first-derivative-sign-change.html" class="cs-card">
+<a href="move/classify-a-stationary-point-via-first-derivative-sign-change.html" class="cs-card lazy-tex">
   <div class="cs-name">Classify a stationary point via first-derivative sign change</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x) = (x-1)(x-3),\quad x_0 = 1\;$</div><div class="cs-line cs-step">$\;f'(0)=(-)(-) > 0,\; f'(2)=(+)(-)< 0 \Rightarrow +\to -\Rightarrow \text{local max at } x=1\;$</div></div>
   <div class="cs-meta">
@@ -654,7 +689,7 @@ window.MathJax = {
     <span>sign analysis</span>
   </div>
 </a>
-<a href="move/deduce-monotonicity-of-ff-from-sign-of-f-via-chain-rule.html" class="cs-card">
+<a href="move/deduce-monotonicity-of-ff-from-sign-of-f-via-chain-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Deduce monotonicity of f∘f from sign of f&#x27; via chain rule</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x)<0 \text{ on } (0,\infty),\; f:(0,\infty)\to(0,\infty)\;$</div><div class="cs-line cs-step">$\;(f\circ f)'(x)=f'(f(x))\cdot f'(x)=(-)(-)>0 \Rightarrow f\circ f \text{ strictly increasing on } (0,\infty)\;$</div></div>
   <div class="cs-meta">
@@ -662,7 +697,7 @@ window.MathJax = {
     <span>sign analysis</span>
   </div>
 </a>
-<a href="move/discard-strictly-positive-factors-when-solving-product-0.html" class="cs-card">
+<a href="move/discard-strictly-positive-factors-when-solving-product-0.html" class="cs-card lazy-tex">
   <div class="cs-name">Discard strictly-positive factors when solving product = 0</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x) = 3e^{2x}(x-1)(x+2)\;$</div><div class="cs-line cs-step">$\;e^{2x} > 0\ \forall x \Rightarrow f'(x)=0 \iff (x-1)(x+2)=0 \iff x=1,\,-2\;$</div></div>
   <div class="cs-meta">
@@ -677,7 +712,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-product-of-polynomial-factors-before-applying-the-power-rule-term-by-term.html" class="cs-card">
+<a href="move/expand-product-of-polynomial-factors-before-applying-the-power-rule-term-by-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand product of polynomial factors before applying the power rule term-by-term</div>
   <div class="cs-example"><div class="cs-line">$\;y = (x-1)(x+2)^2\;$</div><div class="cs-line cs-step">$\;y = x^3 + 3x^2 - 4 \Rightarrow \dfrac{dy}{dx} = 3x^2 + 6x\;$</div></div>
   <div class="cs-meta">
@@ -692,7 +727,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-newton-raphson-iteration-via-x-n1-x-n-fx-nfx-n-to-refine-a-root-estimate.html" class="cs-card">
+<a href="move/apply-newton-raphson-iteration-via-x-n1-x-n-fx-nfx-n-to-refine-a-root-estimate.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Newton-Raphson iteration via x_{n+1} = x_n − f(x_n)/f&#x27;(x_n) to refine a root estimate</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^2 - 3,\quad f'(x) = 2x,\quad x_0 = 2\;$</div><div class="cs-line cs-step">$\;x_1 = 2 - \dfrac{2^2 - 3}{2(2)} = 2 - \dfrac{1}{4} = 1.75\;$</div></div>
   <div class="cs-meta">
@@ -707,7 +742,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-into-sum-of-simple-terms-form-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-into-sum-of-simple-terms-form-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite into sum-of-simple-terms form before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x^2 + 1}{x}\;$</div><div class="cs-line cs-step">$\;y = x + x^{-1} \Rightarrow \dfrac{dy}{dx} = 1 - x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -722,7 +757,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-then-substitute-x-coordinate-to-get-gradient-at-a-point.html" class="cs-card">
+<a href="move/differentiate-then-substitute-x-coordinate-to-get-gradient-at-a-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate then substitute x-coordinate to get gradient at a point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x + 1,\quad P(2,\,3)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2 - 3,\quad f'(2) = 12 - 3 = 9\;$</div></div>
   <div class="cs-meta">
@@ -737,7 +772,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-sum-of-axn-terms.html" class="cs-card">
+<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-sum-of-axn-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate term-by-term using the power rule on a sum of ax^n terms</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x^4 - 5x^2 + 2x - 1\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 12x^3 - 10x + 2\;$</div></div>
   <div class="cs-meta">
@@ -752,7 +787,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-curve-and-substitute-x-coordinate-to-obtain-tangent-gradient.html" class="cs-card">
+<a href="move/differentiate-curve-and-substitute-x-coordinate-to-obtain-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate curve and substitute x-coordinate to obtain tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x,\quad P(1,\,-2)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2 - 3,\quad m = 3(1)^2 - 3 = 0\;$</div></div>
   <div class="cs-meta">
@@ -767,7 +802,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/discard-the-exponential-factor-since-efx-0-to-reduce-to-an-algebraic-equation.html" class="cs-card">
+<a href="move/discard-the-exponential-factor-since-efx-0-to-reduce-to-an-algebraic-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Discard the exponential factor since e^{f(x)} &gt; 0 to reduce to an algebraic equation</div>
   <div class="cs-example"><div class="cs-line">$\;e^{2x}(3x - 6) = 0\;$</div><div class="cs-line cs-step">$\;e^{2x} > 0 \Rightarrow 3x - 6 = 0 \Rightarrow x = 2\;$</div></div>
   <div class="cs-meta">
@@ -782,7 +817,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-derivative-to-given-gradient-to-form-solvable-equation.html" class="cs-card">
+<a href="move/equate-derivative-to-given-gradient-to-form-solvable-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate derivative to given gradient to form solvable equation</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^2 + kx,\quad f'(2) = 7\;$</div><div class="cs-line cs-step">$\;f'(x) = 2x + k \Rightarrow 4 + k = 7 \Rightarrow k = 3\;$</div></div>
   <div class="cs-meta">
@@ -797,7 +832,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-given-point-into-dydx-to-obtain-the-tangent-gradient.html" class="cs-card">
+<a href="move/substitute-the-given-point-into-dydx-to-obtain-the-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the given point into dy/dx to obtain the tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{2x + y}{x - 2y},\quad P(1,1)\;$</div><div class="cs-line cs-step">$\;m = \dfrac{2(1) + 1}{1 - 2(1)} = \dfrac{3}{-1} = -3\;$</div></div>
   <div class="cs-meta">
@@ -812,7 +847,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-numerator-of-dydx-fraction-to-zero-to-locate-stationary-points.html" class="cs-card">
+<a href="move/set-numerator-of-dydx-fraction-to-zero-to-locate-stationary-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Set numerator of dy/dx fraction to zero to locate stationary points</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{x^2 - 4}{x^2 + 1}\;$</div><div class="cs-line cs-step">$\;x^2 - 4 = 0 \Rightarrow x = \pm 2\;$</div></div>
   <div class="cs-meta">
@@ -827,7 +862,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/parametrize-q-as-ah-fah-to-form-the-chord-gradient-difference-quotient.html" class="cs-card">
+<a href="move/parametrize-q-as-ah-fah-to-form-the-chord-gradient-difference-quotient.html" class="cs-card lazy-tex">
   <div class="cs-name">Parametrize Q as (a+h, f(a+h)) to form the chord-gradient difference quotient</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad P = (1,1),\quad Q = (1+h,\,(1+h)^2)\;$</div><div class="cs-line cs-step">$\;m_{PQ} = \dfrac{(1+h)^2 - 1}{h} = \dfrac{2h + h^2}{h} = 2 + h\;$</div></div>
   <div class="cs-meta">
@@ -842,7 +877,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-prepared-sum.html" class="cs-card">
+<a href="move/differentiate-term-by-term-using-the-power-rule-on-a-prepared-sum.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate term-by-term using the power rule on a prepared sum</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x^2 + 5x^{-1}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 6x - 5x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -857,7 +892,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-derivative-at-given-x-to-construct-tangent-line-equation.html" class="cs-card">
+<a href="move/evaluate-derivative-at-given-x-to-construct-tangent-line-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate derivative at given x to construct tangent line equation</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 + 3x,\quad P = (1,\,4)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x+3,\quad m = 5 \Rightarrow y - 4 = 5(x-1)\;$</div></div>
   <div class="cs-meta">
@@ -872,7 +907,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-t-limit-of-decaying-exponential-to-identify-horizontal-asymptotemodel-ceili.html" class="cs-card">
+<a href="move/take-t-limit-of-decaying-exponential-to-identify-horizontal-asymptotemodel-ceili.html" class="cs-card lazy-tex">
   <div class="cs-name">Take t→∞ limit of decaying exponential to identify horizontal asymptote/model ceiling</div>
   <div class="cs-example"><div class="cs-line">$\;N = 500 - 3e^{-2t}\;$</div><div class="cs-line cs-step">$\;t\to\infty:\; e^{-2t}\to 0 \Rightarrow N \to 500\;$</div></div>
   <div class="cs-meta">
@@ -887,7 +922,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/validate-candidate-values-against-the-functions-domain-and-range-to-reject-extra.html" class="cs-card">
+<a href="move/validate-candidate-values-against-the-functions-domain-and-range-to-reject-extra.html" class="cs-card lazy-tex">
   <div class="cs-name">Validate candidate values against the function&#x27;s domain and range to reject extraneous cases</div>
   <div class="cs-example"><div class="cs-line">$\;y = \ln(x^2 - 4),\quad \frac{dy}{dx}=0 \Rightarrow x=0,\; x=3\;$</div><div class="cs-line cs-step">$\;x=0:\; x^2-4=-4<0 \text{ (outside domain), reject};\quad x=3:\; x^2-4=5>0 \text{ \checkmark}\;$</div></div>
   <div class="cs-meta">
@@ -902,7 +937,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-and-evaluate-at-the-given-point-to-obtain-the-tangent-gradient.html" class="cs-card">
+<a href="move/differentiate-and-evaluate-at-the-given-point-to-obtain-the-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate and evaluate at the given point to obtain the tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3,\quad x = 2\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2,\quad m = 3(4) = 12 \Rightarrow y - 8 = 12(x - 2)\;$</div></div>
   <div class="cs-meta">
@@ -917,7 +952,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-between-variables-using-the-defining-equation-or-a-shared-parameter.html" class="cs-card">
+<a href="move/bridge-between-variables-using-the-defining-equation-or-a-shared-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge between variables using the defining equation or a shared parameter</div>
   <div class="cs-example"><div class="cs-line">$\;y = 2\sec x,\quad 0 < x < \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2\sec x\tan x = \dfrac{y}{2}\,\sqrt{\dfrac{y^2}{4}-1} \cdot 2 = \dfrac{y\sqrt{y^2-4}}{4}\;$</div></div>
   <div class="cs-meta">
@@ -932,7 +967,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-repeatedly-and-evaluate-at-the-expansion-point-to-obtain-taylormac.html" class="cs-card">
+<a href="move/differentiate-repeatedly-and-evaluate-at-the-expansion-point-to-obtain-taylormac.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate repeatedly and evaluate at the expansion point to obtain Taylor/Maclaurin coefficients</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = e^{x^2},\quad \text{Maclaurin up to } x^4\;$</div><div class="cs-line cs-step">$\;f(0)=1,\ f'=2xe^{x^2}\!\Rightarrow f'(0)=0,\ f''=2e^{x^2}+4x^2e^{x^2}\!\Rightarrow f''(0)=2,\ f'''(0)=0,\ f^{(4)}(0)=12 \Rightarrow e^{x^2}=1+x^2+\tfrac{x^4}{2}\;$</div></div>
   <div class="cs-meta">
@@ -947,7 +982,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-curves-derivative-to-required-line-gradient-to-locate-tangent-point.html" class="cs-card">
+<a href="move/match-curves-derivative-to-required-line-gradient-to-locate-tangent-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Match curve&#x27;s derivative to required line gradient to locate tangent point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 + 3x,\quad \text{tangent parallel to } y = 5x\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x + 3 = 5 \Rightarrow x = 1,\; y = 4\;$</div></div>
   <div class="cs-meta">
@@ -962,7 +997,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-the-inverse-relation-and-reciprocate-to-obtain-dydx.html" class="cs-card">
+<a href="move/differentiate-the-inverse-relation-and-reciprocate-to-obtain-dydx.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate the inverse relation and reciprocate to obtain dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;y = \arcsin x \Rightarrow x = \sin y\;$</div><div class="cs-line cs-step">$\;\dfrac{dx}{dy} = \cos y \Rightarrow \dfrac{dy}{dx} = \dfrac{1}{\cos y} = \dfrac{1}{\sqrt{1-x^2}}\;$</div></div>
   <div class="cs-meta">
@@ -977,7 +1012,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-quotient-rule-to-differentiate-a-ratio-of-two-functions.html" class="cs-card">
+<a href="move/apply-the-quotient-rule-to-differentiate-a-ratio-of-two-functions.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the quotient rule to differentiate a ratio of two functions</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x^2}{x+1}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{(x+1)(2x) - x^2(1)}{(x+1)^2} = \dfrac{x^2+2x}{(x+1)^2}\;$</div></div>
   <div class="cs-meta">
@@ -992,7 +1027,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/analyse-sign-of-fx-to-prove-monotonicity-or-classify-stationary-points.html" class="cs-card">
+<a href="move/analyse-sign-of-fx-to-prove-monotonicity-or-classify-stationary-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Analyse sign of f&#x27;(x) to prove monotonicity or classify stationary points</div>
   <div class="cs-example"><div class="cs-line">$\;f(x)=\dfrac{2x+1}{x-1},\quad x>1\;$</div><div class="cs-line cs-step">$\;f'(x)=\dfrac{(x-1)(2)-(2x+1)(1)}{(x-1)^2}=\dfrac{-3}{(x-1)^2}<0 \Rightarrow f \text{ decreasing}\;$</div></div>
   <div class="cs-meta">
@@ -1007,7 +1042,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/sketch-curve-via-end-behaviour-and-turning-points-to-count-solutions-of-fxk.html" class="cs-card">
+<a href="move/sketch-curve-via-end-behaviour-and-turning-points-to-count-solutions-of-fxk.html" class="cs-card lazy-tex">
   <div class="cs-name">Sketch curve via end-behaviour and turning points to count solutions of f(x)=k</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - 3x,\quad f'(x)=0 \Rightarrow x=-1\ (\text{max},\,2),\; x=1\ (\text{min},\,-2)\;$</div><div class="cs-line cs-step">$\;\lim_{x\to\pm\infty} f = \pm\infty,\; \text{rises to }2,\; \text{falls to }-2,\; \text{rises} \Rightarrow f(x)=k \text{ has } \begin{cases}3 \text{ roots} & -2<k<2\\1 \text{ root} & |k|>2\end{cases}\;$</div></div>
   <div class="cs-meta">
@@ -1022,7 +1057,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-tangent-gradient-conditions-into-algebraic-equations-on-dydx.html" class="cs-card">
+<a href="move/translate-tangent-gradient-conditions-into-algebraic-equations-on-dydx.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate tangent gradient conditions into algebraic equations on dy/dx</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x,\quad \text{tangent slope } = 9\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3x^2 - 3 = 9 \Rightarrow 3x^2 = 12 \Rightarrow x = \pm 2\;$</div></div>
   <div class="cs-meta">
@@ -1037,7 +1072,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-known-and-target-rates-via-the-chain-rule-through-a-shared-variable.html" class="cs-card">
+<a href="move/bridge-known-and-target-rates-via-the-chain-rule-through-a-shared-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge known and target rates via the chain rule through a shared variable</div>
   <div class="cs-example"><div class="cs-line">$\;V = h^3,\quad \dfrac{dV}{dt} = 6,\quad h = 1\;$</div><div class="cs-line cs-step">$\;\dfrac{dh}{dt} = \dfrac{dV/dt}{dV/dh} = \dfrac{6}{3h^2}\bigg|_{h=1} = 2\;$</div></div>
   <div class="cs-meta">
@@ -1052,7 +1087,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-derivative-equal-to-given-gradient-to-locate-tangent-point.html" class="cs-card">
+<a href="move/set-derivative-equal-to-given-gradient-to-locate-tangent-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Set derivative equal to given gradient to locate tangent point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 3x,\quad \text{gradient } = 5\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x - 3 = 5 \Rightarrow x = 4,\; y = 4 \Rightarrow (4,\,4)\;$</div></div>
   <div class="cs-meta">
@@ -1067,7 +1102,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-polynomial-and-evaluate-to-find-tangent-gradient-at-a-point.html" class="cs-card">
+<a href="move/differentiate-polynomial-and-evaluate-to-find-tangent-gradient-at-a-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate polynomial and evaluate to find tangent gradient at a point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 + 3x,\quad P(2,\,10)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x + 3 \Rightarrow \left.\dfrac{dy}{dx}\right|_{x=2} = 7\;$</div></div>
   <div class="cs-meta">
@@ -1082,7 +1117,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-power-rule-directly-to-fractional-and-negative-exponents.html" class="cs-card">
+<a href="move/apply-the-power-rule-directly-to-fractional-and-negative-exponents.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the power rule directly to fractional and negative exponents</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = 3x^{1/2} + x^{-1}\;$</div><div class="cs-line cs-step">$\;f'(x) = \tfrac{3}{2}x^{-1/2} - x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1097,7 +1132,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-factored-polynomial-before-differentiating-term-by-term.html" class="cs-card">
+<a href="move/expand-factored-polynomial-before-differentiating-term-by-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand factored polynomial before differentiating term by term</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = (x-1)(x+2)(x+3)\;$</div><div class="cs-line cs-step">$\;(x-1)(x^2+5x+6) = x^3+4x^2+x-6 \Rightarrow f'(x)=3x^2+8x+1\;$</div></div>
   <div class="cs-meta">
@@ -1112,7 +1147,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-polynomial-over-power-of-x-fraction-into-separate-xn-terms-before-differen.html" class="cs-card">
+<a href="move/split-polynomial-over-power-of-x-fraction-into-separate-xn-terms-before-differen.html" class="cs-card lazy-tex">
   <div class="cs-name">Split polynomial-over-power-of-x fraction into separate x^n terms before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x^3 + 2x}{x^2}\;$</div><div class="cs-line cs-step">$\;y = x + 2x^{-1} \Rightarrow \dfrac{dy}{dx} = 1 - 2x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1127,7 +1162,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-that-additive-constants-vanish-under-differentiation-to-bypass-unknowns.html" class="cs-card">
+<a href="move/exploit-that-additive-constants-vanish-under-differentiation-to-bypass-unknowns.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit that additive constants vanish under differentiation to bypass unknowns</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 4x + k\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x - 4 = 0 \Rightarrow x = 2\;$</div></div>
   <div class="cs-meta">
@@ -1142,7 +1177,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-surds-and-reciprocals-as-powers-of-x-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-surds-and-reciprocals-as-powers-of-x-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite surds and reciprocals as powers of x before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{x} + \dfrac{1}{x^2}\;$</div><div class="cs-line cs-step">$\;y = x^{1/2} + x^{-2} \Rightarrow \dfrac{dy}{dx} = \tfrac{1}{2}x^{-1/2} - 2x^{-3}\;$</div></div>
   <div class="cs-meta">
@@ -1157,7 +1192,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/read-tangent-form-y-k-as-a-zero-gradient-condition.html" class="cs-card">
+<a href="move/read-tangent-form-y-k-as-a-zero-gradient-condition.html" class="cs-card lazy-tex">
   <div class="cs-name">Read tangent form y = k as a zero-gradient condition</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^2 - 2x + 3,\quad x = 1\;$</div><div class="cs-line cs-step">$\;f'(1) = 2(1)-2 = 0 \Rightarrow \text{tangent: } y = f(1) = 2\;$</div></div>
   <div class="cs-meta">
@@ -1172,7 +1207,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-the-first-derivative-to-obtain-the-second-derivative.html" class="cs-card">
+<a href="move/differentiate-the-first-derivative-to-obtain-the-second-derivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate the first derivative to obtain the second derivative</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = 3x^2 - 4x + 1\;$</div><div class="cs-line cs-step">$\;\dfrac{d^2y}{dx^2} = 6x - 4\;$</div></div>
   <div class="cs-meta">
@@ -1187,7 +1222,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-derivative-to-lines-gradient-to-locate-tangent-point.html" class="cs-card">
+<a href="move/equate-derivative-to-lines-gradient-to-locate-tangent-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate derivative to line&#x27;s gradient to locate tangent point</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = 2x + c\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 2x = 2 \Rightarrow x = 1,\ y = 1,\ c = 1 - 2 = -1\;$</div></div>
   <div class="cs-meta">
@@ -1202,7 +1237,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-given-x-value-into-both-derivatives-then-equate-to-solve-for-the-.html" class="cs-card">
+<a href="move/substitute-the-given-x-value-into-both-derivatives-then-equate-to-solve-for-the-.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the given x-value into both derivatives, then equate to solve for the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = kx^3 + x^2 - kx. \text{ Given that } f'(2) = f''(2), \text{ find } k.\;$</div><div class="cs-line cs-step">$\;f'(2) = 12k + 4 - k = 11k + 4,\; f''(2) = 12k + 2 \Rightarrow 11k + 4 = 12k + 2 \Rightarrow k = 2\;$</div></div>
   <div class="cs-meta">
@@ -1217,7 +1252,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-fx-and-fx-generally-to-form-a-quadratic-in-x.html" class="cs-card">
+<a href="move/equate-fx-and-fx-generally-to-form-a-quadratic-in-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate f&#x27;(x) and f&#x27;&#x27;(x) generally to form a quadratic in x</div>
   <div class="cs-example"><div class="cs-line">$\;f(x)=x^3-3x^2+2x \Rightarrow f'(x)=3x^2-6x+2,\quad f''(x)=6x-6\;$</div><div class="cs-line cs-step">$\;3x^2-6x+2=6x-6 \Rightarrow 3x^2-12x+8=0\;$</div></div>
   <div class="cs-meta">
@@ -1232,7 +1267,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-fractional-terms-as-negative-powers-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-fractional-terms-as-negative-powers-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite fractional terms as negative powers before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 + \dfrac{3}{x}\;$</div><div class="cs-line cs-step">$\;y = x^2 + 3x^{-1} \Rightarrow \dfrac{dy}{dx} = 2x - 3x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1247,7 +1282,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-given-x-value-into-derivative-to-verify-stationary-point.html" class="cs-card">
+<a href="move/substitute-given-x-value-into-derivative-to-verify-stationary-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute given x-value into derivative to verify stationary point</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = 2x^2 - 8,\quad x = 2\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx}\bigg|_{x=2} = 2(2)^2 - 8 = 8 - 8 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1262,7 +1297,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-the-simplified-show-that-form-not-the-original-expression.html" class="cs-card">
+<a href="move/differentiate-the-simplified-show-that-form-not-the-original-expression.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate the simplified show-that form, not the original expression</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \dfrac{5x}{x+3}\;$</div><div class="cs-line cs-step">$\;f'(x) = \dfrac{(x+3)(5) - (5x)(1)}{(x+3)^2} = \dfrac{15}{(x+3)^2}\;$</div></div>
   <div class="cs-meta">
@@ -1277,7 +1312,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-or-integrate-term-by-term-using-linearity-on-a-sum-of-power-terms.html" class="cs-card">
+<a href="move/differentiate-or-integrate-term-by-term-using-linearity-on-a-sum-of-power-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate or integrate term-by-term using linearity on a sum of power terms</div>
   <div class="cs-example"><div class="cs-line">$\;y = 3x^2 - x^{-1}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = 3\cdot 2\,x^{1} - (-1)x^{-2} = 6x + x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1292,7 +1327,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-derivative-at-given-x-values-to-disprove-stationarity.html" class="cs-card">
+<a href="move/evaluate-derivative-at-given-x-values-to-disprove-stationarity.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate derivative at given x-values to disprove stationarity</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x) = 2x + 3\;$</div><div class="cs-line cs-step">$\;f'(1) = 2(1)+3 = 5 \neq 0,\quad f'(-2) = 2(-2)+3 = -1 \neq 0 \Rightarrow \text{not stationary}\;$</div></div>
   <div class="cs-meta">
@@ -1307,7 +1342,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-constant-over-linear-as-negative-power-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-constant-over-linear-as-negative-power-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite constant-over-linear as negative power before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{4}{(2x+1)^2}\;$</div><div class="cs-line cs-step">$\;y = 4(2x+1)^{-2} \Rightarrow \dfrac{dy}{dx} = 4(-2)(2x+1)^{-3}\cdot 2 = -\dfrac{16}{(2x+1)^3}\;$</div></div>
   <div class="cs-meta">
@@ -1322,7 +1357,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-exponential-model-and-evaluate-derivative-as-instantaneous-rate.html" class="cs-card">
+<a href="move/differentiate-exponential-model-and-evaluate-derivative-as-instantaneous-rate.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate exponential model and evaluate derivative as instantaneous rate</div>
   <div class="cs-example"><div class="cs-line">$\;\theta = 50 - 30e^{-2t}\;$</div><div class="cs-line cs-step">$\;\dfrac{d\theta}{dt} = 60e^{-2t},\quad \left.\dfrac{d\theta}{dt}\right|_{t=1} = 60e^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1337,7 +1372,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-common-bracket-from-quotient-rule-numerator-to-fully-factorise.html" class="cs-card">
+<a href="move/extract-common-bracket-from-quotient-rule-numerator-to-fully-factorise.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract common bracket from quotient-rule numerator to fully factorise</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \dfrac{(x+1)^2}{x-2},\quad f'(x) = \dfrac{(x-2)\cdot 2(x+1) - (x+1)^2}{(x-2)^2}\;$</div><div class="cs-line cs-step">$\;\dfrac{(x+1)\bigl[2(x-2)-(x+1)\bigr]}{(x-2)^2} = \dfrac{(x+1)(x-5)}{(x-2)^2}\;$</div></div>
   <div class="cs-meta">
@@ -1352,7 +1387,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-roots-and-reciprocals-as-index-powers-before-differentiating.html" class="cs-card">
+<a href="move/rewrite-roots-and-reciprocals-as-index-powers-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite roots and reciprocals as index powers before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{x} + \dfrac{1}{x}\;$</div><div class="cs-line cs-step">$\;y = x^{1/2} + x^{-1} \Rightarrow \dfrac{dy}{dx} = \tfrac{1}{2}x^{-1/2} - x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1367,7 +1402,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-common-power-before-solving-derivative-equal-to-zero.html" class="cs-card">
+<a href="move/factor-common-power-before-solving-derivative-equal-to-zero.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor common power before solving derivative equal to zero</div>
   <div class="cs-example"><div class="cs-line">$\;y = x(x-1)^3 \Rightarrow \dfrac{dy}{dx} = (x-1)^3 + 3x(x-1)^2\;$</div><div class="cs-line cs-step">$\;(x-1)^2[(x-1)+3x] = (x-1)^2(4x-1) = 0 \Rightarrow x=1,\; x=\tfrac{1}{4}\;$</div></div>
   <div class="cs-meta">
@@ -1382,7 +1417,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-quotient-rule-when-target-form-shows-v²-in-denominator.html" class="cs-card">
+<a href="move/select-quotient-rule-when-target-form-shows-v²-in-denominator.html" class="cs-card lazy-tex">
   <div class="cs-name">Select quotient rule when target form shows v² in denominator</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x}{1+x}\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx} = \dfrac{(1+x)(1) - x(1)}{(1+x)^2} = \dfrac{1}{(1+x)^2}\;$</div></div>
   <div class="cs-meta">
@@ -1397,7 +1432,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-second-derivative-test-to-filter-minima-from-multiple-stationary-points.html" class="cs-card">
+<a href="move/use-second-derivative-test-to-filter-minima-from-multiple-stationary-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Use second derivative test to filter minima from multiple stationary points</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x \Rightarrow \dfrac{dy}{dx} = 3x^2 - 3 = 0 \Rightarrow x = \pm 1\;$</div><div class="cs-line cs-step">$\;\dfrac{d^2y}{dx^2} = 6x:\quad x=-1 \Rightarrow -6<0\ (\text{max}),\quad x=1 \Rightarrow 6>0\ (\text{min})\;$</div></div>
   <div class="cs-meta">
@@ -1412,7 +1447,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recycle-the-stationarity-equation-to-simplify-back-substitution.html" class="cs-card">
+<a href="move/recycle-the-stationarity-equation-to-simplify-back-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Recycle the stationarity equation to simplify back-substitution</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = 4 - e^x - 4e^{-x},\quad f'(x)=0 \Rightarrow e^x = 4e^{-x}\;$</div><div class="cs-line cs-step">$\;e^{-x} = \tfrac{1}{4}e^{x} \Rightarrow f_{\max} = 4 - e^x - 4\cdot\tfrac{1}{4}e^x = 4 - 2e^x = 4 - 2\cdot 2 = 0\;$</div></div>
   <div class="cs-meta">
@@ -1427,7 +1462,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-derivative-to-expose-zero-product-structure.html" class="cs-card">
+<a href="move/factor-derivative-to-expose-zero-product-structure.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor derivative to expose zero-product structure</div>
   <div class="cs-example"><div class="cs-line">$\;g(x) = x^2 e^x \Rightarrow g'(x) = 2x\,e^x + x^2 e^x\;$</div><div class="cs-line cs-step">$\;g'(x) = x\,e^x(2 + x) = 0 \Rightarrow x = 0 \text{ or } x = -2\;$</div></div>
   <div class="cs-meta">
@@ -1442,7 +1477,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-range-on-closed-interval-via-endpoints-and-interior-critical-points.html" class="cs-card">
+<a href="move/find-range-on-closed-interval-via-endpoints-and-interior-critical-points.html" class="cs-card lazy-tex">
   <div class="cs-name">Find range on closed interval via endpoints and interior critical points</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - 3x \text{ on } [-2,\,2],\quad f'(x)=3x^2-3=0 \Rightarrow x=\pm1\;$</div><div class="cs-line cs-step">$\;f(-2)=-2,\ f(-1)=2,\ f(1)=-2,\ f(2)=2 \Rightarrow \text{range} = [-2,\,2]\;$</div></div>
   <div class="cs-meta">
@@ -1457,7 +1492,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/eliminate-always-nonzero-factors-to-reduce-a-stationary-point-equation.html" class="cs-card">
+<a href="move/eliminate-always-nonzero-factors-to-reduce-a-stationary-point-equation.html" class="cs-card lazy-tex">
   <div class="cs-name">Eliminate always-nonzero factors to reduce a stationary-point equation</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x) = e^x(2x - 1) = 0\;$</div><div class="cs-line cs-step">$\;e^x > 0 \Rightarrow 2x - 1 = 0 \Rightarrow x = \tfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1472,7 +1507,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-stationary-x-value-into-original-equation-for-y-coordinate.html" class="cs-card">
+<a href="move/substitute-stationary-x-value-into-original-equation-for-y-coordinate.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute stationary x-value into original equation for y-coordinate</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^3 - 3x,\quad \dfrac{dy}{dx} = 0 \Rightarrow x = 1\;$</div><div class="cs-line cs-step">$\;y(1) = 1^3 - 3(1) = -2 \Rightarrow (1,\,-2)\;$</div></div>
   <div class="cs-meta">
@@ -1487,7 +1522,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-derivative-sign-change-with-end-behaviour-to-state-range.html" class="cs-card">
+<a href="move/combine-derivative-sign-change-with-end-behaviour-to-state-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine derivative sign change with end-behaviour to state range</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x + \dfrac{1}{x},\quad x > 0,\quad f'(x) = 1 - \dfrac{1}{x^2} = 0 \Rightarrow x = 1\;$</div><div class="cs-line cs-step">$\;f'\!\left(\tfrac{1}{2}\right)<0,\ f'(2)>0 \Rightarrow \text{min at } f(1)=2;\ f\to+\infty \text{ as } x\to0^+,\,\infty \Rightarrow \text{range}=[2,\infty)\;$</div></div>
   <div class="cs-meta">
@@ -1502,7 +1537,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-at-via-the-rule-ddtat-at-ln-a.html" class="cs-card">
+<a href="move/differentiate-at-via-the-rule-ddtat-at-ln-a.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate a^t via the rule d/dt(a^t) = a^t ln a</div>
   <div class="cs-example"><div class="cs-line">$\;A = 5 \cdot 3^{2t}\;$</div><div class="cs-line cs-step">$\;\dfrac{dA}{dt} = 5 \cdot 3^{2t} \cdot 2\ln 3 = 10\ln 3 \cdot 3^{2t}\;$</div></div>
   <div class="cs-meta">
@@ -1517,7 +1552,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-the-lowest-fractional-power-to-merge-product-rule-terms.html" class="cs-card">
+<a href="move/factor-out-the-lowest-fractional-power-to-merge-product-rule-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out the lowest fractional power to merge product-rule terms</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = 2x(x+1)^{1/2} + x^2 \cdot \tfrac{1}{2}(x+1)^{-1/2}\;$</div><div class="cs-line cs-step">$\;(x+1)^{-1/2}\!\left[2x(x+1) + \tfrac{x^2}{2}\right] = \dfrac{x(5x+4)}{2(x+1)^{1/2}}\;$</div></div>
   <div class="cs-meta">
@@ -1532,7 +1567,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-exponential-beats-polynomial-dominance-to-extract-horizontal-asymptote.html" class="cs-card">
+<a href="move/use-exponential-beats-polynomial-dominance-to-extract-horizontal-asymptote.html" class="cs-card lazy-tex">
   <div class="cs-name">Use exponential-beats-polynomial dominance to extract horizontal asymptote</div>
   <div class="cs-example"><div class="cs-line">$\;y = 5 + x^2 e^{-x},\quad x \to \infty\;$</div><div class="cs-line cs-step">$\;x^2 e^{-x} \to 0 \Rightarrow y \to 5\;$</div></div>
   <div class="cs-meta">
@@ -1547,7 +1582,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bridge-drdt-via-chain-rule-using-dvdt-and-dvdr.html" class="cs-card">
+<a href="move/bridge-drdt-via-chain-rule-using-dvdt-and-dvdr.html" class="cs-card lazy-tex">
   <div class="cs-name">Bridge dr/dt via chain rule using dV/dt and dV/dr</div>
   <div class="cs-example"><div class="cs-line">$\;V = \tfrac{4}{3}\pi r^3,\quad \dfrac{dV}{dt} = 8\pi,\quad r = 2\;$</div><div class="cs-line cs-step">$\;\dfrac{dr}{dt} = \dfrac{dV/dt}{dV/dr} = \dfrac{8\pi}{4\pi r^2}\bigg|_{r=2} = \dfrac{8\pi}{16\pi} = \dfrac{1}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1562,7 +1597,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-given-point-coordinates-into-implicit-dydx-for-numerical-gradient.html" class="cs-card">
+<a href="move/substitute-given-point-coordinates-into-implicit-dydx-for-numerical-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute given point coordinates into implicit dy/dx for numerical gradient</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{2x - y}{x + 2y},\quad P(1,\,1)\;$</div><div class="cs-line cs-step">$\;\dfrac{dy}{dx}\bigg|_{(1,1)} = \dfrac{2(1) - 1}{1 + 2(1)} = \dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1577,7 +1612,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-constant-rate-by-dividing-total-volume-by-flow-rate.html" class="cs-card">
+<a href="move/invert-constant-rate-by-dividing-total-volume-by-flow-rate.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert constant rate by dividing total volume by flow rate</div>
   <div class="cs-example"><div class="cs-line">$\;V(h) = h^3,\quad h_{\max} = 5,\quad \dfrac{dV}{dt} = 25\;$</div><div class="cs-line cs-step">$\;t = \dfrac{V(5)}{25} = \dfrac{125}{25} = 5\;$</div></div>
   <div class="cs-meta">
@@ -1592,7 +1627,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-point-coordinates-into-implicit-derivative-to-find-tangent-gradient.html" class="cs-card">
+<a href="move/substitute-point-coordinates-into-implicit-derivative-to-find-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute point coordinates into implicit derivative to find tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{dy}{dx} = \dfrac{-2x - y}{x + 6y},\quad P(1,2)\;$</div><div class="cs-line cs-step">$\;m = \dfrac{-2(1) - 2}{1 + 6(2)} = \dfrac{-4}{13}\;$</div></div>
   <div class="cs-meta">
@@ -1607,7 +1642,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rearrange-implicit-product-to-explicit-y-fx-before-differentiating.html" class="cs-card">
+<a href="move/rearrange-implicit-product-to-explicit-y-fx-before-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange implicit product to explicit y = f(x) before differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;xy = 4\;$</div><div class="cs-line cs-step">$\;y = 4x^{-1} \Rightarrow \dfrac{dy}{dx} = -4x^{-2}\;$</div></div>
   <div class="cs-meta">
@@ -1622,7 +1657,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-ln-of-both-sides-to-differentiate-variable-base-variable-exponent-forms.html" class="cs-card">
+<a href="move/take-ln-of-both-sides-to-differentiate-variable-base-variable-exponent-forms.html" class="cs-card lazy-tex">
   <div class="cs-name">Take ln of both sides to differentiate variable-base variable-exponent forms</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^x\;$</div><div class="cs-line cs-step">$\;\ln y = x\ln x \Rightarrow \frac{1}{y}\frac{dy}{dx} = \ln x + 1 \Rightarrow \frac{dy}{dx} = x^x(\ln x + 1)\;$</div></div>
   <div class="cs-meta">
@@ -1637,7 +1672,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/differentiate-f-to-prepare-the-newton-raphson-denominator.html" class="cs-card">
+<a href="move/differentiate-f-to-prepare-the-newton-raphson-denominator.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate f to prepare the Newton-Raphson denominator</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^3 - 2x + 1,\quad x_0 = 2\;$</div><div class="cs-line cs-step">$\;f'(x) = 3x^2 - 2 \Rightarrow f'(2) = 10 \neq 0\;$</div></div>
   <div class="cs-meta">
@@ -1652,7 +1687,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/simplify-derivative-via-pythagorean-identity-before-differentiating-again.html" class="cs-card">
+<a href="move/simplify-derivative-via-pythagorean-identity-before-differentiating-again.html" class="cs-card lazy-tex">
   <div class="cs-name">Simplify derivative via Pythagorean identity before differentiating again</div>
   <div class="cs-example"><div class="cs-line">$\;f''(x) = \dfrac{-\sin x - \sin^2 x - \cos^2 x}{(1+\sin x)^2}\;$</div><div class="cs-line cs-step">$\;\dfrac{-\sin x - (\sin^2 x + \cos^2 x)}{(1+\sin x)^2} = \dfrac{-(1+\sin x)}{(1+\sin x)^2} = \dfrac{-1}{1+\sin x}\;$</div></div>
   <div class="cs-meta">
@@ -1667,7 +1702,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/trace-parameter-domain-through-asymptotes-to-find-cartesian-range.html" class="cs-card">
+<a href="move/trace-parameter-domain-through-asymptotes-to-find-cartesian-range.html" class="cs-card lazy-tex">
   <div class="cs-name">Trace parameter domain through asymptotes to find Cartesian range</div>
   <div class="cs-example"><div class="cs-line">$\;x = \tan t,\; y = x^2,\; -\tfrac{3\pi}{4} \le t \le \tfrac{\pi}{4}\;$</div><div class="cs-line cs-step">$\;t\in[-\tfrac{3\pi}{4},-\tfrac{\pi}{2})\!:\,x\in[1,\infty);\; t\in(-\tfrac{\pi}{2},\tfrac{\pi}{4}]\!:\,x\in(-\infty,1] \Rightarrow x\in\mathbb{R} \Rightarrow y\in[0,\infty)\;$</div></div>
   <div class="cs-meta">
@@ -1682,7 +1717,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-implicit-differentiation-over-parametric-for-tangent-gradient.html" class="cs-card">
+<a href="move/choose-implicit-differentiation-over-parametric-for-tangent-gradient.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose implicit differentiation over parametric for tangent gradient</div>
   <div class="cs-example"><div class="cs-line">$\;4x^2 - y^2 = 4,\quad P(\sec\theta,\, 2\tan\theta)\;$</div><div class="cs-line cs-step">$\;8x - 2y\,\dfrac{dy}{dx} = 0 \Rightarrow \dfrac{dy}{dx} = \dfrac{4x}{y} = \dfrac{4\sec\theta}{2\tan\theta} = \dfrac{2}{\sin\theta}\;$</div></div>
   <div class="cs-meta">
@@ -1697,7 +1732,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/build-maclaurintaylor-series-by-repeated-differentiation-at-the-expansion-point.html" class="cs-card">
+<a href="move/build-maclaurintaylor-series-by-repeated-differentiation-at-the-expansion-point.html" class="cs-card lazy-tex">
   <div class="cs-name">Build Maclaurin/Taylor series by repeated differentiation at the expansion point</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = e^x,\quad f(0)=1,\; f'(0)=1,\; f''(0)=1,\; f'''(0)=1\;$</div><div class="cs-line cs-step">$\;e^x = 1 + x + \dfrac{x^2}{2!} + \dfrac{x^3}{3!} + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -1712,7 +1747,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-product-rule-with-chain-rule-inside-an-outer-quotient-rule.html" class="cs-card">
+<a href="move/apply-product-rule-with-chain-rule-inside-an-outer-quotient-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply product rule with chain rule inside an outer quotient rule</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{d^2y}{dx^2},\quad \dfrac{dy}{dx}=\dfrac{1+\ln x}{x(1+x)^{1/2}}\;$</div><div class="cs-line cs-step">$\;p=1+\ln x,\; q=x(1+x)^{1/2};\; q'=(1+x)^{1/2}+\dfrac{x}{2(1+x)^{1/2}}=\dfrac{2+3x}{2(1+x)^{1/2}} \Rightarrow \dfrac{d^2y}{dx^2}=\dfrac{\tfrac{1}{x}\cdot x(1+x)^{1/2}-(1+\ln x)\cdot\tfrac{2+3x}{2(1+x)^{1/2}}}{x^2(1+x)}\;$</div></div>
   <div class="cs-meta">

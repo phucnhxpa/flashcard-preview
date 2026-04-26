@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">12 moves · 14 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-u-inner-function-to-collapse-a-composite-power-into-an-integrable-for.html" class="cs-card">
+<a href="move/substitute-u-inner-function-to-collapse-a-composite-power-into-an-integrable-for.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u = inner function to collapse a composite power into an integrable form</div>
   <div class="cs-example"><div class="cs-line">$\;\int 2x(x^2+1)^3\,dx\;$</div><div class="cs-line cs-step">$\;u=x^2+1,\; du=2x\,dx \Rightarrow \int u^3\,du = \tfrac{u^4}{4}+C = \tfrac{(x^2+1)^4}{4}+C\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-u-equal-to-the-inner-expression-to-absorb-its-derivative.html" class="cs-card">
+<a href="move/substitute-u-equal-to-the-inner-expression-to-absorb-its-derivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u equal to the inner expression to absorb its derivative</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^2 \frac{x}{(x+1)^2}\,dx\;$</div><div class="cs-line cs-step">$\;u = x+1,\; x = u-1,\; \int_1^3 \frac{u-1}{u^2}\,du = \int_1^3 \left(\frac{1}{u} - \frac{1}{u^2}\right)du\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/convert-x-surd-and-dx-to-u-via-squaring-and-differentiating.html" class="cs-card">
+<a href="move/convert-x-surd-and-dx-to-u-via-squaring-and-differentiating.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert x, surd, and dx to u via squaring and differentiating</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x}{\sqrt{x+1}}\,dx,\quad u=\sqrt{x+1}\;$</div><div class="cs-line cs-step">$\;x=u^2-1,\ dx=2u\,du \Rightarrow \int \dfrac{u^2-1}{u}\cdot 2u\,du = \int 2(u^2-1)\,du\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/use-hence-to-reverse-part-as-derivative-as-an-antiderivative.html" class="cs-card">
+<a href="move/use-hence-to-reverse-part-as-derivative-as-an-antiderivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Use &#x27;hence&#x27; to reverse part (a)&#x27;s derivative as an antiderivative</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \dfrac{d}{dx}\bigl[(1+x^2)^{1/2}\bigr] = \dfrac{x}{\sqrt{1+x^2}};\quad \text{(b)}\ \int \dfrac{3x}{\sqrt{1+x^2}}\,dx\;$</div><div class="cs-line cs-step">$\;\int \dfrac{3x}{\sqrt{1+x^2}}\,dx = 3\,(1+x^2)^{1/2} + C\;$</div></div>
   <div class="cs-meta">
@@ -295,7 +330,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-u-x-to-rationalise-surd-integrand.html" class="cs-card">
+<a href="move/substitute-u-x-to-rationalise-surd-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u = √x to rationalise surd integrand</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{1+\sqrt{x}}\,dx\;$</div><div class="cs-line cs-step">$\;u=\sqrt{x},\; dx=2u\,du \Rightarrow \int \dfrac{2u}{1+u}\,du\;$</div></div>
   <div class="cs-meta">
@@ -303,7 +338,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/differentiate-the-given-substitution-to-express-dx-in-terms-of-du.html" class="cs-card">
+<a href="move/differentiate-the-given-substitution-to-express-dx-in-terms-of-du.html" class="cs-card lazy-tex">
   <div class="cs-name">Differentiate the given substitution to express dx in terms of du</div>
   <div class="cs-example"><div class="cs-line">$\;\int 2x\,e^{x^2}\,dx,\quad u = x^2\;$</div><div class="cs-line cs-step">$\;\dfrac{du}{dx} = 2x \Rightarrow dx = \dfrac{du}{2x}\;$</div></div>
   <div class="cs-meta">
@@ -311,7 +346,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/substitute-u-inner-function-to-absorb-its-derivative-from-the-numerator.html" class="cs-card">
+<a href="move/substitute-u-inner-function-to-absorb-its-derivative-from-the-numerator.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u = inner function to absorb its derivative from the numerator</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{\cos x}{(1+\sin x)^2}\,dx\;$</div><div class="cs-line cs-step">$\;u = 1+\sin x,\; du = \cos x\,dx \Rightarrow \int u^{-2}\,du = -\dfrac{1}{1+\sin x}+C\;$</div></div>
   <div class="cs-meta">
@@ -319,7 +354,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/convert-x-limits-to-u-limits-immediately-on-substitution.html" class="cs-card">
+<a href="move/convert-x-limits-to-u-limits-immediately-on-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert x-limits to u-limits immediately on substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 2x\,(x^2+1)^3\,dx,\quad u=x^2+1\;$</div><div class="cs-line cs-step">$\;x=0\Rightarrow u=1,\; x=1\Rightarrow u=2:\quad \int_1^2 u^3\,du = \left[\tfrac{u^4}{4}\right]_1^2 = \tfrac{15}{4}\;$</div></div>
   <div class="cs-meta">
@@ -327,7 +362,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/rearrange-the-substitution-equation-to-rewrite-leftover-integrand-pieces-in-u.html" class="cs-card">
+<a href="move/rearrange-the-substitution-equation-to-rewrite-leftover-integrand-pieces-in-u.html" class="cs-card lazy-tex">
   <div class="cs-name">Rearrange the substitution equation to rewrite leftover integrand pieces in u</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x}{(1+x)^2}\,dx,\quad u=1+x\;$</div><div class="cs-line cs-step">$\;x = u-1,\; dx = du \Rightarrow \int \dfrac{u-1}{u^2}\,du\;$</div></div>
   <div class="cs-meta">
@@ -335,7 +370,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/re-express-x-dx-and-all-radical-parts-in-the-new-variable-u.html" class="cs-card">
+<a href="move/re-express-x-dx-and-all-radical-parts-in-the-new-variable-u.html" class="cs-card lazy-tex">
   <div class="cs-name">Re-express x, dx, and all radical parts in the new variable u</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{1}{1+\sqrt{x}}\,dx,\quad u = 1+\sqrt{x}\;$</div><div class="cs-line cs-step">$\;\sqrt{x}=u-1,\ x=(u-1)^2,\ dx=2(u-1)\,du \Rightarrow \int \frac{2(u-1)}{u}\,du\;$</div></div>
   <div class="cs-meta">
@@ -343,7 +378,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/split-odd-power-to-pair-one-factor-with-du-in-radical-substitution.html" class="cs-card">
+<a href="move/split-odd-power-to-pair-one-factor-with-du-in-radical-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Split odd power to pair one factor with du in radical substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^3 \sqrt{4-x^2}\,dx\;$</div><div class="cs-line cs-step">$\;u=4-x^2,\; x^3\,dx = x^2\cdot x\,dx = (4-u)\!\left(-\tfrac{du}{2}\right) \Rightarrow -\tfrac{1}{2}\int (4-u)\sqrt{u}\,du\;$</div></div>
   <div class="cs-meta">
@@ -351,7 +386,7 @@ window.MathJax = {
     <span>substitution bridge</span>
   </div>
 </a>
-<a href="move/invert-the-substitution-to-rewrite-orphan-x-factors-in-u.html" class="cs-card">
+<a href="move/invert-the-substitution-to-rewrite-orphan-x-factors-in-u.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert the substitution to rewrite orphan x-factors in u</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\sqrt{2x+1}\,dx,\quad u=2x+1\;$</div><div class="cs-line cs-step">$\;x=\tfrac{u-1}{2},\ dx=\tfrac{1}{2}du \Rightarrow \tfrac{1}{4}\int (u-1)\,u^{1/2}\,du = \tfrac{1}{4}\int \bigl(u^{3/2}-u^{1/2}\bigr)du\;$</div></div>
   <div class="cs-meta">
@@ -366,7 +401,7 @@ window.MathJax = {
     <span class="meta">8 moves · 13 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-u-as-the-polynomial-factor-in-ibp-to-reduce-its-degree.html" class="cs-card">
+<a href="move/choose-u-as-the-polynomial-factor-in-ibp-to-reduce-its-degree.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose u as the polynomial factor in IBP to reduce its degree</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;u=x,\ dv=e^{x}dx \Rightarrow x\,e^{x} - \int e^{x}\,dx = (x-1)\,e^{x}+C\;$</div></div>
   <div class="cs-meta">
@@ -374,7 +409,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/apply-integration-by-parts-when-integrand-is-a-product-of-unlike-functions-or-a-.html" class="cs-card">
+<a href="move/apply-integration-by-parts-when-integrand-is-a-product-of-unlike-functions-or-a-.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply integration by parts when integrand is a product of unlike functions or a lone log/inverse-trig</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^x\,dx\;$</div><div class="cs-line cs-step">$\;u=x,\ dv=e^x dx \Rightarrow x\,e^x - \int e^x\,dx = x\,e^x - e^x + C\;$</div></div>
   <div class="cs-meta">
@@ -382,7 +417,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/apply-liate-priority-to-choose-u-in-integration-by-parts.html" class="cs-card">
+<a href="move/apply-liate-priority-to-choose-u-in-integration-by-parts.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply LIATE priority to choose u in integration by parts</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;u=x,\; dv=e^{x}dx \Rightarrow x\,e^{x} - \int e^{x}\,dx = (x-1)\,e^{x}+C\;$</div></div>
   <div class="cs-meta">
@@ -390,7 +425,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/apply-integration-by-parts-repeatedly-until-the-logpolynomial-factor-is-exhauste.html" class="cs-card">
+<a href="move/apply-integration-by-parts-repeatedly-until-the-logpolynomial-factor-is-exhauste.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply integration by parts repeatedly until the log/polynomial factor is exhausted</div>
   <div class="cs-example"><div class="cs-line">$\;\int (\ln x)^2\,dx\;$</div><div class="cs-line cs-step">$\;x(\ln x)^2 - \int 2\ln x\,dx = x(\ln x)^2 - 2x\ln x + 2x + C\;$</div></div>
   <div class="cs-meta">
@@ -398,7 +433,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/multiply-integrand-by-1-to-manufacture-ibp-product-structure.html" class="cs-card">
+<a href="move/multiply-integrand-by-1-to-manufacture-ibp-product-structure.html" class="cs-card lazy-tex">
   <div class="cs-name">Multiply integrand by 1 to manufacture IBP product structure</div>
   <div class="cs-example"><div class="cs-line">$\;\int \ln x\,dx = \int \ln x \cdot 1\,dx\;$</div><div class="cs-line cs-step">$\;u=\ln x,\; v=x \Rightarrow x\ln x - \int x \cdot \dfrac{1}{x}\,dx = x\ln x - x + C\;$</div></div>
   <div class="cs-meta">
@@ -406,7 +441,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/assign-u-to-the-polynomial-factor-in-polynomialexponential-integrals-via-liateli.html" class="cs-card">
+<a href="move/assign-u-to-the-polynomial-factor-in-polynomialexponential-integrals-via-liateli.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign u to the polynomial factor in polynomial×exponential integrals via LIATE/LIPET</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^{2x}\,dx\;$</div><div class="cs-line cs-step">$\;u = x,\; dv = e^{2x}\,dx \Rightarrow \tfrac{1}{2}x\,e^{2x} - \tfrac{1}{2}\!\int e^{2x}\,dx = \tfrac{1}{2}x\,e^{2x} - \tfrac{1}{4}e^{2x} + C\;$</div></div>
   <div class="cs-meta">
@@ -414,7 +449,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/assign-u-to-the-logarithmic-factor-by-liate-priority.html" class="cs-card">
+<a href="move/assign-u-to-the-logarithmic-factor-by-liate-priority.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign u to the logarithmic factor by LIATE priority</div>
   <div class="cs-example"><div class="cs-line">$\;\int x \ln x\,dx\;$</div><div class="cs-line cs-step">$\;u = \ln x,\ v = \tfrac{x^2}{2} \Rightarrow \tfrac{x^2}{2}\ln x - \int \tfrac{x}{2}\,dx = \tfrac{x^2}{2}\ln x - \tfrac{x^2}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -422,7 +457,7 @@ window.MathJax = {
     <span>integration by parts</span>
   </div>
 </a>
-<a href="move/integrate-polynomial-times-exponential-using-integration-by-parts.html" class="cs-card">
+<a href="move/integrate-polynomial-times-exponential-using-integration-by-parts.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate polynomial times exponential using integration by parts</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\, e^{2x}\, dx\;$</div><div class="cs-line cs-step">$\;u=x,\ dv=e^{2x}dx \Rightarrow \tfrac{x}{2}e^{2x} - \int \tfrac{1}{2}e^{2x}\,dx = \tfrac{x}{2}e^{2x} - \tfrac{1}{4}e^{2x} + C\;$</div></div>
   <div class="cs-meta">
@@ -437,7 +472,7 @@ window.MathJax = {
     <span class="meta">7 moves · 10 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sinn-x-sinn-1-x-sin-x-to-set-up-ibp-reduction.html" class="cs-card">
+<a href="move/split-sinn-x-sinn-1-x-sin-x-to-set-up-ibp-reduction.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sin^n x = sin^(n-1) x · sin x to set up IBP reduction</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\, dx\;$</div><div class="cs-line cs-step">$\;I_n = \int_0^{\pi/2} \sin^{n-1} x \cdot \sin x\, dx,\quad u = \sin^{n-1} x,\; dv = \sin x\, dx\;$</div></div>
   <div class="cs-meta">
@@ -445,7 +480,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/apply-integration-by-parts-twice-to-close-a-polynomial-times-trig-reduction-form.html" class="cs-card">
+<a href="move/apply-integration-by-parts-twice-to-close-a-polynomial-times-trig-reduction-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply integration by parts twice to close a polynomial-times-trig reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} x^n \sin x\, dx\;$</div><div class="cs-line cs-step">$\;I_n = n\bigl[x^{n-1}\sin x\bigr]_0^{\pi/2} - n(n-1)\int_0^{\pi/2} x^{n-2}\sin x\, dx = n\!\left(\tfrac{\pi}{2}\right)^{n-1} - n(n-1)\,I_{n-2}\;$</div></div>
   <div class="cs-meta">
@@ -453,7 +488,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/set-u-polynomial-factor-in-ibp-to-drive-a-reduction-formula.html" class="cs-card">
+<a href="move/set-u-polynomial-factor-in-ibp-to-drive-a-reduction-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Set u = (polynomial factor) in IBP to drive a reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^1 x^n e^{-x}\,dx\;$</div><div class="cs-line cs-step">$\;u = x^n,\ dv = e^{-x}dx \Rightarrow I_n = \bigl[-x^n e^{-x}\bigr]_0^1 + n\!\int_0^1 x^{n-1}e^{-x}\,dx = nI_{n-1} - e^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -461,7 +496,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/apply-integration-by-parts-twice-to-close-a-trig-polynomial-reduction.html" class="cs-card">
+<a href="move/apply-integration-by-parts-twice-to-close-a-trig-polynomial-reduction.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply integration by parts twice to close a trig-polynomial reduction</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} x^n \cos x\,dx\;$</div><div class="cs-line cs-step">$\;I_n = \left(\tfrac{\pi}{2}\right)^n - n\!\int_0^{\pi/2} x^{n-1}\sin x\,dx = \left(\tfrac{\pi}{2}\right)^n - n(n-1)\,I_{n-2}\;$</div></div>
   <div class="cs-meta">
@@ -469,7 +504,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/iterate-a-reduction-formula-along-the-parity-chain-to-the-matching-base-case.html" class="cs-card">
+<a href="move/iterate-a-reduction-formula-along-the-parity-chain-to-the-matching-base-case.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate a reduction formula along the parity chain to the matching base case</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = (n-1)\,I_{n-2},\quad I_0 = \tfrac{\pi}{2},\quad \text{find } I_4\;$</div><div class="cs-line cs-step">$\;I_4 = 3\,I_2 = 3\cdot 1\cdot I_0 = 3\cdot\tfrac{\pi}{2} = \dfrac{3\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -477,7 +512,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/split-xn-as-xn-1x-to-enable-ibp-against-a-surd-denominator.html" class="cs-card">
+<a href="move/split-xn-as-xn-1x-to-enable-ibp-against-a-surd-denominator.html" class="cs-card lazy-tex">
   <div class="cs-name">Split x^n as x^{n-1}·x to enable IBP against a surd denominator</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int \dfrac{x^n}{\sqrt{a^2 - x^2}}\,dx\;$</div><div class="cs-line cs-step">$\;\int \dfrac{x^{n-1} \cdot x}{\sqrt{a^2-x^2}}\,dx,\quad u = x^{n-1},\ dv = \dfrac{x}{\sqrt{a^2-x^2}}\,dx \Rightarrow v = -\sqrt{a^2-x^2}\;$</div></div>
   <div class="cs-meta">
@@ -485,7 +520,7 @@ window.MathJax = {
     <span>reduction formula ibp</span>
   </div>
 </a>
-<a href="move/peel-off-one-factor-of-sin-x-to-set-up-ibp-for-reduction.html" class="cs-card">
+<a href="move/peel-off-one-factor-of-sin-x-to-set-up-ibp-for-reduction.html" class="cs-card lazy-tex">
   <div class="cs-name">Peel off one factor of sin x to set up IBP for reduction</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\,dx\;$</div><div class="cs-line cs-step">$\;I_n = \int_0^{\pi/2} \sin^{n-1}x \cdot \sin x\,dx,\quad u=\sin^{n-1}x,\ dv=\sin x\,dx\;$</div></div>
   <div class="cs-meta">
@@ -500,7 +535,7 @@ window.MathJax = {
     <span class="meta">4 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/select-the-correct-arc-length-or-surface-area-integral-formula-to-frame-the-prob.html" class="cs-card">
+<a href="move/select-the-correct-arc-length-or-surface-area-integral-formula-to-frame-the-prob.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the correct arc length or surface area integral formula to frame the problem</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^{3/2},\quad 0 \le x \le 1\;$</div><div class="cs-line cs-step">$\;L = \int_0^1 \sqrt{1 + \left(\dfrac{dy}{dx}\right)^2}\,dx = \int_0^1 \sqrt{1 + \tfrac{9}{4}x}\,dx\;$</div></div>
   <div class="cs-meta">
@@ -508,7 +543,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/select-the-appropriate-revolution-integral-formula-matching-axis-and-curve-repre.html" class="cs-card">
+<a href="move/select-the-appropriate-revolution-integral-formula-matching-axis-and-curve-repre.html" class="cs-card lazy-tex">
   <div class="cs-name">Select the appropriate revolution integral formula matching axis and curve representation</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\text{ rotated about the }x\text{-axis from }x=0\text{ to }x=1\;$</div><div class="cs-line cs-step">$\;V = \pi\int_0^1 y^2\,dx = \pi\int_0^1 x^4\,dx\;$</div></div>
   <div class="cs-meta">
@@ -516,7 +551,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/classify-ordinates-as-end-pair-versus-interior-for-trapezium-rule.html" class="cs-card">
+<a href="move/classify-ordinates-as-end-pair-versus-interior-for-trapezium-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Classify ordinates as end-pair versus interior for trapezium rule</div>
   <div class="cs-example"><div class="cs-line">$\;n=3,\; h=1,\; y_0=1,\; y_1=3,\; y_2=5,\; y_3=2\;$</div><div class="cs-line cs-step">$\;\tfrac{h}{2}\bigl[(y_0+y_3)+2(y_1+y_2)\bigr]=\tfrac{1}{2}\bigl[(1+2)+2(3+5)\bigr]=\tfrac{19}{2}\;$</div></div>
   <div class="cs-meta">
@@ -524,7 +559,7 @@ window.MathJax = {
     <span>formula selection</span>
   </div>
 </a>
-<a href="move/partition-ordinates-into-endpoints-versus-interior-values-for-the-trapezium-rule.html" class="cs-card">
+<a href="move/partition-ordinates-into-endpoints-versus-interior-values-for-the-trapezium-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Partition ordinates into endpoints versus interior values for the trapezium rule</div>
   <div class="cs-example"><div class="cs-line">$\;h=1,\quad y_0=1,\; y_1=3,\; y_2=2,\; y_3=5\;$</div><div class="cs-line cs-step">$\;\tfrac{h}{2}\bigl[(y_0+y_3)+2(y_1+y_2)\bigr]=\tfrac{1}{2}(6+10)=8\;$</div></div>
   <div class="cs-meta">
@@ -539,7 +574,7 @@ window.MathJax = {
     <span class="meta">5 moves · 7 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/decompose-proper-rational-integrand-via-partial-fractions-to-reduce-to-logpower-.html" class="cs-card">
+<a href="move/decompose-proper-rational-integrand-via-partial-fractions-to-reduce-to-logpower-.html" class="cs-card lazy-tex">
   <div class="cs-name">Decompose proper rational integrand via partial fractions to reduce to log/power integrals</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{3}{x(x+1)}\,dx\;$</div><div class="cs-line cs-step">$\;\dfrac{3}{x(x+1)} = \dfrac{3}{x} - \dfrac{3}{x+1} \Rightarrow 3\ln|x| - 3\ln|x+1| + C\;$</div></div>
   <div class="cs-meta">
@@ -547,7 +582,7 @@ window.MathJax = {
     <span>partial fractions then integrate</span>
   </div>
 </a>
-<a href="move/integrate-divided-rational-form-using-ln-for-kxa-term.html" class="cs-card">
+<a href="move/integrate-divided-rational-form-using-ln-for-kxa-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate divided rational form using ln for k/(x−a) term</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 \left(3 + \dfrac{2}{x-3}\right)dx\;$</div><div class="cs-line cs-step">$\;\left[3x + 2\ln|x-3|\right]_0^1 = 3 + 2\ln 2 - 2\ln 3 = 3 + 2\ln\!\dfrac{2}{3}\;$</div></div>
   <div class="cs-meta">
@@ -555,7 +590,7 @@ window.MathJax = {
     <span>partial fractions then integrate</span>
   </div>
 </a>
-<a href="move/expand-polynomial-product-directly-instead-of-parts-or-substitution.html" class="cs-card">
+<a href="move/expand-polynomial-product-directly-instead-of-parts-or-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand polynomial product directly instead of parts or substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\int x(x+1)^2\,dx\;$</div><div class="cs-line cs-step">$\;\int (x^3+2x^2+x)\,dx = \tfrac{1}{4}x^4 + \tfrac{2}{3}x^3 + \tfrac{1}{2}x^2 + C\;$</div></div>
   <div class="cs-meta">
@@ -563,7 +598,7 @@ window.MathJax = {
     <span>partial fractions then integrate</span>
   </div>
 </a>
-<a href="move/apply-given-multi-angle-linearisation-to-integrate-cosn-θ-term-by-term.html" class="cs-card">
+<a href="move/apply-given-multi-angle-linearisation-to-integrate-cosn-θ-term-by-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply given multi-angle linearisation to integrate cos^n θ term-by-term</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^{\pi/6} 8\cos^3\theta\,d\theta,\quad 8\cos^3\theta = \cos 3\theta + 3\cos\theta\;$</div><div class="cs-line cs-step">$\;\int_0^{\pi/6}(\cos 3\theta + 3\cos\theta)\,d\theta = \left[\tfrac{\sin 3\theta}{3} + 3\sin\theta\right]_0^{\pi/6} = \tfrac{1}{3} + \tfrac{3}{2} = \tfrac{11}{6}\;$</div></div>
   <div class="cs-meta">
@@ -571,7 +606,7 @@ window.MathJax = {
     <span>partial fractions then integrate</span>
   </div>
 </a>
-<a href="move/integrate-each-partial-fraction-term-using-standard-log-and-power-rules.html" class="cs-card">
+<a href="move/integrate-each-partial-fraction-term-using-standard-log-and-power-rules.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate each partial fraction term using standard log and power rules</div>
   <div class="cs-example"><div class="cs-line">$\;\int \left(\dfrac{3}{x+1} + \dfrac{2}{x-1}\right) dx\;$</div><div class="cs-line cs-step">$\;3\ln|x+1| + 2\ln|x-1| + c\;$</div></div>
   <div class="cs-meta">
@@ -586,7 +621,7 @@ window.MathJax = {
     <span class="meta">3 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-trapezium-rule-to-tabulated-ordinates-to-estimate-a-definite-integral.html" class="cs-card">
+<a href="move/apply-trapezium-rule-to-tabulated-ordinates-to-estimate-a-definite-integral.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply trapezium rule to tabulated ordinates to estimate a definite integral</div>
   <div class="cs-example"><div class="cs-line">$\;\int_{0}^{2} f(x)\,dx,\quad h=1,\quad y_0=1,\; y_1=3,\; y_2=5\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{2}\bigl[(1+5)+2(3)\bigr] = \tfrac{1}{2}(12) = 6\;$</div></div>
   <div class="cs-meta">
@@ -594,7 +629,7 @@ window.MathJax = {
     <span>numerical integration</span>
   </div>
 </a>
-<a href="move/set-up-trapezium-rule-strip-width-from-ordinate-count.html" class="cs-card">
+<a href="move/set-up-trapezium-rule-strip-width-from-ordinate-count.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up trapezium rule strip width from ordinate count</div>
   <div class="cs-example"><div class="cs-line">$\;x = 0,\,1,\,2,\,3,\,4 \quad (k = 5 \text{ ordinates})\;$</div><div class="cs-line cs-step">$\;n = 5 - 1 = 4,\quad h = \dfrac{4-0}{4} = 1\;$</div></div>
   <div class="cs-meta">
@@ -602,7 +637,7 @@ window.MathJax = {
     <span>numerical integration</span>
   </div>
 </a>
-<a href="move/set-up-strip-width-and-ordinate-table-for-trapezium-rule.html" class="cs-card">
+<a href="move/set-up-strip-width-and-ordinate-table-for-trapezium-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up strip width and ordinate table for trapezium rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^{3} x^2\,dx,\quad n=3\;$</div><div class="cs-line cs-step">$\;h=1,\quad \text{Area}\approx\tfrac{1}{2}[0+9+2(1+4)]=\tfrac{19}{2}\;$</div></div>
   <div class="cs-meta">
@@ -617,7 +652,7 @@ window.MathJax = {
     <span class="meta">4 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-integration-by-parts-repeatedly-to-reduce-polynomial-exponential.html" class="cs-card">
+<a href="move/apply-integration-by-parts-repeatedly-to-reduce-polynomial-exponential.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply integration by parts repeatedly to reduce polynomial × exponential</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^2 e^x\,dx\;$</div><div class="cs-line cs-step">$\;x^2 e^x - 2\!\int x e^x\,dx = x^2 e^x - 2\bigl(x e^x - e^x\bigr) = (x^2 - 2x + 2)e^x + C\;$</div></div>
   <div class="cs-meta">
@@ -625,7 +660,7 @@ window.MathJax = {
     <span>repeated ibp</span>
   </div>
 </a>
-<a href="move/iterate-ibp-until-the-polynomial-factor-reduces-to-a-constant.html" class="cs-card">
+<a href="move/iterate-ibp-until-the-polynomial-factor-reduces-to-a-constant.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate IBP until the polynomial factor reduces to a constant</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^2 e^x\,dx\;$</div><div class="cs-line cs-step">$\;x^2 e^x - 2\!\int x e^x\,dx = x^2 e^x - 2\bigl(x e^x - e^x\bigr) + C = e^x(x^2 - 2x + 2) + C\;$</div></div>
   <div class="cs-meta">
@@ -633,7 +668,7 @@ window.MathJax = {
     <span>repeated ibp</span>
   </div>
 </a>
-<a href="move/apply-repeated-integration-by-parts-with-u-polynomial-to-drain-its-degree.html" class="cs-card">
+<a href="move/apply-repeated-integration-by-parts-with-u-polynomial-to-drain-its-degree.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply repeated integration by parts with u = polynomial to drain its degree</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^2 e^x\,dx\;$</div><div class="cs-line cs-step">$\;x^2 e^x - 2x e^x + 2e^x + c\;$</div></div>
   <div class="cs-meta">
@@ -641,7 +676,7 @@ window.MathJax = {
     <span>repeated ibp</span>
   </div>
 </a>
-<a href="move/iterate-integration-by-parts-to-eliminate-the-polynomial-factor.html" class="cs-card">
+<a href="move/iterate-integration-by-parts-to-eliminate-the-polynomial-factor.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate integration by parts to eliminate the polynomial factor</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^2 e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;x^2 e^x - 2\!\int x e^x\,dx = x^2 e^x - 2\bigl(xe^x - e^x\bigr) + C = e^x(x^2 - 2x + 2) + C\;$</div></div>
   <div class="cs-meta">
@@ -656,7 +691,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-fundamental-theorem-of-calculus-using-a-given-antiderivative-at-the-stated.html" class="cs-card">
+<a href="move/apply-fundamental-theorem-of-calculus-using-a-given-antiderivative-at-the-stated.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply Fundamental Theorem of Calculus using a given antiderivative at the stated limits</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 xe^{x}\,dx,\quad F(x)=e^{x}(x-1)\;$</div><div class="cs-line cs-step">$\;\big[e^{x}(x-1)\big]_0^1 = e^1(0) - e^0(-1) = 1\;$</div></div>
   <div class="cs-meta">
@@ -671,7 +706,7 @@ window.MathJax = {
     <span class="meta">1 moves · 5 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reverse-the-substitution-to-express-the-antiderivative-in-the-original-variable.html" class="cs-card">
+<a href="move/reverse-the-substitution-to-express-the-antiderivative-in-the-original-variable.html" class="cs-card lazy-tex">
   <div class="cs-name">Reverse the substitution to express the antiderivative in the original variable</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{1}{1+x^2}\,dx = \arctan u + C,\quad u = x\;$</div><div class="cs-line cs-step">$\;\text{Let } u = \sqrt{x},\; \int \frac{2}{1+u^2}\,du = 2\arctan u + C = 2\arctan\!\sqrt{x} + C\;$</div></div>
   <div class="cs-meta">
@@ -686,7 +721,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-upper-minus-lower-between-intersection-limits-to-find-enclosed-area.html" class="cs-card">
+<a href="move/integrate-upper-minus-lower-between-intersection-limits-to-find-enclosed-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate upper-minus-lower between intersection limits to find enclosed area</div>
   <div class="cs-example"><div class="cs-line">$\;y = 4 - x^2,\quad y = x^2,\quad x \in [-1,\,1]\;$</div><div class="cs-line cs-step">$\;A = \int_{-1}^{1}\bigl[(4-x^2)-x^2\bigr]\,dx = \int_{-1}^{1}(4-2x^2)\,dx = \left[4x-\tfrac{2x^3}{3}\right]_{-1}^{1} = \dfrac{20}{3}\;$</div></div>
   <div class="cs-meta">
@@ -701,7 +736,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-integration-limits-to-the-new-variable-to-avoid-back-substitution.html" class="cs-card">
+<a href="move/convert-integration-limits-to-the-new-variable-to-avoid-back-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert integration limits to the new variable to avoid back-substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 2x(x^2+1)^2\,dx,\quad u=x^2+1\;$</div><div class="cs-line cs-step">$\;x=0\Rightarrow u=1,\; x=1\Rightarrow u=2:\quad \int_1^2 u^2\,du = \left[\tfrac{u^3}{3}\right]_1^2 = \tfrac{7}{3}\;$</div></div>
   <div class="cs-meta">
@@ -716,7 +751,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-power-reduction-or-pythagorean-identity-to-linearise-squared-trighyperboli.html" class="cs-card">
+<a href="move/apply-power-reduction-or-pythagorean-identity-to-linearise-squared-trighyperboli.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply power-reduction or Pythagorean identity to linearise squared trig/hyperbolic terms</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos^2 x\, dx\;$</div><div class="cs-line cs-step">$\;\int \tfrac{1}{2}(1+\cos 2x)\, dx = \tfrac{x}{2} + \tfrac{\sin 2x}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -731,7 +766,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cascade-reduction-formula-down-to-a-known-base-case-to-extract-a-numerical-value.html" class="cs-card">
+<a href="move/cascade-reduction-formula-down-to-a-known-base-case-to-extract-a-numerical-value.html" class="cs-card lazy-tex">
   <div class="cs-name">Cascade reduction formula down to a known base case to extract a numerical value</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = nI_{n-1} - e^{-1},\quad I_0 = 1 - e^{-1}\;$</div><div class="cs-line cs-step">$\;I_1 = 1 - 2e^{-1},\quad I_2 = 2(1-2e^{-1}) - e^{-1} = 2 - 5e^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -746,7 +781,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-a-trig-power-as-fn-1f-or-fn-2f²-to-set-up-a-clean-reduction-formula-ibp.html" class="cs-card">
+<a href="move/split-a-trig-power-as-fn-1f-or-fn-2f²-to-set-up-a-clean-reduction-formula-ibp.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a trig power as f^(n-1)·f (or f^(n-2)·f²) to set up a clean reduction-formula IBP</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\,dx\;$</div><div class="cs-line cs-step">$\;I_n = \int_0^{\pi/2} \sin^{n-1}x \cdot \sin x\,dx,\quad u = \sin^{n-1}x,\ dv = \sin x\,dx \Rightarrow I_n = (n-1)\int_0^{\pi/2} \sin^{n-2}x\,\cos^2 x\,dx\;$</div></div>
   <div class="cs-meta">
@@ -761,7 +796,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-fxfx-pattern-to-integrate-as-lnfx.html" class="cs-card">
+<a href="move/recognise-fxfx-pattern-to-integrate-as-lnfx.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise f&#x27;(x)/f(x) pattern to integrate as ln|f(x)|</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{2x}{x^2+1}\,dx\;$</div><div class="cs-line cs-step">$\;f(x)=x^2+1,\; f'(x)=2x \Rightarrow \int \dfrac{f'(x)}{f(x)}\,dx = \ln|x^2+1|+C\;$</div></div>
   <div class="cs-meta">
@@ -776,7 +811,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-a-rational-fraction-term-by-term-into-standard-integrable-pieces.html" class="cs-card">
+<a href="move/split-a-rational-fraction-term-by-term-into-standard-integrable-pieces.html" class="cs-card lazy-tex">
   <div class="cs-name">Split a rational fraction term-by-term into standard integrable pieces</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{u-1}{u^2}\,du\;$</div><div class="cs-line cs-step">$\;\int \left(\frac{1}{u} - u^{-2}\right)du = \ln|u| + \frac{1}{u} + C\;$</div></div>
   <div class="cs-meta">
@@ -791,7 +826,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-integrand-by-linearity-to-reuse-a-known-integral.html" class="cs-card">
+<a href="move/split-integrand-by-linearity-to-reuse-a-known-integral.html" class="cs-card lazy-tex">
   <div class="cs-name">Split integrand by linearity to reuse a known integral</div>
   <div class="cs-example"><div class="cs-line">$\;\int_{1}^{3}\!\frac{7}{x}\,dx,\quad\text{given }\int_{1}^{3}\!\frac{6}{x}\,dx\approx6.59\;$</div><div class="cs-line cs-step">$\;\int_{1}^{3}\!\frac{7}{x}\,dx = \int_{1}^{3}\!\frac{6}{x}\,dx + \int_{1}^{3}\!\frac{1}{x}\,dx = 6.59 + \ln 3\;$</div></div>
   <div class="cs-meta">
@@ -806,7 +841,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-u-axb-to-linearise-composite-integrand.html" class="cs-card">
+<a href="move/substitute-u-axb-to-linearise-composite-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u = ax+b to linearise composite integrand</div>
   <div class="cs-example"><div class="cs-line">$\;\int (3x+1)^4\,dx\;$</div><div class="cs-line cs-step">$\;u=3x+1,\; dx=\tfrac{du}{3} \Rightarrow \tfrac{1}{3}\cdot\tfrac{u^5}{5}+C = \tfrac{(3x+1)^5}{15}+C\;$</div></div>
   <div class="cs-meta">
@@ -821,7 +856,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/simplify-the-integrand-algebraically-before-integrating-to-reduce-term-count-and.html" class="cs-card">
+<a href="move/simplify-the-integrand-algebraically-before-integrating-to-reduce-term-count-and.html" class="cs-card lazy-tex">
   <div class="cs-name">Simplify the integrand algebraically before integrating to reduce term count and complexity</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x^3 + x^2}{x}\,dx\;$</div><div class="cs-line cs-step">$\;\int (x^2 + x)\,dx = \dfrac{x^3}{3} + \dfrac{x^2}{2} + C\;$</div></div>
   <div class="cs-meta">
@@ -836,7 +871,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-ibp-boundary-brackets-at-engineered-limits-to-kill-or-simplify-them.html" class="cs-card">
+<a href="move/evaluate-ibp-boundary-brackets-at-engineered-limits-to-kill-or-simplify-them.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate IBP boundary brackets at engineered limits to kill or simplify them</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\, dx \Rightarrow \bigl[-\sin^{n-1}x\,\cos x\bigr]_0^{\pi/2}\;$</div><div class="cs-line cs-step">$\;x=\tfrac{\pi}{2}:\cos\tfrac{\pi}{2}=0;\quad x=0:\sin^{n-1}0=0 \Rightarrow \bigl[-\sin^{n-1}x\,\cos x\bigr]_0^{\pi/2}=0\;$</div></div>
   <div class="cs-meta">
@@ -851,7 +886,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/anchor-the-recursion-by-evaluating-the-lowest-index-integral-directly.html" class="cs-card">
+<a href="move/anchor-the-recursion-by-evaluating-the-lowest-index-integral-directly.html" class="cs-card lazy-tex">
   <div class="cs-name">Anchor the recursion by evaluating the lowest-index integral directly</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = nI_{n-1},\quad I_0 = \int_0^1 e^{-x}\,dx\;$</div><div class="cs-line cs-step">$\;I_0 = \bigl[-e^{-x}\bigr]_0^1 = 1 - e^{-1} \Rightarrow I_2 = 2I_1 = 2(1\cdot I_0) = 2(1 - e^{-1})\;$</div></div>
   <div class="cs-meta">
@@ -866,7 +901,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collapse-1dydx²-into-a-perfect-square-to-kill-the-arc-length-radical.html" class="cs-card">
+<a href="move/collapse-1dydx²-into-a-perfect-square-to-kill-the-arc-length-radical.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse 1+(dy/dx)² into a perfect square to kill the arc-length radical</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x^2}{2} + \dfrac{1}{2x},\quad \dfrac{dy}{dx} = x - \dfrac{1}{2x^2}\;$</div><div class="cs-line cs-step">$\;1+\left(x - \tfrac{1}{2x^2}\right)^2 = 1 + x^2 - 1 + \tfrac{1}{4x^4} = x^2 + \tfrac{1}{4x^4} = \left(x + \tfrac{1}{2x^2}\right)^2\;$</div></div>
   <div class="cs-meta">
@@ -881,7 +916,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-known-point-into-antiderivative-to-determine-constant-of-integration.html" class="cs-card">
+<a href="move/substitute-known-point-into-antiderivative-to-determine-constant-of-integration.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute known point into antiderivative to determine constant of integration</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = x^2 + 3x + c,\quad f(1) = 7\;$</div><div class="cs-line cs-step">$\;1 + 3 + c = 7 \Rightarrow c = 3\;$</div></div>
   <div class="cs-meta">
@@ -896,7 +931,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/unroll-reduction-formula-iteratively-to-a-base-case.html" class="cs-card">
+<a href="move/unroll-reduction-formula-iteratively-to-a-base-case.html" class="cs-card lazy-tex">
   <div class="cs-name">Unroll reduction formula iteratively to a base case</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \dfrac{n-1}{n}\,I_{n-2},\quad I_0 = \dfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;I_4 = \dfrac{3}{4}\,I_2 = \dfrac{3}{4}\cdot\dfrac{1}{2}\,I_0 = \dfrac{3}{4}\cdot\dfrac{1}{2}\cdot\dfrac{\pi}{2} = \dfrac{3\pi}{16}\;$</div></div>
   <div class="cs-meta">
@@ -911,7 +946,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-integrand-to-a-formula-booklet-standard-form-for-direct-antidifferentiatio.html" class="cs-card">
+<a href="move/match-integrand-to-a-formula-booklet-standard-form-for-direct-antidifferentiatio.html" class="cs-card lazy-tex">
   <div class="cs-name">Match integrand to a formula-booklet standard form for direct antidifferentiation</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 \dfrac{1}{1+x^2}\,dx\;$</div><div class="cs-line cs-step">$\;\bigl[\arctan x\bigr]_0^1 = \arctan 1 - \arctan 0 = \dfrac{\pi}{4}\;$</div></div>
   <div class="cs-meta">
@@ -926,7 +961,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/keep-ibp-role-assignment-consistent-across-repeated-applications-to-close-the-lo.html" class="cs-card">
+<a href="move/keep-ibp-role-assignment-consistent-across-repeated-applications-to-close-the-lo.html" class="cs-card lazy-tex">
   <div class="cs-name">Keep IBP role assignment consistent across repeated applications to close the loop</div>
   <div class="cs-example"><div class="cs-line">$\;I = \int e^{x}\sin x\,dx\;$</div><div class="cs-line cs-step">$\;I = e^{x}\sin x - e^{x}\cos x - I \Rightarrow I = \dfrac{e^{x}(\sin x - \cos x)}{2} + C\;$</div></div>
   <div class="cs-meta">
@@ -941,7 +976,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-power-reduction-identities-to-linearise-trig-powers-for-integration.html" class="cs-card">
+<a href="move/apply-power-reduction-identities-to-linearise-trig-powers-for-integration.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply power-reduction identities to linearise trig powers for integration</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos^2 x\,dx\;$</div><div class="cs-line cs-step">$\;\int \tfrac{1+\cos 2x}{2}\,dx = \tfrac{x}{2} + \tfrac{\sin 2x}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -956,7 +991,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-fx-term-by-term-to-recover-fx-with-constant-of-integration.html" class="cs-card">
+<a href="move/integrate-fx-term-by-term-to-recover-fx-with-constant-of-integration.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate f&#x27;(x) term-by-term to recover f(x) with constant of integration</div>
   <div class="cs-example"><div class="cs-line">$\;f'(x) = 3x^2 - 2x + 1\;$</div><div class="cs-line cs-step">$\;f(x) = x^3 - x^2 + x + c\;$</div></div>
   <div class="cs-meta">
@@ -971,7 +1006,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/classify-ordinates-as-endpoints-vs-interior-to-apply-the-trapezium-rule.html" class="cs-card">
+<a href="move/classify-ordinates-as-endpoints-vs-interior-to-apply-the-trapezium-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Classify ordinates as endpoints vs interior to apply the trapezium rule</div>
   <div class="cs-example"><div class="cs-line">$\;n=4,\; h=0.25,\; y_0=1,\; y_1=2,\; y_2=3,\; y_3=4,\; y_4=5\;$</div><div class="cs-line cs-step">$\;\int_0^1 y\,dx \approx \dfrac{0.25}{2}\bigl[(1+5)+2(2+3+4)\bigr] = 0.125 \times 24 = 3\;$</div></div>
   <div class="cs-meta">
@@ -986,7 +1021,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/flip-integration-limits-to-absorb-a-leading-negative-sign.html" class="cs-card">
+<a href="move/flip-integration-limits-to-absorb-a-leading-negative-sign.html" class="cs-card lazy-tex">
   <div class="cs-name">Flip integration limits to absorb a leading negative sign</div>
   <div class="cs-example"><div class="cs-line">$\;-\int_{4}^{0} u^{1/2}\,du\;$</div><div class="cs-line cs-step">$\;-\int_{4}^{0} u^{1/2}\,du = \int_{0}^{4} u^{1/2}\,du\;$</div></div>
   <div class="cs-meta">
@@ -1001,7 +1036,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-x-limits-to-u-limits-to-keep-the-definite-integral-in-u-space.html" class="cs-card">
+<a href="move/convert-x-limits-to-u-limits-to-keep-the-definite-integral-in-u-space.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert x-limits to u-limits to keep the definite integral in u-space</div>
   <div class="cs-example"><div class="cs-line">$\;\int_{0}^{1} 2x(x^2+1)^3\,dx,\quad u=x^2+1\;$</div><div class="cs-line cs-step">$\;x=0\Rightarrow u=1,\; x=1\Rightarrow u=2:\quad \int_{1}^{2} u^3\,du = \tfrac{15}{4}\;$</div></div>
   <div class="cs-meta">
@@ -1016,7 +1051,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-up-trapezium-rule-by-reading-h-and-labelling-ordinates-correctly.html" class="cs-card">
+<a href="move/set-up-trapezium-rule-by-reading-h-and-labelling-ordinates-correctly.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up trapezium rule by reading h and labelling ordinates correctly</div>
   <div class="cs-example"><div class="cs-line">$\;x: 0,\,1,\,2,\,3;\quad y: 2,\,5,\,4,\,3;\quad n=3,\; h=1\;$</div><div class="cs-line cs-step">$\;\int_0^3 y\,dx \approx \tfrac{1}{2}\bigl[(2+3)+2(5+4)\bigr] = \tfrac{1}{2}(23) = 11.5\;$</div></div>
   <div class="cs-meta">
@@ -1031,7 +1066,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/verify-integrand-sign-on-the-interval-to-remove-absolute-values.html" class="cs-card">
+<a href="move/verify-integrand-sign-on-the-interval-to-remove-absolute-values.html" class="cs-card lazy-tex">
   <div class="cs-name">Verify integrand sign on the interval to remove absolute values</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^2 |x-3|\, dx\;$</div><div class="cs-line cs-step">$\;x-3 < 0 \text{ on } [0,2] \Rightarrow \int_0^2 (3-x)\, dx\;$</div></div>
   <div class="cs-meta">
@@ -1046,7 +1081,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-reverse-power-rule-term-by-term-to-integrate-non-integer-powers.html" class="cs-card">
+<a href="move/apply-reverse-power-rule-term-by-term-to-integrate-non-integer-powers.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply reverse power rule term-by-term to integrate non-integer powers</div>
   <div class="cs-example"><div class="cs-line">$\;\int \sqrt{x}\,dx\;$</div><div class="cs-line cs-step">$\;\int x^{1/2}\,dx = \dfrac{x^{3/2}}{3/2} = \tfrac{2}{3}x^{3/2} + C\;$</div></div>
   <div class="cs-meta">
@@ -1061,7 +1096,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reuse-an-earlier-parts-integral-result-by-matching-structural-form.html" class="cs-card">
+<a href="move/reuse-an-earlier-parts-integral-result-by-matching-structural-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Reuse an earlier part&#x27;s integral result by matching structural form</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \int x e^x\,dx = xe^x - e^x + C.\quad \text{(b)}\ \tfrac{1}{2}y^2 = \int t\,e^t\,dt\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{2}y^2 = te^t - e^t + C \Rightarrow y^2 = 2te^t - 2e^t + A\;$</div></div>
   <div class="cs-meta">
@@ -1076,7 +1111,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/algebraically-pre-process-the-integrand-into-a-sum-of-standard-xn-or-ekx-terms.html" class="cs-card">
+<a href="move/algebraically-pre-process-the-integrand-into-a-sum-of-standard-xn-or-ekx-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Algebraically pre-process the integrand into a sum of standard x^n or e^{kx} terms</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x^2 + 3}{x}\,dx\;$</div><div class="cs-line cs-step">$\;\int \left(x + 3x^{-1}\right)dx = \dfrac{x^2}{2} + 3\ln|x| + C\;$</div></div>
   <div class="cs-meta">
@@ -1091,7 +1126,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/append-c-to-indefinite-integrals-to-capture-the-full-antiderivative-family.html" class="cs-card">
+<a href="move/append-c-to-indefinite-integrals-to-capture-the-full-antiderivative-family.html" class="cs-card lazy-tex">
   <div class="cs-name">Append +C to indefinite integrals to capture the full antiderivative family</div>
   <div class="cs-example"><div class="cs-line">$\;\int 2x\,dx\;$</div><div class="cs-line cs-step">$\;x^2 + C\;$</div></div>
   <div class="cs-meta">
@@ -1106,7 +1141,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assign-u-to-the-algebraic-factor-via-liate-for-integration-by-parts.html" class="cs-card">
+<a href="move/assign-u-to-the-algebraic-factor-via-liate-for-integration-by-parts.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign u to the algebraic factor via LIATE for integration by parts</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^{2x}\,dx\;$</div><div class="cs-line cs-step">$\;u=x,\ \tfrac{dv}{dx}=e^{2x} \Rightarrow \tfrac{x}{2}e^{2x}-\int \tfrac{1}{2}e^{2x}\,dx = \tfrac{x}{2}e^{2x}-\tfrac{1}{4}e^{2x}+C\;$</div></div>
   <div class="cs-meta">
@@ -1121,7 +1156,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/spot-fxfx-or-fxfxn-pattern-to-integrate-by-inspection.html" class="cs-card">
+<a href="move/spot-fxfx-or-fxfxn-pattern-to-integrate-by-inspection.html" class="cs-card lazy-tex">
   <div class="cs-name">Spot f&#x27;(x)/f(x) or f&#x27;(x)·f(x)^n pattern to integrate by inspection</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{2x}{x^2+1}\,dx\;$</div><div class="cs-line cs-step">$\;f=x^2+1,\; f'=2x \Rightarrow \int \dfrac{f'}{f}\,dx = \ln(x^2+1)+C\;$</div></div>
   <div class="cs-meta">
@@ -1136,7 +1171,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-both-sides-of-ddxμyμq-to-obtain-the-general-solution.html" class="cs-card">
+<a href="move/integrate-both-sides-of-ddxμyμq-to-obtain-the-general-solution.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate both sides of d/dx[μy]=μQ to obtain the general solution</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{d}{dx}[e^{2x} y] = e^{x}\;$</div><div class="cs-line cs-step">$\;e^{2x} y = \int e^{x}\,dx + C = e^{x} + C \Rightarrow y = e^{-x} + Ce^{-2x}\;$</div></div>
   <div class="cs-meta">
@@ -1151,7 +1186,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-up-washerdisc-volume-by-squaring-y-to-eliminate-surds.html" class="cs-card">
+<a href="move/set-up-washerdisc-volume-by-squaring-y-to-eliminate-surds.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up washer/disc volume by squaring y to eliminate surds</div>
   <div class="cs-example"><div class="cs-line">$\;V = \pi\int_{0}^{4}\left(3^2 - \left(\sqrt{x}\right)^2\right)dx\;$</div><div class="cs-line cs-step">$\;V = \pi\int_{0}^{4}\left(9 - x\right)dx\;$</div></div>
   <div class="cs-meta">
@@ -1166,7 +1201,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-integral-by-linearity-to-reuse-a-previous-numerical-estimate.html" class="cs-card">
+<a href="move/split-integral-by-linearity-to-reuse-a-previous-numerical-estimate.html" class="cs-card lazy-tex">
   <div class="cs-name">Split integral by linearity to reuse a previous numerical estimate</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^{5} f(x)\,dx \approx 8.3,\quad g(x) = f(x) + 3\;$</div><div class="cs-line cs-step">$\;\int_0^{5} g(x)\,dx = \int_0^{5} f(x)\,dx + 3(5-0) = 8.3 + 15 = 23.3\;$</div></div>
   <div class="cs-meta">
@@ -1181,7 +1216,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/deduce-missing-integration-limit-from-curve-axis-or-curve-domain-constraints.html" class="cs-card">
+<a href="move/deduce-missing-integration-limit-from-curve-axis-or-curve-domain-constraints.html" class="cs-card lazy-tex">
   <div class="cs-name">Deduce missing integration limit from curve-axis or curve-domain constraints</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{x},\quad y\text{-axis},\quad x\text{-axis},\quad x = 4\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow \sqrt{x}=0 \Rightarrow x=0;\quad \text{limits: } [0,\,4]\;$</div></div>
   <div class="cs-meta">
@@ -1196,7 +1231,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pull-constant-multiplier-outside-the-integral-to-simplify-or-reuse-a-known-resul.html" class="cs-card">
+<a href="move/pull-constant-multiplier-outside-the-integral-to-simplify-or-reuse-a-known-resul.html" class="cs-card lazy-tex">
   <div class="cs-name">Pull constant multiplier outside the integral to simplify or reuse a known result</div>
   <div class="cs-example"><div class="cs-line">$\;\int 5x^2\,dx\;$</div><div class="cs-line cs-step">$\;5\int x^2\,dx = 5 \cdot \dfrac{x^3}{3} = \dfrac{5x^3}{3} + C\;$</div></div>
   <div class="cs-meta">
@@ -1211,7 +1246,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-the-integrand-into-power-rule-ready-form-before-integrating.html" class="cs-card">
+<a href="move/rewrite-the-integrand-into-power-rule-ready-form-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite the integrand into power-rule-ready form before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{\sqrt{x}}\,dx\;$</div><div class="cs-line cs-step">$\;\int x^{-1/2}\,dx = \dfrac{x^{1/2}}{1/2} + C = 2\sqrt{x} + C\;$</div></div>
   <div class="cs-meta">
@@ -1226,7 +1261,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-parametric-area-y-dx-into-ydxdtdt-with-sign-aware-limits.html" class="cs-card">
+<a href="move/convert-parametric-area-y-dx-into-ydxdtdt-with-sign-aware-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert parametric area ∫y dx into ∫y(dx/dt)dt with sign-aware limits</div>
   <div class="cs-example"><div class="cs-line">$\;x = 2 - t,\quad y = t^2,\quad 0 \le x \le 2\;$</div><div class="cs-line cs-step">$\;A = \int_{t=2}^{0} t^2(-1)\,dt = \int_{0}^{2} t^2\,dt\;$</div></div>
   <div class="cs-meta">
@@ -1241,7 +1276,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-concavity-and-strip-width-to-judge-and-improve-trapezium-rule-accuracy.html" class="cs-card">
+<a href="move/use-concavity-and-strip-width-to-judge-and-improve-trapezium-rule-accuracy.html" class="cs-card lazy-tex">
   <div class="cs-name">Use concavity and strip-width to judge and improve trapezium-rule accuracy</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{x},\quad x \in [0,4],\quad \text{2 strips}\;$</div><div class="cs-line cs-step">$\;f''(x)<0 \Rightarrow \text{concave down} \Rightarrow \text{chords below curve} \Rightarrow A_{\text{trap}} < A_{\text{true}};\; \text{more strips} \Rightarrow \text{better}\;$</div></div>
   <div class="cs-meta">
@@ -1256,7 +1291,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/repeat-integration-by-parts-n-times-to-eliminate-a-degree-n-polynomial-factor.html" class="cs-card">
+<a href="move/repeat-integration-by-parts-n-times-to-eliminate-a-degree-n-polynomial-factor.html" class="cs-card lazy-tex">
   <div class="cs-name">Repeat integration by parts n times to eliminate a degree-n polynomial factor</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^2 e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;x^2 e^x - 2\!\int x e^x\,dx = x^2 e^x - 2\bigl(x e^x - e^x\bigr) + C = (x^2 - 2x + 2)e^x + C\;$</div></div>
   <div class="cs-meta">
@@ -1271,7 +1306,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-logarithms-via-log-laws-then-exponentiate-or-evaluate-to-simplify.html" class="cs-card">
+<a href="move/combine-logarithms-via-log-laws-then-exponentiate-or-evaluate-to-simplify.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine logarithms via log laws then exponentiate or evaluate to simplify</div>
   <div class="cs-example"><div class="cs-line">$\;\tfrac{1}{2}\ln|y-1| - \tfrac{1}{2}\ln|y+1| = x + C\;$</div><div class="cs-line cs-step">$\;\ln\left|\dfrac{y-1}{y+1}\right| = 2x + K \Rightarrow \dfrac{y-1}{y+1} = A e^{2x}\;$</div></div>
   <div class="cs-meta">
@@ -1286,7 +1321,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-reciprocal-and-root-terms-as-negative-or-fractional-powers-before-integr.html" class="cs-card">
+<a href="move/rewrite-reciprocal-and-root-terms-as-negative-or-fractional-powers-before-integr.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite reciprocal and root terms as negative or fractional powers before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int\!\left(\dfrac{1}{x^2} + \sqrt{x}\right)dx\;$</div><div class="cs-line cs-step">$\;\int\!\left(x^{-2} + x^{1/2}\right)dx = -x^{-1} + \dfrac{2}{3}x^{3/2} + c\;$</div></div>
   <div class="cs-meta">
@@ -1301,7 +1336,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-the-standard-form-remainder-exactly-after-splitting.html" class="cs-card">
+<a href="move/evaluate-the-standard-form-remainder-exactly-after-splitting.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate the standard-form remainder exactly after splitting</div>
   <div class="cs-example"><div class="cs-line">$\;\int_1^2 \frac{1}{x}\,dx = [\ln x]_1^2\;$</div><div class="cs-line cs-step">$\;\ln 2 - \ln 1 = \ln 2\;$</div></div>
   <div class="cs-meta">
@@ -1316,7 +1351,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-term-by-term-using-linearity-and-the-power-rule.html" class="cs-card">
+<a href="move/integrate-term-by-term-using-linearity-and-the-power-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate term-by-term using linearity and the power rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int (3x^2 + 4x - 1)\,dx\;$</div><div class="cs-line cs-step">$\;= x^3 + 2x^2 - x + C\;$</div></div>
   <div class="cs-meta">
@@ -1331,7 +1366,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-roots-and-reciprocals-as-fractional-indices-before-integrating.html" class="cs-card">
+<a href="move/rewrite-roots-and-reciprocals-as-fractional-indices-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite roots and reciprocals as fractional indices before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\displaystyle\int \dfrac{3}{\sqrt{x}}\, dx\;$</div><div class="cs-line cs-step">$\;\int 3x^{-1/2}\, dx = 3 \cdot \dfrac{x^{1/2}}{1/2} + c = 6\sqrt{x} + c\;$</div></div>
   <div class="cs-meta">
@@ -1346,7 +1381,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/subtract-lower-from-upper-to-find-area-between-curves-splitting-where-they-cross.html" class="cs-card">
+<a href="move/subtract-lower-from-upper-to-find-area-between-curves-splitting-where-they-cross.html" class="cs-card lazy-tex">
   <div class="cs-name">Subtract lower from upper to find area between curves, splitting where they cross</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\; y = x,\; x \in [0,2]\;$</div><div class="cs-line cs-step">$\;\text{Cross at } x=0,1;\quad A = \int_0^1 (x - x^2)\,dx + \int_1^2 (x^2 - x)\,dx = \tfrac{1}{6} + \tfrac{5}{6} = 1\;$</div></div>
   <div class="cs-meta">
@@ -1361,7 +1396,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-follow-up-integrand-as-linear-combination-of-original-integrand.html" class="cs-card">
+<a href="move/rewrite-follow-up-integrand-as-linear-combination-of-original-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite follow-up integrand as linear combination of original integrand</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^2 (1 - \ln x)\,dx = 3,\quad \text{find } \int_0^2 (5 + \ln x)\,dx\;$</div><div class="cs-line cs-step">$\;5 + \ln x = 6 - (1 - \ln x) \Rightarrow \int_0^2 (5+\ln x)\,dx = 6(2) - 3 = 9\;$</div></div>
   <div class="cs-meta">
@@ -1376,7 +1411,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-cross-sectional-area-to-volume-via-v-avt.html" class="cs-card">
+<a href="move/convert-cross-sectional-area-to-volume-via-v-avt.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert cross-sectional area to volume via V = A·v·t</div>
   <div class="cs-example"><div class="cs-line">$\;A = 2\,\text{m}^2,\quad v = 3\,\text{m/s},\quad t = 1\,\text{min} = 60\,\text{s}\;$</div><div class="cs-line cs-step">$\;V = A \cdot v \cdot t = 2 \times 3 \times 60 = 360\,\text{m}^3\;$</div></div>
   <div class="cs-meta">
@@ -1391,7 +1426,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/partition-region-using-geometric-boundaries-to-assign-per-piece-integration-limi.html" class="cs-card">
+<a href="move/partition-region-using-geometric-boundaries-to-assign-per-piece-integration-limi.html" class="cs-card lazy-tex">
   <div class="cs-name">Partition region using geometric boundaries to assign per-piece integration limits</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2,\quad y = 2x,\quad y = 3 \quad (\text{intersections at } x=0,1,\sqrt{3})\;$</div><div class="cs-line cs-step">$\;A = \int_0^1 (2x - x^2)\,dx + \int_1^{\sqrt{3}} (3 - x^2)\,dx\;$</div></div>
   <div class="cs-meta">
@@ -1406,7 +1441,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-1x-as-the-logarithmic-special-case-of-integration.html" class="cs-card">
+<a href="move/recognise-1x-as-the-logarithmic-special-case-of-integration.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise 1/x as the logarithmic special case of integration</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{5}{x}\,dx\;$</div><div class="cs-line cs-step">$\;\int 5x^{-1}\,dx = 5\ln|x| + c\;$</div></div>
   <div class="cs-meta">
@@ -1421,7 +1456,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-polynomial-term-by-term-and-evaluate-at-bounds-for-definite-area.html" class="cs-card">
+<a href="move/integrate-polynomial-term-by-term-and-evaluate-at-bounds-for-definite-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate polynomial term-by-term and evaluate at bounds for definite area</div>
   <div class="cs-example"><div class="cs-line">$\;\int_1^2 (3x^2 - 2x)\,dx\;$</div><div class="cs-line cs-step">$\;\left[x^3 - x^2\right]_1^2 = (8-4)-(1-1) = 4\;$</div></div>
   <div class="cs-meta">
@@ -1436,7 +1471,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/distribute-fractional-power-across-polynomial-factor-before-applying-power-rule.html" class="cs-card">
+<a href="move/distribute-fractional-power-across-polynomial-factor-before-applying-power-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Distribute fractional power across polynomial factor before applying power rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int (u+1)\,u^{1/2}\,du\;$</div><div class="cs-line cs-step">$\;\int \bigl(u^{3/2}+u^{1/2}\bigr)\,du = \tfrac{2}{5}u^{5/2}+\tfrac{2}{3}u^{3/2}+C\;$</div></div>
   <div class="cs-meta">
@@ -1451,7 +1486,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-lhs-and-match-coefficients-to-determine-unknown-constant.html" class="cs-card">
+<a href="move/integrate-lhs-and-match-coefficients-to-determine-unknown-constant.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate LHS and match coefficients to determine unknown constant</div>
   <div class="cs-example"><div class="cs-line">$\;\int\!\left(3x + \dfrac{1}{x^2}\right)dx = \dfrac{3}{2}x^2 + \dfrac{k}{x}\;$</div><div class="cs-line cs-step">$\;\int x^{-2}\,dx = -\dfrac{1}{x} = \dfrac{k}{x} \Rightarrow k = -1\;$</div></div>
   <div class="cs-meta">
@@ -1466,7 +1501,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assemble-full-antiderivative-before-applying-definite-limits.html" class="cs-card">
+<a href="move/assemble-full-antiderivative-before-applying-definite-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Assemble full antiderivative before applying definite limits</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 x\,e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;\bigl[x\,e^{x} - e^{x}\bigr]_0^1 = (e - e) - (0 - 1) = 1\;$</div></div>
   <div class="cs-meta">
@@ -1481,7 +1516,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/take-absolute-value-of-negative-definite-integral-to-report-geometric-area.html" class="cs-card">
+<a href="move/take-absolute-value-of-negative-definite-integral-to-report-geometric-area.html" class="cs-card lazy-tex">
   <div class="cs-name">Take absolute value of negative definite integral to report geometric area</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^2 (x^2 - 4)\,dx = -\tfrac{16}{3}\;$</div><div class="cs-line cs-step">$\;\text{Area} = \left|-\tfrac{16}{3}\right| = \tfrac{16}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1496,7 +1531,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-total-area-decomposition-to-replace-awkward-sub-region-with-complement.html" class="cs-card">
+<a href="move/use-total-area-decomposition-to-replace-awkward-sub-region-with-complement.html" class="cs-card lazy-tex">
   <div class="cs-name">Use total-area decomposition to replace awkward sub-region with complement</div>
   <div class="cs-example"><div class="cs-line">$\;R_1 + R_2 = \int_0^1 (x - x^2)\,dx = \tfrac{1}{6},\quad R_1 = \tfrac{(1-m)^3}{6},\quad R_1 = R_2\;$</div><div class="cs-line cs-step">$\;2 \cdot \tfrac{(1-m)^3}{6} = \tfrac{1}{6} \Rightarrow (1-m)^3 = \tfrac{1}{2} \Rightarrow m = 1 - \tfrac{1}{\sqrt[3]{2}}\;$</div></div>
   <div class="cs-meta">
@@ -1511,7 +1546,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/sketch-y-eˣ-by-labelling-intercept-asymptote-and-concavity.html" class="cs-card">
+<a href="move/sketch-y-eˣ-by-labelling-intercept-asymptote-and-concavity.html" class="cs-card lazy-tex">
   <div class="cs-name">Sketch y = eˣ by labelling intercept, asymptote, and concavity</div>
   <div class="cs-example"><div class="cs-line">$\;y = e^x\;$</div><div class="cs-line cs-step">$\;y(0)=1,\quad y''=e^x>0,\quad y\to 0^+\ (x\to -\infty) \Rightarrow \text{intercept }(0,1),\ \text{asymptote }y=0,\ \text{concave up}\;$</div></div>
   <div class="cs-meta">
@@ -1526,7 +1561,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/determine-trapezium-rule-strip-width-h-from-limits-and-ordinate-count.html" class="cs-card">
+<a href="move/determine-trapezium-rule-strip-width-h-from-limits-and-ordinate-count.html" class="cs-card lazy-tex">
   <div class="cs-name">Determine trapezium-rule strip width h from limits and ordinate count</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 f(x)\,dx,\quad x = 0,\, 0.25,\, 0.5,\, 0.75,\, 1\;$</div><div class="cs-line cs-step">$\;n = 5-1 = 4,\quad h = \dfrac{1-0}{4} = 0.25,\quad \dfrac{h}{2} = 0.125\;$</div></div>
   <div class="cs-meta">
@@ -1541,7 +1576,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/determine-trapezium-rule-strip-width-h-from-a-table-of-x-values.html" class="cs-card">
+<a href="move/determine-trapezium-rule-strip-width-h-from-a-table-of-x-values.html" class="cs-card lazy-tex">
   <div class="cs-name">Determine trapezium-rule strip width h from a table of x-values</div>
   <div class="cs-example"><div class="cs-line">$\;x = 1,\, 1.5,\, 2,\, 2.5,\, 3\;$</div><div class="cs-line cs-step">$\;n = 5 - 1 = 4,\quad h = \dfrac{3 - 1}{4} = 0.5\;$</div></div>
   <div class="cs-meta">
@@ -1556,7 +1591,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-1uⁿ-as-uⁿ-to-apply-the-reverse-power-rule.html" class="cs-card">
+<a href="move/rewrite-1uⁿ-as-uⁿ-to-apply-the-reverse-power-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite 1/uⁿ as u⁻ⁿ to apply the reverse power rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{x^3}\,dx\;$</div><div class="cs-line cs-step">$\;\int x^{-3}\,dx = \dfrac{x^{-2}}{-2} + C = -\dfrac{1}{2x^2} + C\;$</div></div>
   <div class="cs-meta">
@@ -1571,7 +1606,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-integral-into-exact-constant-part-and-approximate-function-part.html" class="cs-card">
+<a href="move/split-integral-into-exact-constant-part-and-approximate-function-part.html" class="cs-card lazy-tex">
   <div class="cs-name">Split integral into exact constant part and approximate function part</div>
   <div class="cs-example"><div class="cs-line">$\;\int_{1}^{4} (3 + 2f(x))\,dx,\quad \int_{1}^{4} f(x)\,dx \approx 5.2\;$</div><div class="cs-line cs-step">$\;\int_{1}^{4} 3\,dx + 2\int_{1}^{4} f(x)\,dx = 3(3) + 2(5.2) = 19.4\;$</div></div>
   <div class="cs-meta">
@@ -1586,7 +1621,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/preserve-full-decimal-precision-through-trapezium-rule-arithmetic.html" class="cs-card">
+<a href="move/preserve-full-decimal-precision-through-trapezium-rule-arithmetic.html" class="cs-card lazy-tex">
   <div class="cs-name">Preserve full decimal precision through trapezium-rule arithmetic</div>
   <div class="cs-example"><div class="cs-line">$\;h=0.5,\quad y_0=1.00,\ y_1=1.25,\ y_2=2.00\;$</div><div class="cs-line cs-step">$\;\tfrac{0.5}{2}\bigl(1.00+2.00+2(1.25)\bigr)=0.25\times5.50=1.375\;$</div></div>
   <div class="cs-meta">
@@ -1601,7 +1636,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-boundary-brackets-immediately-after-each-ibp-round.html" class="cs-card">
+<a href="move/evaluate-boundary-brackets-immediately-after-each-ibp-round.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate boundary brackets immediately after each IBP round</div>
   <div class="cs-example"><div class="cs-line">$\;I = \int_0^1 x\,e^x\,dx,\quad u=x,\ dv=e^x\,dx\;$</div><div class="cs-line cs-step">$\;I = [xe^x]_0^1 - \int_0^1 e^x\,dx = e - [e^x]_0^1 = e - (e-1) = 1\;$</div></div>
   <div class="cs-meta">
@@ -1616,7 +1651,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/compute-the-trapezium-rule-bracket-fully-before-multiplying-by-h2.html" class="cs-card">
+<a href="move/compute-the-trapezium-rule-bracket-fully-before-multiplying-by-h2.html" class="cs-card lazy-tex">
   <div class="cs-name">Compute the trapezium-rule bracket fully before multiplying by h/2</div>
   <div class="cs-example"><div class="cs-line">$\;h=1,\quad y_0=1,\; y_1=3,\; y_2=5\;$</div><div class="cs-line cs-step">$\;B = (1+5)+2(3)=12,\quad A \approx \tfrac{1}{2}\times 12 = 6\;$</div></div>
   <div class="cs-meta">
@@ -1631,7 +1666,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/label-sub-integrals-with-letters-to-manage-repeated-ibp-cleanly.html" class="cs-card">
+<a href="move/label-sub-integrals-with-letters-to-manage-repeated-ibp-cleanly.html" class="cs-card lazy-tex">
   <div class="cs-name">Label sub-integrals with letters to manage repeated IBP cleanly</div>
   <div class="cs-example"><div class="cs-line">$\;I = \int_0^1 x^2 e^x\,dx\;$</div><div class="cs-line cs-step">$\;I = e - 2J,\quad J = \int_0^1 x\,e^x\,dx = 1 \Rightarrow I = e - 2\;$</div></div>
   <div class="cs-meta">
@@ -1646,7 +1681,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-coskx-by-reverse-chain-rule-with-1k-factor.html" class="cs-card">
+<a href="move/integrate-coskx-by-reverse-chain-rule-with-1k-factor.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate cos(kx) by reverse chain rule with 1/k factor</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos 3x\,dx\;$</div><div class="cs-line cs-step">$\;\int \cos 3x\,dx = \dfrac{\sin 3x}{3} + C\;$</div></div>
   <div class="cs-meta">
@@ -1661,7 +1696,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-the-show-that-linearised-identity-before-integrating.html" class="cs-card">
+<a href="move/substitute-the-show-that-linearised-identity-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute the show-that linearised identity before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a): } (1+\cos x)^2 = \tfrac{3}{2}+2\cos x+\tfrac{1}{2}\cos 2x\,;\quad \int_0^{\pi}(1+\cos x)^2\,dx\;$</div><div class="cs-line cs-step">$\;\int_0^{\pi}\!\left(\tfrac{3}{2}+2\cos x+\tfrac{1}{2}\cos 2x\right)dx = \left[\tfrac{3}{2}x+2\sin x+\tfrac{1}{4}\sin 2x\right]_0^{\pi} = \dfrac{3\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -1676,7 +1711,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/label-integral-as-i-to-close-cyclic-ibp-algebraically.html" class="cs-card">
+<a href="move/label-integral-as-i-to-close-cyclic-ibp-algebraically.html" class="cs-card lazy-tex">
   <div class="cs-name">Label integral as I to close cyclic IBP algebraically</div>
   <div class="cs-example"><div class="cs-line">$\;I = \int e^{x}\sin x\,dx\;$</div><div class="cs-line cs-step">$\;\text{IBP twice} \Rightarrow I = \tfrac{1}{2}e^{x}(\sin x - \cos x) - I \Rightarrow I = \tfrac{1}{2}e^{x}(\sin x - \cos x) + C\;$</div></div>
   <div class="cs-meta">
@@ -1691,7 +1726,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-positivity-of-one-factor-to-reduce-a-product-equals-zero-to-a-single-equatio.html" class="cs-card">
+<a href="move/use-positivity-of-one-factor-to-reduce-a-product-equals-zero-to-a-single-equatio.html" class="cs-card lazy-tex">
   <div class="cs-name">Use positivity of one factor to reduce a product-equals-zero to a single equation</div>
   <div class="cs-example"><div class="cs-line">$\;e^{2x}\sin x = 0\;$</div><div class="cs-line cs-step">$\;e^{2x} > 0\ \forall x \in \mathbb{R} \Rightarrow \sin x = 0 \Rightarrow x = n\pi,\ n \in \mathbb{Z}\;$</div></div>
   <div class="cs-meta">
@@ -1706,7 +1741,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/convert-cartesian-volume-of-revolution-to-parametric-integral-via-dx-dxdθdθ.html" class="cs-card">
+<a href="move/convert-cartesian-volume-of-revolution-to-parametric-integral-via-dx-dxdθdθ.html" class="cs-card lazy-tex">
   <div class="cs-name">Convert Cartesian volume of revolution to parametric integral via dx = (dx/dθ)dθ</div>
   <div class="cs-example"><div class="cs-line">$\;x = t^2,\; y = t,\quad t \in [0,1]\;$</div><div class="cs-line cs-step">$\;V = \int_0^1 \pi\, y^2\,\frac{dx}{dt}\,dt = \int_0^1 \pi\, t^2 \cdot 2t\, dt = \int_0^1 2\pi t^3\, dt\;$</div></div>
   <div class="cs-meta">
@@ -1721,7 +1756,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-to-displacement-equation-then-isolate-linear-t-term-for-iteration.html" class="cs-card">
+<a href="move/integrate-to-displacement-equation-then-isolate-linear-t-term-for-iteration.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate to displacement equation then isolate linear-T term for iteration</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^T (5 - e^{-t})\,dt = 20\;$</div><div class="cs-line cs-step">$\;5T + e^{-T} - 1 = 20 \Rightarrow T = \tfrac{1}{5}(21 - e^{-T})\;$</div></div>
   <div class="cs-meta">
@@ -1736,7 +1771,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-matching-x-factors-between-integrand-and-dx-after-substitution.html" class="cs-card">
+<a href="move/cancel-matching-x-factors-between-integrand-and-dx-after-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel matching √x factors between integrand and dx after substitution</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{\sqrt{x}\,(1+\sqrt{x})^2}\,dx,\quad u=1+\sqrt{x},\quad dx=2\sqrt{x}\,du\;$</div><div class="cs-line cs-step">$\;\int \dfrac{1}{\sqrt{x}\,u^2}\cdot 2\sqrt{x}\,du = \int 2u^{-2}\,du = -\dfrac{2}{1+\sqrt{x}}+C\;$</div></div>
   <div class="cs-meta">
@@ -1751,7 +1786,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/invert-a-rational-substitution-to-write-x-and-dx-in-terms-of-u.html" class="cs-card">
+<a href="move/invert-a-rational-substitution-to-write-x-and-dx-in-terms-of-u.html" class="cs-card lazy-tex">
   <div class="cs-name">Invert a rational substitution to write x and dx in terms of u</div>
   <div class="cs-example"><div class="cs-line">$\;u = \dfrac{x+1}{x-1}\;$</div><div class="cs-line cs-step">$\;x = \dfrac{u+1}{u-1},\quad dx = \dfrac{-2}{(u-1)^2}\,du\;$</div></div>
   <div class="cs-meta">
@@ -1766,7 +1801,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-polynomial-over-single-power-fraction-into-term-by-term-powers.html" class="cs-card">
+<a href="move/split-polynomial-over-single-power-fraction-into-term-by-term-powers.html" class="cs-card lazy-tex">
   <div class="cs-name">Split polynomial-over-single-power fraction into term-by-term powers</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x^2 + 1}{\sqrt{x}}\,dx\;$</div><div class="cs-line cs-step">$\;\int \left(x^{3/2} + x^{-1/2}\right)dx = \tfrac{2}{5}x^{5/2} + 2x^{1/2} + C\;$</div></div>
   <div class="cs-meta">
@@ -1781,7 +1816,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/square-ex2-via-index-law-to-collapse-to-ex.html" class="cs-card">
+<a href="move/square-ex2-via-index-law-to-collapse-to-ex.html" class="cs-card lazy-tex">
   <div class="cs-name">Square e^{x/2} via index law to collapse to e^x</div>
   <div class="cs-example"><div class="cs-line">$\;\left(e^{x/2}\right)^2\;$</div><div class="cs-line cs-step">$\;e^{x/2 + x/2} = e^x\;$</div></div>
   <div class="cs-meta">
@@ -1796,7 +1831,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-tanax-as-1alncosax-via-ff-recognition.html" class="cs-card">
+<a href="move/integrate-tanax-as-1alncosax-via-ff-recognition.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate tan(ax) as −(1/a)ln|cos(ax)| via f&#x27;/f recognition</div>
   <div class="cs-example"><div class="cs-line">$\;\int \tan(3x)\,dx\;$</div><div class="cs-line cs-step">$\;\int \frac{\sin(3x)}{\cos(3x)}\,dx = -\tfrac{1}{3}\ln|\cos(3x)| + C\;$</div></div>
   <div class="cs-meta">
@@ -1811,7 +1846,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-secondary-linear-shift-to-bypass-partial-fractions-on-repeated-linear-deno.html" class="cs-card">
+<a href="move/apply-secondary-linear-shift-to-bypass-partial-fractions-on-repeated-linear-deno.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply secondary linear shift to bypass partial fractions on repeated linear denominators</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{x+3}{(x+1)^2}\,dx\;$</div><div class="cs-line cs-step">$\;w=x+1:\quad \int \frac{w+2}{w^2}\,dw = \int \left(\frac{1}{w}+\frac{2}{w^2}\right)dw = \ln|x+1|-\frac{2}{x+1}+C\;$</div></div>
   <div class="cs-meta">
@@ -1826,7 +1861,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/double-a-single-revolution-volume-to-model-a-symmetric-composite-solid.html" class="cs-card">
+<a href="move/double-a-single-revolution-volume-to-model-a-symmetric-composite-solid.html" class="cs-card lazy-tex">
   <div class="cs-name">Double a single-revolution volume to model a symmetric composite solid</div>
   <div class="cs-example"><div class="cs-line">$\;V_1 = \pi\int_0^{4} x\,dx = 8\pi\;$</div><div class="cs-line cs-step">$\;V_{\text{total}} = 2V_1 = 16\pi\;$</div></div>
   <div class="cs-meta">
@@ -1841,7 +1876,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-polynomial-over-monomial-fraction-into-separate-power-terms.html" class="cs-card">
+<a href="move/split-polynomial-over-monomial-fraction-into-separate-power-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Split polynomial-over-monomial fraction into separate power terms</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x^2 + 1}{x^3}\,dx\;$</div><div class="cs-line cs-step">$\;\int \left(x^{-1} + x^{-3}\right)dx = \ln|x| - \tfrac{1}{2}x^{-2} + C\;$</div></div>
   <div class="cs-meta">
@@ -1856,7 +1891,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-u-linear-to-convert-surd-integrand-into-polynomial.html" class="cs-card">
+<a href="move/substitute-u-linear-to-convert-surd-integrand-into-polynomial.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute u = √(linear) to convert surd integrand into polynomial</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x}{\sqrt{x+1}}\,dx,\quad u=\sqrt{x+1}\;$</div><div class="cs-line cs-step">$\;\int \dfrac{u^2-1}{u}\cdot 2u\,du = \int 2(u^2-1)\,du = \tfrac{2}{3}u^3 - 2u + C\;$</div></div>
   <div class="cs-meta">
@@ -1871,7 +1906,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/spot-ftn-ft-and-integrate-by-reverse-chain-rule.html" class="cs-card">
+<a href="move/spot-ftn-ft-and-integrate-by-reverse-chain-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Spot [f(t)]^n · f&#x27;(t) and integrate by reverse chain rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int \sin^2 t\,\cos t\,dt\;$</div><div class="cs-line cs-step">$\;\int [\sin t]^2 \cdot (\sin t)'\ dt = \dfrac{\sin^3 t}{3} + C\;$</div></div>
   <div class="cs-meta">
@@ -1886,7 +1921,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-constant-scalar-to-reuse-part-a-antiderivative.html" class="cs-card">
+<a href="move/factor-out-constant-scalar-to-reuse-part-a-antiderivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out constant scalar to reuse part (a) antiderivative</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \int x e^{x^2}\,dx = \tfrac{1}{2}e^{x^2}+C\qquad \text{(b)}\ \int_0^1 5x e^{x^2}\,dx\;$</div><div class="cs-line cs-step">$\;5\int_0^1 x e^{x^2}\,dx = 5\left[\tfrac{1}{2}e^{x^2}\right]_0^1 = \tfrac{5}{2}(e-1)\;$</div></div>
   <div class="cs-meta">
@@ -1901,7 +1936,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/map-cartesian-region-boundaries-to-parameter-t-limits.html" class="cs-card">
+<a href="move/map-cartesian-region-boundaries-to-parameter-t-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Map Cartesian region boundaries to parameter t-limits</div>
   <div class="cs-example"><div class="cs-line">$\;x = \cos t,\; y = \sin t,\; 0 \le t \le \pi\;$</div><div class="cs-line cs-step">$\;y=0 \Rightarrow t=0,\; x=0 \Rightarrow t=\tfrac{\pi}{2} \Rightarrow \int_{0}^{\pi/2} y\,\dfrac{dx}{dt}\,dt\;$</div></div>
   <div class="cs-meta">
@@ -1916,7 +1951,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-unfactored-power-form-when-bounds-give-perfect-square-radicands.html" class="cs-card">
+<a href="move/choose-unfactored-power-form-when-bounds-give-perfect-square-radicands.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose unfactored power form when bounds give perfect-square radicands</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^3 \dfrac{x}{\sqrt{x+1}}\,dx\;$</div><div class="cs-line cs-step">$\;\left[\tfrac{2}{3}(x+1)^{3/2} - 2(x+1)^{1/2}\right]_0^3 = \left(\tfrac{16}{3} - 4\right) - \left(\tfrac{2}{3} - 2\right) = \dfrac{8}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1931,7 +1966,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-ftc-with-part-1-antiderivative-on-a-hence-evaluate-definite-integral.html" class="cs-card">
+<a href="move/apply-ftc-with-part-1-antiderivative-on-a-hence-evaluate-definite-integral.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply FTC with Part 1 antiderivative on a &#x27;Hence evaluate&#x27; definite integral</div>
   <div class="cs-example"><div class="cs-line">$\;F(x) = \tfrac{2}{3}x^{3/2},\quad \int_1^4 \sqrt{x}\,dx\;$</div><div class="cs-line cs-step">$\;\left[\tfrac{2}{3}x^{3/2}\right]_1^4 = \tfrac{2}{3}(8) - \tfrac{2}{3}(1) = \dfrac{14}{3}\;$</div></div>
   <div class="cs-meta">
@@ -1946,7 +1981,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reuse-part-a-antiderivative-inside-fundamental-theorem-for-part-b.html" class="cs-card">
+<a href="move/reuse-part-a-antiderivative-inside-fundamental-theorem-for-part-b.html" class="cs-card lazy-tex">
   <div class="cs-name">Reuse part (a) antiderivative inside Fundamental Theorem for part (b)</div>
   <div class="cs-example"><div class="cs-line">$\;\text{(a)}\ \int x\,e^x\,dx = xe^x - e^x + C\;$</div><div class="cs-line cs-step">$\;\text{(b)}\ \int_0^1 x\,e^x\,dx = \bigl[xe^x - e^x\bigr]_0^1 = (e - e) - (0 - 1) = 1\;$</div></div>
   <div class="cs-meta">
@@ -1961,7 +1996,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-ekx-via-standard-result-with-reciprocal-coefficient-1k.html" class="cs-card">
+<a href="move/integrate-ekx-via-standard-result-with-reciprocal-coefficient-1k.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate e^{kx} via standard result with reciprocal coefficient 1/k</div>
   <div class="cs-example"><div class="cs-line">$\;\int e^{3x}\,dx\;$</div><div class="cs-line cs-step">$\;\dfrac{1}{3}\,e^{3x} + C\;$</div></div>
   <div class="cs-meta">
@@ -1976,7 +2011,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/assign-u-to-the-algebraic-factor-by-liate-priority.html" class="cs-card">
+<a href="move/assign-u-to-the-algebraic-factor-by-liate-priority.html" class="cs-card lazy-tex">
   <div class="cs-name">Assign u to the algebraic factor by LIATE priority</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;u = x,\; dv = e^{x}\,dx \Rightarrow \int x\,e^{x}\,dx = x\,e^{x} - e^{x} + C\;$</div></div>
   <div class="cs-meta">
@@ -1991,7 +2026,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/drop-absolute-value-in-ln-when-domain-forces-positivity.html" class="cs-card">
+<a href="move/drop-absolute-value-in-ln-when-domain-forces-positivity.html" class="cs-card lazy-tex">
   <div class="cs-name">Drop absolute value in ln when domain forces positivity</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{1}{x}\,dx,\quad x>0\;$</div><div class="cs-line cs-step">$\;\ln|x|+C = \ln x + C \quad (\text{since } x>0)\;$</div></div>
   <div class="cs-meta">
@@ -2006,7 +2041,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-squared-exponential-binomial-using-index-law-before-integrating.html" class="cs-card">
+<a href="move/expand-squared-exponential-binomial-using-index-law-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand squared exponential binomial using index law before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int (e^{0.5x} - 2)^2\,dx\;$</div><div class="cs-line cs-step">$\;(e^{0.5x})^2 - 2\cdot 2e^{0.5x} + 4 = e^x - 4e^{0.5x} + 4\;$</div></div>
   <div class="cs-meta">
@@ -2021,7 +2056,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/defer-limit-substitution-until-full-antiderivative-is-found.html" class="cs-card">
+<a href="move/defer-limit-substitution-until-full-antiderivative-is-found.html" class="cs-card lazy-tex">
   <div class="cs-name">Defer limit substitution until full antiderivative is found</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 x\,e^{x}\,dx\;$</div><div class="cs-line cs-step">$\;F(x)=xe^x - e^x \Rightarrow F(1)-F(0)=(e-e)-(-1)=1\;$</div></div>
   <div class="cs-meta">
@@ -2036,7 +2071,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-fractional-negative-power-via-reverse-power-rule.html" class="cs-card">
+<a href="move/integrate-fractional-negative-power-via-reverse-power-rule.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate fractional negative power via reverse power rule</div>
   <div class="cs-example"><div class="cs-line">$\;\int t^{-1/3}\,dt\;$</div><div class="cs-line cs-step">$\;\dfrac{t^{2/3}}{2/3} + C = \dfrac{3}{2}\,t^{2/3} + C\;$</div></div>
   <div class="cs-meta">
@@ -2051,7 +2086,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/find-missing-integration-limit-from-curve-axis-intersection.html" class="cs-card">
+<a href="move/find-missing-integration-limit-from-curve-axis-intersection.html" class="cs-card lazy-tex">
   <div class="cs-name">Find missing integration limit from curve-axis intersection</div>
   <div class="cs-example"><div class="cs-line">$\;y = x^2 - 4,\quad x = 3,\quad y = 0\;$</div><div class="cs-line cs-step">$\;x^2 - 4 = 0 \Rightarrow x = 2 \quad (x>0),\quad \int_{2}^{3}(x^2-4)\,dx\;$</div></div>
   <div class="cs-meta">
@@ -2066,7 +2101,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-improper-rational-fraction-by-numerator-surgery-before-integrating.html" class="cs-card">
+<a href="move/split-improper-rational-fraction-by-numerator-surgery-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Split improper rational fraction by numerator surgery before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{x}{x+1}\,dx\;$</div><div class="cs-line cs-step">$\;\int \left(1 - \frac{1}{x+1}\right)dx = x - \ln|x+1| + C\;$</div></div>
   <div class="cs-meta">
@@ -2081,7 +2116,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-integrand-by-linearity-to-isolate-the-ibp-needing-term.html" class="cs-card">
+<a href="move/split-integrand-by-linearity-to-isolate-the-ibp-needing-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Split integrand by linearity to isolate the IBP-needing term</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\sin^2 x\,dx = \tfrac{1}{2}\int (x - x\cos 2x)\,dx\;$</div><div class="cs-line cs-step">$\;= \tfrac{1}{2}\!\left[\int x\,dx \;-\; \underbrace{\int x\cos 2x\,dx}_{\text{IBP}}\right]\;$</div></div>
   <div class="cs-meta">
@@ -2096,7 +2131,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-linear-over-quadratic-numerator-into-ff-part-plus-constant-part.html" class="cs-card">
+<a href="move/split-linear-over-quadratic-numerator-into-ff-part-plus-constant-part.html" class="cs-card lazy-tex">
   <div class="cs-name">Split linear-over-quadratic numerator into f&#x27;/f part plus constant part</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{3x+4}{x^2+1}\,dx\;$</div><div class="cs-line cs-step">$\;\tfrac{3}{2}\!\int\!\dfrac{2x}{x^2+1}\,dx + 4\!\int\!\dfrac{1}{x^2+1}\,dx = \tfrac{3}{2}\ln(x^2+1) + 4\arctan x + C\;$</div></div>
   <div class="cs-meta">
@@ -2111,7 +2146,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-integral-by-linearity-to-reuse-earlier-part-antiderivative.html" class="cs-card">
+<a href="move/split-integral-by-linearity-to-reuse-earlier-part-antiderivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Split integral by linearity to reuse earlier-part antiderivative</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Given } \int x e^x\,dx = xe^x - e^x.\quad \text{Find } \int_0^1 (2x - xe^x)\,dx.\;$</div><div class="cs-line cs-step">$\;\int_0^1 2x\,dx - \int_0^1 xe^x\,dx = \bigl[x^2\bigr]_0^1 - \bigl[xe^x - e^x\bigr]_0^1 = 1 - (1 - (-1)) = -1\;$</div></div>
   <div class="cs-meta">
@@ -2126,7 +2161,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-ln-1-0-and-ln-e-1-at-integration-limits-to-collapse-log-terms.html" class="cs-card">
+<a href="move/exploit-ln-1-0-and-ln-e-1-at-integration-limits-to-collapse-log-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit ln 1 = 0 and ln e = 1 at integration limits to collapse log terms</div>
   <div class="cs-example"><div class="cs-line">$\;\int_1^e x\ln x\,dx = \left[\tfrac{x^2}{2}\ln x - \tfrac{x^2}{4}\right]_1^e\;$</div><div class="cs-line cs-step">$\;\left(\tfrac{e^2}{2}(1) - \tfrac{e^2}{4}\right) - \left(\tfrac{1}{2}(0) - \tfrac{1}{4}\right) = \dfrac{e^2+1}{4}\;$</div></div>
   <div class="cs-meta">
@@ -2141,7 +2176,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-iterated-ibp-to-reduce-powers-of-ln-x-against-polynomial.html" class="cs-card">
+<a href="move/apply-iterated-ibp-to-reduce-powers-of-ln-x-against-polynomial.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply iterated IBP to reduce powers of ln x against polynomial</div>
   <div class="cs-example"><div class="cs-line">$\;\int x\,(\ln x)^2\,dx\;$</div><div class="cs-line cs-step">$\;\frac{x^2}{2}(\ln x)^2 - \int x\,\ln x\,dx = \frac{x^2}{2}(\ln x)^2 - \frac{x^2}{2}\ln x + \frac{x^2}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -2156,7 +2191,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/swap-integration-limits-to-absorb-a-leading-negative-sign.html" class="cs-card">
+<a href="move/swap-integration-limits-to-absorb-a-leading-negative-sign.html" class="cs-card lazy-tex">
   <div class="cs-name">Swap integration limits to absorb a leading negative sign</div>
   <div class="cs-example"><div class="cs-line">$\;\int_{5}^{2} -f(u)\,du\;$</div><div class="cs-line cs-step">$\;\int_{5}^{2} -f(u)\,du = \int_{2}^{5} f(u)\,du\;$</div></div>
   <div class="cs-meta">
@@ -2171,7 +2206,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-the-polar-area-formula-½r²dθ-with-correct-limits.html" class="cs-card">
+<a href="move/apply-the-polar-area-formula-½r²dθ-with-correct-limits.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply the polar area formula ½∫r²dθ with correct limits</div>
   <div class="cs-example"><div class="cs-line">$\;r = 2\cos\theta,\quad A = ?\;$</div><div class="cs-line cs-step">$\;A = \tfrac{1}{2}\int_{-\pi/2}^{\pi/2}(2\cos\theta)^2\,d\theta = 2\int_{-\pi/2}^{\pi/2}\cos^2\theta\,d\theta = \pi\;$</div></div>
   <div class="cs-meta">
@@ -2186,7 +2221,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/divide-by-inner-linear-coefficient-when-integrating-1axb-forms.html" class="cs-card">
+<a href="move/divide-by-inner-linear-coefficient-when-integrating-1axb-forms.html" class="cs-card lazy-tex">
   <div class="cs-name">Divide by inner linear coefficient when integrating 1/(ax+b) forms</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{3}{2x+1}\,dx\;$</div><div class="cs-line cs-step">$\;\dfrac{3}{2}\ln|2x+1| + C\;$</div></div>
   <div class="cs-meta">
@@ -2201,7 +2236,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-logarithmic-terms-using-log-laws-for-compact-exact-answer.html" class="cs-card">
+<a href="move/combine-logarithmic-terms-using-log-laws-for-compact-exact-answer.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine logarithmic terms using log laws for compact exact answer</div>
   <div class="cs-example"><div class="cs-line">$\;\ln 3 - \ln 4 - \ln 2 + \ln 3\;$</div><div class="cs-line cs-step">$\;2\ln 3 - \ln 8 = \ln 9 - \ln 8 = \ln\!\dfrac{9}{8}\;$</div></div>
   <div class="cs-meta">
@@ -2216,7 +2251,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/annihilate-cosine-and-sine-harmonics-over-a-full-period.html" class="cs-card">
+<a href="move/annihilate-cosine-and-sine-harmonics-over-a-full-period.html" class="cs-card lazy-tex">
   <div class="cs-name">Annihilate cosine and sine harmonics over a full period</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^{2\pi} \left(3 + 2\cos\theta - \sin 2\theta\right) d\theta\;$</div><div class="cs-line cs-step">$\;\cos\theta,\,\sin 2\theta \text{ vanish} \Rightarrow \int_0^{2\pi} 3\, d\theta = 6\pi\;$</div></div>
   <div class="cs-meta">
@@ -2231,7 +2266,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/kill-sinkπ-terms-when-polarintegration-limits-are-multiples-of-π.html" class="cs-card">
+<a href="move/kill-sinkπ-terms-when-polarintegration-limits-are-multiples-of-π.html" class="cs-card lazy-tex">
   <div class="cs-name">Kill sin(kπ) terms when polar/integration limits are multiples of π</div>
   <div class="cs-example"><div class="cs-line">$\;\tfrac{1}{2}\int_0^{2\pi}(1+\cos\theta)^2\,d\theta = \tfrac{1}{2}\Big[\tfrac{3}{2}\theta + 2\sin\theta + \tfrac{1}{4}\sin 2\theta\Big]_0^{2\pi}\;$</div><div class="cs-line cs-step">$\;\sin 2\pi = \sin 4\pi = \sin 0 = 0 \Rightarrow \tfrac{1}{2}\Big[\tfrac{3}{2}(2\pi) - 0\Big] = \tfrac{3\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2246,7 +2281,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-evaluated-definite-integral-to-given-value-to-solve-for-unknown-limit.html" class="cs-card">
+<a href="move/equate-evaluated-definite-integral-to-given-value-to-solve-for-unknown-limit.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate evaluated definite integral to given value to solve for unknown limit</div>
   <div class="cs-example"><div class="cs-line">$\;\int_1^k \frac{1}{x^2}\,dx = \frac{1}{2}\;$</div><div class="cs-line cs-step">$\;\left[-\frac{1}{x}\right]_1^k = -\frac{1}{k}+1 = \frac{1}{2} \Rightarrow k = 2\;$</div></div>
   <div class="cs-meta">
@@ -2261,7 +2296,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/linearise-sin²θ-via-sin²θ-1-cos2θ2-to-integrate.html" class="cs-card">
+<a href="move/linearise-sin²θ-via-sin²θ-1-cos2θ2-to-integrate.html" class="cs-card lazy-tex">
   <div class="cs-name">Linearise sin²θ via sin²θ = (1 − cos2θ)/2 to integrate</div>
   <div class="cs-example"><div class="cs-line">$\;\int \sin^2\theta\,d\theta\;$</div><div class="cs-line cs-step">$\;\int \dfrac{1-\cos 2\theta}{2}\,d\theta = \dfrac{\theta}{2} - \dfrac{\sin 2\theta}{4} + C\;$</div></div>
   <div class="cs-meta">
@@ -2276,7 +2311,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reduce-improper-rational-integrand-by-polynomial-long-division-first.html" class="cs-card">
+<a href="move/reduce-improper-rational-integrand-by-polynomial-long-division-first.html" class="cs-card lazy-tex">
   <div class="cs-name">Reduce improper rational integrand by polynomial long division first</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x^2}{x+1}\,dx\;$</div><div class="cs-line cs-step">$\;\int \left(x - 1 + \dfrac{1}{x+1}\right)dx = \tfrac{1}{2}x^2 - x + \ln|x+1| + C\;$</div></div>
   <div class="cs-meta">
@@ -2291,7 +2326,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-cosθ-against-tanθ-to-reduce-integrand-to-sinθ.html" class="cs-card">
+<a href="move/cancel-cosθ-against-tanθ-to-reduce-integrand-to-sinθ.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel cosθ against tanθ to reduce integrand to sinθ</div>
   <div class="cs-example"><div class="cs-line">$\;\int \cos\theta\,\tan\theta\,d\theta\;$</div><div class="cs-line cs-step">$\;\int \cos\theta \cdot \dfrac{\sin\theta}{\cos\theta}\,d\theta = \int \sin\theta\,d\theta = -\cos\theta + C\;$</div></div>
   <div class="cs-meta">
@@ -2306,7 +2341,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/integrate-both-sides-after-recognising-exact-derivative-lhs.html" class="cs-card">
+<a href="move/integrate-both-sides-after-recognising-exact-derivative-lhs.html" class="cs-card lazy-tex">
   <div class="cs-name">Integrate both sides after recognising exact-derivative LHS</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{d}{dx}\bigl[e^{x}\, y\bigr] = e^{x}\;$</div><div class="cs-line cs-step">$\;e^{x}\, y = \int e^{x}\, dx + C = e^{x} + C \Rightarrow y = 1 + C\,e^{-x}\;$</div></div>
   <div class="cs-meta">
@@ -2321,7 +2356,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/carry-forward-part-a-simplified-1dydx²-into-part-b-surface-area-integral.html" class="cs-card">
+<a href="move/carry-forward-part-a-simplified-1dydx²-into-part-b-surface-area-integral.html" class="cs-card lazy-tex">
   <div class="cs-name">Carry forward part (a) simplified √(1+(dy/dx)²) into part (b) surface area integral</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{9-x^2},\quad \sqrt{1+\left(\tfrac{dy}{dx}\right)^{\!2}} = \dfrac{3}{\sqrt{9-x^2}}\;$</div><div class="cs-line cs-step">$\;S = 2\pi\!\int_0^3 \!\sqrt{9-x^2}\;\cdot\;\dfrac{3}{\sqrt{9-x^2}}\,dx = 2\pi\!\int_0^3 3\,dx = 18\pi\;$</div></div>
   <div class="cs-meta">
@@ -2336,7 +2371,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-linear-numerator-as-afx-b-over-irreducible-quadratic.html" class="cs-card">
+<a href="move/split-linear-numerator-as-afx-b-over-irreducible-quadratic.html" class="cs-card lazy-tex">
   <div class="cs-name">Split linear numerator as A·f&#x27;(x) + B over irreducible quadratic</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{x+3}{x^2+2x+5}\,dx\;$</div><div class="cs-line cs-step">$\;x+3 = \tfrac{1}{2}(2x+2)+2 \Rightarrow \tfrac{1}{2}\ln|x^2+2x+5|+2\int\dfrac{dx}{(x+1)^2+4}\;$</div></div>
   <div class="cs-meta">
@@ -2351,7 +2386,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-x-a-cosh-θ-to-eliminate-x²-a²n2-surds.html" class="cs-card">
+<a href="move/substitute-x-a-cosh-θ-to-eliminate-x²-a²n2-surds.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute x = a cosh θ to eliminate (x² − a²)^{n/2} surds</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{\sqrt{x^2 - 9}}\,dx\;$</div><div class="cs-line cs-step">$\;x = 3\cosh\theta,\; \sqrt{9\cosh^2\theta - 9} = 3\sinh\theta \Rightarrow \int \dfrac{3\sinh\theta}{3\sinh\theta}\,d\theta = \theta + C = \operatorname{arcosh}\!\left(\tfrac{x}{3}\right) + C\;$</div></div>
   <div class="cs-meta">
@@ -2366,7 +2401,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sinⁿx-as-sinⁿ¹x-sinx-to-seed-reduction-by-parts.html" class="cs-card">
+<a href="move/split-sinⁿx-as-sinⁿ¹x-sinx-to-seed-reduction-by-parts.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sinⁿx as sinⁿ⁻¹x · sinx to seed reduction by parts</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int \sin^n x\, dx\;$</div><div class="cs-line cs-step">$\;u = \sin^{n-1}x,\ dv = \sin x\, dx \Rightarrow I_n = -\sin^{n-1}x\cos x + (n-1)\int \sin^{n-2}x\cos^2 x\, dx\;$</div></div>
   <div class="cs-meta">
@@ -2381,7 +2416,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/complete-the-square-to-reach-standard-1u²a²-form.html" class="cs-card">
+<a href="move/complete-the-square-to-reach-standard-1u²a²-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Complete the square to reach standard ∫1/(u²−a²) form</div>
   <div class="cs-example"><div class="cs-line">$\;\int \dfrac{1}{x^2 + 2x - 3}\,dx\;$</div><div class="cs-line cs-step">$\;x^2+2x-3=(x+1)^2-4 \Rightarrow \int \dfrac{du}{u^2-4} = \dfrac{1}{4}\ln\left|\dfrac{x-1}{x+3}\right|+C\;$</div></div>
   <div class="cs-meta">
@@ -2396,7 +2431,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-1-dydx²-over-common-denominator-to-collapse-the-arc-length-integrand.html" class="cs-card">
+<a href="move/combine-1-dydx²-over-common-denominator-to-collapse-the-arc-length-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine 1 + (dy/dx)² over common denominator to collapse the arc-length integrand</div>
   <div class="cs-example"><div class="cs-line">$\;y = \sqrt{4 - x^2},\quad \left(\dfrac{dy}{dx}\right)^2 = \dfrac{x^2}{4 - x^2}\;$</div><div class="cs-line cs-step">$\;1 + \dfrac{x^2}{4-x^2} = \dfrac{4-x^2+x^2}{4-x^2} = \dfrac{4}{4-x^2} \Rightarrow \sqrt{1+(y')^2} = \dfrac{2}{\sqrt{4-x^2}}\;$</div></div>
   <div class="cs-meta">
@@ -2411,7 +2446,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-matching-surd-factors-in-surface-area-integrand-before-integrating.html" class="cs-card">
+<a href="move/cancel-matching-surd-factors-in-surface-area-integrand-before-integrating.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel matching surd factors in surface-area integrand before integrating</div>
   <div class="cs-example"><div class="cs-line">$\;S = 2\pi \int_0^3 \sqrt{9-x^2}\,\cdot\,\dfrac{3}{\sqrt{9-x^2}}\,dx\;$</div><div class="cs-line cs-step">$\;\sqrt{9-x^2}\,\cdot\,\dfrac{3}{\sqrt{9-x^2}} = 3 \Rightarrow S = 2\pi\int_0^3 3\,dx = 18\pi\;$</div></div>
   <div class="cs-meta">
@@ -2426,7 +2461,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-xn-with-surd-to-pair-derivative-factor-into-dv.html" class="cs-card">
+<a href="move/split-xn-with-surd-to-pair-derivative-factor-into-dv.html" class="cs-card lazy-tex">
   <div class="cs-name">Split x^n with surd to pair derivative-factor into dv</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int x^n \sqrt{x^3+1}\,dx = \int x^{n-2} \cdot x^2(x^3+1)^{1/2}\,dx\;$</div><div class="cs-line cs-step">$\;u = x^{n-2},\ dv = x^2(x^3+1)^{1/2}dx \Rightarrow I_n = \tfrac{2}{9}\,x^{n-2}(x^3+1)^{3/2} - \tfrac{2(n-2)}{9}\int x^{n-3}(x^3+1)^{3/2}\,dx\;$</div></div>
   <div class="cs-meta">
@@ -2441,7 +2476,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-x³132-as-x³1x³112-to-recover-i-n-and-i-n-3.html" class="cs-card">
+<a href="move/split-x³132-as-x³1x³112-to-recover-i-n-and-i-n-3.html" class="cs-card lazy-tex">
   <div class="cs-name">Split (x³+1)^{3/2} as (x³+1)·(x³+1)^{1/2} to recover I_n and I_{n-3}</div>
   <div class="cs-example"><div class="cs-line">$\;\int x^{n-3}(x^3+1)^{3/2}\,dx\;$</div><div class="cs-line cs-step">$\;x^{n-3}(x^3+1)(x^3+1)^{1/2} = x^n(x^3+1)^{1/2} + x^{n-3}(x^3+1)^{1/2} \Rightarrow I_n + I_{n-3}\;$</div></div>
   <div class="cs-meta">
@@ -2456,7 +2491,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-derive-a-reduction-formula.html" class="cs-card">
+<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-derive-a-reduction-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sin^n x as sin^(n-1)x · sin x to derive a reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\,dx,\quad u = \sin^{n-1}x,\; dv = \sin x\,dx\;$</div><div class="cs-line cs-step">$\;I_n = \bigl[-\sin^{n-1}x\cos x\bigr]_0^{\pi/2} + (n-1)\!\int_0^{\pi/2}\!\sin^{n-2}x\,(1-\sin^2 x)\,dx \Rightarrow nI_n = (n-1)I_{n-2}\;$</div></div>
   <div class="cs-meta">
@@ -2471,7 +2506,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-residual-integral-as-lower-index-i-k-to-close-reduction-recurrence.html" class="cs-card">
+<a href="move/recognise-residual-integral-as-lower-index-i-k-to-close-reduction-recurrence.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise residual integral as lower-index I_k to close reduction recurrence</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^1 x^n e^{-x}\,dx \xrightarrow{\text{IBP}} -e^{-1} + n\!\int_0^1 x^{n-1}e^{-x}\,dx\;$</div><div class="cs-line cs-step">$\;\int_0^1 x^{n-1}e^{-x}\,dx = I_{n-1} \Rightarrow I_n = nI_{n-1} - e^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -2486,7 +2521,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-cos²x-1sin²x-to-force-self-referencing-reduction.html" class="cs-card">
+<a href="move/substitute-cos²x-1sin²x-to-force-self-referencing-reduction.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute cos²x = 1−sin²x to force self-referencing reduction</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = (n-1)\!\int_0^{\pi/2} \sin^{n-2}x\,\cos^2 x\;dx\;$</div><div class="cs-line cs-step">$\;\cos^2 x = 1-\sin^2 x \Rightarrow I_n = (n-1)(I_{n-2}-I_n) \Rightarrow I_n = \dfrac{n-1}{n}\,I_{n-2}\;$</div></div>
   <div class="cs-meta">
@@ -2501,7 +2536,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/use-the-parametric-ds-element-instead-of-eliminating-the-parameter.html" class="cs-card">
+<a href="move/use-the-parametric-ds-element-instead-of-eliminating-the-parameter.html" class="cs-card lazy-tex">
   <div class="cs-name">Use the parametric ds element instead of eliminating the parameter</div>
   <div class="cs-example"><div class="cs-line">$\;x = \cos t,\; y = \sin t,\; 0 \le t \le \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;ds = \sqrt{(-\sin t)^2 + (\cos t)^2}\,dt = dt \Rightarrow L = \int_0^{\pi/2} dt = \dfrac{\pi}{2}\;$</div></div>
   <div class="cs-meta">
@@ -2516,7 +2551,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-arc-lengthsurface-area-formula-and-collapse-integrand-to-reduction-family.html" class="cs-card">
+<a href="move/apply-arc-lengthsurface-area-formula-and-collapse-integrand-to-reduction-family.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply arc-length/surface-area formula and collapse integrand to reduction family</div>
   <div class="cs-example"><div class="cs-line">$\;y = \ln(\cos x),\quad S = 2\pi\int_0^{\pi/4} y\,\sqrt{1+\left(\tfrac{dy}{dx}\right)^2}\,dx\;$</div><div class="cs-line cs-step">$\;\tfrac{dy}{dx} = -\tan x,\; 1+\tan^2 x = \sec^2 x \Rightarrow S = 2\pi\int_0^{\pi/4} \ln(\cos x)\,\sec x\,dx\;$</div></div>
   <div class="cs-meta">
@@ -2531,7 +2566,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collapse-square-root-of-perfect-square-to-linearise-integrand.html" class="cs-card">
+<a href="move/collapse-square-root-of-perfect-square-to-linearise-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse square root of perfect square to linearise integrand</div>
   <div class="cs-example"><div class="cs-line">$\;1 + \left(\dfrac{dy}{dx}\right)^{\!2} = \dfrac{x^2}{4} + \dfrac{1}{2} + \dfrac{1}{4x^2}\;$</div><div class="cs-line cs-step">$\;\sqrt{\dfrac{x^2}{4} + \dfrac{1}{2} + \dfrac{1}{4x^2}} = \sqrt{\left(\dfrac{x}{2} + \dfrac{1}{2x}\right)^{\!2}} = \dfrac{x}{2} + \dfrac{1}{2x}\;$</div></div>
   <div class="cs-meta">
@@ -2546,7 +2581,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/combine-each-limits-terms-into-one-fraction-before-subtracting.html" class="cs-card">
+<a href="move/combine-each-limits-terms-into-one-fraction-before-subtracting.html" class="cs-card lazy-tex">
   <div class="cs-name">Combine each limit&#x27;s terms into one fraction before subtracting</div>
   <div class="cs-example"><div class="cs-line">$\;F(x)=\dfrac{x^3}{3}-\dfrac{x^2}{2},\quad F\Big|_1^2\;$</div><div class="cs-line cs-step">$\;F(2)=\dfrac{8}{3}-\dfrac{4}{2}=\dfrac{16-12}{6}=\dfrac{4}{6}=\dfrac{2}{3},\quad F(1)=\dfrac{1}{3}-\dfrac{1}{2}=\dfrac{2-3}{6}=-\dfrac{1}{6},\quad F(2)-F(1)=\dfrac{2}{3}+\dfrac{1}{6}=\dfrac{5}{6}\;$</div></div>
   <div class="cs-meta">
@@ -2561,7 +2596,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-ibp-twice-to-recover-the-original-integral-and-solve-algebraically.html" class="cs-card">
+<a href="move/apply-ibp-twice-to-recover-the-original-integral-and-solve-algebraically.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply IBP twice to recover the original integral and solve algebraically</div>
   <div class="cs-example"><div class="cs-line">$\;I = \int e^x \sin x\,dx\;$</div><div class="cs-line cs-step">$\;I = e^x \sin x - e^x \cos x - I \Rightarrow I = \tfrac{1}{2}e^x(\sin x - \cos x) + C\;$</div></div>
   <div class="cs-meta">
@@ -2576,7 +2611,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-set-up-ibp-reduction.html" class="cs-card">
+<a href="move/split-sinn-x-as-sinn-1x-sin-x-to-set-up-ibp-reduction.html" class="cs-card lazy-tex">
   <div class="cs-name">Split sin^n x as sin^(n-1)x · sin x to set up IBP reduction</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\, dx = \int_0^{\pi/2} \sin^{n-1} x \cdot \sin x\, dx\;$</div><div class="cs-line cs-step">$\;u = \sin^{n-1} x,\ dv = \sin x\, dx \Rightarrow I_n = \bigl[-\sin^{n-1} x\cos x\bigr]_0^{\pi/2} + (n{-}1)\!\int_0^{\pi/2} \sin^{n-2} x\cos^2 x\, dx\;$</div></div>
   <div class="cs-meta">
@@ -2591,7 +2626,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/recognise-part-b-integrand-as-i-n-from-part-as-reduction-formula.html" class="cs-card">
+<a href="move/recognise-part-b-integrand-as-i-n-from-part-as-reduction-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Recognise part (b) integrand as I_n from part (a)&#x27;s reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} \sin^n x\, dx,\quad I_n = \tfrac{n-1}{n}\,I_{n-2};\quad S = 2\pi\!\int_0^{\pi/2} \sin^4 x\, dx\;$</div><div class="cs-line cs-step">$\;S = 2\pi\, I_4 = 2\pi \cdot \tfrac{3}{4}\,I_2 = 2\pi \cdot \tfrac{3}{4}\cdot\tfrac{1}{2}\,I_0 = 2\pi \cdot \tfrac{3}{8}\cdot\tfrac{\pi}{2} = \dfrac{3\pi^2}{8}\;$</div></div>
   <div class="cs-meta">
@@ -2606,7 +2641,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/link-arc-length-or-surface-area-integrand-to-a-previously-derived-reduction-form.html" class="cs-card">
+<a href="move/link-arc-length-or-surface-area-integrand-to-a-previously-derived-reduction-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Link arc length or surface area integrand to a previously derived reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;L = \int_0^{\pi/2} x^2 \sin x\, dx,\quad I_n = \int_0^{\pi/2} x^n \sin x\, dx,\; I_2 = \pi - 2\;$</div><div class="cs-line cs-step">$\;L = I_2 = \pi - 2\;$</div></div>
   <div class="cs-meta">
@@ -2621,7 +2656,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-a-surd-numerator-as-radicandsurd-to-close-a-reduction-recurrence.html" class="cs-card">
+<a href="move/rewrite-a-surd-numerator-as-radicandsurd-to-close-a-reduction-recurrence.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite a surd numerator as (radicand)/surd to close a reduction recurrence</div>
   <div class="cs-example"><div class="cs-line">$\;\int_0^1 x^{n-2}\sqrt{a - x^2}\,dx\;$</div><div class="cs-line cs-step">$\;\sqrt{a-x^2} = \dfrac{a-x^2}{\sqrt{a-x^2}} \Rightarrow \int_0^1 \dfrac{x^{n-2}(a-x^2)}{\sqrt{a-x^2}}\,dx = a\,I_{n-2} - I_n\;$</div></div>
   <div class="cs-meta">
@@ -2636,7 +2671,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/iterate-two-step-reduction-formula-down-to-base-case.html" class="cs-card">
+<a href="move/iterate-two-step-reduction-formula-down-to-base-case.html" class="cs-card lazy-tex">
   <div class="cs-name">Iterate two-step reduction formula down to base case</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \tfrac{n-1}{n}\,I_{n-2},\quad I_0 = \tfrac{\pi}{2}\;$</div><div class="cs-line cs-step">$\;I_4 = \tfrac{3}{4}\,I_2 = \tfrac{3}{4}\cdot\tfrac{1}{2}\,I_0 = \tfrac{3}{4}\cdot\tfrac{1}{2}\cdot\tfrac{\pi}{2} = \tfrac{3\pi}{16}\;$</div></div>
   <div class="cs-meta">
@@ -2651,7 +2686,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-x-½cos-θ-to-linearise-14x²-via-sin²θ-identity.html" class="cs-card">
+<a href="move/substitute-x-½cos-θ-to-linearise-14x²-via-sin²θ-identity.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute x = ½cos θ to linearise √(1−4x²) via sin²θ identity</div>
   <div class="cs-example"><div class="cs-line">$\;\int \frac{1}{\sqrt{1-4x^2}}\,dx\;$</div><div class="cs-line cs-step">$\;x=\tfrac{1}{2}\cos\theta,\; dx=-\tfrac{1}{2}\sin\theta\,d\theta,\; \sqrt{1-4x^2}=\sin\theta \Rightarrow \int \frac{-\frac{1}{2}\sin\theta}{\sin\theta}\,d\theta = -\tfrac{1}{2}\theta + C\;$</div></div>
   <div class="cs-meta">
@@ -2666,7 +2701,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/peel-off-one-x-to-pair-with-cosx²-as-exact-derivative.html" class="cs-card">
+<a href="move/peel-off-one-x-to-pair-with-cosx²-as-exact-derivative.html" class="cs-card lazy-tex">
   <div class="cs-name">Peel off one x to pair with cos(x²) as exact derivative</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int x^n \cos(x^2)\, dx\;$</div><div class="cs-line cs-step">$\;\int x^{n-1}\!\cdot\! x\cos(x^2)\, dx,\quad dv = x\cos(x^2)\,dx \Rightarrow v = \tfrac{1}{2}\sin(x^2)\;$</div></div>
   <div class="cs-meta">
@@ -2681,7 +2716,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pick-the-polynomial-factor-as-u-in-ibp-to-drive-a-reduction-formula.html" class="cs-card">
+<a href="move/pick-the-polynomial-factor-as-u-in-ibp-to-drive-a-reduction-formula.html" class="cs-card lazy-tex">
   <div class="cs-name">Pick the polynomial factor as u in IBP to drive a reduction formula</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi} x^n \sin x\, dx\;$</div><div class="cs-line cs-step">$\;u = x^n,\ dv = \sin x\, dx \Rightarrow I_n = [-x^n \cos x]_0^{\pi} + n\!\int_0^{\pi} x^{n-1} \cos x\, dx\;$</div></div>
   <div class="cs-meta">
@@ -2696,7 +2731,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/exploit-vanishing-boundary-terms-at-0-and-π2-in-ibp.html" class="cs-card">
+<a href="move/exploit-vanishing-boundary-terms-at-0-and-π2-in-ibp.html" class="cs-card lazy-tex">
   <div class="cs-name">Exploit vanishing boundary terms at 0 and π/2 in IBP</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = \int_0^{\pi/2} x^n \sin x\, dx\;$</div><div class="cs-line cs-step">$\;I_n = \bigl[-x^n \cos x\bigr]_0^{\pi/2} + n\!\int_0^{\pi/2} x^{n-1}\cos x\, dx = 0 + n\!\int_0^{\pi/2} x^{n-1}\cos x\, dx\;$</div></div>
   <div class="cs-meta">
@@ -2711,7 +2746,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collapse-the-arc-length-surd-into-a-clean-trig-or-hyperbolic-integrand.html" class="cs-card">
+<a href="move/collapse-the-arc-length-surd-into-a-clean-trig-or-hyperbolic-integrand.html" class="cs-card lazy-tex">
   <div class="cs-name">Collapse the arc-length surd into a clean trig or hyperbolic integrand</div>
   <div class="cs-example"><div class="cs-line">$\;y = \ln(\sec x),\quad s = \int_0^{\pi/3}\!\sqrt{1+\left(\tfrac{dy}{dx}\right)^2}\,dx\;$</div><div class="cs-line cs-step">$\;1+\tan^2 x = \sec^2 x \Rightarrow s = \int_0^{\pi/3}\sec x\,dx = \ln(2+\sqrt{3})\;$</div></div>
   <div class="cs-meta">
@@ -2726,7 +2761,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/anchor-reduction-formula-at-base-case-then-iterate-upward.html" class="cs-card">
+<a href="move/anchor-reduction-formula-at-base-case-then-iterate-upward.html" class="cs-card lazy-tex">
   <div class="cs-name">Anchor reduction formula at base case then iterate upward</div>
   <div class="cs-example"><div class="cs-line">$\;I_n = nI_{n-2},\quad I_0 = 1,\quad \text{find } I_4\;$</div><div class="cs-line cs-step">$\;I_0=1,\; I_2=2I_0=2,\; I_4=4I_2=8\;$</div></div>
   <div class="cs-meta">
@@ -2741,7 +2776,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/set-up-arc-length-or-surface-area-integral-via-dydx-substitution.html" class="cs-card">
+<a href="move/set-up-arc-length-or-surface-area-integral-via-dydx-substitution.html" class="cs-card lazy-tex">
   <div class="cs-name">Set up arc-length or surface-area integral via dy/dx substitution</div>
   <div class="cs-example"><div class="cs-line">$\;y = \dfrac{x^2}{4} - \dfrac{\ln x}{2},\quad \dfrac{dy}{dx} = \dfrac{x}{2} - \dfrac{1}{2x}\;$</div><div class="cs-line cs-step">$\;1 + \left(\dfrac{dy}{dx}\right)^{\!2} = 1 + \dfrac{x^2}{4} - \dfrac{1}{2} + \dfrac{1}{4x^2} = \left(\dfrac{x}{2}+\dfrac{1}{2x}\right)^{\!2} \Rightarrow L = \int_1^2 \!\left(\dfrac{x}{2}+\dfrac{1}{2x}\right)dx\;$</div></div>
   <div class="cs-meta">

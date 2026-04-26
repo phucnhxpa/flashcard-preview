@@ -232,7 +232,42 @@ mjx-container[display="true"] { margin: 12px 0 !important; }
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']],
          processEscapes: true, packages: {'[+]': ['ams', 'newcommand', 'noerrors', 'noundefined']} },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    /* Skip .lazy-tex elements during the initial sweep — we'll typeset them
+       lazily as they enter the viewport. Critical for dense cheatsheet pages
+       that contain 1000+ inline math snippets. */
+    ignoreHtmlClass: 'lazy-tex|tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        if (!('IntersectionObserver' in window)) {
+          /* Fallback: typeset everything (may be slow but functional) */
+          document.querySelectorAll('.lazy-tex').forEach(function(el) {
+            el.classList.remove('lazy-tex');
+          });
+          return MathJax.typesetPromise().catch(function(){});
+        }
+        var observer = new IntersectionObserver(function(entries) {
+          var visible = [];
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              var el = e.target;
+              el.classList.remove('lazy-tex');
+              visible.push(el);
+              observer.unobserve(el);
+            }
+          });
+          if (visible.length) {
+            MathJax.typesetPromise(visible).catch(function(){});
+          }
+        }, { rootMargin: '800px' });
+        document.querySelectorAll('.lazy-tex').forEach(function(c) { observer.observe(c); });
+      });
+    }
+  }
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -263,7 +298,7 @@ window.MathJax = {
     <span class="meta">5 moves · 8 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/map-expression-onto-standard-binomial-template-1yn.html" class="cs-card">
+<a href="move/map-expression-onto-standard-binomial-template-1yn.html" class="cs-card lazy-tex">
   <div class="cs-name">Map expression onto standard binomial template (1+y)^n</div>
   <div class="cs-example"><div class="cs-line">$\;(2 + x)^5\;$</div><div class="cs-line cs-step">$\;2^5\!\left(1 + \tfrac{x}{2}\right)^{\!5} = 32\!\left(1 + \tfrac{x}{2}\right)^{\!5}\;$</div></div>
   <div class="cs-meta">
@@ -271,7 +306,7 @@ window.MathJax = {
     <span>template matching</span>
   </div>
 </a>
-<a href="move/match-expression-to-standard-binomial-series-form-1un.html" class="cs-card">
+<a href="move/match-expression-to-standard-binomial-series-form-1un.html" class="cs-card lazy-tex">
   <div class="cs-name">Match expression to standard binomial series form (1+u)^n</div>
   <div class="cs-example"><div class="cs-line">$\;(1+3x)^{-2}\;$</div><div class="cs-line cs-step">$\;n=-2,\; u=3x:\quad 1 + (-2)(3x) + \dfrac{(-2)(-3)}{2!}(3x)^2 + \cdots = 1 - 6x + 27x^2 + \cdots,\;|x|<\tfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -279,7 +314,7 @@ window.MathJax = {
     <span>template matching</span>
   </div>
 </a>
-<a href="move/apply-generalised-binomial-expansion-for-fractional-or-negative-powers.html" class="cs-card">
+<a href="move/apply-generalised-binomial-expansion-for-fractional-or-negative-powers.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply generalised binomial expansion for fractional or negative powers</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{-1}\;$</div><div class="cs-line cs-step">$\;(1+x)^{-1} = 1 - x + x^2 - x^3 + \cdots,\quad |x|<1\;$</div></div>
   <div class="cs-meta">
@@ -287,7 +322,7 @@ window.MathJax = {
     <span>template matching</span>
   </div>
 </a>
-<a href="move/map-expression-to-1yn-template-for-binomial-expansion.html" class="cs-card">
+<a href="move/map-expression-to-1yn-template-for-binomial-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Map expression to (1+y)^n template for binomial expansion</div>
   <div class="cs-example"><div class="cs-line">$\;(1 - 2x)^5,\quad n=5,\ y=-2x\;$</div><div class="cs-line cs-step">$\;1 + 5(-2x) + \tfrac{5 \cdot 4}{2}(-2x)^2 + \cdots = 1 - 10x + 40x^2 - \cdots\;$</div></div>
   <div class="cs-meta">
@@ -295,7 +330,7 @@ window.MathJax = {
     <span>template matching</span>
   </div>
 </a>
-<a href="move/apply-binomial-theorem-directly-in-abn-form.html" class="cs-card">
+<a href="move/apply-binomial-theorem-directly-in-abn-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply binomial theorem directly in (a+b)^n form</div>
   <div class="cs-example"><div class="cs-line">$\;(1 + 2x)^4\;$</div><div class="cs-line cs-step">$\;\binom{4}{0}1^4 + \binom{4}{1}1^3(2x) + \binom{4}{2}1^2(2x)^2 + \binom{4}{3}1(2x)^3 + \binom{4}{4}(2x)^4 = 1 + 8x + 24x^2 + 32x^3 + 16x^4\;$</div></div>
   <div class="cs-meta">
@@ -310,7 +345,7 @@ window.MathJax = {
     <span class="meta">1 moves · 6 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-generalised-binomial-expansion-for-non-positive-integer-index.html" class="cs-card">
+<a href="move/apply-generalised-binomial-expansion-for-non-positive-integer-index.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply generalised binomial expansion for non-positive-integer index</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{-1}\;$</div><div class="cs-line cs-step">$\;(1+x)^{-1} = 1 + (-1)x + \dfrac{(-1)(-2)}{2!}x^2 + \cdots = 1 - x + x^2 - x^3 + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -325,7 +360,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-y1-convergence-condition-into-validity-range-for-x.html" class="cs-card">
+<a href="move/translate-y1-convergence-condition-into-validity-range-for-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate |y|&lt;1 convergence condition into validity range for x</div>
   <div class="cs-example"><div class="cs-line">$\;(1+3x)^{-2}\;$</div><div class="cs-line cs-step">$\;|3x|<1 \Rightarrow |x|<\tfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -340,7 +375,7 @@ window.MathJax = {
     <span class="meta">1 moves · 4 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-expansions-base-to-target-value-to-find-substitution-x.html" class="cs-card">
+<a href="move/equate-expansions-base-to-target-value-to-find-substitution-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate expansion&#x27;s base to target value to find substitution x</div>
   <div class="cs-example"><div class="cs-line">$\;(1+2x)^4 \approx 1 + 8x + 24x^2 + 32x^3,\quad \text{find } 1.02^4\;$</div><div class="cs-line cs-step">$\;1+2x=1.02 \Rightarrow x=0.01;\quad 1+8(0.01)+24(0.0001)+32(0.000001)=1.08243\;$</div></div>
   <div class="cs-meta">
@@ -355,7 +390,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/enumerate-term-pairs-whose-exponents-sum-to-the-target-power.html" class="cs-card">
+<a href="move/enumerate-term-pairs-whose-exponents-sum-to-the-target-power.html" class="cs-card lazy-tex">
   <div class="cs-name">Enumerate term-pairs whose exponents sum to the target power</div>
   <div class="cs-example"><div class="cs-line">$\;(3 + x)(1+x)^5,\quad \text{coeff of } x^3\;$</div><div class="cs-line cs-step">$\;3\binom{5}{3}(1)^2(1)^3 + 1\cdot\binom{5}{2}(1)^3(1)^2 = 30 + 10 = 40\;$</div></div>
   <div class="cs-meta">
@@ -370,7 +405,7 @@ window.MathJax = {
     <span class="meta">1 moves · 3 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/equate-coefficients-of-like-powers-of-x-to-solve-for-unknowns.html" class="cs-card">
+<a href="move/equate-coefficients-of-like-powers-of-x-to-solve-for-unknowns.html" class="cs-card lazy-tex">
   <div class="cs-name">Equate coefficients of like powers of x to solve for unknowns</div>
   <div class="cs-example"><div class="cs-line">$\;(1+kx)^{10} = 1 - 5x + px^2 + \ldots\;$</div><div class="cs-line cs-step">$\;10k = -5 \Rightarrow k = -\tfrac{1}{2},\quad p = 45k^2 = \tfrac{45}{4}\;$</div></div>
   <div class="cs-meta">
@@ -385,7 +420,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-the-leading-constant-to-obtain-standard-1un-form.html" class="cs-card">
+<a href="move/factor-out-the-leading-constant-to-obtain-standard-1un-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out the leading constant to obtain standard (1+u)^n form</div>
   <div class="cs-example"><div class="cs-line">$\;(2+x)^3\;$</div><div class="cs-line cs-step">$\;(2+x)^3 = 2^3\left(1+\dfrac{x}{2}\right)^3 = 8\left(1+\dfrac{x}{2}\right)^3\;$</div></div>
   <div class="cs-meta">
@@ -400,7 +435,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-the-constant-from-abxn-to-reach-1xn-form.html" class="cs-card">
+<a href="move/factor-out-the-constant-from-abxn-to-reach-1xn-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out the constant from (a+bx)^n to reach (1+X)^n form</div>
   <div class="cs-example"><div class="cs-line">$\;(2+x)^{-1}\;$</div><div class="cs-line cs-step">$\;(2+x)^{-1} = 2^{-1}\!\left(1+\tfrac{x}{2}\right)^{-1} = \tfrac{1}{2}\left(1+\tfrac{x}{2}\right)^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -415,7 +450,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/substitute-a-small-rational-x-value-to-link-expansion-to-target-numerical-surd.html" class="cs-card">
+<a href="move/substitute-a-small-rational-x-value-to-link-expansion-to-target-numerical-surd.html" class="cs-card lazy-tex">
   <div class="cs-name">Substitute a small rational x-value to link expansion to target numerical surd</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{1/2} \approx 1 + \tfrac{x}{2} - \tfrac{x^2}{8},\quad \text{approximate } \sqrt{1.02}\;$</div><div class="cs-line cs-step">$\;x = 0.02:\quad 1 + \tfrac{0.02}{2} - \tfrac{(0.02)^2}{8} = 1 + 0.01 - 0.00005 = 1.00995\;$</div></div>
   <div class="cs-meta">
@@ -430,7 +465,7 @@ window.MathJax = {
     <span class="meta">1 moves · 2 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/track-compound-substitution-uax-through-each-binomial-power-separately.html" class="cs-card">
+<a href="move/track-compound-substitution-uax-through-each-binomial-power-separately.html" class="cs-card lazy-tex">
   <div class="cs-name">Track compound substitution u=ax through each binomial power separately</div>
   <div class="cs-example"><div class="cs-line">$\;(1+3x)^{-2},\quad T_k = \frac{(-2)(-3)\cdots(-2-k+1)}{k!}\cdot 3^k\cdot x^k\;$</div><div class="cs-line cs-step">$\;k{=}1:\,(-2)(3)x=-6x;\quad k{=}2:\,\tfrac{(-2)(-3)}{2}\cdot 9x^2=27x^2;\quad k{=}3:\,\tfrac{(-2)(-3)(-4)}{6}\cdot 27x^3=-108x^3\;$</div></div>
   <div class="cs-meta">
@@ -445,7 +480,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/collect-only-required-low-order-terms-from-a-polynomial-times-series-product.html" class="cs-card">
+<a href="move/collect-only-required-low-order-terms-from-a-polynomial-times-series-product.html" class="cs-card lazy-tex">
   <div class="cs-name">Collect only required low-order terms from a polynomial-times-series product</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = (1+2x)(1+x)^{1/2},\quad \text{find coefficient of } x\;$</div><div class="cs-line cs-step">$\;(1+x)^{1/2} = 1 + \tfrac{1}{2}x + \cdots \Rightarrow [x]:\; 1\cdot\tfrac{1}{2} + 2\cdot 1 = \tfrac{5}{2}\;$</div></div>
   <div class="cs-meta">
@@ -460,7 +495,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/treat-composite-second-term-as-single-unit-in-binomial-expansion.html" class="cs-card">
+<a href="move/treat-composite-second-term-as-single-unit-in-binomial-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Treat composite second term as single unit in binomial expansion</div>
   <div class="cs-example"><div class="cs-line">$\;(1+3x)^4\;$</div><div class="cs-line cs-step">$\;T_{r+1}=\binom{4}{r}(3x)^r \Rightarrow 1+12x+54x^2+\cdots\;$</div></div>
   <div class="cs-meta">
@@ -475,7 +510,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/target-a-single-power-via-the-binomial-general-term.html" class="cs-card">
+<a href="move/target-a-single-power-via-the-binomial-general-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Target a single power via the binomial general term</div>
   <div class="cs-example"><div class="cs-line">$\;(1 + 2x)^5,\quad \text{coeff of } x^3\;$</div><div class="cs-line cs-step">$\;T_{4} = \binom{5}{3}(1)^{2}(2x)^{3} = 10 \cdot 8\,x^{3} = 80x^{3}\;$</div></div>
   <div class="cs-meta">
@@ -490,7 +525,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/evaluate-binomial-coefficients-using-the-falling-factorial-shortcut.html" class="cs-card">
+<a href="move/evaluate-binomial-coefficients-using-the-falling-factorial-shortcut.html" class="cs-card lazy-tex">
   <div class="cs-name">Evaluate binomial coefficients using the falling-factorial shortcut</div>
   <div class="cs-example"><div class="cs-line">$\;\dbinom{8}{3}\;$</div><div class="cs-line cs-step">$\;\dfrac{8 \times 7 \times 6}{3!} = \dfrac{336}{6} = 56\;$</div></div>
   <div class="cs-meta">
@@ -505,7 +540,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/apply-binomial-theorem-directly-to-a-two-term-base-with-positive-integer-exponen.html" class="cs-card">
+<a href="move/apply-binomial-theorem-directly-to-a-two-term-base-with-positive-integer-exponen.html" class="cs-card lazy-tex">
   <div class="cs-name">Apply binomial theorem directly to a two-term base with positive integer exponent</div>
   <div class="cs-example"><div class="cs-line">$\;(1 + x)^4\;$</div><div class="cs-line cs-step">$\;\binom{4}{0} + \binom{4}{1}x + \binom{4}{2}x^2 + \binom{4}{3}x^3 + \binom{4}{4}x^4 = 1 + 4x + 6x^2 + 4x^3 + x^4\;$</div></div>
   <div class="cs-meta">
@@ -520,7 +555,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/cancel-shared-powers-of-2-between-coefficient-and-denominator-before-multiplying.html" class="cs-card">
+<a href="move/cancel-shared-powers-of-2-between-coefficient-and-denominator-before-multiplying.html" class="cs-card lazy-tex">
   <div class="cs-name">Cancel shared powers of 2 between coefficient and denominator before multiplying</div>
   <div class="cs-example"><div class="cs-line">$\;\binom{6}{r} \cdot 2^{6-r} \cdot \left(\dfrac{x}{4}\right)^r = \binom{6}{r} \cdot \dfrac{2^{6-r}}{4^r} \cdot x^r\;$</div><div class="cs-line cs-step">$\;\dfrac{2^{6-r}}{4^r} = \dfrac{2^{6-r}}{2^{2r}} = 2^{6-3r}\;$</div></div>
   <div class="cs-meta">
@@ -535,7 +570,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/determine-overunderestimate-by-checking-sign-of-omitted-binomial-tail-terms.html" class="cs-card">
+<a href="move/determine-overunderestimate-by-checking-sign-of-omitted-binomial-tail-terms.html" class="cs-card lazy-tex">
   <div class="cs-name">Determine over/underestimate by checking sign of omitted binomial tail terms</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{6},\quad x=0.1,\quad \text{terms up to } r=2: \; 1+6(0.1)+15(0.01)=1.75\;$</div><div class="cs-line cs-step">$\;r=3,\dots,6:\; \tbinom{6}{r}(0.1)^r > 0 \;\Rightarrow\; \text{all omitted terms positive} \;\Rightarrow\; \text{underestimate}\;$</div></div>
   <div class="cs-meta">
@@ -550,7 +585,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/absorb-the-minus-sign-into-b-when-matching-abn.html" class="cs-card">
+<a href="move/absorb-the-minus-sign-into-b-when-matching-abn.html" class="cs-card lazy-tex">
   <div class="cs-name">Absorb the minus sign into b when matching (a+b)^n</div>
   <div class="cs-example"><div class="cs-line">$\;(1 - x)^5\;$</div><div class="cs-line cs-step">$\;T_{r+1} = \binom{5}{r}(1)^{5-r}(-x)^r = \binom{5}{r}(-1)^r x^r\;$</div></div>
   <div class="cs-meta">
@@ -565,7 +600,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extend-binomial-expansion-one-term-beyond-the-stated-requirement.html" class="cs-card">
+<a href="move/extend-binomial-expansion-one-term-beyond-the-stated-requirement.html" class="cs-card lazy-tex">
   <div class="cs-name">Extend binomial expansion one term beyond the stated requirement</div>
   <div class="cs-example"><div class="cs-line">$\;\dfrac{1}{x}(1+x)^5,\quad \text{expand to } x^2\;$</div><div class="cs-line cs-step">$\;\tfrac{1}{x}\cdot\binom{5}{3}x^3 = \tfrac{1}{x}\cdot 10x^3 = 10x^2\;$</div></div>
   <div class="cs-meta">
@@ -580,7 +615,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/match-x-powers-across-a-linear-times-expansion-product-to-isolate-one-term.html" class="cs-card">
+<a href="move/match-x-powers-across-a-linear-times-expansion-product-to-isolate-one-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Match x-powers across a linear-times-expansion product to isolate one term</div>
   <div class="cs-example"><div class="cs-line">$\;(2x+1)(1+x)^5,\quad (1+x)^5 = 1 + 5x + 10x^2 + \cdots\;$</div><div class="cs-line cs-step">$\;\text{coeff of } x^2\!: \ 2 \cdot [x^1] + 1 \cdot [x^2] = 2(5) + 1(10) = 20\;$</div></div>
   <div class="cs-meta">
@@ -595,7 +630,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/pair-only-the-cross-terms-that-hit-the-target-power.html" class="cs-card">
+<a href="move/pair-only-the-cross-terms-that-hit-the-target-power.html" class="cs-card lazy-tex">
   <div class="cs-name">Pair only the cross-terms that hit the target power</div>
   <div class="cs-example"><div class="cs-line">$\;(3+2x)(1+x)^3,\quad \text{coeff of } x^2\;$</div><div class="cs-line cs-step">$\;3\cdot\binom{3}{2}x^2 + 2x\cdot\binom{3}{1}x \Rightarrow 3(3)+2(3)=15\;$</div></div>
   <div class="cs-meta">
@@ -610,7 +645,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/bundle-negative-sign-and-fractional-coefficient-into-a-single-substitution-varia.html" class="cs-card">
+<a href="move/bundle-negative-sign-and-fractional-coefficient-into-a-single-substitution-varia.html" class="cs-card lazy-tex">
   <div class="cs-name">Bundle negative sign and fractional coefficient into a single substitution variable</div>
   <div class="cs-example"><div class="cs-line">$\;(1 - \tfrac{x}{3})^6,\quad y = -\tfrac{x}{3}\;$</div><div class="cs-line cs-step">$\;1 + \binom{6}{1}y + \binom{6}{2}y^2 = 1 + 6\!\left(-\tfrac{x}{3}\right) + 15\!\left(\tfrac{x^2}{9}\right) = 1 - 2x + \tfrac{5x^2}{3}\;$</div></div>
   <div class="cs-meta">
@@ -625,7 +660,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/translate-x1-binomial-convergence-into-an-interval-for-x.html" class="cs-card">
+<a href="move/translate-x1-binomial-convergence-into-an-interval-for-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Translate |X|&lt;1 binomial convergence into an interval for x</div>
   <div class="cs-example"><div class="cs-line">$\;(1+3x)^{-1}\;$</div><div class="cs-line cs-step">$\;|3x|<1 \Rightarrow |x|<\dfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -640,7 +675,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/extract-a-specific-term-using-the-general-term-formula-cnryr.html" class="cs-card">
+<a href="move/extract-a-specific-term-using-the-general-term-formula-cnryr.html" class="cs-card lazy-tex">
   <div class="cs-name">Extract a specific term using the general-term formula C(n,r)y^r</div>
   <div class="cs-example"><div class="cs-line">$\;\text{Find the coefficient of } x^2 \text{ in } (1+x)^5\;$</div><div class="cs-line cs-step">$\;T_{r+1} = \binom{5}{r}x^r,\; r=2 \Rightarrow \binom{5}{2}x^2 = 10x^2\;$</div></div>
   <div class="cs-meta">
@@ -655,7 +690,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/distribute-prefactor-and-match-x-powers-to-isolate-the-constant-term.html" class="cs-card">
+<a href="move/distribute-prefactor-and-match-x-powers-to-isolate-the-constant-term.html" class="cs-card lazy-tex">
   <div class="cs-name">Distribute prefactor and match x-powers to isolate the constant term</div>
   <div class="cs-example"><div class="cs-line">$\;\left(\frac{1}{x}+\frac{2}{x^2}\right)\!\left(1+\frac{x}{3}\right)^{6}\;$</div><div class="cs-line cs-step">$\;\frac{1}{x}:\,r=1\;\Rightarrow\;\binom{6}{1}\frac{1}{3}=2;\quad \frac{2}{x^2}:\,r=2\;\Rightarrow\;2\binom{6}{2}\frac{1}{9}=\frac{10}{3};\quad \text{sum}=\frac{16}{3}\;$</div></div>
   <div class="cs-meta">
@@ -670,7 +705,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/state-validity-of-binomial-expansion-via-u-1.html" class="cs-card">
+<a href="move/state-validity-of-binomial-expansion-via-u-1.html" class="cs-card lazy-tex">
   <div class="cs-name">State validity of binomial expansion via |u| &lt; 1</div>
   <div class="cs-example"><div class="cs-line">$\;(1 + 3x)^{-2}\;$</div><div class="cs-line cs-step">$\;|3x| < 1 \Rightarrow |x| < \tfrac{1}{3}\;$</div></div>
   <div class="cs-meta">
@@ -685,7 +720,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/separate-sign-coefficient-and-variable-when-expanding-abxn-with-composite-x.html" class="cs-card">
+<a href="move/separate-sign-coefficient-and-variable-when-expanding-abxn-with-composite-x.html" class="cs-card lazy-tex">
   <div class="cs-name">Separate sign, coefficient, and variable when expanding (a+bx)^n with composite X</div>
   <div class="cs-example"><div class="cs-line">$\;(1 - 2x)^{-2}\;$</div><div class="cs-line cs-step">$\;1 + (-2)(-2x) + \tfrac{(-2)(-3)}{2!}(4x^2) + \tfrac{(-2)(-3)(-4)}{3!}(-8x^3) = 1 + 4x + 12x^2 + 32x^3 + \cdots\;$</div></div>
   <div class="cs-meta">
@@ -700,7 +735,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/reshape-fraction-to-power-into-constant-times-1un-template.html" class="cs-card">
+<a href="move/reshape-fraction-to-power-into-constant-times-1un-template.html" class="cs-card lazy-tex">
   <div class="cs-name">Reshape fraction-to-power into constant times (1+u)^n template</div>
   <div class="cs-example"><div class="cs-line">$\;\left(\dfrac{1}{2+x}\right)^3\;$</div><div class="cs-line cs-step">$\;\dfrac{1}{(2+x)^3} = \dfrac{1}{8}\left(1+\dfrac{x}{2}\right)^{-3}\;$</div></div>
   <div class="cs-meta">
@@ -715,7 +750,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/defer-scalar-multiplication-until-after-term-by-term-binomial-expansion.html" class="cs-card">
+<a href="move/defer-scalar-multiplication-until-after-term-by-term-binomial-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Defer scalar multiplication until after term-by-term binomial expansion</div>
   <div class="cs-example"><div class="cs-line">$\;3(1+x)^{-1}\;$</div><div class="cs-line cs-step">$\;(1+x)^{-1} = 1 - x + x^2 - \cdots \Rightarrow 3(1 - x + x^2 - \cdots) = 3 - 3x + 3x^2 - \cdots\;$</div></div>
   <div class="cs-meta">
@@ -730,7 +765,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/binomial-expand-zz-1n-and-pair-symmetric-powers-to-linearise-cosn-θ.html" class="cs-card">
+<a href="move/binomial-expand-zz-1n-and-pair-symmetric-powers-to-linearise-cosn-θ.html" class="cs-card lazy-tex">
   <div class="cs-name">Binomial-expand (z+z^{-1})^n and pair symmetric powers to linearise cos^n θ</div>
   <div class="cs-example"><div class="cs-line">$\;16\cos^4\theta = (z+z^{-1})^4 = z^4 + 4z^2 + 6 + 4z^{-2} + z^{-4}\;$</div><div class="cs-line cs-step">$\;(z^4+z^{-4}) + 4(z^2+z^{-2}) + 6 = 2\cos4\theta + 8\cos2\theta + 6 \Rightarrow \cos^4\theta = \tfrac{1}{8}(\cos4\theta + 4\cos2\theta + 3)\;$</div></div>
   <div class="cs-meta">
@@ -745,7 +780,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/choose-x-to-link-binomial-series-to-target-surd.html" class="cs-card">
+<a href="move/choose-x-to-link-binomial-series-to-target-surd.html" class="cs-card lazy-tex">
   <div class="cs-name">Choose x to link binomial series to target surd</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{1/2} \approx 1 + \tfrac{x}{2} - \tfrac{x^2}{8},\quad |x|<1\;$</div><div class="cs-line cs-step">$\;\sqrt{2} = (1+1)^{1/2}:\; x=1 \text{ fails } |x|<1;\quad \sqrt{\tfrac{3}{2}} = \left(1+\tfrac{1}{2}\right)^{1/2}:\; x=\tfrac{1}{2} \Rightarrow 1+\tfrac{1}{4}-\tfrac{1}{32} = \tfrac{39}{32}\;$</div></div>
   <div class="cs-meta">
@@ -760,7 +795,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/expand-1un-as-generalized-binomial-series-for-fractionalnegative-n.html" class="cs-card">
+<a href="move/expand-1un-as-generalized-binomial-series-for-fractionalnegative-n.html" class="cs-card lazy-tex">
   <div class="cs-name">Expand (1+u)^n as generalized binomial series for fractional/negative n</div>
   <div class="cs-example"><div class="cs-line">$\;(1+x)^{-1}\;$</div><div class="cs-line cs-step">$\;1 + (-1)x + \dfrac{(-1)(-2)}{2!}x^2 + \cdots = 1 - x + x^2 - \cdots\;$</div></div>
   <div class="cs-meta">
@@ -775,7 +810,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/factor-out-leading-constant-to-reach-1xn-standard-form.html" class="cs-card">
+<a href="move/factor-out-leading-constant-to-reach-1xn-standard-form.html" class="cs-card lazy-tex">
   <div class="cs-name">Factor out leading constant to reach (1+X)^n standard form</div>
   <div class="cs-example"><div class="cs-line">$\;(2+x)^{-1}\;$</div><div class="cs-line cs-step">$\;[2(1+\tfrac{x}{2})]^{-1} = \tfrac{1}{2}\left(1+\tfrac{x}{2}\right)^{-1}\;$</div></div>
   <div class="cs-meta">
@@ -790,7 +825,7 @@ window.MathJax = {
     <span class="meta">1 moves · 1 examples</span>
   </div>
   <div class="cs-grid">
-<a href="move/rewrite-quotient-as-product-to-reuse-a-binomial-expansion.html" class="cs-card">
+<a href="move/rewrite-quotient-as-product-to-reuse-a-binomial-expansion.html" class="cs-card lazy-tex">
   <div class="cs-name">Rewrite quotient as product to reuse a binomial expansion</div>
   <div class="cs-example"><div class="cs-line">$\;f(x) = \dfrac{1+3x}{(1+x)^2},\quad (1+x)^{-2} = 1 - 2x + 3x^2 - \dots\;$</div><div class="cs-line cs-step">$\;f(x) = (1+3x)(1-2x+3x^2-\dots) = 1 + x - 3x^2 + \dots\;$</div></div>
   <div class="cs-meta">
