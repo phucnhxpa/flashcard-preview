@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>S1 · ch4 Correlation and regression</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">S1</a><span class="sep">/</span>ch4 Correlation and regression</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 S1 · ch4</div>
+  <h1>Correlation and regression</h1>
+  <p class="lede">Every S1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 14 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 S1 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">14</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">178<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">13<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">12</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">14 questions · 178 marks across 13 papers · <b>19.8%</b> of all unit marks · <b>17.7%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 0 q · 0/0 marks (0.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:0%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">0.0%</div>
+            </div><div class="year-bar" title="2021: 3 q · 45/225 marks (20.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:94%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">20.0%</div>
+            </div><div class="year-bar" title="2022: 4 q · 46/225 marks (20.4% of paper)">
+                <div class="bar-fill ch-bar" style="height:96%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">20.4%</div>
+            </div><div class="year-bar" title="2023: 3 q · 39/225 marks (17.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:81%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">17.3%</div>
+            </div><div class="year-bar" title="2024: 4 q · 48/225 marks (21.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">21.3%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 14 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-calculating-pmcc-from-summary-statistics">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Calculating PMCC from summary statistics</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">14</span><small>×</small></div>
+                    <div class="marks">3-5m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given summary statistics such as Σx, Σy, Σx², Σy², Σxy and n. You must compute Sxx, Syy, Sxy and then the product moment correlation coefficient r.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">49</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">28.6%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">27.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">12.2</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 12 marks">
+                    <div class="bar-fill" style="height:52%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">12</div>
+                </div><div class="year-bar" title="2022: 1 q · 14 marks">
+                    <div class="bar-fill" style="height:61%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 2 q · 23 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">23</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">product moment correlation coefficient</span><span class="chip-trigger">Σx²</span><span class="chip-trigger">Σxy</span><span class="chip-trigger">summary statistics</span><span class="chip-trigger">calculate r</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Data are bivariate and come from a sample of size n</li><li>The PMCC measures linear association only — not causation</li><li>r lies in the interval [-1, 1]; values near ±1 indicate strong linear correlation</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct formula using summary statistics</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the standard and expected method when summary statistics are provided</div>
+                <ol class='cs-steps'><li>Compute Sxx = Σx² − (Σx)²/n</li><li>Compute Syy = Σy² − (Σy)²/n</li><li>Compute Sxy = Σxy − (Σx)(Σy)/n</li><li>Calculate r = Sxy / √(Sxx × Syy)</li><li>Check that −1 ≤ r ≤ 1 as a sanity check</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic, works every time, directly from formula booklet</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Prone to arithmetic errors with large numbers — must be careful with calculator work</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Recover Sxy from given regression coefficient b</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the regression line is already given and you need to find r (e.g. Jun 2021)</div>
+                <ol class='cs-steps'><li>Note that b = Sxy/Sxx, so Sxy = b × Sxx</li><li>Compute Sxx and Syy from summary statistics</li><li>Calculate r = Sxy / √(Sxx × Syy) = (b × Sxx) / √(Sxx × Syy)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Saves time when b is already provided</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only applicable when the regression gradient is given or already calculated</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$S_{xx} = \sum x^2 - \frac{(\sum x)^2}{n}$ (formula booklet)</div><div class="cs-formula">$S_{yy} = \sum y^2 - \frac{(\sum y)^2}{n}$ (formula booklet)</div><div class="cs-formula">$S_{xy} = \sum xy - \frac{(\sum x)(\sum y)}{n}$ (formula booklet)</div><div class="cs-formula">$r = \frac{S_{xy}}{\sqrt{S_{xx} \cdot S_{yy}}}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to divide (Σx)² by n — writing Sxx = Σx² − (Σx)² instead of Σx² − (Σx)²/n</li><li>Mixing up Sxx and Syy or Sxy in the formula</li><li>Arithmetic errors with large squared sums — always double-check on the calculator</li><li>Giving r to insufficient decimal places (typically 3 s.f. or 4 d.p. required)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q2.html">Jan 2024 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q2.html">Jun 2022 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q4.html">Jun 2024 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2024-Q2.html">Oct 2024 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-interpolation-vs-extrapolation-and-reliability-of-predictions">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Interpolation vs extrapolation and reliability of predictions</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">10</span><small>×</small></div>
+                    <div class="marks">2-4m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are asked to use the regression line to predict a value of y for a given x, then comment on whether this prediction is reliable. Or someone (e.g. 'Priya') makes a claim based on a prediction and you must assess it.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">39</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">21.4%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">21.9%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 2 q · 26 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">26</div>
+                </div><div class="year-bar" title="2024: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:50%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">13</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">estimate</span><span class="chip-trigger">predict</span><span class="chip-trigger">reliable</span><span class="chip-trigger">extrapolation</span><span class="chip-trigger">interpolation</span><span class="chip-trigger">within the range</span><span class="chip-trigger">outside the range</span><span class="chip-trigger">Priya claims</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Interpolation (predicting within the observed range of x) is generally reliable if r is strong</li><li>Extrapolation (predicting outside the observed range of x) is unreliable because the linear model may not hold</li><li>The regression line of y on x should only be used to predict y from x, not x from y</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Substitute and comment</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always when asked to predict and comment on reliability</div>
+                <ol class='cs-steps'><li>Substitute the given x-value into the regression equation y = a + bx</li><li>State the predicted value with appropriate units and precision</li><li>Determine whether the x-value lies within the range of the original data</li><li>If within range → interpolation → prediction is reliable (assuming strong correlation)</li><li>If outside range → extrapolation → prediction is unreliable as the linear model may not hold outside the observed range</li><li>If commenting on another person's claim, explicitly state why it is or is not valid</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward and systematic — easy marks if you remember to comment</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Students often forget the comment part and lose marks</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Interpolation: prediction at $x$ within $[x_{\min}, x_{\max}]$ of observed data (MEMORIZE definition)</div><div class="cs-formula">Extrapolation: prediction at $x$ outside $[x_{\min}, x_{\max}]$ of observed data (MEMORIZE definition)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Using the regression line of y on x to predict x from y — this is invalid; you need x on y for that</li><li>Not recognising that x = 0 is often extrapolation (e.g. interpreting the intercept as meaningful when 0 is far from the data range)</li><li>Forgetting to comment on reliability after making the prediction — this is almost always worth a mark</li><li>Saying extrapolation is 'wrong' — it's not wrong, it's unreliable/less reliable</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q6.html">Jan 2022 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q4.html">Jun 2024 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q6.html">Oct 2023 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-interpretation-of-pmcc-and-regression-coefficients-in-context">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Interpretation of PMCC and regression coefficients in context</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">12</span><small>×</small></div>
+                    <div class="marks">2-4m</div>
+                </div>
+            </div>
+            <p class="qt-look">A follow-up part asking you to interpret the value of r, the gradient b, or the intercept a in the context of the problem (e.g. 'interpret the value 0.92 in the context of house prices and floor area').</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">30</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.9%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">15.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 17 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">17</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:76%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">interpret</span><span class="chip-trigger">in context</span><span class="chip-trigger">what does this value mean</span><span class="chip-trigger">describe the correlation</span><span class="chip-trigger">comment on</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Correlation does not imply causation</li><li>The PMCC only measures the strength of linear association</li><li>Interpretations must refer to the actual variables in the question, not just 'x and y'</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Structured interpretation using sign, strength, and context</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always when asked to interpret r</div>
+                <ol class='cs-steps'><li>State the sign: positive r means as x increases, y tends to increase; negative means as x increases, y tends to decrease</li><li>State the strength: |r| close to 1 = strong, close to 0.5 = moderate, close to 0 = weak</li><li>Put it in context: replace 'x' and 'y' with the actual variable names from the question</li><li>Example: 'r = 0.92 indicates a strong positive linear correlation between floor area and house price'</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Covers all marking points systematically</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Students sometimes forget one element (e.g. 'linear' or the context)</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Interpreting gradient b in context</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked what b represents</div>
+                <ol class='cs-steps'><li>State that b represents the change in y for each unit increase in x</li><li>Use the actual variable names and units from the question</li><li>Be careful with scaled variables (e.g. if y is in £1000s, b = 2.5 means £2500 increase per unit increase in x)</li><li>Example: 'For each additional square metre of floor area, the house price increases by approximately £2500'</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and concise</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to forget unit scaling</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$-1 \le r \le 1$ (MEMORIZE)</div><div class="cs-formula">$r = \pm 1$ means perfect linear correlation (MEMORIZE)</div><div class="cs-formula">$r = 0$ means no linear correlation (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Saying 'strong correlation' without specifying 'linear' — examiners want the word 'linear'</li><li>Failing to use the context of the question — writing 'x and y are correlated' instead of naming the actual variables</li><li>Interpreting r close to 0 as 'no relationship' — it only means no LINEAR relationship</li><li>Forgetting unit conversions: if y is in £1000s then b = 3 means £3000 not £3 per unit increase in x</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q5.html">Jan 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q2.html">Jun 2023 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q4.html">Jun 2024 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q6.html">Oct 2023 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-finding-the-least-squares-regression-line-y-on-x">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Finding the least squares regression line y on x</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">14</span><small>×</small></div>
+                    <div class="marks">3-5m</div>
+                </div>
+            </div>
+            <p class="qt-look">After computing Sxx and Sxy (or given them), you must find the equation of the regression line of y on x in the form y = a + bx. Often followed by interpretation of a and b in context.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">25</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">12.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 12 marks">
+                    <div class="bar-fill" style="height:92%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">12</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">regression line</span><span class="chip-trigger">y on x</span><span class="chip-trigger">equation of the line</span><span class="chip-trigger">least squares</span><span class="chip-trigger">predict</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The regression line of y on x is used to predict y from x (y is the response/dependent variable)</li><li>The regression line always passes through the point (x̄, ȳ)</li><li>The model assumes a linear relationship between x and y</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Standard calculation from summary statistics</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you have Σx, Σy, Σx², Σxy and n</div>
+                <ol class='cs-steps'><li>Calculate x̄ = Σx/n and ȳ = Σy/n</li><li>Calculate Sxx = Σx² − (Σx)²/n</li><li>Calculate Sxy = Σxy − (Σx)(Σy)/n</li><li>Compute gradient b = Sxy / Sxx</li><li>Compute intercept a = ȳ − b × x̄</li><li>Write the equation as y = a + bx (or ŷ = a + bx)</li><li>If asked, verify the line passes through (x̄, ȳ)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Completely standard and expected — always gets full marks</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Multiple steps increase risk of arithmetic error</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Using (x̄, ȳ) and one other point to draw/check line</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked to plot the regression line on a scatter diagram</div>
+                <ol class='cs-steps'><li>Calculate (x̄, ȳ) and plot this point</li><li>Substitute another convenient x-value into y = a + bx to get a second point</li><li>Draw a straight line through both points</li><li>Ensure the line extends only within the data range (avoid extrapolation on the plot)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Quick visual check and easy to plot accurately</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only useful for graphical parts, not for calculation marks</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$b = \frac{S_{xy}}{S_{xx}}$ (formula booklet)</div><div class="cs-formula">$a = \bar{y} - b\bar{x}$ (formula booklet)</div><div class="cs-formula">Regression line of $y$ on $x$: $y = a + bx$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Using b = Sxy/Syy instead of b = Sxy/Sxx — the denominator is ALWAYS the S-value for the explanatory variable</li><li>Computing the regression line of x on y when asked for y on x — always check which variable is being predicted</li><li>Rounding b and a too early — keep intermediate values to at least 4 s.f.</li><li>Forgetting to state the equation clearly in the form y = a + bx with numerical values</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q5.html">Jan 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q2.html">Oct 2022 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q2.html">Jun 2023 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q4.html">Jan 2024 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-recovering-summary-statistics-from-given-regression-line">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Recovering summary statistics from given regression line</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">3-4m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given the regression equation and some summary statistics, and must work backwards to find a missing summary statistic (e.g. Σx) or verify a value. Uses the fact that the line passes through (x̄, ȳ).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">16</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.1%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 16 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">16</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">regression line passes through</span><span class="chip-trigger">find Σx</span><span class="chip-trigger">given that the equation is</span><span class="chip-trigger">show that</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The regression line of y on x always passes through the mean point (x̄, ȳ)</li><li>b = Sxy/Sxx and a = ȳ − bx̄ can be used in reverse to recover unknowns</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Use the mean point property</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you know the regression equation and ȳ (or Σy/n) but need x̄ (or Σx)</div>
+                <ol class='cs-steps'><li>Write ȳ = a + b × x̄</li><li>Substitute the known values of a, b, and ȳ</li><li>Solve for x̄</li><li>Recover Σx = n × x̄ if needed</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very quick — just one equation to solve</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only works when the regression equation is fully given</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use b = Sxy/Sxx to recover Sxy</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you know b and Sxx and need Sxy (e.g. to find r)</div>
+                <ol class='cs-steps'><li>Calculate Sxy = b × Sxx</li><li>Then use r = Sxy / √(Sxx × Syy) as needed</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct algebraic manipulation</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires Sxx to be known or calculable</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">The regression line passes through $(\bar{x}, \bar{y})$ (MEMORIZE)</div><div class="cs-formula">$\bar{x} = \frac{\sum x}{n}$, $\bar{y} = \frac{\sum y}{n}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that the regression line passes through (x̄, ȳ) — this is the key property to exploit</li><li>Confusing x̄ with Σx — remember to multiply/divide by n appropriately</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-regression-prediction-vs-identity-line-inequality-problem">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Regression prediction vs identity line (inequality problem)</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">2-3m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are asked to find for which values of the explanatory variable the regression prediction exceeds (or is less than) the actual value, i.e. solve a + bx > x or a + bx < x.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">13</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.1%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">overestimate</span><span class="chip-trigger">underestimate</span><span class="chip-trigger">exceeds</span><span class="chip-trigger">inequality</span><span class="chip-trigger">regression vs actual</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The regression line predicts ŷ = a + bx</li><li>The identity line y = x (or f = p etc.) represents 'prediction equals actual'</li><li>The inequality reverses direction depending on the sign of (b − 1)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Solve the inequality algebraically</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked to find the range of x for which the regression prediction exceeds the actual</div>
+                <ol class='cs-steps'><li>Set up the inequality: a + bx > x (or a + bx < x depending on the question)</li><li>Rearrange: a > x(1 − b) or a < x(1 − b)</li><li>Solve for x, being careful about the direction of the inequality when dividing by (1 − b)</li><li>State the range clearly and check it makes sense in context</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Quick and elegant</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful with inequality direction when dividing by a negative number</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Regression prediction: $\hat{y} = a + bx$ (formula booklet)</div><div class="cs-formula">Identity line: $y = x$ (MEMORIZE for this type of problem)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Reversing the inequality when dividing by a negative quantity (1 − b) when b > 1</li><li>Not linking the algebraic answer back to the context of the problem</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q6.html">Jan 2022 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-effect-of-linear-coding-on-pmcc">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Effect of linear coding on PMCC</div>
+                    <span class="rank-pill">#7</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">2-3m</div>
+                </div>
+            </div>
+            <p class="qt-look">A new variable is defined as a linear transformation of an existing one (e.g. w = 50 − p). You must state the PMCC between the new variable and another, or between the coded and original variable.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.1%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">3.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 6 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">6</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">coding</span><span class="chip-trigger">linear transformation</span><span class="chip-trigger">w = 50 − p</span><span class="chip-trigger">effect on r</span><span class="chip-trigger">new variable</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Linear coding y = a + bx does not change |r|, only changes the sign if b < 0</li><li>If the coding is w = c − p (negative coefficient on p), then r(d, w) = −r(d, p)</li><li>Two variables related by an exact linear equation have r = ±1</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Apply the linear coding rule for PMCC</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When a linear transformation is applied to one or both variables</div>
+                <ol class='cs-steps'><li>Identify the transformation: e.g. w = 50 − p means w = 50 + (−1)p</li><li>The multiplier of p is −1 (negative), so the sign of r is reversed</li><li>Therefore r(d, w) = −r(d, p)</li><li>If asked for r between w and p directly: since w = 50 − p is exact linear, r(w, p) = −1</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very quick — no calculation needed once the rule is known</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to forget the sign-reversal rule under exam pressure</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">If $w = \alpha + \beta p$ then $r(d, w) = \text{sign}(\beta) \times r(d, p)$ (MEMORIZE)</div><div class="cs-formula">If $w = \alpha + \beta p$ is exact (not statistical), then $r(w, p) = \text{sign}(\beta) = \pm 1$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that a negative coefficient in the coding reverses the sign of r</li><li>Thinking that coding changes the magnitude of r — it does NOT; only the sign can change</li><li>Not recognising that w = 50 − p is an exact linear relationship, so r(w, p) = −1 exactly</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-updating-summary-statistics-after-data-correction">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Updating summary statistics after data correction</div>
+                    <span class="rank-pill">#8</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">3-5m</div>
+                </div>
+            </div>
+            <p class="qt-look">A data point is found to be incorrect and is corrected. You must update one or more of: Σx, Σy, Σx², Σy², Σxy, and then recalculate the regression line or PMCC.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">0</div><div class="stat-l">questions in 0 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">0</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">corrected</span><span class="chip-trigger">should have been</span><span class="chip-trigger">updated</span><span class="chip-trigger">recalculate</span><span class="chip-trigger">error in data</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>When only a y-value is corrected, Σx and Σx² (hence Sxx) do not change</li><li>When only an x-value is corrected, Σy and Σy² (hence Syy) do not change</li><li>Updating means: new sum = old sum − old value + new value</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Adjust each affected summary statistic individually</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Whenever a single data point is corrected</div>
+                <ol class='cs-steps'><li>Identify which value changed (x or y or both) and the old and new values</li><li>Update Σy: new Σy = old Σy − old_y + new_y</li><li>Update Σy²: new Σy² = old Σy² − (old_y)² + (new_y)²</li><li>Update Σxy: new Σxy = old Σxy − x × old_y + x × new_y (where x is the unchanged x-value of that data point)</li><li>Note: if only y changed, Σx and Σx² remain the same, so Sxx is unchanged</li><li>Recalculate Sxy, Syy (and Sxx if x also changed) with the new summary statistics</li><li>Recompute b, a, and r as required</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Efficient — avoids recalculating everything from scratch</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful to update every affected sum and not miss one</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Updated $\sum y = \text{old } \sum y - y_{\text{old}} + y_{\text{new}}$ (MEMORIZE)</div><div class="cs-formula">Updated $\sum y^2 = \text{old } \sum y^2 - y_{\text{old}}^2 + y_{\text{new}}^2$ (MEMORIZE)</div><div class="cs-formula">Updated $\sum xy = \text{old } \sum xy - x \cdot y_{\text{old}} + x \cdot y_{\text{new}}$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Changing Sxx when only a y-value was corrected — Sxx does NOT change in this case</li><li>Forgetting to update Σxy as well as Σy and Σy²</li><li>Using the old n when a data point is added/removed (though correction usually keeps n the same)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q6.html">Jan 2022 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$S_{xx} = \sum x^2 - \frac{(\sum x)^2}{n}$ (formula booklet)</li><li>$S_{yy} = \sum y^2 - \frac{(\sum y)^2}{n}$ (formula booklet)</li><li>$S_{xy} = \sum xy - \frac{(\sum x)(\sum y)}{n}$ (formula booklet)</li><li>$r = \frac{S_{xy}}{\sqrt{S_{xx} \cdot S_{yy}}}$ (formula booklet)</li><li>$b = \frac{S_{xy}}{S_{xx}}$, $a = \bar{y} - b\bar{x}$ (formula booklet)</li><li>The regression line of $y$ on $x$ always passes through $(\bar{x}, \bar{y})$ (MEMORIZE)</li><li>Interpolation = within observed range (reliable); Extrapolation = outside observed range (unreliable) (MEMORIZE)</li><li>Linear coding $w = \alpha + \beta p$ does not change $|r|$; sign of $r$ changes if $\beta < 0$ (MEMORIZE)</li><li>Regression of $y$ on $x$ is used to predict $y$ from $x$; regression of $x$ on $y$ is used to predict $x$ from $y$ (MEMORIZE)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Almost every question follows the same skeleton: compute Sxx, Syy, Sxy → find r → find regression line → interpret → predict and comment on reliability. Master this workflow and you can handle any variant.</li><li>Always start by carefully noting n, Σx, Σy, Σx², Σy², Σxy from the question — write them out clearly before computing anything.</li><li>Double-check Sxx, Syy, Sxy calculations: the most common source of lost marks is forgetting to divide (Σx)² by n in the formula Sxx = Σx² − (Σx)²/n.</li><li>When asked to interpret, always use the context of the question (name the actual variables and their units) and include the word 'linear' when describing correlation.</li><li>Always identify whether a prediction involves interpolation or extrapolation — this is almost always asked and is easy marks.</li><li>Know which regression line to use: y on x predicts y from x; x on y predicts x from y. Using the wrong one is a fatal error.</li><li>Keep at least 4 significant figures in intermediate calculations and round only the final answer to the precision requested.</li><li>For coding questions, remember: linear coding does not change |r|; a negative multiplier flips the sign of r.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Write out all given summary statistics at the start and label them clearly — this reduces substitution errors.</li><li>When computing Sxx, Syy, Sxy, use brackets on your calculator: e.g. type (Σx)² ÷ n as a single calculation to avoid premature rounding.</li><li>If your value of r comes out greater than 1 or less than −1, you have made an error — go back and check your Sxx, Syy, Sxy immediately.</li><li>For interpretation marks: always write a full sentence using the variable names from the question (e.g. 'temperature' and 'sales'), include the word 'linear', and describe direction (positive/negative) and strength (strong/moderate/weak).</li><li>When the question says 'comment on the reliability', explicitly state whether it is interpolation or extrapolation, and why this matters.</li><li>Never use the regression line of y on x to predict x — if asked to find x for a given y, either rearrange cautiously (with a comment about limitations) or state that the x on y line is needed.</li><li>In data-correction questions, update each affected sum systematically: Σy, Σy², Σxy — and explicitly note which sums (like Σx, Σx², Sxx) remain unchanged.</li><li>Check your regression equation by substituting x̄ and verifying you get ȳ — this catches errors in a and b quickly.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Calculating PMCC from summary statistics">Calculating PMCC from summary statistics</option><option value="Effect of linear coding on PMCC">Effect of linear coding on PMCC</option><option value="Finding the least squares regression line y on x">Finding the least squares regression line y on x</option><option value="Interpolation vs extrapolation and reliability of predictions">Interpolation vs extrapolation and reliability of predictions</option><option value="Interpretation of PMCC and regression coefficients in context">Interpretation of PMCC and regression coefficients in context</option><option value="Recovering summary statistics from given regression line">Recovering summary statistics from given regression line</option><option value="Regression prediction vs identity line (inequality problem)">Regression prediction vs identity line (inequality problem)</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Interpretation of PMCC and regression coefficients in context">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">17m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-interpretation-of-pmcc-and-regression-coefficients-in-context">Interpretation of PMCC and regression coefficients in context</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Recovering summary statistics from given regression line">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">16m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-recovering-summary-statistics-from-given-regression-line">Recovering summary statistics from given regression line</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Calculating PMCC from summary statistics">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-calculating-pmcc-from-summary-statistics">Calculating PMCC from summary statistics</a><div class="qtype-freeform">correlation and regression line</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Effect of linear coding on PMCC">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-effect-of-linear-coding-on-pmcc">Effect of linear coding on PMCC</a><div class="qtype-freeform">PMCC and linear coding</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Regression prediction vs identity line (inequality problem)">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q6</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-regression-prediction-vs-identity-line-inequality-problem">Regression prediction vs identity line (inequality problem)</a><div class="qtype-freeform">correlation regression line analysis</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Calculating PMCC from summary statistics">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-calculating-pmcc-from-summary-statistics">Calculating PMCC from summary statistics</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding the least squares regression line y on x">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-the-least-squares-regression-line-y-on-x">Finding the least squares regression line y on x</a><div class="qtype-freeform">correlation and regression line</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Interpolation vs extrapolation and reliability of predictions">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-interpolation-vs-extrapolation-and-reliability-of-predictions">Interpolation vs extrapolation and reliability of predictions</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Interpretation of PMCC and regression coefficients in context">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q2</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-interpretation-of-pmcc-and-regression-coefficients-in-context">Interpretation of PMCC and regression coefficients in context</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Interpolation vs extrapolation and reliability of predictions">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-interpolation-vs-extrapolation-and-reliability-of-predictions">Interpolation vs extrapolation and reliability of predictions</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Calculating PMCC from summary statistics">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-calculating-pmcc-from-summary-statistics">Calculating PMCC from summary statistics</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Finding the least squares regression line y on x">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q4</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-finding-the-least-squares-regression-line-y-on-x">Finding the least squares regression line y on x</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Interpolation vs extrapolation and reliability of predictions">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q4</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-interpolation-vs-extrapolation-and-reliability-of-predictions">Interpolation vs extrapolation and reliability of predictions</a><div class="qtype-freeform">correlation and regression analysis</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Calculating PMCC from summary statistics">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-calculating-pmcc-from-summary-statistics">Calculating PMCC from summary statistics</a><div class="qtype-freeform">correlation and regression line</div></td>
+            <td><a class="qlink" href="q-Oct_2024-Q2.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

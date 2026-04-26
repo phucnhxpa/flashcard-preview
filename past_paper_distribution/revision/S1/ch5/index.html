@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>S1 · ch5 Discrete random variables</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">S1</a><span class="sep">/</span>ch5 Discrete random variables</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 S1 · ch5</div>
+  <h1>Discrete random variables</h1>
+  <p class="lede">Every S1 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 13 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 S1 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">13</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">162<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">12<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">12</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">13 questions · 162 marks across 13 papers · <b>18.0%</b> of all unit marks · <b>16.5%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 0 q · 0/0 marks (0.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:0%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">0.0%</div>
+            </div><div class="year-bar" title="2021: 3 q · 45/225 marks (20.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">20.0%</div>
+            </div><div class="year-bar" title="2022: 4 q · 45/225 marks (20.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">20.0%</div>
+            </div><div class="year-bar" title="2023: 3 q · 36/225 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:80%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">16.0%</div>
+            </div><div class="year-bar" title="2024: 3 q · 36/225 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:80%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">16.0%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 13 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-cumulative-distribution-function-cdf-and-extracting-probabilities">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Cumulative distribution function (CDF) and extracting probabilities</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">7</span><small>×</small></div>
+                    <div class="marks">3-5m (within a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given F(x) in a table or asked to construct F(x). May be asked to find P(X ≤ c), P(X > c), P(a < X ≤ b) from the CDF, or to extract P(X=x) from the CDF.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">64</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">46.2%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">39.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.7</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 4 marks">
+                    <div class="bar-fill" style="height:11%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">4</div>
+                </div><div class="year-bar" title="2023: 2 q · 24 marks">
+                    <div class="bar-fill" style="height:67%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">24</div>
+                </div><div class="year-bar" title="2024: 3 q · 36 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">36</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">cumulative distribution function</span><span class="chip-trigger">F(x)</span><span class="chip-trigger">P(X ≤</span><span class="chip-trigger">P(X ></span><span class="chip-trigger">find F(x)</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>F(x) = P(X ≤ x) is the cumulative distribution function</li><li>F is a step function for discrete random variables: F(x) increases only at the values X can take</li><li>F(largest value) = 1 and F(value below smallest) = 0</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Build CDF from probability table</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you have P(X=x) for all x and need to construct F(x)</div>
+                <ol class='cs-steps'><li>List all values of X in increasing order: x₁ < x₂ < ... < xₙ</li><li>F(x₁) = P(X = x₁)</li><li>F(x₂) = P(X = x₁) + P(X = x₂)</li><li>Continue: F(xᵢ) = F(xᵢ₋₁) + P(X = xᵢ)</li><li>Verify F(xₙ) = 1</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward cumulative addition</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful with running totals; check final value is 1</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Extract P(X=x) from given CDF</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When F(x) is given in a table and you need individual probabilities</div>
+                <ol class='cs-steps'><li>For the smallest value x₁: P(X = x₁) = F(x₁)</li><li>For subsequent values: P(X = xᵢ) = F(xᵢ) − F(xᵢ₋₁)</li><li>Verify all extracted probabilities sum to 1</li><li>Use these to compute E(X), Var(X) etc.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Clean extraction of probabilities; avoids mistakes in probability tables</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must correctly identify the 'previous' CDF value — easy to subtract wrong pair</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$F(x) = P(X \le x) = \sum_{t \le x} P(X = t)$ (MEMORIZE)</div><div class="cs-formula">$P(X = x) = F(x) - F(x^{-})$ where $x^{-}$ is the previous value in the support (MEMORIZE)</div><div class="cs-formula">$P(a < X \le b) = F(b) - F(a)$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that P(X = x₁) = F(x₁) for the smallest value (not F(x₁) − F(x₀) since F(x₀)=0)</li><li>Subtracting CDF values in the wrong order: P(X=x) = F(x) − F(previous), not F(previous) − F(x)</li><li>Confusing P(X ≤ c) with P(X < c): for discrete variables, P(X < c) = F(c) − P(X=c)</li><li>Forgetting that F(0) includes P(X=0) plus all probabilities for values below 0</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2022-Q4.html">Oct 2022 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q3.html">Jan 2023 Q3</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q5.html">Jun 2023 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q2.html">Jun 2024 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q5.html">Oct 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q7.html">Jan 2024 Q7</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2024-Q6.html">Oct 2024 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-probability-distributions-from-two-independent-observations-functions-of-two-variables">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Probability distributions from two independent observations / functions of two variables</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">5-7m (within a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">Two independent observations X₁ and X₂ are taken from the same distribution. You find P(X₁ < X₂), P(X₁ + X₂ = k), or the distribution of X₁·X₂, T = X₁ + X₂, etc.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">28</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">15.4%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">17.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">14.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 14 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2022: 1 q · 14 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">two independent observations</span><span class="chip-trigger">X₁ and X₂</span><span class="chip-trigger">P(X₁ < X₂)</span><span class="chip-trigger">product</span><span class="chip-trigger">sum of two observations</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>X₁ and X₂ are independent and identically distributed</li><li>Independence means P(X₁=a, X₂=b) = P(X₁=a)·P(X₂=b)</li><li>Enumerate all possible (X₁, X₂) pairs systematically</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Full enumeration via sample space grid</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the number of values is small (e.g. X takes 3-5 values)</div>
+                <ol class='cs-steps'><li>List all possible pairs (x₁, x₂) in a grid/table</li><li>For each pair, compute the joint probability P(X₁=x₁)·P(X₂=x₂)</li><li>Identify which pairs satisfy the required condition (e.g. X₁ < X₂)</li><li>Sum the relevant joint probabilities</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Thorough and transparent — hard to miss cases</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Time-consuming for large support; must be systematic to avoid missing pairs</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Symmetry argument for P(X₁ < X₂)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When X₁ and X₂ are i.i.d. and you need P(X₁ < X₂)</div>
+                <ol class='cs-steps'><li>By symmetry: P(X₁ < X₂) = P(X₁ > X₂)</li><li>Compute P(X₁ = X₂) = Σ[P(X=x)]²</li><li>Then P(X₁ < X₂) = [1 − P(X₁ = X₂)] / 2</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very fast; avoids full enumeration</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only works for the specific comparison X₁ < X₂ with i.i.d. variables</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$P(X_1 = a, X_2 = b) = P(X_1 = a) \cdot P(X_2 = b)$ for independent $X_1, X_2$ (MEMORIZE)</div><div class="cs-formula">$P(X_1 < X_2) = \frac{1 - P(X_1 = X_2)}{2}$ for i.i.d. variables (MEMORIZE — useful shortcut)</div><div class="cs-formula">$P(X_1 = X_2) = \sum [P(X = x)]^2$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to halve P(X₁≠X₂) when using symmetry to find P(X₁ < X₂)</li><li>Missing pairs in the enumeration — use a systematic grid</li><li>Confusing P(X₁ ≤ X₂) with P(X₁ < X₂) — the former includes P(X₁ = X₂)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2022-Q7.html">Oct 2022 Q7</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q5.html">Oct 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-probability-distribution-table-with-unknown-parameters">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Probability distribution table with unknown parameters</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">8</span><small>×</small></div>
+                    <div class="marks">10-14m</div>
+                </div>
+            </div>
+            <p class="qt-look">A table of X values and their probabilities is given, with one or more unknown parameters (e.g. a, b, k). You are asked to find these unknowns, then compute E(X), Var(X), and sometimes F(x).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">26</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">15.4%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 14 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2023: 1 q · 12 marks">
+                    <div class="bar-fill" style="height:86%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">12</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">probability distribution</span><span class="chip-trigger">random variable X</span><span class="chip-trigger">given in the following table</span><span class="chip-trigger">find the value of</span><span class="chip-trigger">P(X=x)</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>X is a discrete random variable taking only the listed values</li><li>All probabilities are non-negative: P(X=x) ≥ 0 for all x</li><li>The sum of all probabilities equals exactly 1: ΣP(X=x) = 1</li><li>Each value of X is taken with the probability given — no other values are possible</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Sum-to-1 then direct computation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Standard approach when the table has one or two unknown parameters</div>
+                <ol class='cs-steps'><li>Write out ΣP(X=x) = 1 and substitute all given probabilities to form an equation in the unknown(s)</li><li>If a second equation is needed, use a given condition such as E(X) = value, or P(X ≤ c) = value</li><li>Solve the simultaneous equations for the unknown parameter(s)</li><li>Check all resulting probabilities are between 0 and 1 inclusive</li><li>Compute E(X) = Σx·P(X=x) by multiplying each x by its probability and summing</li><li>Compute E(X²) = Σx²·P(X=x)</li><li>Compute Var(X) = E(X²) − [E(X)]²</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and always works; easy to check at each stage</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be arithmetic-heavy with many table entries; easy to make sign/fraction errors</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use symmetry (when distribution is symmetric)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the probability distribution is symmetric about a central value</div>
+                <ol class='cs-steps'><li>Identify the axis of symmetry of the distribution</li><li>Conclude E(X) = central value by symmetry</li><li>Still compute E(X²) = Σx²·P(X=x) explicitly</li><li>Compute Var(X) = E(X²) − [E(X)]²</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Saves time on E(X) calculation and provides a quick check</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only applicable when symmetry is present; still need full computation for variance</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\sum_{\text{all } x} P(X=x) = 1$ (MEMORIZE)</div><div class="cs-formula">$E(X) = \sum x \cdot P(X=x)$ (formula booklet)</div><div class="cs-formula">$E(X^2) = \sum x^2 \cdot P(X=x)$ (MEMORIZE — derived from definition)</div><div class="cs-formula">$\text{Var}(X) = E(X^2) - [E(X)]^2$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that all probabilities must sum to exactly 1, leading to incorrect parameter values</li><li>Computing Var(X) as E(X²) − E(X) instead of E(X²) − [E(X)]² — must square the mean</li><li>Arithmetic errors when working with fractions — keep exact fractions throughout</li><li>Not checking that all computed probabilities are non-negative after solving</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q3.html">Jan 2023 Q3</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q7.html">Jan 2024 Q7</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q5.html">Jun 2022 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q5.html">Jun 2023 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q2.html">Jun 2024 Q2</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2023-Q4.html">Oct 2023 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2024-Q6.html">Oct 2024 Q6</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-discrete-uniform-distribution-properties">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Discrete uniform distribution properties</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">10-16m</div>
+                </div>
+            </div>
+            <p class="qt-look">A random variable is stated to follow a discrete uniform distribution on {1, 2, ..., n} or similar. You must recognise the distribution and use its standard formulas for E(X) and Var(X).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">16</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.9%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 16 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">16</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">discrete uniform distribution</span><span class="chip-trigger">equally likely</span><span class="chip-trigger">each value has the same probability</span><span class="chip-trigger">P(X=x) = 1/n</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Each of the n outcomes is equally likely with probability 1/n</li><li>The values are consecutive integers or equally spaced</li><li>If X ~ DU(1,n) then E(X) = (n+1)/2 and Var(X) = (n²−1)/12</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Use standard discrete uniform formulas</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When X takes values 1, 2, ..., n each with probability 1/n</div>
+                <ol class='cs-steps'><li>Identify that X ~ Discrete Uniform on {1, 2, ..., n}</li><li>Apply E(X) = (n+1)/2</li><li>Apply Var(X) = (n²−1)/12</li><li>For linear transformations Y = aX+b, apply E(Y) = aE(X)+b and Var(Y) = a²Var(X)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very fast if you recognise the distribution and know the formulas</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Formulas may not be in the booklet — must memorise; doesn't apply if values aren't 1 to n</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: First principles calculation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the uniform distribution is on non-standard values or to verify your answer</div>
+                <ol class='cs-steps'><li>List all values and their equal probabilities</li><li>Compute E(X) = (1/n)·Σxᵢ directly</li><li>Compute E(X²) = (1/n)·Σxᵢ²</li><li>Compute Var(X) = E(X²) − [E(X)]²</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Always works regardless of the values; provides a check</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Slower for large n; more room for arithmetic error</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$E(X) = \frac{n+1}{2}$ for $X \sim DU(1, n)$ (MEMORIZE — not always in booklet)</div><div class="cs-formula">$\text{Var}(X) = \frac{n^2 - 1}{12}$ for $X \sim DU(1, n)$ (MEMORIZE)</div><div class="cs-formula">$\sum_{r=1}^{n} r = \frac{n(n+1)}{2}$ (formula booklet)</div><div class="cs-formula">$\sum_{r=1}^{n} r^2 = \frac{n(n+1)(2n+1)}{6}$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Not recognising the discrete uniform distribution when all outcomes are equally likely</li><li>Using the wrong formula: confusing (n+1)/2 with n/2 for the mean</li><li>Applying the standard DU formulas when the values aren't 1 to n — must adjust or use first principles</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q4.html">Jan 2021 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q4.html">Jan 2022 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-solving-probability-inequalities-involving-discrete-x">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Solving probability inequalities involving discrete X</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">3-4m (within a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a condition like P(X > k) > c or an inequality involving the random variable, find which discrete values of X satisfy the condition.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">15</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">15.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 15 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">inequality</span><span class="chip-trigger">P(X ></span><span class="chip-trigger">find the values of X</span><span class="chip-trigger">solve</span><span class="chip-trigger">greater than</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>X is discrete — solutions must be integers or discrete values from the support</li><li>After solving a continuous inequality, restrict to valid discrete values</li><li>The inequality may involve a linear transformation of X</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Solve continuous inequality then restrict to discrete support</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked which values of X satisfy a given inequality</div>
+                <ol class='cs-steps'><li>Solve the inequality algebraically as if X were continuous</li><li>Identify the critical boundary value</li><li>Restrict to only those discrete values of X in the support that satisfy the inequality</li><li>State the answer clearly listing the valid discrete values</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic — uses algebra then applies the discrete constraint</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must remember X is discrete; the algebraic solution alone is not the final answer</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Standard inequality manipulation rules (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that X is discrete: after solving X > 0.5, the valid values start from X = 1 (or the next discrete value), not X = 0.5</li><li>Not listing all discrete values that satisfy the inequality</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q5.html">Jun 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-non-linear-functions-of-random-variables-y-g-x">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Non-linear functions of random variables: Y = g(X)</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">2</span><small>×</small></div>
+                    <div class="marks">4-6m (within a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">Given the distribution of X, a new variable Y = g(X) is defined where g is non-linear (e.g. Y = 1/X, Y = X²). You must find the distribution of Y and/or E(Y).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">13</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">Y = 1/X</span><span class="chip-trigger">Y = X²</span><span class="chip-trigger">new random variable</span><span class="chip-trigger">find the distribution of Y</span><span class="chip-trigger">find E(Y)</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Y = g(X) is a well-defined function for all values X can take</li><li>If g is non-linear, E(g(X)) ≠ g(E(X)) in general</li><li>Different values of X may map to the same value of Y — combine their probabilities</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Construct the new probability distribution table</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always for non-linear transformations</div>
+                <ol class='cs-steps'><li>For each value xᵢ in the support of X, compute yᵢ = g(xᵢ)</li><li>If two or more xᵢ give the same yᵢ, add their probabilities: P(Y=yᵢ) = ΣP(X=xⱼ) for all xⱼ mapping to yᵢ</li><li>Write out the probability distribution table for Y</li><li>Verify ΣP(Y=y) = 1</li><li>Compute E(Y) = Σy·P(Y=y) from this new table</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Clear and systematic; impossible to go wrong if table is correctly constructed</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be time-consuming if X has many values</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use E(g(X)) = Σg(x)·P(X=x) directly</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you only need E(Y) and not the full distribution of Y</div>
+                <ol class='cs-steps'><li>Apply E(g(X)) = Σg(xᵢ)·P(X=xᵢ) using the original X table</li><li>No need to construct the Y distribution table</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Faster when only E(Y) is needed</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Cannot find Var(Y) or P(Y=y) without the full distribution; easy to make the E(1/X) = 1/E(X) error</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$E(g(X)) = \sum g(x) \cdot P(X=x)$ (MEMORIZE)</div><div class="cs-formula">$E(g(X)) \neq g(E(X))$ in general for non-linear $g$ (MEMORIZE — critical concept)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Using E(1/X) = 1/E(X) — this is WRONG for non-linear functions; must compute E(1/X) from the definition</li><li>Forgetting to combine probabilities when multiple X values map to the same Y value</li><li>Using E(X²) = [E(X)]² — these are different quantities</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q4.html">Jan 2022 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q5.html">Oct 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-linear-transformations-of-discrete-random-variables-e-ax-b-and-var-ax-b">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Linear transformations of discrete random variables: E(aX+b) and Var(aX+b)</div>
+                    <span class="rank-pill">#7</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">4-6m (within a larger question)</div>
+                </div>
+            </div>
+            <p class="qt-look">Given E(X) and Var(X), or having just computed them, you must find E(Y) and Var(Y) where Y = aX + b. May involve solving for unknown constants a and b given E(Y) and Var(Y).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">0</div><div class="stat-l">questions in 0 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">0</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">0.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">Y = aX + b</span><span class="chip-trigger">linear transformation</span><span class="chip-trigger">find E(Y)</span><span class="chip-trigger">find Var(Y)</span><span class="chip-trigger">given that a > 0</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The transformation is linear: Y = aX + b where a, b are constants</li><li>a and b are real constants; if a > 0 is stated, do not consider negative roots</li><li>The underlying distribution of X is already known or E(X) and Var(X) are given</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct formula application</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When E(X) and Var(X) are known and you need E(Y) and Var(Y)</div>
+                <ol class='cs-steps'><li>Write Y = aX + b</li><li>Apply E(Y) = aE(X) + b</li><li>Apply Var(Y) = a²Var(X) — note the constant b vanishes and a is squared</li><li>If required, SD(Y) = |a| · SD(X)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Very fast — just plug in values</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must remember to square the coefficient for variance; easy to forget b drops out</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Reverse-engineer a and b from E(Y) and Var(Y)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When Y = aX + b and you are given E(Y) and Var(Y) and must find a and b</div>
+                <ol class='cs-steps'><li>From Var(Y) = a²Var(X), solve for a² then a (use a > 0 if specified)</li><li>From E(Y) = aE(X) + b, substitute the value of a and solve for b</li><li>State Y = aX + b with the found values</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic approach to a common exam sub-question</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful about sign of a; always check any constraint given in the question</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$E(aX + b) = aE(X) + b$ (formula booklet)</div><div class="cs-formula">$\text{Var}(aX + b) = a^2 \text{Var}(X)$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Using Var(aX+b) = a·Var(X) instead of a²·Var(X) — must square the coefficient</li><li>Including the constant b in the variance formula — Var(aX+b) = a²Var(X), not a²Var(X)+b</li><li>Taking the negative square root for a when the question specifies a > 0</li><li>For Var(4−3X): writing Var = 3·Var(X) instead of 9·Var(X) — must square the −3</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q4.html">Jan 2021 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q4.html">Jan 2022 Q4</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q5.html">Jun 2021 Q5</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2022-Q7.html">Oct 2022 Q7</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/S1/Oct_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$\sum P(X=x) = 1$ — sum of all probabilities equals 1</li><li>$E(X) = \sum x \cdot P(X=x)$ (formula booklet)</li><li>$\text{Var}(X) = E(X^2) - [E(X)]^2$ (formula booklet)</li><li>$E(aX + b) = aE(X) + b$ (formula booklet)</li><li>$\text{Var}(aX + b) = a^2 \text{Var}(X)$ (formula booklet)</li><li>$E(g(X)) = \sum g(x) \cdot P(X = x)$ — definition of expectation of a function (MEMORIZE)</li><li>$F(x) = P(X \le x)$; $P(X = x) = F(x) - F(x^{-})$ (MEMORIZE)</li><li>For $X \sim DU(1, n)$: $E(X) = \frac{n+1}{2}$, $\text{Var}(X) = \frac{n^2 - 1}{12}$ (MEMORIZE — may not be in booklet)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Always start by writing ΣP(X=x) = 1 — this gives you the key equation for finding unknown parameters</li><li>For every Var(X) calculation, compute E(X) and E(X²) separately, then use Var(X) = E(X²) − [E(X)]² — never skip squaring the mean</li><li>Set up a systematic table with columns: x, P(X=x), x·P(X=x), x²·P(X=x) — this organises your work and reduces arithmetic errors</li><li>For linear transformations Y = aX + b, remember: constants shift the mean but only the coefficient squared affects the variance</li><li>For non-linear functions Y = g(X), never assume E(g(X)) = g(E(X)) — always go back to the definition E(g(X)) = Σg(x)·P(X=x)</li><li>When building a CDF, add probabilities cumulatively from the smallest value and verify the final entry equals 1</li><li>When two independent observations are involved, consider using the symmetry shortcut: P(X₁ < X₂) = [1 − ΣP(X=x)²] / 2</li><li>Keep all working in exact fractions — avoid decimals until the final answer if the question requires a decimal</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Draw a clear table with columns x | P(X=x) | x·P | x²·P — this prevents errors and earns method marks even if arithmetic slips</li><li>Always verify ΣP = 1 after finding unknown parameters — this is a quick sanity check that catches algebraic mistakes</li><li>In Var(X) = E(X²) − [E(X)]², circle or underline the square on [E(X)]² to remind yourself — this is the #1 error across all sessions</li><li>For Var(aX+b) = a²Var(X): write out the formula explicitly before substituting — examiners award marks for quoting the correct formula</li><li>If a question says 'a > 0', only take the positive square root when solving a² = k — state this reasoning explicitly</li><li>When working with CDFs, clearly state F(x) for each x including values below and above the support range</li><li>Show full working for E(X) and E(X²) calculations — partial credit is awarded for correct method even with arithmetic errors</li><li>In 'two observation' problems, draw a grid of all (x₁, x₂) outcomes to ensure no pairs are missed</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Cumulative distribution function (CDF) and extracting probabilities">Cumulative distribution function (CDF) and extracting probabilities</option><option value="Discrete uniform distribution properties">Discrete uniform distribution properties</option><option value="Non-linear functions of random variables: Y = g(X)">Non-linear functions of random variables: Y = g(X)</option><option value="Probability distribution table with unknown parameters">Probability distribution table with unknown parameters</option><option value="Probability distributions from two independent observations / functions of two variables">Probability distributions from two independent observations / functions of two variables</option><option value="Solving probability inequalities involving discrete X">Solving probability inequalities involving discrete X</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Discrete uniform distribution properties">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q4</td>
+            <td class="r">16m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-discrete-uniform-distribution-properties">Discrete uniform distribution properties</a><div class="qtype-freeform">discrete random variable properties</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Solving probability inequalities involving discrete X">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">15m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-solving-probability-inequalities-involving-discrete-x">Solving probability inequalities involving discrete X</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Probability distributions from two independent observations / functions of two variables">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-probability-distributions-from-two-independent-observations-functions-of-two-variables">Probability distributions from two independent observations / functions of two variables</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Non-linear functions of random variables: Y = g(X)">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-non-linear-functions-of-random-variables-y-g-x">Non-linear functions of random variables: Y = g(X)</a><div class="qtype-freeform">discrete random variable transformations</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Probability distribution table with unknown parameters">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-probability-distribution-table-with-unknown-parameters">Probability distribution table with unknown parameters</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q4</td>
+            <td class="r">4m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">expected value discrete random variable</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Probability distributions from two independent observations / functions of two variables">
+            <td class="session">Oct 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-probability-distributions-from-two-independent-observations-functions-of-two-variables">Probability distributions from two independent observations / functions of two variables</a><div class="qtype-freeform">discrete random variable properties</div></td>
+            <td><a class="qlink" href="q-Oct_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q3</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q5</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Probability distribution table with unknown parameters">
+            <td class="session">Oct 2023</td>
+            <td class="r">Q4</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-probability-distribution-table-with-unknown-parameters">Probability distribution table with unknown parameters</a><div class="qtype-freeform">discrete random variable expectation</div></td>
+            <td><a class="qlink" href="q-Oct_2023-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">discrete random variable distribution</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Cumulative distribution function (CDF) and extracting probabilities">
+            <td class="session">Oct 2024</td>
+            <td class="r">Q6</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-cumulative-distribution-function-cdf-and-extracting-probabilities">Cumulative distribution function (CDF) and extracting probabilities</a><div class="qtype-freeform">discrete random variable problem</div></td>
+            <td><a class="qlink" href="q-Oct_2024-Q6.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

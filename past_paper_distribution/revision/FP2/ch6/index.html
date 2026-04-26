@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FP2 · ch6 Maclaurin and Taylor series</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">FP2</a><span class="sep">/</span>ch6 Maclaurin and Taylor series</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 FP2 · ch6</div>
+  <h1>Maclaurin and Taylor series</h1>
+  <p class="lede">Every FP2 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 12 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 FP2 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">12</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">98<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">8<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">10</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">12 questions · 98 marks across 10 papers · <b>13.1%</b> of all unit marks · <b>14.3%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 1 q · 9/75 marks (12.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:75%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">12.0%</div>
+            </div><div class="year-bar" title="2021: 3 q · 26/225 marks (11.6% of paper)">
+                <div class="bar-fill ch-bar" style="height:72%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">11.6%</div>
+            </div><div class="year-bar" title="2022: 2 q · 16/150 marks (10.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:67%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">10.7%</div>
+            </div><div class="year-bar" title="2023: 3 q · 24/150 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">16.0%</div>
+            </div><div class="year-bar" title="2024: 3 q · 23/150 marks (15.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:96%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">15.3%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 12 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-taylor-series-expansion-about-a-non-zero-point-x-a">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Taylor series expansion about a non-zero point x = a</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given f(x), find the Taylor expansion about x = a (where a ≠ 0, e.g. a = π/3, a = 1, a = e). The answer is in powers of (x − a). Often involves logarithmic, trigonometric, or composite functions evaluated at a specific point.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 4 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">32</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">33.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">32.7%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:89%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2022: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:89%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2023: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2024: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:78%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">7</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">Taylor series</span><span class="chip-trigger">expansion about x =</span><span class="chip-trigger">in ascending powers of (x - a)</span><span class="chip-trigger">series valid near x =</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>f(x) is sufficiently differentiable at x = a</li><li>The expansion is in powers of (x − a), NOT powers of x</li><li>Derivative evaluations must be at x = a, not at x = 0</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct differentiation and evaluation at x = a</span>
+                </div>
+                <div class="approach-when"><b>When:</b> The default approach for any Taylor series question</div>
+                <ol class='cs-steps'><li>Compute f(a)</li><li>Find f'(x), then evaluate f'(a)</li><li>Find f''(x), then evaluate f''(a)</li><li>Continue to the required order</li><li>Substitute into Taylor formula: f(x) = f(a) + f'(a)(x−a) + f''(a)(x−a)²/2! + f'''(a)(x−a)³/3! + ...</li><li>Simplify all coefficients</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Universally applicable; clean and systematic</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Derivative evaluations at awkward points (e.g. x = π/3) can be algebraically messy</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Substitution u = x − a into a Maclaurin-type expansion</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When f(x) can be rewritten as a function of u = x − a that maps to a standard Maclaurin form</div>
+                <ol class='cs-steps'><li>Let u = x − a, so x = u + a</li><li>Rewrite f(x) = f(u + a) = g(u)</li><li>Expand g(u) as a Maclaurin series in u (using standard series if possible)</li><li>Replace u with (x − a)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Can sometimes bypass tedious differentiation if g(u) has a nice form</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Not always possible to get a clean standard form in u</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[\tan x] = \sec^2 x$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[\sec x] = \sec x \tan x$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[\ln x] = \frac{1}{x}$ (formula booklet)</div><div class="cs-formula">$\sec^2 x = 1 + \tan^2 x$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Evaluating derivatives at x = 0 instead of x = a</li><li>Writing the expansion in powers of x instead of powers of (x − a)</li><li>Forgetting exact trig values: tan(π/3) = √3, sec(π/3) = 2, sin(π/4) = √2/2, etc.</li><li>Forgetting to divide by n! in each term</li><li>Not converting tan²x to sec²x − 1 when the question requires it for simplification</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q5.html">Jan 2022 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q5.html">Oct 2021 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q6.html">Jun 2023 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q7.html">Jun 2024 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-maclaurin-series-from-a-differential-equation-ode-method">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Maclaurin series from a differential equation (ODE method)</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">8-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">You are given a differential equation (often second-order) together with initial conditions y(0) and y'(0). You must differentiate the ODE implicitly to find y''(0), y'''(0), etc., then build a Maclaurin series for y. The ODE typically involves products like xy'', y·y', or (y')².</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">26</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">26.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.7</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 2 q · 18 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">18</div>
+                </div><div class="year-bar" title="2022: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:44%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">differential equation</span><span class="chip-trigger">given that y(0) =</span><span class="chip-trigger">y'(0) =</span><span class="chip-trigger">Maclaurin series for y</span><span class="chip-trigger">series solution</span><span class="chip-trigger">find the first four non-zero terms</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The solution y(x) exists and is analytic at x = 0</li><li>Initial conditions y(0) and y'(0) are provided — always use them</li><li>You do NOT need to solve the ODE explicitly — only find derivatives at x = 0</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Successive implicit differentiation of the ODE</span>
+                </div>
+                <div class="approach-when"><b>When:</b> This is the standard and usually only approach for these questions</div>
+                <ol class='cs-steps'><li>Substitute x = 0 and the given initial conditions into the ODE to find y''(0)</li><li>Differentiate the entire ODE with respect to x using product rule and chain rule as needed</li><li>Substitute x = 0 and all known values (y(0), y'(0), y''(0)) to find y'''(0)</li><li>If needed, differentiate again and substitute to find y⁽⁴⁾(0)</li><li>Build the Maclaurin series: y = y(0) + y'(0)x + y''(0)x²/2! + y'''(0)x³/3! + ...</li><li>Simplify coefficients</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and direct; no need to solve the ODE</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Differentiating the ODE can be very involved with multiple product rule applications; errors compound</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$y(x) = y(0) + y'(0)x + \frac{y''(0)}{2!}x^2 + \frac{y'''(0)}{3!}x^3 + \cdots$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[y \cdot y'] = (y')^2 + y \cdot y''$ — product rule on implicit terms (MEMORIZE the pattern)</div><div class="cs-formula">$\frac{d}{dx}[(y')^2] = 2y' \cdot y''$ — chain rule on squared derivative (MEMORIZE the pattern)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting product rule when differentiating terms like x²y'' — every product of x-terms and y-terms needs it</li><li>Forgetting chain rule when differentiating (dy/dx)² to get 2(dy/dx)(d²y/dx²)</li><li>Substituting x = 0 into the ODE before differentiating (you must differentiate first, then substitute)</li><li>Arithmetic errors with large values — e.g. when y(0) = 8, computing powers and products carefully</li><li>Getting 0/0 when directly substituting — may need L'Hôpital or algebraic rearrangement before substituting</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q5.html">Jan 2021 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q4.html">Jun 2021 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q5.html">Jun 2022 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-maclaurin-series-by-repeated-differentiation">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Maclaurin series by repeated differentiation</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a function f(x), find the Maclaurin series up to a specified term (e.g. up to x⁴). The function is typically non-standard — not directly a standard series — so you must differentiate repeatedly and evaluate at x=0.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">22</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">22.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 2 q · 15 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2024: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:47%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">7</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">Maclaurin series</span><span class="chip-trigger">expansion in ascending powers of x</span><span class="chip-trigger">up to and including the term in x^n</span><span class="chip-trigger">f(0)</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>f(x) is infinitely differentiable at x=0 (or at least differentiable to the required order)</li><li>The expansion is valid for some neighbourhood of x=0</li><li>Unless told otherwise, expand about x=0 (Maclaurin, not Taylor)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct repeated differentiation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the function cannot be easily decomposed into standard series or when the question explicitly asks you to find derivatives</div>
+                <ol class='cs-steps'><li>Compute f(0)</li><li>Differentiate f(x) to get f'(x), then evaluate f'(0)</li><li>Differentiate again to get f''(x), evaluate f''(0)</li><li>Continue to the required order: f'''(x) → f'''(0), f⁽⁴⁾(x) → f⁽⁴⁾(0), etc.</li><li>Substitute into the Maclaurin formula: f(x) = f(0) + f'(0)x + f''(0)x²/2! + f'''(0)x³/3! + ...</li><li>Simplify coefficients</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Always works; systematic and shows all working for full marks</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be very tedious for higher-order derivatives; error-prone with chain/product/quotient rules</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Use standard series with substitution/manipulation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When f(x) can be written as a composition or product of standard functions (e.g. e^(sin x), x·ln(1+x))</div>
+                <ol class='cs-steps'><li>Write f(x) in terms of standard functions whose Maclaurin series you know</li><li>Write out the standard series to the required order</li><li>Substitute or multiply the series together, collecting terms to the required order</li><li>Discard terms beyond the required power</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Much faster when applicable; avoids messy differentiation</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only works when you can decompose f(x) into standard forms; must know standard series by heart</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(0)}{n!} x^n$ (MEMORIZE)</div><div class="cs-formula">$e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$ (formula booklet)</div><div class="cs-formula">$\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$ (formula booklet)</div><div class="cs-formula">$\cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \cdots$ (formula booklet)</div><div class="cs-formula">$\ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots, \quad |x| \le 1, x \neq -1$ (formula booklet)</div><div class="cs-formula">$(1+x)^n = 1 + nx + \frac{n(n-1)}{2!}x^2 + \cdots$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to divide by n! — writing f''(0)x² instead of f''(0)x²/2!</li><li>Sign errors when differentiating repeatedly, especially with chain rule on nested functions</li><li>Arithmetic errors in evaluating derivatives at x=0 when the function involves fractions or surds</li><li>Not simplifying the final coefficients — leave as clean fractions</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q1.html">Jan 2023 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q4.html">Jan 2023 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q4.html">Jan 2024 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q2.html">Jun 2024 Q2</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-series-multiplication-composition-or-substitution-to-build-maclaurin-taylor-expansions">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">7-9m</div>
+                </div>
+            </div>
+            <p class="qt-look">Find the Maclaurin series of a composite or product function such as e^(sin x), (1+x)·ln(1+x), sin(x²), or similar. Rather than differentiating repeatedly, you multiply or compose known standard series.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">2</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">18</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">16.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">9</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">find the series expansion</span><span class="chip-trigger">use the standard series for</span><span class="chip-trigger">multiply the series</span><span class="chip-trigger">hence find</span><span class="chip-trigger">use your result from part (a)</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Standard Maclaurin series are valid within their radius of convergence</li><li>When multiplying series, only terms up to the required order need to be kept</li><li>Composition f(g(x)): substitute the series for g(x) into the series for f</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Series substitution (composition)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When f(x) = h(g(x)) and both h and g have known series</div>
+                <ol class='cs-steps'><li>Write the Maclaurin series for g(x) to the required order</li><li>Write the Maclaurin series for h(u) where u = g(x)</li><li>Substitute the series for g(x) in place of u</li><li>Expand and collect terms, discarding anything beyond the required order</li><li>Simplify coefficients</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Avoids messy higher-order differentiation entirely</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Requires careful bookkeeping when expanding brackets; easy to miss terms or double-count</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Series multiplication</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When f(x) = p(x) · q(x) and both have known series</div>
+                <ol class='cs-steps'><li>Write the series for p(x) and q(x) each to the required order</li><li>Multiply term by term, collecting all contributions to each power of x up to the required order</li><li>Simplify the coefficients of each power</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward when both factors have simple series</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to miss cross-terms; must be systematic</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$e^u = 1 + u + \frac{u^2}{2!} + \frac{u^3}{3!} + \cdots$ — substitute $u = g(x)$ (formula booklet)</div><div class="cs-formula">$\ln(1+u) = u - \frac{u^2}{2} + \frac{u^3}{3} - \cdots$ — substitute $u = g(x)$ (formula booklet)</div><div class="cs-formula">$\sin u = u - \frac{u^3}{3!} + \cdots$ — substitute $u = g(x)$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Keeping too many or too few terms in the intermediate expansion before discarding</li><li>Forgetting that (g(x))² generates cross-terms when g(x) itself is a series</li><li>Sign errors when composing alternating series (e.g. ln(1+x) substituted into another alternating series)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q4.html">Jan 2024 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q5.html">Specimen 2018 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(0)}{n!}x^n$ — Maclaurin series formula (MEMORIZE)</li><li>$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n$ — Taylor series formula (MEMORIZE)</li><li>$e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$ (formula booklet)</li><li>$\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$ (formula booklet)</li><li>$\cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \cdots$ (formula booklet)</li><li>$\ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \frac{x^4}{4} + \cdots, \quad |x| \le 1, x \neq -1$ (formula booklet)</li><li>$(1+x)^n = 1 + nx + \frac{n(n-1)}{2!}x^2 + \frac{n(n-1)(n-2)}{3!}x^3 + \cdots$ (formula booklet)</li><li>$\sec^2 x = 1 + \tan^2 x$ (MEMORIZE — crucial for Taylor about non-zero points involving tan)</li><li>$\frac{d}{dx}[\tan x] = \sec^2 x$, $\frac{d}{dx}[\sec x] = \sec x \tan x$ (MEMORIZE)</li><li>Exact trig values: $\sin\frac{\pi}{3}=\frac{\sqrt{3}}{2}$, $\cos\frac{\pi}{3}=\frac{1}{2}$, $\tan\frac{\pi}{3}=\sqrt{3}$, $\sec\frac{\pi}{3}=2$ (MEMORIZE)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Every question in this chapter boils down to: find derivatives → evaluate at a point → substitute into the Maclaurin/Taylor formula. Master this pipeline.</li><li>Always check: am I expanding about x = 0 (Maclaurin) or x = a (Taylor)? This determines where you evaluate derivatives and what the powers are (xⁿ vs (x−a)ⁿ).</li><li>Memorize all six standard Maclaurin series (eˣ, sin x, cos x, ln(1+x), (1+x)ⁿ, tan⁻¹x) — they appear in the formula booklet but fluency saves crucial time.</li><li>For ODE-based questions, NEVER try to solve the ODE. Just differentiate it implicitly and plug in initial conditions step by step.</li><li>After computing each derivative, immediately substitute x = 0 (or x = a) before moving to the next derivative — this prevents carrying huge unsimplified expressions.</li><li>Double-check every term has its n! denominator. The single most common error across all 12 sessions is forgetting to divide by n!.</li><li>When the question says 'hence find an approximation for...', substitute a specific x-value into your series — choose x carefully so the series converges rapidly.</li><li>Show every differentiation step explicitly — examiners award method marks for each derivative found and evaluated.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Write out the general Maclaurin/Taylor formula at the top of your working — it reminds you of the n! denominators and prevents the most common error.</li><li>For ODE questions, create a small table: | n | y⁽ⁿ⁾(0) | — fill it in row by row. This keeps your working organised and prevents substitution errors.</li><li>If a derivative calculation seems overwhelmingly complex, re-check whether you can use an identity (e.g. sec²x = 1 + tan²x) to simplify before differentiating.</li><li>When asked to find a Taylor series about x = a, circle 'x = a' in the question so you don't accidentally evaluate at x = 0.</li><li>After obtaining your series, do a quick sanity check: substitute x = 0 (for Maclaurin) — you should get f(0). For Taylor about x = a, substitute x = a — you should get f(a).</li><li>In series multiplication, set up a grid or table of cross-products to avoid missing terms. Only compute products that contribute to powers ≤ the required order.</li><li>Budget your time: a 9-mark question typically requires 4 derivatives. Each derivative-and-evaluate cycle is worth ~2 marks, and the final assembly is worth ~1 mark.</li><li>If you get a 0 for one derivative value, don't panic — it just means that power of x is absent from the series. This is common with even/odd functions.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Maclaurin series by repeated differentiation">Maclaurin series by repeated differentiation</option><option value="Maclaurin series from a differential equation (ODE method)">Maclaurin series from a differential equation (ODE method)</option><option value="Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions">Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions</option><option value="Taylor series expansion about a non-zero point x = a">Taylor series expansion about a non-zero point x = a</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q5</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-series-multiplication-composition-or-substitution-to-build-maclaurin-taylor-expansions">Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions</a><div class="qtype-freeform">Maclaurin and Taylor series expansion</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series from a differential equation (ODE method)">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-from-a-differential-equation-ode-method">Maclaurin series from a differential equation (ODE method)</a><div class="qtype-freeform">Taylor series from differential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series from a differential equation (ODE method)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q4</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-from-a-differential-equation-ode-method">Maclaurin series from a differential equation (ODE method)</a><div class="qtype-freeform">implicit ODE Maclaurin series</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Taylor series expansion about a non-zero point x = a">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-taylor-series-expansion-about-a-non-zero-point-x-a">Taylor series expansion about a non-zero point x = a</a><div class="qtype-freeform">Taylor series expansion</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Taylor series expansion about a non-zero point x = a">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-taylor-series-expansion-about-a-non-zero-point-x-a">Taylor series expansion about a non-zero point x = a</a><div class="qtype-freeform">Taylor series expansion</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series from a differential equation (ODE method)">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q5</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-from-a-differential-equation-ode-method">Maclaurin series from a differential equation (ODE method)</a><div class="qtype-freeform">implicit differentiation Taylor series</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series by repeated differentiation">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q1</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-by-repeated-differentiation">Maclaurin series by repeated differentiation</a><div class="qtype-freeform">Maclaurin series expansion</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series by repeated differentiation">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q4</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-by-repeated-differentiation">Maclaurin series by repeated differentiation</a><div class="qtype-freeform">Maclaurin or Taylor expansion</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Taylor series expansion about a non-zero point x = a">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-taylor-series-expansion-about-a-non-zero-point-x-a">Taylor series expansion about a non-zero point x = a</a><div class="qtype-freeform">Maclaurin and Taylor series expansion</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q4</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-series-multiplication-composition-or-substitution-to-build-maclaurin-taylor-expansions">Series multiplication, composition, or substitution to build Maclaurin/Taylor expansions</a><div class="qtype-freeform">Maclaurin/Taylor series expansion</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Maclaurin series by repeated differentiation">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-maclaurin-series-by-repeated-differentiation">Maclaurin series by repeated differentiation</a><div class="qtype-freeform">Maclaurin or Taylor expansion</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Taylor series expansion about a non-zero point x = a">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-taylor-series-expansion-about-a-non-zero-point-x-a">Taylor series expansion about a non-zero point x = a</a><div class="qtype-freeform">Maclaurin or Taylor expansion</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q7.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

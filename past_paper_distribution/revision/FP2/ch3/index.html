@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FP2 · ch3 Further complex numbers</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">FP2</a><span class="sep">/</span>ch3 Further complex numbers</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 FP2 · ch3</div>
+  <h1>Further complex numbers</h1>
+  <p class="lede">Every FP2 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 22 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 FP2 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">22</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">185<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">8<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">10</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">22 questions · 185 marks across 10 papers · <b>24.7%</b> of all unit marks · <b>26.2%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 2 q · 23/75 marks (30.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">30.7%</div>
+            </div><div class="year-bar" title="2021: 7 q · 55/225 marks (24.4% of paper)">
+                <div class="bar-fill ch-bar" style="height:79%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">24.4%</div>
+            </div><div class="year-bar" title="2022: 4 q · 37/150 marks (24.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:80%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">24.7%</div>
+            </div><div class="year-bar" title="2023: 4 q · 33/150 marks (22.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:72%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">22.0%</div>
+            </div><div class="year-bar" title="2024: 5 q · 37/150 marks (24.7% of paper)">
+                <div class="bar-fill ch-bar" style="height:80%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">24.7%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 22 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">nth roots of complex numbers using De Moivre's theorem</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">10</span><small>×</small></div>
+                    <div class="marks">4-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a complex number (often in Cartesian form), find all nth roots. May ask for answers in exponential form re^{iθ}, modulus-argument form, or exact Cartesian form. Often part (a) asks for conversion to polar form, then part (b) asks for roots.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">6</div><div class="stat-l">questions in 4 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">45</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">27.3%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">24.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">7.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:36%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2021: 1 q · 4 marks">
+                    <div class="bar-fill" style="height:16%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">4</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 3 q · 25 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">25</div>
+                </div><div class="year-bar" title="2024: 1 q · 7 marks">
+                    <div class="bar-fill" style="height:28%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">7</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">find all roots</span><span class="chip-trigger">solve z^n =</span><span class="chip-trigger">exponential form</span><span class="chip-trigger">cube roots</span><span class="chip-trigger">fifth roots</span><span class="chip-trigger">modulus-argument form</span><span class="chip-trigger">express in the form re^{iθ}</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Principal argument convention: θ ∈ (−π, π] unless stated otherwise (some questions specify 0 < θ < 2π — read carefully)</li><li>There are exactly n distinct nth roots of any non-zero complex number</li><li>Roots are equally spaced around a circle of radius r^{1/n} in the Argand diagram</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: De Moivre's theorem nth root formula</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Standard approach for all nth root problems</div>
+                <ol class='cs-steps'><li>Convert the complex number to modulus-argument form: w = R(cos α + i sin α) or w = Re^{iα}</li><li>Write z^n = Re^{iα}, so z = R^{1/n} e^{i(α + 2kπ)/n}</li><li>Let k = 0, 1, 2, ..., n−1 to generate all n distinct roots</li><li>Compute each argument θ_k = (α + 2kπ)/n</li><li>Adjust arguments to the required range (e.g. principal argument (−π, π])</li><li>Convert to requested form (exponential, mod-arg, or exact Cartesian using known trig values)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and works for any n; easy to check you have all roots</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful with argument range conventions</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Factorisation / quadratic approach (for n = 2)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When solving z² = a + bi, or when a quadratic with complex coefficients arises</div>
+                <ol class='cs-steps'><li>Let z = x + iy, then z² = (x² − y²) + 2xyi</li><li>Equate real and imaginary parts to get simultaneous equations</li><li>Use |z²| = |z|² to find x² + y² = |w|^{1/2} as a third equation</li><li>Solve the system for x and y</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Gives exact Cartesian answers directly without needing to evaluate trig functions</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only practical for square roots; tedious for higher n</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$z_k = r^{1/n} \exp\left(\frac{i(\theta + 2k\pi)}{n}\right),\; k = 0,1,\ldots,n-1$ (MEMORIZE)</div><div class="cs-formula">$r = |z| = \sqrt{x^2 + y^2}$ (MEMORIZE)</div><div class="cs-formula">$\theta = \arg(z) = \arctan\left(\frac{y}{x}\right)$ adjusted for quadrant (MEMORIZE)</div><div class="cs-formula">$e^{i\theta} = \cos\theta + i\sin\theta$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to take the nth root of the MODULUS (writing R instead of R^{1/n})</li><li>Missing roots by not cycling k from 0 to n−1</li><li>Giving arguments outside the required range (not converting to principal argument)</li><li>Wrong quadrant for the original argument — always check signs of Re and Im parts</li><li>Confusing exact trig values: e.g. cos(π/3) = 1/2 vs cos(π/6) = √3/2</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q1.html">Jan 2022 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q1.html">Oct 2021 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q2.html">Jun 2023 Q2</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q5.html">Jun 2023 Q5</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q1.html">Jun 2024 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q6.html">Jun 2024 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q4.html">Specimen 2018 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q7.html">Jan 2023 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Möbius transformation mapping (image of lines/circles under w = f(z))</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">6</span><small>×</small></div>
+                    <div class="marks">6-14m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a transformation w = (az + b)/(cz + d), find the image of the real axis, imaginary axis, a given circle, or a given line. May ask to show the image is a circle and find its centre and radius. Sometimes combined with finding invariant points.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">5</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">50</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">22.7%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">27.0%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 14 marks">
+                    <div class="bar-fill" style="height:64%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2021: 2 q · 14 marks">
+                    <div class="bar-fill" style="height:64%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">14</div>
+                </div><div class="year-bar" title="2022: 2 q · 22 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">22</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">transformation w =</span><span class="chip-trigger">image of</span><span class="chip-trigger">maps to</span><span class="chip-trigger">w-plane</span><span class="chip-trigger">z-plane</span><span class="chip-trigger">Möbius</span><span class="chip-trigger">show that the image is a circle</span><span class="chip-trigger">find the centre and radius</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Möbius transformations map circles and lines to circles and lines (a line is a circle through infinity)</li><li>To find the image, either substitute parametric z into w, or rearrange for z in terms of w and substitute the locus condition</li><li>The imaginary axis is z = iy (y ∈ ℝ); the real axis is z = x (x ∈ ℝ)</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Parametric substitution (substitute z = x or z = iy into w)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the source locus is a simple line (real axis, imaginary axis) and you want to trace its image</div>
+                <ol class='cs-steps'><li>Substitute z = iy (for imaginary axis) or z = x (for real axis) into w = f(z)</li><li>Multiply numerator and denominator by the complex conjugate of the denominator</li><li>Separate into w = u + iv to get u(y) and v(y) as parametric equations</li><li>Eliminate the parameter y to find the Cartesian equation of the image in the w-plane</li><li>Complete the square if needed to identify the circle</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Direct and systematic; always works for lines</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Can be algebraically intensive; risk of sign errors when multiplying by conjugate</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Rearrange for z in terms of w, then substitute locus condition</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the source locus is given as |z − a| = r or another modulus/argument condition</div>
+                <ol class='cs-steps'><li>From w = (az + b)/(cz + d), rearrange to get z = (dw − b)/(a − cw)</li><li>Substitute this expression for z into the locus equation (e.g. |z| = 1 becomes |dw − b| = |a − cw|)</li><li>Square both sides and expand to get a Cartesian equation in u and v (where w = u + iv)</li><li>Complete the square to identify the circle centre and radius</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Works for any source locus, not just lines; elegant for circle-to-circle mappings</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Rearranging the transformation can introduce errors</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">C: Three-point method</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Quick check or when asked to verify: pick 3 points on the source locus, compute their images, then find the circle through those 3 image points</div>
+                <ol class='cs-steps'><li>Choose 3 convenient points on the source locus (e.g. z = 0, z = i, z = −i on the imaginary axis)</li><li>Compute w = f(z) for each</li><li>Use the 3 image points to determine the image circle (or verify it's a line if 3 points are collinear)</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Quick sanity check; can identify the image without heavy algebra</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Doesn't constitute a full proof; may miss that the image is only part of the circle</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$w = \frac{az + b}{cz + d}$ — general Möbius transformation (MEMORIZE structure)</div><div class="cs-formula">Rearranging: $z = \frac{dw - b}{a - cw}$ or equivalent (derive by cross-multiplying)</div><div class="cs-formula">To separate $\frac{p + qi}{r + si}$ into real and imaginary parts, multiply by $\frac{r - si}{r - si}$ (MEMORIZE technique)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to multiply by the complex conjugate when separating real and imaginary parts</li><li>Sign errors when expanding products of complex numbers, especially (a − bi)(c + di)</li><li>Algebraic slips when cross-multiplying to rearrange w = f(z) for z</li><li>Forgetting to square the RHS constant when squaring both sides of a modulus equation</li><li>Not identifying that the image of a line can be a circle (not necessarily another line)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q7.html">Jan 2022 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q2.html">Jun 2021 Q2</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q3.html">Oct 2021 Q3</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q8.html">Jun 2022 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q8.html">Specimen 2018 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-complex-loci-in-the-argand-diagram-circles-half-lines-intersections">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Complex loci in the Argand diagram (circles, half-lines, intersections)</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">7</span><small>×</small></div>
+                    <div class="marks">7-10m</div>
+                </div>
+            </div>
+            <p class="qt-look">Sketch the locus defined by |z − a| = k, |z − a| = k|z − b|, or arg(z − a) = θ. May ask to find intersection points, shade regions, or identify the locus geometrically (centre and radius of circle).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">35</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.2%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">18.9%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">8.8</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 9 marks">
+                    <div class="bar-fill" style="height:35%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">9</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 3 q · 26 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">26</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">|z − a| = r</span><span class="chip-trigger">|z − a| = k|z − b|</span><span class="chip-trigger">arg(z − a) = θ</span><span class="chip-trigger">sketch the locus</span><span class="chip-trigger">Argand diagram</span><span class="chip-trigger">shade the region</span><span class="chip-trigger">half-line</span><span class="chip-trigger">circle centre</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>|z − a| = r is a circle centre a, radius r</li><li>arg(z − a) = θ is a HALF-LINE from point a (not through a) in direction θ</li><li>|z − a| = k|z − b| with k ≠ 1 gives a circle (Apollonius circle); k = 1 gives a perpendicular bisector</li><li>Regions defined by inequalities: |z − a| < r means inside the circle</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct Cartesian conversion (substitute z = x + iy)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When you need the equation of the circle or need to find intersection points algebraically</div>
+                <ol class='cs-steps'><li>Let z = x + iy and substitute into the locus equation</li><li>For |z − a| = k|z − b|: square both sides to get (x−a₁)² + (y−a₂)² = k²[(x−b₁)² + (y−b₂)²]</li><li>Expand, collect terms, and complete the square to identify centre and radius</li><li>For arg(z − a) = θ: write (y − a₂)/(x − a₁) = tan θ, noting the half-line direction constraint</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Rigorous and gives exact equation; needed when finding intersections</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Algebraically heavy, especially with the Apollonius circle form</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Geometric recognition</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the question asks only to sketch or identify the locus, not derive the equation</div>
+                <ol class='cs-steps'><li>Recognise |z − a| = r as circle centre a, radius r — plot directly</li><li>Recognise arg(z − a) = θ as half-line from a at angle θ to positive real axis</li><li>For |z − a| = k|z − b|, find two points on the real line joining a and b that divide in ratio k:1 (internally and externally) — these are endpoints of a diameter</li><li>Sketch and find intersections geometrically or by substitution</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Fast for sketching; gives quick geometric insight</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> May not give exact coordinates without further algebra</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$|z - a| = r$ is a circle centre $a$, radius $r$ (MEMORIZE)</div><div class="cs-formula">$\arg(z - a) = \theta$ is a half-line from $a$ at angle $\theta$ to the positive real direction (MEMORIZE)</div><div class="cs-formula">$|z - a| = k|z - b|,\; k \neq 1$ is a circle (Apollonius circle) (MEMORIZE)</div><div class="cs-formula">$|z - a| = |z - b|$ is the perpendicular bisector of the line segment from $a$ to $b$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Treating arg(z − a) = θ as a FULL line instead of a HALF-line — the line only extends in one direction from a</li><li>Forgetting to square the constant k when squaring |z − a| = k|z − b|</li><li>Sign errors when completing the square, especially with negative coefficients</li><li>Selecting the wrong intersection point by ignoring the half-line direction constraint</li><li>Not recognising |z − a| < r means INSIDE the circle (strict inequality → open boundary)</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2024-Q2.html">Jan 2024 Q2</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q7.html">Jan 2024 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Oct_2021-Q6.html">Oct 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q3.html">Jun 2022 Q3</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q8.html">Jun 2022 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q9.html">Jun 2024 Q9</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q8.html">Specimen 2018 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-de-moivre-s-theorem-for-multiple-angle-identities-cos-n-sin-n-tan-n">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">9-16m</div>
+                </div>
+            </div>
+            <p class="qt-look">Multi-part question: (a) prove z^n + z^{-n} = 2cos nθ, (b) use binomial expansion of (z + 1/z)^n to express cos^n θ in terms of multiple angle cosines, (c) use the identity to evaluate an integral or solve a trig equation. OR: expand (cos θ + i sin θ)^n to derive tan nθ formula.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">33</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.6%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">17.8%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">11.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 2 q · 25 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">25</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 8 marks">
+                    <div class="bar-fill" style="height:32%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">8</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">z + 1/z</span><span class="chip-trigger">z^n + z^{-n}</span><span class="chip-trigger">cos^n θ</span><span class="chip-trigger">sin^n θ</span><span class="chip-trigger">tan nθ</span><span class="chip-trigger">show that</span><span class="chip-trigger">binomial expansion</span><span class="chip-trigger">hence integrate</span><span class="chip-trigger">hence solve</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>z = cos θ + i sin θ = e^{iθ}, so z^n = cos nθ + i sin nθ (De Moivre's theorem)</li><li>z + z^{-1} = 2cos θ and z − z^{-1} = 2i sin θ</li><li>z^n + z^{-n} = 2cos nθ and z^n − z^{-n} = 2i sin nθ</li><li>When deriving tan nθ, separate real and imaginary parts then divide Im by Re</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Binomial expansion of (z + 1/z)^n for cos^n θ identity</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked to express cos^n θ (or sin^n θ) as a sum of multiple angle terms</div>
+                <ol class='cs-steps'><li>Note (2cos θ)^n = (z + z^{-1})^n</li><li>Expand using the binomial theorem: sum of C(n,k) z^{n-2k} terms</li><li>Group terms symmetrically: z^k + z^{-k} = 2cos kθ</li><li>Divide both sides by 2^n to isolate cos^n θ</li><li>Simplify to get cos^n θ = (1/2^{n-1})[combination of cos kθ terms]</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and generalises to any power; directly yields integration-ready form</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Binomial coefficients can be large for high n; easy to lose factors of 2</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Separate real/imaginary parts of (cos θ + i sin θ)^n for tan nθ</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When asked to derive an expression for tan nθ in terms of tan θ</div>
+                <ol class='cs-steps'><li>By De Moivre: cos nθ + i sin nθ = (cos θ + i sin θ)^n</li><li>Expand RHS using binomial theorem</li><li>Separate real parts (cos nθ) and imaginary parts (sin nθ)</li><li>Form tan nθ = sin nθ / cos nθ = Im / Re</li><li>Divide every term in numerator and denominator by cos^n θ to express in terms of tan θ</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Gives a clean rational expression in t = tan θ; leads to polynomial root problems</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Separating real and imaginary parts requires care with i^k powers</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$z = e^{i\theta} \Rightarrow z^n + z^{-n} = 2\cos n\theta$ (MEMORIZE)</div><div class="cs-formula">$z = e^{i\theta} \Rightarrow z^n - z^{-n} = 2i\sin n\theta$ (MEMORIZE)</div><div class="cs-formula">$(z + z^{-1})^n = \sum_{k=0}^{n} \binom{n}{k} z^{n-2k}$ (formula booklet for binomial coefficients)</div><div class="cs-formula">$\cos^6\theta = \frac{1}{32}(\cos 6\theta + 6\cos 4\theta + 15\cos 2\theta + 10)$ — typical result (derive, don't memorise)</div><div class="cs-formula">$\tan 4\theta = \frac{4\tan\theta - 4\tan^3\theta}{1 - 6\tan^2\theta + \tan^4\theta}$ — typical result (derive)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to divide by 2^n (e.g. (2cos θ)^6 = 64 cos^6 θ, not cos^6 θ)</li><li>Errors in binomial coefficients for large n</li><li>When forming tan nθ, forgetting to divide EVERY term by cos^n θ</li><li>Not recognising the link between a polynomial equation and tan nθ = c (the polynomial's roots are tan(θ_k))</li><li>In integration parts, forgetting that ∫cos kθ dθ = (1/k)sin kθ + C</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q8.html">Jan 2021 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2021-Q7.html">Jun 2021 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2023-Q6.html">Jan 2023 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-modulus-argument-form-conversion-and-basic-operations">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Modulus-argument form conversion and basic operations</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">4-8m</div>
+                </div>
+            </div>
+            <p class="qt-look">Convert a complex number to modulus-argument or exponential form. Multiply, divide, or raise to a power using polar form. Often a lead-in part before a bigger question on roots or loci.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">19</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.6%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">6.3</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 2 q · 15 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">15</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 1 q · 4 marks">
+                    <div class="bar-fill" style="height:27%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">4</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">modulus-argument form</span><span class="chip-trigger">express in the form r(cos θ + i sin θ)</span><span class="chip-trigger">exponential form</span><span class="chip-trigger">find |z| and arg z</span><span class="chip-trigger">hence find z^n</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>Modulus r = √(x² + y²) is always non-negative</li><li>Argument θ must be in the correct quadrant — arctan alone may give the wrong angle</li><li>When multiplying: moduli multiply, arguments add. When dividing: moduli divide, arguments subtract</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Direct conversion using r and θ</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — fundamental skill</div>
+                <ol class='cs-steps'><li>Compute r = |z| = √(x² + y²)</li><li>Compute θ = arg(z): start with arctan(y/x), then adjust for quadrant</li><li>Write z = r(cos θ + i sin θ) = re^{iθ}</li><li>For powers: z^n = r^n e^{inθ} by De Moivre's theorem</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Fundamental and universally applicable</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Quadrant determination requires thought for each case</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$|z_1 z_2| = |z_1||z_2|,\quad \arg(z_1 z_2) = \arg(z_1) + \arg(z_2)$ (MEMORIZE)</div><div class="cs-formula">$\left|\frac{z_1}{z_2}\right| = \frac{|z_1|}{|z_2|},\quad \arg\left(\frac{z_1}{z_2}\right) = \arg(z_1) - \arg(z_2)$ (MEMORIZE)</div><div class="cs-formula">$z^n = r^n(\cos n\theta + i\sin n\theta)$ — De Moivre's theorem (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Wrong quadrant for arg: e.g. z = −1 + i has arg = 3π/4, not π/4</li><li>Forgetting to raise the modulus to the power (only rotating the argument)</li><li>Using degrees instead of radians when the question specifies radians</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2024-Q1.html">Jun 2024 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q3.html">Jun 2022 Q3</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2022-Q1.html">Jan 2022 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-m-bius-transformation-invariant-points">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Möbius transformation invariant points</div>
+                    <span class="rank-pill">#6</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">3m</div>
+                </div>
+            </div>
+            <p class="qt-look">Given a Möbius transformation w = f(z) and told that a specific point is invariant (or asked to find invariant points). Set w = z and solve.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">4.5%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">1.6%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">3.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 3 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">3</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">invariant point</span><span class="chip-trigger">fixed point</span><span class="chip-trigger">w = z</span><span class="chip-trigger">maps to itself</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>An invariant point satisfies w = z, i.e. z = f(z)</li><li>This typically gives a quadratic equation in z, so there are at most 2 invariant points</li><li>The given invariant point must satisfy the equation — use it to find unknown parameters</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Set w = z and solve the resulting equation</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the defining method</div>
+                <ol class='cs-steps'><li>Set w = z in the transformation equation: z = (az + b)/(cz + d)</li><li>Cross-multiply: z(cz + d) = az + b</li><li>Rearrange to cz² + (d − a)z − b = 0</li><li>If a specific invariant point is given, substitute it to find the unknown parameter</li><li>Solve the quadratic for z to find all invariant points</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Straightforward; always works</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Must be careful with complex arithmetic when the invariant point involves surds or i</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">Invariant point condition: $z = \frac{az + b}{cz + d}$ leads to $cz^2 + (d-a)z - b = 0$ (MEMORIZE derivation)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting that invariant means w = z (not w = 0 or z = 0)</li><li>Errors when expanding products of surds with complex numbers</li><li>Not substituting the given invariant point into BOTH z and w</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q1.html">Jan 2021 Q1</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$e^{i\theta} = \cos\theta + i\sin\theta$ (Euler's formula — in formula booklet)</li><li>$z^n + z^{-n} = 2\cos n\theta$ where $z = e^{i\theta}$ (MEMORIZE — used constantly)</li><li>$z^n - z^{-n} = 2i\sin n\theta$ where $z = e^{i\theta}$ (MEMORIZE)</li><li>De Moivre's theorem: $(\cos\theta + i\sin\theta)^n = \cos n\theta + i\sin n\theta$ (formula booklet)</li><li>nth root formula: $z_k = r^{1/n} \exp\left(\frac{i(\theta + 2k\pi)}{n}\right)$ for $k = 0, 1, \ldots, n-1$ (MEMORIZE)</li><li>$|z - a| = r$ is a circle centre $a$, radius $r$ (MEMORIZE)</li><li>$\arg(z - a) = \theta$ is a half-line from $a$ at angle $\theta$ (MEMORIZE)</li><li>$|z - a| = k|z - b|$ ($k \neq 1$) is an Apollonius circle (MEMORIZE the concept; derive the equation)</li><li>Invariant points satisfy $w = z$: substitute into the transformation and solve (MEMORIZE method)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Master the conversion between Cartesian, modulus-argument, and exponential forms — this underpins nearly every question in this chapter</li><li>Always determine the argument by checking the quadrant (signs of Re and Im parts) — never rely on arctan alone</li><li>For nth roots: learn the formula z_k = r^{1/n} exp(i(θ + 2kπ)/n) as a reflex — then systematically cycle k = 0 to n−1</li><li>For Möbius transformations: decide upfront whether to substitute z into w (parametric) or rearrange for z in terms of w (inverse substitution) — choose based on the source locus form</li><li>When separating real and imaginary parts of a complex fraction, ALWAYS multiply top and bottom by the conjugate of the denominator</li><li>For De Moivre's theorem power/identity questions, keep track of the factor of 2 (or 2i) throughout: (z + 1/z) = 2cos θ, NOT cos θ</li><li>In loci questions, always clearly distinguish between full lines, half-lines, and circles — and remember arg gives a HALF-line</li><li>Complete the square carefully and systematically when deriving circle equations from |z − a| = k|z − b|</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>READ whether the question wants exponential form, modulus-argument form, or exact Cartesian — giving the wrong form loses marks even if your working is correct</li><li>Check the required argument range: (−π, π] vs [0, 2π) — questions vary and you MUST match their convention</li><li>When finding nth roots, ALWAYS list all n roots and verify they are distinct — a common error is getting repeated roots from wrong k values</li><li>In Möbius transformation questions, label your working clearly with z-plane and w-plane — examiners want to see you distinguish between the two</li><li>For 'show that' or 'hence' parts, you MUST use the result from the previous part — using an independent method may score zero</li><li>When completing the square to find a circle's centre and radius, double-check by expanding your answer to verify it matches</li><li>In multi-part De Moivre questions, the early parts build toward the later parts — if stuck on (c), look back at what (a) and (b) established</li><li>Draw a quick Argand diagram sketch even if not asked — it helps you check arguments, loci, and root positions</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Complex loci in the Argand diagram (circles, half-lines, intersections)">Complex loci in the Argand diagram (circles, half-lines, intersections)</option><option value="De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)">De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)</option><option value="Modulus-argument form conversion and basic operations">Modulus-argument form conversion and basic operations</option><option value="Möbius transformation invariant points">Möbius transformation invariant points</option><option value="Möbius transformation mapping (image of lines/circles under w = f(z))">Möbius transformation mapping (image of lines/circles under w = f(z))</option><option value="nth roots of complex numbers using De Moivre's theorem">nth roots of complex numbers using De Moivre's theorem</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q4</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation mapping (image of lines/circles under w = f(z))">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q8</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">Möbius transformation mapping (image of lines/circles under w = f(z))</a><div class="qtype-freeform">further complex numbers loci and transformations</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation invariant points">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">3m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-invariant-points">Möbius transformation invariant points</a><div class="qtype-freeform">Möbius transformation invariant point</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q8</td>
+            <td class="r">16m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-de-moivre-s-theorem-for-multiple-angle-identities-cos-n-sin-n-tan-n">De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)</a><div class="qtype-freeform">complex numbers cosine power identity</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation mapping (image of lines/circles under w = f(z))">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q2</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">Möbius transformation mapping (image of lines/circles under w = f(z))</a><div class="qtype-freeform">Möbius transformation circle mapping</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-de-moivre-s-theorem-for-multiple-angle-identities-cos-n-sin-n-tan-n">De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)</a><div class="qtype-freeform">de Moivre tan multiple angle</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q1</td>
+            <td class="r">4m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">solve complex equation exponential form</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation mapping (image of lines/circles under w = f(z))">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q3</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">Möbius transformation mapping (image of lines/circles under w = f(z))</a><div class="qtype-freeform">complex transformation locus mapping</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Complex loci in the Argand diagram (circles, half-lines, intersections)">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">9m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-complex-loci-in-the-argand-diagram-circles-half-lines-intersections">Complex loci in the Argand diagram (circles, half-lines, intersections)</a><div class="qtype-freeform">complex locus circle and line</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Modulus-argument form conversion and basic operations">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q1</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-modulus-argument-form-conversion-and-basic-operations">Modulus-argument form conversion and basic operations</a><div class="qtype-freeform">complex number modulus-argument form</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation mapping (image of lines/circles under w = f(z))">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">Möbius transformation mapping (image of lines/circles under w = f(z))</a><div class="qtype-freeform">Möbius transformation mapping</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Modulus-argument form conversion and basic operations">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q3</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-modulus-argument-form-conversion-and-basic-operations">Modulus-argument form conversion and basic operations</a><div class="qtype-freeform">further complex numbers</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q3.html">walkthrough →</a></td>
+        </tr><tr data-type="Möbius transformation mapping (image of lines/circles under w = f(z))">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q8</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-m-bius-transformation-mapping-image-of-lines-circles-under-w-f-z">Möbius transformation mapping (image of lines/circles under w = f(z))</a><div class="qtype-freeform">further complex numbers loci and transformations</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q8.html">walkthrough →</a></td>
+        </tr><tr data-type="De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q6</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-de-moivre-s-theorem-for-multiple-angle-identities-cos-n-sin-n-tan-n">De Moivre's theorem for multiple angle identities (cos^n θ, sin^n θ, tan nθ)</a><div class="qtype-freeform">further complex numbers</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q7</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">complex number loci and roots</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q2</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q5</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q5.html">walkthrough →</a></td>
+        </tr><tr data-type="Complex loci in the Argand diagram (circles, half-lines, intersections)">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q2</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-complex-loci-in-the-argand-diagram-circles-half-lines-intersections">Complex loci in the Argand diagram (circles, half-lines, intersections)</a><div class="qtype-freeform">complex number loci and regions</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Complex loci in the Argand diagram (circles, half-lines, intersections)">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q7</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-complex-loci-in-the-argand-diagram-circles-half-lines-intersections">Complex loci in the Argand diagram (circles, half-lines, intersections)</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Modulus-argument form conversion and basic operations">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q1</td>
+            <td class="r">4m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-modulus-argument-form-conversion-and-basic-operations">Modulus-argument form conversion and basic operations</a><div class="qtype-freeform">further complex numbers basics</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q1.html">walkthrough →</a></td>
+        </tr><tr data-type="nth roots of complex numbers using De Moivre's theorem">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q6</td>
+            <td class="r">7m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-nth-roots-of-complex-numbers-using-de-moivre-s-theorem">nth roots of complex numbers using De Moivre's theorem</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Complex loci in the Argand diagram (circles, half-lines, intersections)">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q9</td>
+            <td class="r">8m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-complex-loci-in-the-argand-diagram-circles-half-lines-intersections">Complex loci in the Argand diagram (circles, half-lines, intersections)</a><div class="qtype-freeform">further complex numbers loci/roots</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q9.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>

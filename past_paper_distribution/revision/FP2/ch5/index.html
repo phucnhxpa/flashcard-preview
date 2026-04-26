@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FP2 · ch5 Second-order differential equations</title>
+<style>
+:root{
+  --ink:#1d1d1f; --ink-2:#2c2c2e; --muted:#6e6e73; --muted-2:#86868b;
+  --line:#d2d2d7; --bg:#fff; --bg-soft:#fbfbfd; --bg-tint:#f5f5f7;
+  --blue:#0071e3; --blue-soft:#e8f0fa; --blue-deep:#0033a0;
+  --orange:#ff9500; --green:#34c759; --purple:#af52de; --red:#ff3b30;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+a{color:var(--blue);text-decoration:none;} a:hover{text-decoration:underline;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar .crumbs span.sep{color:var(--muted-2);font-weight:400;margin:0 6px;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+.hero{max-width:var(--content-w);margin:0 auto;padding:64px 28px 24px;}
+.hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;
+}
+.hero h1{font-size:44px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:18px 0 10px;}
+.hero .lede{font-size:19px;color:var(--muted);max-width:820px;line-height:1.45;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:16px 24px;margin-top:22px;color:var(--muted-2);font-size:13.5px;}
+.hero .meta b{color:var(--ink);font-weight:600;}
+
+section{max-width:var(--content-w);margin:0 auto;padding:24px 28px 40px;}
+section h2{font-size:28px;letter-spacing:-0.012em;margin:0 0 6px;}
+section h3{font-size:20px;letter-spacing:-0.005em;margin:32px 0 10px;}
+section .note{color:var(--muted);font-size:14.5px;margin:0 0 18px;line-height:1.55;}
+
+/* unit cards on landing */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.unit-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 26px;transition:all .15s;
+}
+.unit-card:hover{border-color:#a1a1a6;box-shadow:0 4px 16px rgba(0,0,0,.04);}
+.unit-card .uc-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.unit-card h3{margin:6px 0 4px;font-size:24px;letter-spacing:-0.01em;}
+.unit-card p{color:var(--muted);font-size:14.5px;margin:0 0 16px;}
+.unit-card .ch-list{display:flex;flex-direction:column;gap:6px;}
+.unit-card .ch-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;background:var(--bg-soft);
+  text-decoration:none;color:inherit;
+  transition:background .15s;border:1px solid transparent;
+}
+.unit-card .ch-row:hover{background:#f0f0f5;border-color:var(--line);text-decoration:none;}
+.unit-card .ch-row .ch-name{font-size:14.5px;font-weight:500;}
+.unit-card .ch-row .ch-name .cn{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--muted-2);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:99px;margin-right:8px;font-weight:600;}
+.unit-card .ch-row .ch-stats{font-size:12.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;}
+
+/* chapter page */
+.summary-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin:8px 0 28px;}
+.summary-grid .stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;}
+.summary-grid .lbl{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.summary-grid .v{font-size:24px;font-weight:700;letter-spacing:-0.01em;margin-top:2px;}
+.summary-grid .v small{font-size:13px;color:var(--muted-2);font-weight:500;margin-left:4px;}
+
+.qtype-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:22px 24px 20px;margin-bottom:14px;
+}
+.qtype-card .qt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.qtype-card .qt-title{font-size:19px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);}
+.qtype-card .qt-stats{font-size:12.5px;color:var(--muted);white-space:nowrap;text-align:right;}
+.qtype-card .qt-stats .freq{font-size:18px;font-weight:700;color:var(--orange);font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-stats .marks{font-family:"SF Mono",Menlo,monospace;}
+.qtype-card .qt-look{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.55;}
+.qtype-card .qt-look b{color:var(--ink);font-weight:500;}
+.qtype-card .qt-section-h{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin:14px 0 6px;}
+.qtype-card .qt-strategy{font-size:14.5px;color:var(--ink-2);line-height:1.6;}
+.qtype-card .qt-strategy ol{margin:6px 0 0;padding-left:22px;}
+.qtype-card .qt-strategy ol li{margin-bottom:4px;}
+.qtype-card .qt-formula-list{display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.qtype-card .qt-formula-list .item{padding:8px 12px;background:var(--bg-soft);border-radius:8px;}
+.qtype-card .qt-pitfalls{font-size:13.5px;color:var(--muted);margin:0;padding-left:22px;}
+.qtype-card .qt-pitfalls li{margin-bottom:4px;color:var(--ink-2);}
+.qtype-card .qt-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qtype-card .qt-examples .ex-chip{
+  display:inline-flex;align-items:stretch;gap:0;
+  background:var(--blue-soft);border-radius:99px;overflow:hidden;
+  font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--blue-deep);font-weight:600;
+}
+.qtype-card .qt-examples .ex-chip > a:first-child{
+  padding:4px 10px;color:inherit;
+}
+.qtype-card .qt-examples .ex-chip > span:first-child{
+  padding:4px 10px;
+}
+.qtype-card .qt-examples .ex-chip a:hover{text-decoration:none;background:rgba(0,113,227,.12);}
+.qtype-card .qt-examples .pdf-mini{
+  padding:4px 8px;background:rgba(0,113,227,.18);color:var(--blue-deep);
+  font-size:10.5px;font-weight:700;border-left:1px solid rgba(0,113,227,.18);
+  display:inline-flex;align-items:center;
+}
+.qtype-card .qt-examples .pdf-mini:hover{background:rgba(0,113,227,.32);text-decoration:none;}
+
+/* Cheatsheet table (the breakdown) */
+table.cheatsheet{
+  width:100%;border-collapse:collapse;margin:16px 0 8px;font-size:14px;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;
+}
+table.cheatsheet th{
+  text-align:left;width:120px;padding:14px 14px;
+  font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+  vertical-align:top;border-right:1px solid var(--line);background:#fff;
+}
+table.cheatsheet td{padding:14px 18px;border-top:1px solid var(--line);background:#fff;vertical-align:top;line-height:1.55;}
+table.cheatsheet tr:first-child th, table.cheatsheet tr:first-child td{border-top:none;}
+table.cheatsheet ul.cs-list, table.cheatsheet ol.cs-list{
+  margin:0;padding-left:20px;
+}
+table.cheatsheet ul.cs-list li, table.cheatsheet ol.cs-list li{
+  margin-bottom:6px;color:var(--ink-2);
+}
+table.cheatsheet ol.cs-steps{margin:6px 0 4px;padding-left:22px;}
+table.cheatsheet ol.cs-steps li{margin-bottom:4px;color:var(--ink-2);}
+table.cheatsheet .chip-trigger{
+  display:inline-block;font-size:12px;background:#fef3c7;color:#915d10;
+  padding:3px 10px;border-radius:99px;margin:2px 4px 2px 0;font-weight:600;
+}
+
+/* Approach card */
+.approach-card{
+  border-left:3px solid var(--purple);
+  background:#fff;
+  padding:10px 12px 12px 14px;margin:10px 0;
+  border-radius:0 8px 8px 0;
+}
+.approach-card:first-child{margin-top:0;}
+.approach-head{margin-bottom:6px;}
+.approach-name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.approach-when{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.approach-pc{font-size:13px;color:var(--ink-2);margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* Formula list */
+.cs-formula-list{display:flex;flex-direction:column;gap:8px;}
+.cs-formula{padding:10px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.5;}
+
+/* PDF link button */
+.pdf-links{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:8px;
+  background:#fff;border:1px solid var(--line);
+  font-size:13.5px;font-weight:500;color:var(--ink);
+  transition:all .15s;
+}
+.pdf-link:hover{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-deep);text-decoration:none;}
+.pdf-link.ms{border-color:#f5d18e;color:#915d10;}
+.pdf-link.ms:hover{background:#fff8eb;border-color:var(--orange);}
+
+/* must-memorize banner */
+.memorize-banner{
+  background:linear-gradient(180deg, #fff8eb 0%, #fff 100%);
+  border:1px solid #f5d18e;border-radius:var(--r-md);
+  padding:18px 22px;margin:16px 0 24px;
+}
+.memorize-banner h3{margin:0 0 10px;font-size:15px;color:#915d10;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.memorize-banner ul{margin:0;padding-left:22px;}
+.memorize-banner ul li{margin-bottom:6px;font-size:14px;color:var(--ink-2);}
+
+.global-strategy{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px 24px;margin:14px 0;}
+.global-strategy ul{margin:0;padding-left:22px;font-size:14.5px;line-height:1.65;}
+.global-strategy ul li{margin-bottom:6px;color:var(--ink-2);}
+
+.exam-tips{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin:14px 0 30px;}
+.exam-tips h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue-deep);font-weight:700;}
+.exam-tips ol{margin:0;padding-left:22px;font-size:14px;line-height:1.6;color:var(--ink-2);}
+
+/* questions table */
+.q-table-wrap{margin-top:28px;}
+.q-table-wrap h3{margin-bottom:8px;}
+.q-table-wrap .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.q-table-wrap .filter-row select{
+  appearance:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 32px 7px 12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3e%3cpath fill='%2386868b' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+table.qs{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+table.qs th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:10px 14px;background:var(--bg-soft);border-bottom:1px solid var(--line);text-align:left;}
+table.qs th.r{text-align:right;}
+table.qs td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.qs td.r{text-align:right;font-family:"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:13px;}
+table.qs tbody tr:hover{background:var(--bg-tint);}
+table.qs tbody tr:last-child td{border-bottom:none;}
+table.qs td.session{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted-2);font-weight:500;}
+table.qs td.qtype{color:var(--ink-2);}
+table.qs a.qlink{font-weight:500;}
+
+/* question detail page */
+.q-detail{max-width:900px;margin:0 auto;}
+.q-detail .q-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;color:var(--muted);font-size:13.5px;align-items:center;}
+.q-detail .q-meta .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;font-family:"SF Mono",Menlo,monospace;}
+.q-detail .q-meta .pill.session{background:var(--blue-soft);color:var(--blue-deep);}
+.q-detail .q-meta .pill.marks{background:#fef3c7;color:#915d10;}
+.q-detail .q-meta .pill.type{background:#dcfce7;color:#0f7a32;font-family:inherit;}
+.q-detail .q-meta .pill.pill-link{text-decoration:none;cursor:pointer;}
+.q-detail .q-meta .pill.pill-link:hover{background:#bbf7d0;text-decoration:underline;}
+.q-detail .q-meta .pill.type-freeform{background:var(--bg-tint);color:var(--muted);font-family:"SF Mono",Menlo,monospace;font-size:11px;font-weight:400;}
+table.qs td.qtype .qtype-link{color:var(--blue);text-decoration:none;font-weight:500;}
+table.qs td.qtype .qtype-link:hover{text-decoration:underline;}
+table.qs td.qtype .qtype-freeform{font-size:10.5px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;margin-top:3px;line-height:1.3;}
+.qtype-card{scroll-margin-top:90px;}
+.qtype-card:target{animation:flash 1.6s ease-out;}
+@keyframes flash{0%{background:rgba(0,113,227,0.12);}100%{background:transparent;}}
+
+/* Chapter-level stats panel */
+.ch-stats-panel{
+  background:linear-gradient(135deg, var(--bg-soft) 0%, var(--blue-soft) 100%);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:18px 22px;margin-bottom:24px;
+}
+.ch-stats-panel .ch-stats-head{margin-bottom:14px;}
+.ch-stats-panel .ch-stats-title{font-size:13px;color:var(--blue-deep);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ch-stats-panel .ch-stats-subline{font-size:13.5px;color:var(--ink-2);}
+.ch-stats-panel .ch-stats-subline b{color:var(--blue-deep);font-weight:700;}
+
+/* Per-type stats panel */
+.qt-stats-panel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px 16px;margin:12px 0 16px;
+}
+.qt-stats-panel .stat-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin-bottom:14px;}
+.qt-stats-panel .stat-cell{text-align:center;padding:6px 4px;border-right:1px solid var(--line);}
+.qt-stats-panel .stat-cell:last-child{border-right:none;}
+.qt-stats-panel .stat-v{font-size:18px;font-weight:700;color:var(--ink);font-family:"SF Mono",Menlo,monospace;letter-spacing:-.01em;}
+.qt-stats-panel .stat-l{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin-top:2px;}
+
+/* Sparkbars */
+.spark-label{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px;}
+.year-spark{display:flex;align-items:flex-end;gap:6px;height:60px;padding:6px 0 0;}
+.year-spark-large{height:100px;gap:8px;}
+.year-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;position:relative;height:100%;}
+.year-bar .bar-fill{
+  width:80%;background:var(--blue);border-radius:4px 4px 0 0;
+  min-height:1px;transition:opacity .15s;
+}
+.year-bar .bar-fill.ch-bar{background:linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);}
+.year-bar:hover .bar-fill{opacity:.7;}
+.year-bar .bar-lbl{font-size:9.5px;color:var(--muted);font-family:"SF Mono",Menlo,monospace;margin-top:3px;}
+.year-bar .bar-val{font-size:10px;color:var(--muted-2);font-family:"SF Mono",Menlo,monospace;line-height:1;position:absolute;top:-13px;font-weight:600;}
+.year-spark-large .bar-val{font-size:11px;color:var(--blue-deep);font-weight:700;top:-14px;}
+
+/* Rank pill */
+.qt-title-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--bg-tint);color:var(--muted);font-size:10.5px;font-weight:700;font-family:"SF Mono",Menlo,monospace;letter-spacing:.02em;}
+.rank-pill.rank-top{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;text-transform:uppercase;letter-spacing:.04em;}
+.q-detail h1{font-size:28px;letter-spacing:-0.012em;margin:6px 0 12px;}
+.q-detail .stem-box{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:16px 20px;margin:14px 0 22px;font-size:14.5px;line-height:1.6;
+}
+.q-detail .stem-box pre{margin:0;font-family:"SF Mono",Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink-2);}
+
+.q-detail .walkthrough{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:24px 28px;font-size:15px;line-height:1.65;
+}
+.q-detail .walkthrough h3{margin:18px 0 8px;font-size:16px;letter-spacing:0;color:var(--blue-deep);}
+.q-detail .walkthrough h2{margin:20px 0 8px;font-size:18px;}
+.q-detail .walkthrough p{margin:8px 0;}
+.q-detail .walkthrough ul, .q-detail .walkthrough ol{margin:6px 0;padding-left:22px;}
+.q-detail .walkthrough strong{font-weight:600;color:var(--ink);}
+.q-detail .walkthrough .answer-line{
+  background:#dcfce7;border-left:3px solid var(--green);padding:8px 14px;margin:14px 0;
+  font-weight:500;border-radius:0 8px 8px 0;
+}
+
+/* Original question image */
+.q-image-wrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:14px;margin:8px 0 22px;text-align:center;
+  box-shadow:0 4px 24px rgba(0,0,0,.04);
+}
+.q-image-wrap img{max-width:100%;height:auto;border-radius:6px;}
+
+/* Stem fallback (collapsed) */
+details.stem-fallback{
+  margin:8px 0 18px;font-size:13px;color:var(--muted);
+}
+details.stem-fallback summary{
+  cursor:pointer;color:var(--muted-2);font-weight:500;padding:6px 0;
+}
+details.stem-fallback summary:hover{color:var(--ink);}
+details.stem-fallback .stem-box{margin-top:6px;}
+
+.tech-pitfalls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tech-pitfalls .box{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;}
+.tech-pitfalls .box h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.tech-pitfalls .box ul{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;}
+.tech-pitfalls .box ul li{margin-bottom:5px;}
+
+footer{max-width:var(--content-w);margin:0 auto;padding:48px 28px 60px;border-top:1px solid var(--line);margin-top:60px;color:var(--muted-2);font-size:13px;text-align:center;}
+
+@media (max-width:880px){
+  .unit-grid, .summary-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:1fr 1fr;}
+  .tech-pitfalls{grid-template-columns:1fr;}
+  .hero h1{font-size:32px;}
+  .q-detail h1{font-size:22px;}
+}
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+
+</head>
+<body>
+<div class="topbar">
+  <div class="crumbs"><a href="../../">revision</a><span class="sep">/</span><a href="../">FP2</a><span class="sep">/</span>ch5 Second-order differential equations</div>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../strategy/">strategy</a>
+    <a href="../per_paper_70/">70% per paper</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">📘 FP2 · ch5</div>
+  <h1>Second-order differential equations</h1>
+  <p class="lede">Every FP2 past-paper question primarily testing this chapter, with intuitive worked solutions and a strategy playbook synthesized across 10 questions.</p>
+  <p style="margin-top:12px;"><a href="../cheatsheet.html" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--blue-soft);color:var(--blue-deep);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📋 FP2 master cheatsheet (all chapters)</a></p>
+</div>
+<section>
+  <div class="summary-grid">
+    <div class="stat"><div class="lbl">Questions</div><div class="v">10</div></div>
+    <div class="stat"><div class="lbl">Total marks</div><div class="v">115<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Avg / question</div><div class="v">12<small>m</small></div></div>
+    <div class="stat"><div class="lbl">Past papers covered</div><div class="v">10</div></div>
+  </div>
+
+  <div class="ch-stats-panel">
+  <div class="ch-stats-head">
+    <div class="ch-stats-title">📊 Chapter footprint across years</div>
+    <div class="ch-stats-subline">10 questions · 115 marks across 10 papers · <b>15.3%</b> of all unit marks · <b>11.9%</b> of all unit questions</div>
+  </div>
+  <div class="spark-label">% of paper marks tested in this chapter, by year</div>
+  <div class="year-spark year-spark-large"><div class="year-bar" title="2018: 1 q · 13/75 marks (17.3% of paper)">
+                <div class="bar-fill ch-bar" style="height:100%"></div>
+                <div class="bar-lbl">'18</div>
+                <div class="bar-val">17.3%</div>
+            </div><div class="year-bar" title="2021: 3 q · 36/225 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:92%"></div>
+                <div class="bar-lbl">'21</div>
+                <div class="bar-val">16.0%</div>
+            </div><div class="year-bar" title="2022: 2 q · 18/150 marks (12.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:69%"></div>
+                <div class="bar-lbl">'22</div>
+                <div class="bar-val">12.0%</div>
+            </div><div class="year-bar" title="2023: 2 q · 24/150 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:92%"></div>
+                <div class="bar-lbl">'23</div>
+                <div class="bar-val">16.0%</div>
+            </div><div class="year-bar" title="2024: 2 q · 24/150 marks (16.0% of paper)">
+                <div class="bar-fill ch-bar" style="height:92%"></div>
+                <div class="bar-lbl">'24</div>
+                <div class="bar-val">16.0%</div>
+            </div></div>
+</div>
+
+  <h2>Question types</h2>
+  <p class="note">Distinct question patterns identified across all 10 questions in this chapter — each with its own playbook.</p>
+  <div class="qtype-card" id="type-second-order-ode-with-general-forcing-and-boundary-conditions">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Second-order ODE with general forcing and boundary conditions</div>
+                    <span class="rank-pill rank-top">#1 most important</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">4</span><small>×</small></div>
+                    <div class="marks">10-14m</div>
+                </div>
+            </div>
+            <p class="qt-look">A standard second-order constant-coefficient ODE with a non-zero RHS (could be exponential, trig, or polynomial). The question provides boundary conditions (e.g. $y(0)=k_1$, $y'(0)=k_2$, or conditions at specific $x$-values) and asks for the complete particular solution. This is the 'workhorse' question of the chapter.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">4</div><div class="stat-l">questions in 3 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">50</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">40.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">43.5%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">12.5</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:54%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:54%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2024: 2 q · 24 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">24</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">boundary conditions</span><span class="chip-trigger">particular solution</span><span class="chip-trigger">y(0) =</span><span class="chip-trigger">y'(0) =</span><span class="chip-trigger">when x =</span><span class="chip-trigger">find the solution</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The general solution must be fully determined — both arbitrary constants found from conditions</li><li>Boundary conditions may be given at the same point (initial value problem) or at different points</li><li>The solution must be stated clearly in the form $y = \ldots$ with no arbitrary constants remaining</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: CF + PI then apply conditions</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always — this is the standard structured approach</div>
+                <ol class='cs-steps'><li>1. Form and solve the auxiliary equation.</li><li>2. Write the CF with arbitrary constants $A$ and $B$.</li><li>3. Choose the correct PI trial form (check for duplication with CF).</li><li>4. Find PI by substitution and coefficient comparison.</li><li>5. Write the general solution $y = \text{CF} + \text{PI}$.</li><li>6. Differentiate the general solution to get $\frac{dy}{dx}$.</li><li>7. Substitute the first boundary condition into $y$ (or $y'$) to get equation (i).</li><li>8. Substitute the second boundary condition to get equation (ii).</li><li>9. Solve simultaneous equations (i) and (ii) for $A$ and $B$.</li><li>10. Write the final particular solution.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Covers every case; marks are awarded at each stage so partial credit is available</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Long working — differentiation of the general solution can be complex, especially with exponentials and trig combined</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\text{Distinct real roots } m_1, m_2: \text{CF} = Ae^{m_1 x} + Be^{m_2 x}$ (formula booklet)</div><div class="cs-formula">$\text{Repeated root } m: \text{CF} = (A + Bx)e^{mx}$ (formula booklet)</div><div class="cs-formula">$\text{Complex roots } p \pm qi: \text{CF} = e^{px}(A\cos qx + B\sin qx)$ (formula booklet)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to differentiate the PI as well as the CF when computing $y'$ for boundary conditions</li><li>Making sign errors when evaluating $e^0 = 1$, $\cos 0 = 1$, $\sin 0 = 0$ at boundary points</li><li>Confusing $y(0) = k$ (condition on $y$) with $y'(0) = k$ (condition on $y'$) — check carefully</li><li>Algebraic errors in simultaneous equations for $A$ and $B$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2023-Q9.html">Jan 2023 Q9</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jan_2024-Q6.html">Jan 2024 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2024-Q8.html">Jun 2024 Q8</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2024_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Specimen_2018-Q6.html">Specimen 2018 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Specimen_2018_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-second-order-ode-with-exponential-forcing-where-pi-duplicates-cf">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Second-order ODE with exponential forcing where PI duplicates CF</div>
+                    <span class="rank-pill">#2</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">3</span><small>×</small></div>
+                    <div class="marks">6-12m</div>
+                </div>
+            </div>
+            <p class="qt-look">An ODE $a\frac{d^2y}{dx^2} + b\frac{dy}{dx} + cy = ke^{\alpha x}$ where $e^{\alpha x}$ already appears in the complementary function. The question tests whether the student modifies the PI trial by multiplying by $x$ (or $x^2$ for repeated roots).</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">3</div><div class="stat-l">questions in 2 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">29</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">30.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">25.2%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.7</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2022: 2 q · 18 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">18</div>
+                </div><div class="year-bar" title="2023: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:61%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">exponential RHS</span><span class="chip-trigger">e^{kx}</span><span class="chip-trigger">general solution</span><span class="chip-trigger">particular integral</span><span class="chip-trigger">duplicates CF</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The ODE has constant coefficients</li><li>If $e^{\alpha x}$ appears in the CF, the standard trial $y_p = \lambda e^{\alpha x}$ will fail (gives zero when substituted)</li><li>If $\alpha$ is a simple root of the auxiliary equation, multiply trial by $x$; if repeated root, multiply by $x^2$</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Modified PI trial (multiply by x)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the standard exponential PI trial $\lambda e^{\alpha x}$ duplicates a term in the CF</div>
+                <ol class='cs-steps'><li>1. Form the auxiliary equation $am^2 + bm + c = 0$ and solve.</li><li>2. Write the CF based on roots.</li><li>3. Check: does $e^{\alpha x}$ (the RHS exponential) already appear in the CF?</li><li>4. If YES (simple root): try $y_p = \lambda x e^{\alpha x}$. If YES (repeated root): try $y_p = \lambda x^2 e^{\alpha x}$.</li><li>5. Differentiate $y_p$ using the product rule: $y_p' = \lambda e^{\alpha x}(1 + \alpha x)$ for the $\lambda x e^{\alpha x}$ case.</li><li>6. Find $y_p''$ (product rule again).</li><li>7. Substitute into the ODE and solve for $\lambda$.</li><li>8. General solution = CF + PI.</li><li>9. Apply boundary/initial conditions if given.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Directly addresses the duplication issue; once recognized, the method is straightforward</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Product rule differentiation of $\lambda x e^{\alpha x}$ or $\lambda x^2 e^{\alpha x}$ is error-prone</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Standard PI trial (no duplication)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When $e^{\alpha x}$ does NOT appear in the CF — use the simple trial $y_p = \lambda e^{\alpha x}$</div>
+                <ol class='cs-steps'><li>1. Form and solve the auxiliary equation.</li><li>2. Write the CF.</li><li>3. Confirm $e^{\alpha x}$ is NOT in the CF.</li><li>4. Try $y_p = \lambda e^{\alpha x}$.</li><li>5. Find $y_p' = \lambda \alpha e^{\alpha x}$ and $y_p'' = \lambda \alpha^2 e^{\alpha x}$.</li><li>6. Substitute into the ODE and solve for $\lambda$.</li><li>7. General solution = CF + PI.</li><li>8. Apply conditions to find constants.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Simpler algebra with no product rule needed</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Only valid when there is no duplication — must check first</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\text{Standard PI trial: } y_p = \lambda e^{\alpha x}$ (MEMORIZE)</div><div class="cs-formula">$\text{Modified PI trial (simple root duplication): } y_p = \lambda x e^{\alpha x}$ (MEMORIZE)</div><div class="cs-formula">$\text{Modified PI trial (repeated root duplication): } y_p = \lambda x^2 e^{\alpha x}$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[x e^{\alpha x}] = e^{\alpha x}(1 + \alpha x)$ (MEMORIZE — product rule result)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to multiply the trial PI by $x$ when $e^{\alpha x}$ already appears in the CF — the most common error across all sessions</li><li>Errors in applying the product rule when differentiating $\lambda x e^{\alpha x}$, especially missing terms in the second derivative</li><li>Not recognizing that a repeated auxiliary root requires multiplication by $x^2$ rather than just $x$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2022-Q2.html">Jan 2022 Q2</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2022-Q7.html">Jun 2022 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2022_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span><span class="ex-chip"><a href="q-Jun_2023-Q4.html">Jun 2023 Q4</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2023_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-second-order-ode-with-polynomial-forcing">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Second-order ODE with polynomial forcing</div>
+                    <span class="rank-pill">#3</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">13m</div>
+                </div>
+            </div>
+            <p class="qt-look">An ODE of the form $a\frac{d^2y}{dx^2} + b\frac{dy}{dx} + cy = p(x)$ where $p(x)$ is a polynomial (e.g. $3x+2$, $x^2-1$). The question asks for CF, PI, general solution, and particular solution using initial conditions.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">13</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">11.3%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">13.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 13 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">13</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">polynomial RHS</span><span class="chip-trigger">ax + b</span><span class="chip-trigger">ax² + bx + c</span><span class="chip-trigger">initial conditions</span><span class="chip-trigger">general solution</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The ODE has constant coefficients</li><li>The PI trial polynomial must be of the same degree as the RHS polynomial</li><li>Include ALL terms down to the constant term in the PI trial, even if they are absent in the RHS</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Polynomial PI trial with undetermined coefficients</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the RHS $f(x)$ is a polynomial of degree $n$</div>
+                <ol class='cs-steps'><li>1. Form and solve the auxiliary equation for the CF.</li><li>2. Write the CF.</li><li>3. If RHS is degree $n$, try $y_p = a_n x^n + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0$.</li><li>4. Differentiate $y_p$ to get $y_p'$ and $y_p''$.</li><li>5. Substitute into the ODE.</li><li>6. Compare coefficients of each power of $x$ on both sides.</li><li>7. Solve the resulting system for $a_0, a_1, \ldots, a_n$ (work from highest power down).</li><li>8. General solution = CF + PI.</li><li>9. Apply initial/boundary conditions.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic — comparing coefficients always works for polynomials</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Easy to lose the constant term; fraction arithmetic can be messy</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\text{For RHS } = ax+b, \text{ try } y_p = \lambda x + \mu$ (MEMORIZE)</div><div class="cs-formula">$\text{For RHS } = ax^2+bx+c, \text{ try } y_p = \lambda x^2 + \mu x + \nu$ (MEMORIZE)</div><div class="cs-formula">$\text{If } c=0 \text{ in the ODE (no } y \text{ term), multiply PI trial by } x$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting the constant term in the polynomial trial — e.g. trying $y_p = \lambda x$ instead of $y_p = \lambda x + \mu$ when the RHS is linear</li><li>Arithmetic errors when comparing coefficients, especially with fractions</li><li>If $c=0$ in the ODE, the standard polynomial trial fails and must be multiplied by $x$</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jun_2021-Q6.html">Jun 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jun_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-second-order-ode-with-trigonometric-forcing-rhs-trig-function">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Second-order ODE with trigonometric forcing (RHS = trig function)</div>
+                    <span class="rank-pill">#4</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">12m</div>
+                </div>
+            </div>
+            <p class="qt-look">An ODE of the form $a\frac{d^2y}{dx^2} + b\frac{dy}{dx} + cy = f(x)$ where $f(x)$ involves $\sin(kx)$ and/or $\cos(kx)$. The question asks for the general solution and then applies initial/boundary conditions to find a particular solution.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">12</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.4%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">12.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 12 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">12</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">sin</span><span class="chip-trigger">cos</span><span class="chip-trigger">trigonometric RHS</span><span class="chip-trigger">d²y/dx²</span><span class="chip-trigger">initial conditions</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The ODE has constant coefficients throughout</li><li>The particular integral must contain BOTH $\sin(kx)$ and $\cos(kx)$ terms even if the RHS contains only one of them</li><li>If the RHS trig function has the same frequency as a CF term (e.g. when auxiliary roots are purely imaginary), the PI trial must be modified</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Standard CF + PI method (trig trial)</span>
+                </div>
+                <div class="approach-when"><b>When:</b> Always the primary method for constant-coefficient second-order ODEs with trig forcing</div>
+                <ol class='cs-steps'><li>1. Write the auxiliary equation $am^2 + bm + c = 0$ and solve for $m$.</li><li>2. Write the complementary function (CF) based on roots: distinct real → $Ae^{m_1x}+Be^{m_2x}$; repeated → $(A+Bx)e^{mx}$; complex $p\pm qi$ → $e^{px}(A\cos qx + B\sin qx)$.</li><li>3. For PI trial, use $y_p = \lambda\cos(kx) + \mu\sin(kx)$. Include BOTH terms even if the RHS has only $\cos$ or only $\sin$.</li><li>4. Differentiate $y_p$ to find $y_p'$ and $y_p''$.</li><li>5. Substitute $y_p$, $y_p'$, $y_p''$ into the ODE.</li><li>6. Compare coefficients of $\cos(kx)$ and $\sin(kx)$ on both sides to form simultaneous equations in $\lambda$ and $\mu$.</li><li>7. Solve for $\lambda$ and $\mu$.</li><li>8. General solution: $y = \text{CF} + \text{PI}$.</li><li>9. Apply initial/boundary conditions to find $A$ and $B$.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Systematic and always works for trig forcing with constant coefficients</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Algebra can be heavy with multiple trig terms; easy to make sign errors</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\text{Auxiliary equation: } am^2 + bm + c = 0$ (MEMORIZE)</div><div class="cs-formula">$\text{Complex roots } p \pm qi \Rightarrow \text{CF} = e^{px}(A\cos qx + B\sin qx)$ (formula booklet)</div><div class="cs-formula">$\text{Trig PI trial: } y_p = \lambda\cos(kx) + \mu\sin(kx)$ (MEMORIZE)</div><div class="cs-formula">$\frac{d}{dx}[\sin(kx)] = k\cos(kx),\quad \frac{d}{dx}[\cos(kx)] = -k\sin(kx)$ (MEMORIZE)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to include both $\cos(kx)$ and $\sin(kx)$ in the PI trial — even if only one appears on the RHS</li><li>Sign errors when differentiating trig terms, especially the minus sign in $\frac{d}{dx}[\cos(kx)] = -k\sin(kx)$</li><li>Errors in simultaneous equations when comparing coefficients</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Jan_2021-Q6.html">Jan 2021 Q6</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Jan_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div><div class="qtype-card" id="type-second-order-ode-requiring-substitution-transformation-to-constant-coefficients">
+            <div class="qt-head">
+                <div class="qt-title-wrap">
+                    <div class="qt-title">Second-order ODE requiring substitution/transformation to constant coefficients</div>
+                    <span class="rank-pill">#5</span>
+                </div>
+                <div class="qt-stats">
+                    <div><span class="freq">1</span><small>×</small></div>
+                    <div class="marks">11m</div>
+                </div>
+            </div>
+            <p class="qt-look">An ODE with variable coefficients (e.g. involving $x$, $x^2$, etc. as coefficients of derivatives). A substitution such as $x = t^2$ or $x = e^t$ is given or implied. The student must transform the ODE into a standard constant-coefficient form, solve it, then back-substitute.</p>
+            <div class="qt-stats-panel">
+                <div class="stat-row">
+                    <div class="stat-cell"><div class="stat-v">1</div><div class="stat-l">questions in 1 years</div></div>
+                    <div class="stat-cell"><div class="stat-v">11</div><div class="stat-l">total marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">10.0%</div><div class="stat-l">of ch. questions</div></div>
+                    <div class="stat-cell"><div class="stat-v">9.6%</div><div class="stat-l">of ch. marks</div></div>
+                    <div class="stat-cell"><div class="stat-v">11.0</div><div class="stat-l">avg marks/q</div></div>
+                </div>
+                <div class="spark-label">Marks per year</div>
+                <div class="year-spark"><div class="year-bar" title="2018: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'18</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2021: 1 q · 11 marks">
+                    <div class="bar-fill" style="height:100%"></div>
+                    <div class="bar-lbl">'21</div>
+                    <div class="bar-val">11</div>
+                </div><div class="year-bar" title="2022: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'22</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2023: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'23</div>
+                    <div class="bar-val">–</div>
+                </div><div class="year-bar" title="2024: 0 q · 0 marks">
+                    <div class="bar-fill" style="height:0%"></div>
+                    <div class="bar-lbl">'24</div>
+                    <div class="bar-val">–</div>
+                </div></div>
+            </div>
+            <table class="cheatsheet"><tr><th>Triggers</th><td><span class="chip-trigger">substitution</span><span class="chip-trigger">let x =</span><span class="chip-trigger">let t =</span><span class="chip-trigger">variable coefficients</span><span class="chip-trigger">transform</span><span class="chip-trigger">show that</span><span class="chip-trigger">hence solve</span></td></tr><tr><th>Assumptions</th><td><ul class="cs-list"><li>The substitution is usually given in the question — do not need to derive it</li><li>Chain rule must be applied carefully for $\frac{dy}{dx}$ and $\frac{d^2y}{dx^2}$ in terms of the new variable</li><li>The transformed ODE should have constant coefficients; if it doesn't, recheck the chain rule working</li><li>After solving, the answer must be expressed in the original variable</li></ul></td></tr><tr><th>Approaches</th><td><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">A: Chain rule substitution → solve transformed ODE → back-substitute</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the ODE has variable coefficients and a substitution is given</div>
+                <ol class='cs-steps'><li>1. Let $x = g(t)$ (as given). Find $\frac{dx}{dt}$.</li><li>2. Use chain rule: $\frac{dy}{dx} = \frac{dy}{dt} \cdot \frac{dt}{dx} = \frac{dy/dt}{dx/dt}$.</li><li>3. For $\frac{d^2y}{dx^2}$, use $\frac{d^2y}{dx^2} = \frac{d}{dx}\left(\frac{dy}{dx}\right) = \frac{1}{dx/dt}\cdot\frac{d}{dt}\left(\frac{dy}{dx}\right)$.</li><li>4. Substitute expressions for $\frac{dy}{dx}$, $\frac{d^2y}{dx^2}$, and $x = g(t)$ into the original ODE.</li><li>5. Simplify to obtain a constant-coefficient ODE in $t$.</li><li>6. Solve the transformed ODE using the standard CF + PI method.</li><li>7. Back-substitute to express the solution in terms of the original variable $x$.</li><li>8. Apply any boundary conditions (which may need converting to the new variable first).</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> Converts an otherwise unsolvable variable-coefficient ODE into a tractable constant-coefficient one</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> The chain rule for the second derivative is complex and highly error-prone; many marks can be lost in step 3</div>
+                </div>
+            </div><div class="approach-card">
+                <div class="approach-head">
+                    <span class="approach-name">B: Verify 'show that' result then proceed</span>
+                </div>
+                <div class="approach-when"><b>When:</b> When the question says 'show that the equation can be written as...' — use the given answer to check your working before proceeding</div>
+                <ol class='cs-steps'><li>1. Attempt the chain rule substitution as in Approach A.</li><li>2. Compare your transformed ODE with the one given in the question.</li><li>3. If they match, proceed to solve. If not, re-examine the chain rule steps.</li><li>4. Solve the constant-coefficient ODE.</li><li>5. Back-substitute and apply conditions.</li></ol>
+                <div class="approach-pc">
+                    <div><b style="color:#0f7a32">+ Pros:</b> The 'show that' structure means you can verify correctness before committing to the rest of the question</div>
+                    <div><b style="color:#a24d3b">– Cons:</b> Even if the 'show that' part goes wrong, you should use the given result for subsequent parts to avoid losing all marks</div>
+                </div>
+            </div></td></tr><tr><th>Formulas</th><td><div class="cs-formula-list"><div class="cs-formula">$\frac{dy}{dx} = \frac{dy/dt}{dx/dt}$ (MEMORIZE — chain rule for first derivative)</div><div class="cs-formula">$\frac{d^2y}{dx^2} = \frac{1}{dx/dt} \cdot \frac{d}{dt}\left(\frac{dy}{dx}\right)$ (MEMORIZE — chain rule for second derivative)</div><div class="cs-formula">$\text{For } x = e^t: \frac{dy}{dx} = e^{-t}\frac{dy}{dt},\quad x^2\frac{d^2y}{dx^2} = \frac{d^2y}{dt^2} - \frac{dy}{dt}$ (MEMORIZE — Euler–Cauchy transformation)</div></div></td></tr><tr><th>Pitfalls</th><td><ul class="cs-list"><li>Forgetting to apply the product rule when computing $\frac{d^2y}{dx^2}$ via the chain rule — the most common error</li><li>Failing to express ALL terms in the new variable (leaving a stray $x$ when everything should be in $t$)</li><li>Forgetting to back-substitute to the original variable at the end</li><li>Not converting boundary conditions to the new variable before applying them</li></ul></td></tr></table>
+            
+            <div class="qt-section-h">From past papers</div><div class="qt-examples"><span class="ex-chip"><a href="q-Oct_2021-Q7.html">Oct 2021 Q7</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_QP.pdf" target="_blank" title="Original Question Paper">QP</a><a class="pdf-mini" href="../../pdfs/FP2/Oct_2021_MS.pdf" target="_blank" title="Original Mark Scheme">MS</a></span></div>
+        </div>
+
+  <div class="memorize-banner">
+            <h3>Must memorize</h3>
+            <ul><li>$\text{Auxiliary equation: } am^2 + bm + c = 0 \text{ from } a\frac{d^2y}{dx^2} + b\frac{dy}{dx} + cy = f(x)$ (MEMORIZE — deriving it wastes time)</li><li>$\text{Distinct real roots } m_1 \neq m_2: y_{CF} = Ae^{m_1x} + Be^{m_2x}$ (formula booklet)</li><li>$\text{Repeated root } m: y_{CF} = (A + Bx)e^{mx}$ (formula booklet)</li><li>$\text{Complex conjugate roots } p \pm qi: y_{CF} = e^{px}(A\cos qx + B\sin qx)$ (formula booklet)</li><li>$\text{PI trial forms — Exponential: } \lambda e^{\alpha x}$ ; Trig: $\lambda\cos kx + \mu\sin kx$ ; Polynomial degree $n$: $a_nx^n + \cdots + a_0$ (MEMORIZE)</li><li>$\text{Duplication rule: if PI trial duplicates CF, multiply by } x \text{ (or } x^2 \text{ for repeated roots)}$ (MEMORIZE — critical rule)</li><li>$\text{Chain rule for second derivative: } \frac{d^2y}{dx^2} = \frac{1}{dx/dt}\cdot\frac{d}{dt}\left(\frac{dy}{dx}\right)$ (MEMORIZE)</li></ul>
+        </div>
+  <h3>Global strategy</h3>
+        <div class="global-strategy"><ul><li>Every question follows the same skeleton: (1) auxiliary equation → (2) CF → (3) PI → (4) general solution → (5) particular solution via conditions. Master this flow and apply it consistently.</li><li>The auxiliary equation is the gateway: solve it correctly (discriminant, complex roots, repeated roots) and the CF writes itself. Triple-check your factorisation.</li><li>PI duplication check is the single most important decision point: ALWAYS compare your PI trial with EVERY term in the CF before proceeding. If there's overlap, multiply by $x$ (or $x^2$).</li><li>When the RHS is trig, ALWAYS include both $\sin$ and $\cos$ in the PI trial, regardless of whether only one appears on the RHS.</li><li>When comparing coefficients, organise your working in a table/column format to avoid sign errors — this is where most marks are lost.</li><li>After finding the general solution, differentiate it fully (including the PI part) before applying boundary conditions. Many students forget to differentiate the PI.</li><li>For substitution questions, write out the chain rule steps explicitly and verify intermediate results against any 'show that' target before continuing.</li><li>Always state your final answer clearly, substituting the values of all constants (A, B, λ, μ) back in.</li></ul></div>
+  <div class="exam-tips">
+            <h3>Exam tips</h3>
+            <ol><li>Read the entire question first — the RHS of the ODE determines your PI trial, and boundary conditions tell you how many marks are in the final part.</li><li>Write the auxiliary equation and solve it as the very first step — this typically earns 2-3 easy marks and structures your entire solution.</li><li>Before choosing your PI trial, write the CF out fully and explicitly check each term against the RHS form. Circle any duplication.</li><li>When comparing coefficients, write 'Comparing coefficients of $\cos kx$:' and 'Comparing coefficients of $\sin kx$:' on separate lines — examiners award method marks for this structure.</li><li>If you get a 'show that' part, use the given result even if you couldn't prove it — you'll still earn marks for subsequent parts.</li><li>Double-check signs at every differentiation step, especially with trig: $\frac{d}{dx}[\cos x] = -\sin x$ catches many students out.</li><li>In the final answer, verify by quick substitution of a boundary condition: does $y(0)$ give the right value? This 10-second check catches many errors.</li><li>Time management: a 12-14 mark question should take about 15-18 minutes. If stuck on the PI, move on and come back — the CF and boundary condition parts earn independent marks.</li></ol>
+        </div>
+
+  <div class="q-table-wrap">
+    <h3>All questions</h3>
+    <div class="filter-row">
+      <select id="type-filter" onchange="filterTable()">
+        <option value="">All types</option>
+        <option value="Second-order ODE requiring substitution/transformation to constant coefficients">Second-order ODE requiring substitution/transformation to constant coefficients</option><option value="Second-order ODE with exponential forcing where PI duplicates CF">Second-order ODE with exponential forcing where PI duplicates CF</option><option value="Second-order ODE with general forcing and boundary conditions">Second-order ODE with general forcing and boundary conditions</option><option value="Second-order ODE with polynomial forcing">Second-order ODE with polynomial forcing</option><option value="Second-order ODE with trigonometric forcing (RHS = trig function)">Second-order ODE with trigonometric forcing (RHS = trig function)</option>
+      </select>
+    </div>
+    <table class="qs">
+      <thead><tr><th>Session</th><th class="r">Q</th><th class="r">Marks</th><th>Type</th><th></th></tr></thead>
+      <tbody><tr data-type="Second-order ODE with general forcing and boundary conditions">
+            <td class="session">Specimen 2018</td>
+            <td class="r">Q6</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-general-forcing-and-boundary-conditions">Second-order ODE with general forcing and boundary conditions</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Specimen_2018-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with trigonometric forcing (RHS = trig function)">
+            <td class="session">Jan 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-trigonometric-forcing-rhs-trig-function">Second-order ODE with trigonometric forcing (RHS = trig function)</a><div class="qtype-freeform">second-order ODE with forcing</div></td>
+            <td><a class="qlink" href="q-Jan_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with polynomial forcing">
+            <td class="session">Jun 2021</td>
+            <td class="r">Q6</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-polynomial-forcing">Second-order ODE with polynomial forcing</a><div class="qtype-freeform">second-order ODE with RHS</div></td>
+            <td><a class="qlink" href="q-Jun_2021-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE requiring substitution/transformation to constant coefficients">
+            <td class="session">Oct 2021</td>
+            <td class="r">Q7</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-requiring-substitution-transformation-to-constant-coefficients">Second-order ODE requiring substitution/transformation to constant coefficients</a><div class="qtype-freeform">transform and solve second-order ODE</div></td>
+            <td><a class="qlink" href="q-Oct_2021-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with exponential forcing where PI duplicates CF">
+            <td class="session">Jan 2022</td>
+            <td class="r">Q2</td>
+            <td class="r">6m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-exponential-forcing-where-pi-duplicates-cf">Second-order ODE with exponential forcing where PI duplicates CF</a><div class="qtype-freeform">second-order ODE general solution</div></td>
+            <td><a class="qlink" href="q-Jan_2022-Q2.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with exponential forcing where PI duplicates CF">
+            <td class="session">Jun 2022</td>
+            <td class="r">Q7</td>
+            <td class="r">12m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-exponential-forcing-where-pi-duplicates-cf">Second-order ODE with exponential forcing where PI duplicates CF</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Jun_2022-Q7.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with general forcing and boundary conditions">
+            <td class="session">Jan 2023</td>
+            <td class="r">Q9</td>
+            <td class="r">13m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-general-forcing-and-boundary-conditions">Second-order ODE with general forcing and boundary conditions</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2023-Q9.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with exponential forcing where PI duplicates CF">
+            <td class="session">Jun 2023</td>
+            <td class="r">Q4</td>
+            <td class="r">11m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-exponential-forcing-where-pi-duplicates-cf">Second-order ODE with exponential forcing where PI duplicates CF</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Jun_2023-Q4.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with general forcing and boundary conditions">
+            <td class="session">Jan 2024</td>
+            <td class="r">Q6</td>
+            <td class="r">14m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-general-forcing-and-boundary-conditions">Second-order ODE with general forcing and boundary conditions</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Jan_2024-Q6.html">walkthrough →</a></td>
+        </tr><tr data-type="Second-order ODE with general forcing and boundary conditions">
+            <td class="session">Jun 2024</td>
+            <td class="r">Q8</td>
+            <td class="r">10m</td>
+            <td class="qtype"><a class="qtype-link" href="#type-second-order-ode-with-general-forcing-and-boundary-conditions">Second-order ODE with general forcing and boundary conditions</a><div class="qtype-freeform">second-order differential equation</div></td>
+            <td><a class="qlink" href="q-Jun_2024-Q8.html">walkthrough →</a></td>
+        </tr></tbody>
+    </table>
+  </div>
+</section>
+<script>
+function filterTable() {
+  const v = document.getElementById('type-filter').value;
+  document.querySelectorAll('table.qs tbody tr').forEach(tr => {
+    tr.style.display = (!v || tr.dataset.type === v) ? '' : 'none';
+  });
+}
+</script>
+
+<footer>
+  Edexcel IAL revision compilation · 79_past_paper_topic_distribution
+</footer>
+</body>
+</html>
