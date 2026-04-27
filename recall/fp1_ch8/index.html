@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP1 Ch 8 — Proof by Induction | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP1 Ch 8 — Proof by Induction | Recall Sheet</h1>
+  <div class="meta">FP1 · Ch 8 · Exam: 2026-05-21 · Recall sheet for spaced repetition</div>
+  <h1>FP1 Ch 8 — Proof by Induction</h1>
+<p><strong>The whole chapter in one mental model.</strong> Proof by induction is a <strong>four-step ritual</strong> for proving a statement $P(n)$ holds for all positive integers $n$: <strong>(1) Basis</strong> — verify $P(1)$ directly; <strong>(2) Assume</strong> $P(k)$ true; <strong>(3) Inductive step</strong> — prove $P(k+1)$ from $P(k)$; <strong>(4) Conclude</strong> — by induction, true for all $n\in\mathbb{Z}^+$. The chapter applies this template to four contexts: sums of series, divisibility statements, closed forms for recurrence relations, and matrix powers $\mathbf{M}^n$. The technique is identical; only what you manipulate in step 3 changes.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mathematical induction</strong></td>
+<td>A proof technique for showing that a statement $P(n)$ is true for every positive integer $n$. The logic: prove $P(1)$ and prove that $P(k)$ implies $P(k+1)$ — then $P(2)$ follows from $P(1)$, $P(3)$ from $P(2)$, and so on like falling dominoes. Doesn't <em>derive</em> statements; only verifies a guessed formula.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Basis step (base case)</strong></td>
+<td>Verify $P(1)$ directly by substitution. Show LHS = RHS at $n=1$. (For two-step recurrences, also check $n=2$.) Without a basis, the chain of implications has nothing to start from.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Assumption / inductive hypothesis</strong></td>
+<td>The line &quot;<em>Assume the statement is true for $n=k$.</em>&quot; You're not proving anything here — you're temporarily granting $P(k)$ so you can use it as a tool in the next step.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Inductive step</strong></td>
+<td>The substantive piece: starting from $P(k)$, derive $P(k+1)$. Usually involves rewriting the $(k+1)$-case to expose the $k$-case (e.g. $\sum_{r=1}^{k+1}=\sum_{r=1}^k+(\text{term at }k+1)$, $\mathbf{M}^{k+1}=\mathbf{M}^k\cdot\mathbf{M}$, $f(k+1)=f(k)+(\text{difference})$).</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Conclusion step</strong></td>
+<td>Standard sentence: &quot;If $P(k)$ true implies $P(k+1)$ true, and $P(1)$ is true, then $P(n)$ is true for all positive integers $n$ by mathematical induction.&quot; Always close with this — it's worth marks.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>$P(n)$ / general statement</strong></td>
+<td>The thing to be proved. Could be an equality (sum formula, matrix-power formula, closed form for $u_n$), a divisibility ($d\mid f(n)$), or any predicate indexed by $n$.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>$\mathbb{Z}^+$ / $\mathbb{N}$</strong></td>
+<td>The set of positive integers $\{1,2,3,\dots\}$. The standard domain for induction in FP1. Sometimes the proof works only for $n\geq n_0$ where $n_0>1$ — adjust the basis accordingly.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Sum-of-series induction</strong></td>
+<td>Type 1 application: prove $\sum_{r=1}^n f(r)=g(n)$. Inductive step uses $\sum_{r=1}^{k+1}=\sum_{r=1}^k+f(k+1)$ and the hypothesis to substitute $\sum_{r=1}^k$.</td>
+<td>8.1</td>
+</tr>
+<tr>
+<td><strong>Divisibility induction</strong></td>
+<td>Type 2 application: prove $d\mid f(n)$. Standard technique: show $f(k+1)-f(k)$ (or $f(k+1)$ written as $a\cdot f(k)+b\cdot d\cdot(\text{integer})$) is divisible by $d$. Then $f(k+1)=$ (mult of $d$) + $f(k)=$ (mult of $d$) + (mult of $d$) = mult of $d$.</td>
+<td>8.2</td>
+</tr>
+<tr>
+<td><strong>Recurrence relation</strong></td>
+<td>A rule defining $u_{n+1}$ (or $u_{n+2}$) in terms of earlier terms, plus initial values. E.g. $u_{n+1}=3u_n+4,\ u_1=1$. The closed form $u_n=3^n-2$ is the formula you prove by induction.</td>
+<td>8.3</td>
+</tr>
+<tr>
+<td><strong>Closed form</strong></td>
+<td>An explicit formula for $u_n$ in terms of $n$ alone — no recursion, no $\sum$, no previous terms. Faster to evaluate at large $n$ than recursion.</td>
+<td>8.3</td>
+</tr>
+<tr>
+<td><strong>Matrix-power induction</strong></td>
+<td>Type 4 application: prove $\mathbf{M}^n=$ (matrix-valued formula in $n$). Inductive step: $\mathbf{M}^{k+1}=\mathbf{M}^k\cdot\mathbf{M}$, substitute the hypothesis for $\mathbf{M}^k$, multiply, simplify, recognise as the formula at $n=k+1$.</td>
+<td>8.4</td>
+</tr>
+<tr>
+<td><strong>Two-step recurrence</strong></td>
+<td>A recurrence like $u_{n+2}=5u_{n+1}-6u_n$ depending on the <em>two</em> previous terms. Requires basis $n=1$ AND $n=2$ (some authors also include $n=3$ for safety), and the assumption uses BOTH $u_k$ and $u_{k+1}$ to derive $u_{k+2}$.</td>
+<td>8.3 Ex 9</td>
+</tr>
+<tr>
+<td><strong>Counter-example</strong></td>
+<td>A specific value of $n$ at which the claimed statement fails. Demonstrates the statement can't be proved by induction (or anything else) because it's outright false. Used in exam questions that ask you to spot an error and disprove a claim.</td>
+<td>8.1 Ex 6, 7</td>
+</tr>
+<tr>
+<td><strong>Divisibility shortcut formula</strong></td>
+<td>$f(k+1)=A\cdot f(k)+B$ where $B$ is divisible by $d$. Then if $f(k)$ is divisible by $d$, so is $f(k+1)$. The hardest part is the algebraic manipulation to expose this structure.</td>
+<td>8.2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The four-step recipe (memorise word-for-word)</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Sum-of-series</th>
+<th>Divisibility</th>
+<th>Recurrence</th>
+<th>Matrix power</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Basis</strong></td>
+<td>Show $\sum_{r=1}^1 f(r)=g(1)$</td>
+<td>Show $d\mid f(1)$ (compute)</td>
+<td>Show $u_1$ formula matches given $u_1$</td>
+<td>Show $\mathbf{M}^1$ matches matrix formula at $n=1$</td>
+</tr>
+<tr>
+<td><strong>2. Assume</strong></td>
+<td>$\sum_{r=1}^k f(r)=g(k)$</td>
+<td>$d\mid f(k)$</td>
+<td>$u_k=$ formula at $n=k$</td>
+<td>$\mathbf{M}^k=$ matrix formula at $n=k$</td>
+</tr>
+<tr>
+<td><strong>3. Inductive step</strong></td>
+<td>$\sum_{r=1}^{k+1}=\sum_{r=1}^k+f(k+1)$, sub hypothesis, simplify to $g(k+1)$</td>
+<td>Compute $f(k+1)-f(k)$ (or $f(k+1)$ as $\alpha f(k)+\beta\cdot d$), show divisible by $d$</td>
+<td>$u_{k+1}=$ recurrence applied to $u_k$, sub hypothesis, simplify to formula at $n=k+1$</td>
+<td>$\mathbf{M}^{k+1}=\mathbf{M}^k\mathbf{M}$, sub hypothesis, multiply matrices, simplify to formula at $n=k+1$</td>
+</tr>
+<tr>
+<td><strong>4. Conclude</strong></td>
+<td>&quot;True for $n=1$, and $P(k)\Rightarrow P(k+1)$, so true for all $n\in\mathbb{Z}^+$ by induction.&quot;</td>
+<td>Same conclusion sentence</td>
+<td>Same</td>
+<td>Same</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Sum-of-series induction — the engine</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Want to prove</td>
+<td>$\sum_{r=1}^n f(r)=g(n)$</td>
+</tr>
+<tr>
+<td>Basis at $n=1$</td>
+<td>LHS = $f(1)$, RHS = $g(1)$, check equal</td>
+</tr>
+<tr>
+<td>Inductive trick</td>
+<td>$\sum_{r=1}^{k+1}f(r)=\underbrace{\sum_{r=1}^k f(r)}_{=g(k)\text{ by hypothesis}}+f(k+1)=g(k)+f(k+1)$</td>
+</tr>
+<tr>
+<td>Goal of algebra</td>
+<td>Show $g(k)+f(k+1)=g(k+1)$ — the formula evaluated at $n=k+1$</td>
+</tr>
+<tr>
+<td>Common factoring</td>
+<td>Pull $(k+1)$ or $\tfrac{1}{6}(k+1)$ out front and show what remains matches $g(k+1)$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked check (Example 1):</strong> Prove $\sum_{r=1}^n (2r-1)=n^2$.</p>
+<ul>
+<li>Basis: $n=1$: LHS=$1$, RHS=$1$. ✓</li>
+<li>Assume $\sum_{r=1}^k(2r-1)=k^2$.</li>
+<li>Step: $\sum_{r=1}^{k+1}=k^2+(2(k+1)-1)=k^2+2k+1=(k+1)^2$. ✓</li>
+</ul>
+<hr />
+<h2>4. Divisibility induction — the standard trick</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Want to prove</td>
+<td>$d\mid f(n)$ for all $n\in\mathbb{Z}^+$</td>
+</tr>
+<tr>
+<td>Basis at $n=1$</td>
+<td>Compute $f(1)$, check it's a multiple of $d$</td>
+</tr>
+<tr>
+<td>Trick 1 (difference)</td>
+<td>Compute $f(k+1)-f(k)$. If divisible by $d$, then $f(k+1)=f(k)+(\text{mult of }d)$. By hypothesis $f(k)$ is mult of $d$, so $f(k+1)$ is too.</td>
+</tr>
+<tr>
+<td>Trick 2 (combination)</td>
+<td>Write $f(k+1)=A\cdot f(k)+B\cdot d\cdot(\text{integer})$. Then $f(k+1)$ = (mult of $d$) + (mult of $d$).</td>
+</tr>
+<tr>
+<td>Final assembly</td>
+<td>&quot;Both pieces are divisible by $d$, so their sum is divisible by $d$.&quot;</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked check (Example 4):</strong> $3^{2n}+11$ divisible by 4. Let $f(n)=3^{2n}+11$.</p>
+<ul>
+<li>Basis: $f(1)=20=4\cdot 5$ ✓</li>
+<li>Assume $4\mid f(k)$.</li>
+<li>$f(k+1)=3^{2k+2}+11=9\cdot 3^{2k}+11$. Then $f(k+1)-f(k)=9\cdot 3^{2k}-3^{2k}=8\cdot 3^{2k}=4\cdot 2\cdot 3^{2k}$, divisible by 4. So $f(k+1)=f(k)+(\text{mult of }4)$, divisible by 4. ✓</li>
+</ul>
+<hr />
+<h2>5. Recurrence-relation induction</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Want to prove</td>
+<td>The closed form $u_n=g(n)$ is the same sequence as the recurrence $u_{n+1}=h(u_n,n)$ with starting value $u_1$</td>
+</tr>
+<tr>
+<td>Basis (one-step recurrence)</td>
+<td>Check $u_1=g(1)$</td>
+</tr>
+<tr>
+<td>Basis (two-step recurrence)</td>
+<td>Check $u_1=g(1)$ AND $u_2=g(2)$ (and optionally $n=3$)</td>
+</tr>
+<tr>
+<td>Inductive step (one-step)</td>
+<td>Use recurrence $u_{k+1}=h(u_k)$, substitute hypothesis $u_k=g(k)$, simplify, recognise as $g(k+1)$</td>
+</tr>
+<tr>
+<td>Inductive step (two-step)</td>
+<td>Assume $u_k=g(k)$ AND $u_{k+1}=g(k+1)$. Use recurrence $u_{k+2}=h(u_{k+1},u_k)$, substitute both, simplify to $g(k+2)$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked check (Example 8):</strong> $u_{n+1}=3u_n+4,\ u_1=1$, prove $u_n=3^n-2$.</p>
+<ul>
+<li>Basis: $u_1=3-2=1$ ✓</li>
+<li>Assume $u_k=3^k-2$.</li>
+<li>$u_{k+1}=3u_k+4=3(3^k-2)+4=3^{k+1}-6+4=3^{k+1}-2$. ✓</li>
+</ul>
+<hr />
+<h2>6. Matrix-power induction</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Want to prove</td>
+<td>$\mathbf{M}^n=N(n)$ where $N(n)$ is some matrix whose entries depend on $n$</td>
+</tr>
+<tr>
+<td>Basis at $n=1$</td>
+<td>Check $\mathbf{M}=N(1)$ — substitute $n=1$ into the formula's entries</td>
+</tr>
+<tr>
+<td>Inductive step</td>
+<td>$\mathbf{M}^{k+1}=\mathbf{M}^k\cdot\mathbf{M}$. Substitute hypothesis $\mathbf{M}^k=N(k)$. Multiply $N(k)\cdot\mathbf{M}$ entry-by-entry. Simplify each entry. Recognise the result as $N(k+1)$ — the formula with $k+1$ in place of $k$.</td>
+</tr>
+<tr>
+<td>Show all four entries</td>
+<td>A common mark allocation — write out the four entries of the product clearly</td>
+</tr>
+<tr>
+<td>Common simplifications</td>
+<td>$a\cdot a^k=a^{k+1}$, $b^{k+1}=b\cdot b^k$, etc.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked check (Example 10):</strong> $\begin{pmatrix}1&-1\\0&2\end{pmatrix}^n=\begin{pmatrix}1 & 1-2^n\\ 0 & 2^n\end{pmatrix}$.</p>
+<ul>
+<li>Basis: $n=1$: LHS=$\begin{pmatrix}1&-1\\0&2\end{pmatrix}$, RHS=$\begin{pmatrix}1 & 1-2\\ 0 & 2\end{pmatrix}=\begin{pmatrix}1 & -1\\ 0 & 2\end{pmatrix}$ ✓</li>
+<li>Assume $\mathbf{M}^k=\begin{pmatrix}1 & 1-2^k\\ 0 & 2^k\end{pmatrix}$.</li>
+<li>$\mathbf{M}^{k+1}=\mathbf{M}^k\mathbf{M}=\begin{pmatrix}1 & 1-2^k\\ 0 & 2^k\end{pmatrix}\begin{pmatrix}1&-1\\0&2\end{pmatrix}=\begin{pmatrix}1 & -1+2(1-2^k)\\ 0 & 2\cdot 2^k\end{pmatrix}=\begin{pmatrix}1 & 1-2^{k+1}\\ 0 & 2^{k+1}\end{pmatrix}$ ✓</li>
+</ul>
+<hr />
+<h2>7. Decision flow — pick the right type</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;$\sum_{r=1}^n f(r)=g(n)$, prove by induction&quot;</td>
+<td>Sum-of-series template (§3)</td>
+</tr>
+<tr>
+<td>&quot;$f(n)$ is divisible by $d$&quot;</td>
+<td>Divisibility template (§4); compute $f(k+1)-f(k)$ or write $f(k+1)$ as $A\cdot f(k)+B$</td>
+</tr>
+<tr>
+<td>&quot;Given $u_{n+1}=h(u_n)$ and $u_1=$ value, prove $u_n=$ formula&quot;</td>
+<td>Recurrence template (§5) — one-step</td>
+</tr>
+<tr>
+<td>&quot;Given $u_{n+2}=h(u_{n+1},u_n)$ and $u_1,u_2$, prove $u_n=$ formula&quot;</td>
+<td>Recurrence template (§5) — two-step (basis at $n=1,2$)</td>
+</tr>
+<tr>
+<td>&quot;Prove $\mathbf{M}^n=$ matrix formula&quot;</td>
+<td>Matrix template (§6); use $\mathbf{M}^{k+1}=\mathbf{M}^k\mathbf{M}$</td>
+</tr>
+<tr>
+<td>&quot;Identify the error in this proof&quot;</td>
+<td>Look for missing basis step, wrong assumption, or invalid manipulation</td>
+</tr>
+<tr>
+<td>&quot;Give a counter-example to disprove&quot;</td>
+<td>Find smallest $n$ where the claim fails; usually $n=2$ or $n=3$</td>
+</tr>
+<tr>
+<td>Asked for $(\mathbf{M}^n)^{-1}$</td>
+<td>First prove formula for $\mathbf{M}^n$ by induction, then take inverse using the $2\times 2$ formula</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Common exam pitfalls (and the marks they cost)</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skipping the basis step</td>
+<td>Always check $n=1$ — the chain doesn't start otherwise</td>
+</tr>
+<tr>
+<td>Stating &quot;Assume true for all $n=k$&quot;</td>
+<td>Wrong! Just for $n=k$ — a single value (you're not begging the question)</td>
+</tr>
+<tr>
+<td>For two-step recurrence, only basis $n=1$</td>
+<td>You need $n=1$ AND $n=2$, plus assumption uses both $u_k$ AND $u_{k+1}$</td>
+</tr>
+<tr>
+<td>Forgetting the conclusion sentence</td>
+<td>&quot;True for $n=1$, and $P(k)\Rightarrow P(k+1)$, so true for all $n\in\mathbb{Z}^+$ by induction&quot; — write it.</td>
+</tr>
+<tr>
+<td>Inductive step concludes &quot;the formula at $n=k+1$&quot; without showing it matches the <em>given</em> formula with $k+1$ substituted</td>
+<td>Always finish by saying &quot;this is the formula with $n$ replaced by $k+1$&quot;</td>
+</tr>
+<tr>
+<td>Sloppy matrix multiplication in step 3</td>
+<td>Show all four entries; one slip and you lose marks</td>
+</tr>
+<tr>
+<td>Substituting numbers into divisibility (e.g. plug $k=2$) instead of doing algebra</td>
+<td>Induction proves for ALL $n$ — keep things symbolic</td>
+</tr>
+<tr>
+<td>Saying &quot;true for $n=k+1$ implies true for $n=k+2$, etc.&quot; (running induction backwards)</td>
+<td>Wrong direction — it goes $k\to k+1$, not the other way</td>
+</tr>
+<tr>
+<td>In divisibility, splitting $f(k+1)=$ poorly so that you can't cleanly extract a multiple of $d$</td>
+<td>Algebraic manipulation is the hard part; sometimes need to add and subtract clever terms (e.g. $143=10+133$ for divisibility by 133)</td>
+</tr>
+<tr>
+<td>Counter-example: missing the smallest $n$ that fails</td>
+<td>Try $n=2,3$ first; smallest counter-example is most natural</td>
+</tr>
+<tr>
+<td>Confusing assumption (&quot;true for $n=k$&quot;) with what you want to prove (&quot;true for $n=k+1$&quot;)</td>
+<td>Different! Assumption is given; conclusion is to be derived</td>
+</tr>
+<tr>
+<td>Treating induction as if it can derive a formula</td>
+<td>Induction VERIFIES guessed formulas; finding them needs other methods (e.g. solving recurrence, observation)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Worked archetypes (memorise the <em>shape</em>)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Statement</th>
+<th>Type</th>
+<th>Key inductive step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$\sum_{r=1}^n (2r-1)=n^2$</td>
+<td>Sum</td>
+<td>$k^2+(2k+1)=(k+1)^2$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>$\sum_{r=1}^n r^2=\tfrac{n(n+1)(2n+1)}{6}$</td>
+<td>Sum</td>
+<td>$\tfrac{1}{6}k(k+1)(2k+1)+(k+1)^2=\tfrac{1}{6}(k+1)(k+2)(2k+3)$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$\sum_{r=1}^n r\cdot 2^r=2(1+(n-1)2^n)$</td>
+<td>Sum</td>
+<td>Add $(k+1)2^{k+1}$, factor $2^{k+1}$ out</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$3^{2n}+11$ divisible by 4</td>
+<td>Divisibility</td>
+<td>$f(k+1)-f(k)=8\cdot 3^{2k}=4\cdot 2\cdot 3^{2k}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>$11^{n+1}+12^{2n-1}$ divisible by 133</td>
+<td>Divisibility</td>
+<td>Split $143=10+133$ to expose the $11f(k)+133\cdot(\dots)$ structure</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$u_{n+1}=3u_n+4,\ u_1=1\Rightarrow u_n=3^n-2$</td>
+<td>Recurrence</td>
+<td>$3(3^k-2)+4=3^{k+1}-2$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>$u_{n+2}=5u_{n+1}-6u_n,\ u_1=13,u_2=35\Rightarrow u_n=2^{n+1}+3^{n+1}$</td>
+<td>2-step recurrence</td>
+<td>$5(2^{k+2}+3^{k+2})-6(2^{k+1}+3^{k+1})=2^{k+3}+3^{k+3}$</td>
+</tr>
+<tr>
+<td>8</td>
+<td>$\begin{pmatrix}1&-1\\0&2\end{pmatrix}^n=\begin{pmatrix}1 & 1-2^n\\ 0 & 2^n\end{pmatrix}$</td>
+<td>Matrix</td>
+<td>Multiply by $\mathbf{M}$ on right; entries become $1-2^{k+1},\ 2^{k+1}$</td>
+</tr>
+<tr>
+<td>9</td>
+<td>$\begin{pmatrix}1&2\\0&1\end{pmatrix}^n=\begin{pmatrix}1&2n\\0&1\end{pmatrix}$</td>
+<td>Matrix</td>
+<td>Multiply: top right $=2n+2=2(k+1)$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (the 30-second mental model)</h2>
+<ol>
+<li><strong>Four steps every time:</strong> Basis → Assume → Inductive step → Conclude. The middle of the sandwich (step 3) is where the actual work happens; the rest is structure that earns marks.</li>
+<li><strong>Induction VERIFIES, not derives.</strong> You need a formula handed to you (or guessed via other means like solving a recurrence by characteristic polynomial). Induction confirms it.</li>
+<li><strong>Four contexts, one technique:</strong>
+<ul>
+<li>Sums: $\sum_{r=1}^{k+1}=\sum_{r=1}^k+f(k+1)$</li>
+<li>Divisibility: $f(k+1)=f(k)+(\text{mult of }d)$</li>
+<li>Recurrences: $u_{k+1}=h(u_k)$</li>
+<li>Matrix powers: $\mathbf{M}^{k+1}=\mathbf{M}^k\cdot\mathbf{M}$</li>
+</ul>
+</li>
+<li><strong>Two-step recurrences need two basis cases</strong> ($n=1$ and $n=2$) and a two-element assumption ($u_k$ AND $u_{k+1}$).</li>
+<li><strong>Always close with the conclusion sentence</strong> — it's a free mark.</li>
+</ol>
+<p>The technique is just &quot;domino logic&quot; — make sure the first one falls and that each one knocks down the next.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

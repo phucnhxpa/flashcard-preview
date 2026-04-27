@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP2 Ch 7 — Maclaurin and Taylor Series | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP2 Ch 7 — Maclaurin and Taylor Series | Recall Sheet</h1>
+  <div class="meta">FP2 · Ch 7 · Exam: 2026-06-01 · Recall sheet for spaced repetition</div>
+  <h1>FP2 Ch 7 — Maclaurin and Taylor Series</h1>
+<p><strong>The whole chapter in one mental model.</strong> Any &quot;nice&quot; function (smooth, derivatives finite at the chosen base point) can be re-written as an <strong>infinite polynomial</strong> in powers of $(x-a)$. <strong>Maclaurin</strong> is the special case $a=0$. The coefficients are forced: the $r$-th one is $\dfrac{f^{(r)}(a)}{r!}$. You either (i) compute derivatives directly, (ii) substitute into a <em>standard</em> series from the formula booklet, or (iii) bootstrap a series solution to a DE by repeatedly differentiating the equation and reading off $y, y', y'', \dots$ at the base point.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>$n$-th derivative $f^{(n)}(x)$</strong></td>
+<td>The result of differentiating $f$ a total of $n$ times. Notations: $f',f'',f''',f^{(4)},\dots$. The chain &amp; product rules are unchanged — you just keep going. Beyond third order, primes get clumsy so the bracketed-superscript is preferred.</td>
+<td>7.1</td>
+</tr>
+<tr>
+<td><strong>Power series</strong></td>
+<td>An infinite sum of the form $a_0+a_1x+a_2x^2+\dots$ — a polynomial with infinitely many terms. Treat as a function whose value at $x$ is the limit of partial sums (when that limit exists). It only &quot;is&quot; the function it represents inside its <strong>interval of convergence</strong>.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Maclaurin series</strong></td>
+<td>The power series $f(x)=\sum_{r\ge0}\dfrac{f^{(r)}(0)}{r!}x^r$ — i.e. a Taylor series centred at $0$. It uses <em>only</em> values of $f$ and its derivatives at $x=0$ to predict $f$ everywhere (within validity). Best near $x=0$, worse further out.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Taylor series at $a$</strong></td>
+<td>$f(x)=\sum_{r\ge0}\dfrac{f^{(r)}(a)}{r!}(x-a)^r$. A &quot;Maclaurin centred elsewhere&quot;: uses derivative-data at $x=a$ instead of $0$. Two equivalent forms: in powers of $(x-a)$ (form B), or by substituting $x\to x+a$ in powers of $x$ (form A).</td>
+<td>7.4</td>
+</tr>
+<tr>
+<td><strong>Maclaurin polynomial of degree $r$</strong></td>
+<td>The truncation $f(0)+f'(0)x+\dots+\dfrac{f^{(r)}(0)}{r!}x^r$. A <em>finite</em> polynomial that approximates $f$. Adding more terms generally improves accuracy near $0$.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Interval of validity / convergence</strong></td>
+<td>The set of $x$-values where the infinite series equals $f(x)$. E.g. $\ln(1+x)$: $-1<x\le1$; $\arctan x$: $-1\le x\le 1$; $e^x,\sin x,\cos x$: all $x\in\mathbb{R}$. Outside this interval the series <strong>diverges</strong> — adding more terms makes the answer worse, not better.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Convergent / divergent</strong></td>
+<td>A series <strong>converges</strong> if its partial sums approach a finite limit; it <strong>diverges</strong> otherwise. E.g. $1+x+x^2+\dots$ converges to $\dfrac{1}{1-x}$ for $\lvert x\rvert<1$ but diverges for $\lvert x\rvert\ge 1$.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Ratio test</strong> (challenge box)</td>
+<td>A sufficient test for convergence: $\sum a_r$ converges if $\lim_{r\to\infty}\left\lvert\dfrac{a_{r+1}}{a_r}\right\rvert<1$, diverges if $>1$, inconclusive at $=1$. Used to <em>derive</em> validity intervals.</td>
+<td>7.2 Challenge</td>
+</tr>
+<tr>
+<td><strong>Compound function</strong></td>
+<td>A function built from a <em>standard</em> one by substitution, multiplication, etc., e.g. $\cos(2x^2)$, $e^{px}\sin 3x$, $\ln\!\sqrt{\tfrac{1+x}{1-x}}$. Their series are obtained by combining known series, not by direct differentiation.</td>
+<td>7.3</td>
+</tr>
+<tr>
+<td><strong>Alternating sequence trick</strong></td>
+<td>$(-1)^r$ flips sign each $r$, $(-1)^{r-1}$ starts positive then alternates. Useful for capturing $\ln(1+x)$, $\sin x$, $\cos x$, $\arctan x$ in closed-form general-term notation.</td>
+<td>7.2 Ex 4</td>
+</tr>
+<tr>
+<td><strong>Formulae-booklet standard series</strong></td>
+<td>Five Maclaurins given in the exam booklet: $e^x,\ \ln(1+x),\ \sin x,\ \cos x,\ \arctan x$. You may quote these without proof. Substituting $g(x)$ for $x$ creates compound expansions instantly.</td>
+<td>7.3</td>
+</tr>
+<tr>
+<td><strong>Series-solution method (DE)</strong></td>
+<td>Use a Taylor expansion <em>as the unknown function</em>: write $y=y_0+(x-x_0)y'_0+\tfrac{(x-x_0)^2}{2!}y''_0+\dots$, then differentiate the DE itself to find each $y^{(r)}(x_0)$ from previous ones. Builds an approximate $y$ as a polynomial without ever solving the DE in closed form.</td>
+<td>7.5</td>
+</tr>
+<tr>
+<td><strong>Initial conditions</strong></td>
+<td>The &quot;seed&quot; data $x_0, y_0$ (and possibly $y'_0$) used to launch the series-solution recursion. The DE supplies $y'_0$ directly (if first-order) or $y''_0$ (if second-order) from these.</td>
+<td>7.5</td>
+</tr>
+<tr>
+<td><strong>Notation $\left.\dfrac{\mathrm dy}{\mathrm dx}\right\rvert_{x_0}$</strong></td>
+<td>&quot;$\mathrm dy/\mathrm dx$ evaluated at $x=x_0$&quot; — a single number, not a function. Used in series-solution work to denote the Taylor coefficients.</td>
+<td>7.5</td>
+</tr>
+<tr>
+<td><strong>Ascending / descending powers</strong></td>
+<td>&quot;Ascending&quot; $=$ low-to-high powers ($a_0+a_1x+a_2x^2+\dots$). Exam questions almost always ask for ascending powers, which matches Taylor/Maclaurin order.</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><strong>Limit problem via Maclaurin</strong></td>
+<td>A common application: $\lim_{x\to0}\dfrac{f(x)}{x^k}$ is found by expanding $f$ to order $x^k$, simplifying. E.g. Ex 8: $\lim_{x\to 0}\dfrac{3\sin x-4x\cos x+x}{x^3}=\tfrac32$.</td>
+<td>7.3 Q4, Q8</td>
+</tr>
+<tr>
+<td><strong>Watch out: radians</strong></td>
+<td>Trig Maclaurins assume $x$ is in <strong>radians</strong>. To approximate $\sin 10°$ use $x=\pi/18$, not $10$.</td>
+<td>7.2 Ex 5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Maclaurin recipe (Section 7.2)</h2>
+<p>For a function whose derivatives are all finite at $0$:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Compute $f(0), f'(0), f''(0), \dots$ until you have enough</td>
+<td>List of derivative values at $0$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Slot into $f(x)=\sum_{r\ge 0}\dfrac{f^{(r)}(0)}{r!}x^r$</td>
+<td>Polynomial in $x$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Identify general term using factorials and $(-1)^r$ if alternating</td>
+<td>Closed form for $r$-th coefficient</td>
+</tr>
+<tr>
+<td>4</td>
+<td>State validity (use ratio test or quote standard)</td>
+<td>Interval like $\lvert x\rvert<1$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Standard Maclaurin series (formulae booklet — memorise!)</h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Series</th>
+<th>Validity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$e^x$</td>
+<td>$\displaystyle 1+x+\dfrac{x^2}{2!}+\dfrac{x^3}{3!}+\dots+\dfrac{x^r}{r!}+\dots$</td>
+<td>all $x\in\mathbb R$</td>
+</tr>
+<tr>
+<td>$\ln(1+x)$</td>
+<td>$\displaystyle x-\dfrac{x^2}{2}+\dfrac{x^3}{3}-\dots+(-1)^{r+1}\dfrac{x^r}{r}+\dots$</td>
+<td>$-1<x\le 1$</td>
+</tr>
+<tr>
+<td>$\sin x$</td>
+<td>$\displaystyle x-\dfrac{x^3}{3!}+\dfrac{x^5}{5!}-\dots+(-1)^{r}\dfrac{x^{2r+1}}{(2r+1)!}+\dots$</td>
+<td>all $x\in\mathbb R$</td>
+</tr>
+<tr>
+<td>$\cos x$</td>
+<td>$\displaystyle 1-\dfrac{x^2}{2!}+\dfrac{x^4}{4!}-\dots+(-1)^{r}\dfrac{x^{2r}}{(2r)!}+\dots$</td>
+<td>all $x\in\mathbb R$</td>
+</tr>
+<tr>
+<td>$\arctan x$</td>
+<td>$\displaystyle x-\dfrac{x^3}{3}+\dfrac{x^5}{5}-\dots+(-1)^{r}\dfrac{x^{2r+1}}{2r+1}+\dots$</td>
+<td>$-1\le x\le 1$</td>
+</tr>
+<tr>
+<td>$(1+x)^n$ (binomial, $n\notin\mathbb N$)</td>
+<td>$\displaystyle 1+nx+\dfrac{n(n-1)}{2!}x^2+\dots$</td>
+<td>$\lvert x\rvert<1$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pattern recognition:</strong> $e^x$ has <em>every</em> $x^r/r!$. $\sin/\cos$ skip even/odd respectively and alternate. $\ln$ and $\arctan$ have plain denominators (not factorials).</p>
+<hr />
+<h2>4. Compound-function tactics (Section 7.3)</h2>
+<table>
+<thead>
+<tr>
+<th>Compound shape</th>
+<th>Strategy</th>
+<th>Validity adjustment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$f(kx)$, $f(x^k)$</td>
+<td>Substitute $kx$ or $x^k$ into the standard series</td>
+<td>Old condition becomes condition on new argument; e.g. $\ln(1-3x)$: $-1<-3x\le 1$ → $-\tfrac13\le x<\tfrac13$</td>
+</tr>
+<tr>
+<td>$\ln(a+bx)$ with $a\ne 1$</td>
+<td>Factor: $\ln(a+bx)=\ln a+\ln\!\left(1+\tfrac{bx}{a}\right)$, then expand the log</td>
+<td>Same as for $\ln(1+u)$ with $u=bx/a$</td>
+</tr>
+<tr>
+<td>$\ln\!\dfrac{f}{g}$ or $\ln(fg)$</td>
+<td>Use $\ln\dfrac{f}{g}=\ln f-\ln g$, then expand each separately, then combine</td>
+<td><strong>Intersection</strong> of the two intervals</td>
+</tr>
+<tr>
+<td>$f(x)\cdot g(x)$ (e.g. $e^{2x}\sin x$)</td>
+<td>Multiply two series, collect terms up to required power, drop higher</td>
+<td>Stay within the <strong>smaller</strong> interval</td>
+</tr>
+<tr>
+<td>$e^{f(x)}$ where $f(0)=0$</td>
+<td>Write $f$ as series, use $e^{a+b}=e^a e^b$ to split, multiply series</td>
+<td>Inherits $f$'s validity</td>
+</tr>
+<tr>
+<td>Even powers only, e.g. $\sin^2 x$</td>
+<td>Use $\sin^2 x=\tfrac{1-\cos 2x}{2}$, expand $\cos 2x$</td>
+<td>All $x$</td>
+</tr>
+<tr>
+<td>Limit $\lim_{x\to 0}\dfrac{f(x)}{x^k}$</td>
+<td>Expand $f$ to order $x^k$, divide term-by-term, set $x=0$</td>
+<td>n/a (just a value)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Taylor recipe at $x=a$ (Section 7.4)</h2>
+<p>Use when $f^{(r)}(0)$ blows up (e.g. $\ln x$ at $0$) or when you want accuracy near a point $a\ne 0$.</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Formula</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(A)</strong> $f(x+a)$ in powers of $x$</td>
+<td>$\displaystyle f(x+a)=f(a)+f'(a)x+\dfrac{f''(a)}{2!}x^2+\dots$</td>
+<td>Question gives shifted argument like $\tan(x+\tfrac{\pi}{4})$</td>
+</tr>
+<tr>
+<td><strong>(B)</strong> $f(x)$ in powers of $(x-a)$</td>
+<td>$\displaystyle f(x)=f(a)+f'(a)(x-a)+\dfrac{f''(a)}{2!}(x-a)^2+\dots$</td>
+<td>Question asks &quot;in powers of $(x-a)$&quot;</td>
+</tr>
+<tr>
+<td><strong>(C)</strong> Maclaurin-as-Taylor</td>
+<td>Set $a=0$ in (B) → recovers Maclaurin</td>
+<td>When derivatives exist at $0$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Procedure:</strong> compute $f(a), f'(a), f''(a), \dots$, plug into (A) or (B). For $\sqrt x$ at $a=1$, $\ln x$ at $a=e$, etc., choose $a$ so that $f(a)$ is a clean number.</p>
+<hr />
+<h2>6. Series solution of a DE (Section 7.5)</h2>
+<p>For $\dfrac{\mathrm dy}{\mathrm dx}=f(x,y)$ with $y(x_0)=y_0$ — or a 2nd-order DE with $y(x_0)$ AND $y'(x_0)$ given:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>First-order $\mathrm dy/\mathrm dx=f(x,y)$</th>
+<th>Second-order $y''=f(x,y,y')$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Read off $x_0,y_0$ from initial conditions</td>
+<td>Read off $x_0,y_0,y'_0$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Sub into the DE → $y'(x_0)$</td>
+<td>Sub into the DE → $y''(x_0)$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Differentiate the DE to get $y''$ in terms of $x,y,y'$, sub previous values → $y''(x_0)$</td>
+<td>Differentiate again to get $y'''$, sub previous values → $y'''(x_0)$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Repeat differentiating to required order</td>
+<td>Repeat to required order</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Plug into Taylor: $y=y_0+y'_0(x-x_0)+\tfrac{y''_0}{2!}(x-x_0)^2+\dots$</td>
+<td>Same Taylor formula</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When $x_0=0$</strong>, $(x-x_0)$ collapses to $x$ → Maclaurin form. <strong>When $x_0\neq 0$</strong> (e.g. Ex 13, $x_0=1$), keep $(x-1)^k$ — do NOT silently expand to powers of $x$.</p>
+<p><strong>Watch out:</strong> when differentiating the DE implicitly, treat $y$ as a function of $x$ — you'll need product rule on terms like $xy$, chain rule on $\sin y$, etc.</p>
+<hr />
+<h2>7. Decision flow — pick your method in 5 seconds</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;Find Maclaurin series of $f$&quot; + $f$ a single nice function</td>
+<td>§2: differentiate, evaluate at 0, plug in</td>
+</tr>
+<tr>
+<td>Compound expression made from $e^x,\ln(1+x),\sin,\cos,\arctan$</td>
+<td>§4: substitute / factor / multiply standard series; combine validity</td>
+</tr>
+<tr>
+<td>&quot;In powers of $(x-a)$&quot; with $a\ne 0$</td>
+<td>§5 form (B): differentiate, evaluate at $a$</td>
+</tr>
+<tr>
+<td>&quot;Substitute $x\to x+a$&quot; or shifted argument $f(x+a)$</td>
+<td>§5 form (A)</td>
+</tr>
+<tr>
+<td>$f(x)=\ln x,\ \sqrt x$ at $x=0$ — undefined</td>
+<td>Switch to Taylor at $a=1$ or other valid point</td>
+</tr>
+<tr>
+<td>&quot;Find a series solution to $\mathrm dy/\mathrm dx=\dots$ given $y(x_0)$&quot;</td>
+<td>§6: bootstrap derivatives at $x_0$, plug in Taylor</td>
+</tr>
+<tr>
+<td>Approximate $\sin 10°$, $\ln 1.05$, $\sqrt{1.2}$</td>
+<td>Maclaurin/Taylor → first few terms; remember <strong>radians</strong></td>
+</tr>
+<tr>
+<td>$\lim_{x\to 0}\dfrac{f(x)}{x^k}$</td>
+<td>Expand $f$ to order $x^k$, simplify</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Worked-out archetypes (memorise the <em>shape</em>)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problem</th>
+<th>Method</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Maclaurin of $\ln(1+x)$</td>
+<td>Differentiate $r$ times → $f^{(r)}(0)=(-1)^{r-1}(r-1)!$</td>
+<td>$x-\tfrac{x^2}{2}+\tfrac{x^3}{3}-\dots$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Maclaurin of $\sin x$</td>
+<td>Cycle $\sin,\cos,-\sin,-\cos$ at 0 gives $0,1,0,-1$</td>
+<td>$x-\tfrac{x^3}{3!}+\tfrac{x^5}{5!}-\dots$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$\cos(2x^2)$ first 4 non-zero terms</td>
+<td>Sub $u=2x^2$ into $\cos$ series</td>
+<td>$1-2x^4+\tfrac{2}{3}x^8-\tfrac{4}{45}x^{12}+\dots$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$\ln\!\tfrac{\sqrt{1+2x}}{1-3x}$</td>
+<td>Split as $\tfrac12\ln(1+2x)-\ln(1-3x)$, expand each, intersect intervals</td>
+<td>$4x+\tfrac72 x^2+\tfrac{31}{3}x^3+\dots$, valid $-\tfrac13\le x<\tfrac13$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>$e^{\sin x}$ to $x^4$</td>
+<td>Expand $\sin x$, then $e^{\sin x}=e^{x}\cdot e^{-x^3/6}\cdot\dots$, multiply, drop $x^{\ge5}$</td>
+<td>$1+x+\tfrac{x^2}{2}-\tfrac{x^4}{8}$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Taylor of $e^{-x}$ in powers of $(x+4)$</td>
+<td>$a=-4$; derivatives alternate sign, all magnitude $e^4$</td>
+<td>$e^4\!\bigl(1-(x+4)+\tfrac12(x+4)^2-\tfrac16(x+4)^3+\dots\bigr)$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Taylor of $\tan(x+\tfrac{\pi}{4})$ to $x^3$</td>
+<td>$a=\pi/4$, $\tan a=1$, $\sec^2 a=2$, etc.</td>
+<td>$1+2x+2x^2+\tfrac83 x^3+\dots$</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Series solution of $y''=y-\sin x$, $y(0)=1, y'(0)=2$, to $x^3$</td>
+<td>At 0: $y''=1-0=1$. Differentiate: $y'''=y'-\cos x\Rightarrow y'''(0)=2-1=1$</td>
+<td>$1+2x+\tfrac{x^2}{2}+\tfrac{x^3}{6}+\dots$</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Series solution of $y'+2y'-xy=0$ at $x_0=1$, $y(1)=1, y'(1)=2$</td>
+<td>Get $y''(1)=-3$; differentiate DE for $y'''(1)=9, y^{(4)}(1)=-17$</td>
+<td>$1+2(x-1)-\tfrac32(x-1)^2+\tfrac32(x-1)^3-\tfrac{17}{24}(x-1)^4+\dots$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Pitfalls (where marks evaporate)</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expanding $\ln 1.8$ from $\ln(1+x)$ at $x=0.8$ — slow convergence</td>
+<td>The further $x$ from 0, the worse Maclaurin; use Taylor at a closer base point or $\ln\!\tfrac{1+x}{1-x}$ trick</td>
+</tr>
+<tr>
+<td>Using degrees in Maclaurin of $\sin x$</td>
+<td>Always <strong>radians</strong> — convert $10°\to\pi/18$</td>
+</tr>
+<tr>
+<td>Forgetting validity intersection when combining two series</td>
+<td>When using $\ln A-\ln B$, take overlap of validity intervals</td>
+</tr>
+<tr>
+<td>Using $\ln x$ in a Maclaurin (centred at 0)</td>
+<td>Impossible — $\ln(0)$ undefined; switch to Taylor centred at $a>0$</td>
+</tr>
+<tr>
+<td>Confusing Taylor (A) and (B) — substituting $x$ instead of $x-a$</td>
+<td>Read the question: &quot;in powers of $x$&quot; → form (A); &quot;in powers of $(x-a)$&quot; → form (B)</td>
+</tr>
+<tr>
+<td>In series-solution: forgetting product rule when differentiating $xy$</td>
+<td>$\dfrac{\mathrm d}{\mathrm dx}(xy)=y+x\dfrac{\mathrm dy}{\mathrm dx}$</td>
+</tr>
+<tr>
+<td>In series-solution at $x_0\ne 0$: writing answer in powers of $x$</td>
+<td>Must keep $(x-x_0)^k$ — that's the whole point of Taylor</td>
+</tr>
+<tr>
+<td>Forgetting to <strong>simplify</strong> coefficients after multiplying series</td>
+<td>E.g. $\tfrac{1}{2}\cdot\tfrac{(2x)^2}{2}=x^2$ — don't leave it ugly</td>
+</tr>
+<tr>
+<td>Multiplying two infinite series and including $x^5$ contribution by accident</td>
+<td>Stop at the requested order; drop higher powers as you multiply</td>
+</tr>
+<tr>
+<td>In limit problems: expanding $f$ to too low an order</td>
+<td>Need at least up to the $x^k$ term that survives division</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (the 30-second mental model)</h2>
+<p>Think of a function near a point $a$ as a polynomial whose coefficients are <em>just</em> its derivative-values at that point, scaled by factorials:</p>
+<p>$$f(x)\approx f(a)+f'(a)(x-a)+\dfrac{f''(a)}{2!}(x-a)^2+\dots$$</p>
+<ol>
+<li><strong>Maclaurin</strong> is the case $a=0$. Five canonical series ($e^x,\ln(1+x),\sin,\cos,\arctan$) are given to you in the formulae booklet — <strong>everything else is built from these by substitution / multiplication / log laws</strong>.</li>
+<li><strong>Taylor</strong> lifts the centre to any point $a$ where the derivatives are finite — needed when Maclaurin can't see a function (e.g. $\ln x$).</li>
+<li><strong>Validity</strong> matters: outside the convergence interval, more terms makes things worse.</li>
+<li><strong>DE series solutions</strong> flip the trick: instead of computing $y$ first and then expanding, you read $y, y', y'', \dots$ directly off the differential equation by repeated differentiation, and assemble the Taylor polynomial. No closed form needed.</li>
+</ol>
+<p>Two recipes (Maclaurin / Taylor), six standard series, one substitution toolkit — that's the chapter.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S1 Ch 5 — Correlation and Regression | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>S1 Ch 5 — Correlation and Regression | Recall Sheet</h1>
+  <div class="meta">S1 · Ch 5 · Exam: 2026-05-19 · Recall sheet for spaced repetition</div>
+  <h1>S1 Ch 5 — Correlation and Regression</h1>
+<p><strong>The whole chapter in one mental model.</strong> Given <strong>bivariate data</strong> $(x,y)$, three statistics summarise the linear relationship: the <strong>gradient</strong> $b=S_{xy}/S_{xx}$ of the least-squares regression line $y=a+bx$ (with $a=\bar y - b\bar x$), and the <strong>product-moment correlation coefficient</strong> $r=S_{xy}/\sqrt{S_{xx}S_{yy}}$ which measures the <em>strength</em> of the linear fit (-1 to +1). Coding rescales the variables; the regression coefficients change predictably, but $r$ is <strong>invariant</strong>. Predict only <strong>inside</strong> the data range (interpolation); extrapolation is unreliable.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bivariate data</strong></td>
+<td>Data consisting of <em>paired</em> observations $(x_i,y_i)$ on two variables — e.g. (height, weight) for each person. Each individual contributes one point to a scatter diagram.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Scatter diagram</strong></td>
+<td>A 2-D plot with one cross per data point: independent variable on $x$-axis, dependent on $y$-axis. Reveals shape (linear or non-linear), strength of correlation, and outliers.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Independent / explanatory variable</strong></td>
+<td>The variable the experimenter <em>controls</em> or that <em>causes</em> — plotted on the <strong>$x$-axis</strong>. The &quot;input.&quot;</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Dependent / response variable</strong></td>
+<td>The variable that <em>responds</em> or is <em>measured</em> — plotted on the <strong>$y$-axis</strong>. The &quot;output.&quot;</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Correlation</strong></td>
+<td>The strength and direction of a <em>linear</em> relationship. <strong>Positive:</strong> $y$ rises with $x$. <strong>Negative:</strong> $y$ falls with $x$. <strong>No (linear) correlation:</strong> points scatter randomly — but a non-linear pattern may still exist.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Causal relationship</strong></td>
+<td>When $x$ truly <em>causes</em> $y$. Correlation alone does <em>not</em> prove causation — confounding variables can produce spurious correlations. Always check the context.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Line of best fit / Regression line</strong></td>
+<td>A straight line passing through the data, used as a linear model. The <strong>least-squares regression line of $y$ on $x$</strong> minimises $\sum\varepsilon_i^2$ where $\varepsilon_i$ is the <em>vertical</em> distance from $(x_i,y_i)$ to the line.</td>
+<td>5.2 / 5.3</td>
+</tr>
+<tr>
+<td><strong>Residual $\varepsilon_i$</strong></td>
+<td>The vertical gap between an observed $y_i$ and the predicted $\hat y_i$ from the regression line: $\varepsilon_i = y_i - \hat y_i$. Can be positive (point above line) or negative (below). The regression line minimises $\sum\varepsilon_i^2$.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Regression line of $y$ on $x$</strong></td>
+<td>The line $y=a+bx$ with $b=\dfrac{S_{xy}}{S_{xx}}$ and $a=\bar y - b\bar x$. Used to predict $y$ from $x$. <strong>Different</strong> from the regression line of $x$ on $y$.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Summary statistics $S_{xx},S_{yy},S_{xy}$</strong></td>
+<td>Convenient sums: $S_{xx}=\sum x^2-\dfrac{(\sum x)^2}{n}$, $S_{yy}=\sum y^2-\dfrac{(\sum y)^2}{n}$, $S_{xy}=\sum xy-\dfrac{\sum x\sum y}{n}$. They are the building blocks for both the regression line and $r$.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Interpolation</strong></td>
+<td>Predicting a $y$ for an $x$ that lies <em>inside</em> the range of observed $x$-values. Generally reliable provided the linear model fits.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Extrapolation</strong></td>
+<td>Predicting a $y$ for an $x$ <em>outside</em> the range. Unreliable — the linear pattern may not extend. Always flag this as a limitation.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Product moment correlation coefficient (PMCC), $r$</strong></td>
+<td>$r=\dfrac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}\in[-1,1]$. Measures linear correlation strength. <strong>+1</strong>: perfect positive line. <strong>-1</strong>: perfect negative line. <strong>0</strong>: no <em>linear</em> relationship (still possibly non-linear).</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><strong>Coding (linear)</strong></td>
+<td>A change of scale $p = \dfrac{x-a}{b}$ (and similar for $y$) to keep numbers small. Affects the regression coefficients (you must decode), but <strong>does not affect $r$</strong>.</td>
+<td>5.3 / 5.4</td>
+</tr>
+<tr>
+<td><strong>Bivariate normal distribution</strong></td>
+<td>The theoretical assumption underlying $r$: both variables, when considered separately, are normally distributed. PMCC is technically valid only under this.</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><strong>Interpretation of $b$</strong></td>
+<td>&quot;For every unit increase in $x$, $y$ changes by $b$.&quot; Always state in <em>context</em> with units.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Interpretation of $a$</strong></td>
+<td>&quot;When $x=0$, the predicted $y$ is $a$.&quot; Often unrealistic if $x=0$ is far outside the data — flag this.</td>
+<td>5.2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Summary statistics — formulae cheat sheet</h2>
+<p>$$S_{xx}=\sum (x-\bar x)^2 = \sum x^2 - \frac{(\sum x)^2}{n}$$
+$$S_{yy}=\sum (y-\bar y)^2 = \sum y^2 - \frac{(\sum y)^2}{n}$$
+$$S_{xy}=\sum (x-\bar x)(y-\bar y) = \sum xy - \frac{\sum x\sum y}{n}$$</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$S_{xx}$</td>
+<td>Denominator of regression slope; spread of $x$</td>
+</tr>
+<tr>
+<td>$S_{yy}$</td>
+<td>Denominator of $r$ alongside $S_{xx}$; spread of $y$</td>
+</tr>
+<tr>
+<td>$S_{xy}$</td>
+<td>Numerator for both slope and $r$; covariance of $x,y$</td>
+</tr>
+<tr>
+<td>$\bar x = \dfrac{\sum x}{n}$, $\bar y = \dfrac{\sum y}{n}$</td>
+<td>Means used in regression intercept</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sign of $S_{xy}$:</strong> matches the direction of correlation — positive ⇒ positive correlation, negative ⇒ negative.</p>
+<hr />
+<h2>3. Least squares regression — building blocks</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Formula</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$\bar x = \sum x/n$ and $\bar y = \sum y/n$</td>
+<td>Compute means first</td>
+</tr>
+<tr>
+<td>2</td>
+<td>$S_{xx} = \sum x^2 - (\sum x)^2/n$</td>
+<td>&quot;Sum of squares&quot; of $x$ deviations</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$S_{xy} = \sum xy - (\sum x)(\sum y)/n$</td>
+<td>Cross-product sum of deviations</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Slope</strong> $b = \dfrac{S_{xy}}{S_{xx}}$</td>
+<td>The &quot;rise per unit run&quot;</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Intercept</strong> $a = \bar y - b\bar x$</td>
+<td>Forces the line through $(\bar x, \bar y)$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Regression equation: $y=a+bx$</td>
+<td>Predict $y$ for new $x$ via plugging in</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation template:</strong></p>
+<ul>
+<li><strong>$b$:</strong> &quot;An increase of 1 [unit] in $x$ is associated with a change of $b$ [unit] in $y$, on average.&quot;</li>
+<li><strong>$a$:</strong> &quot;When $x=0$, the predicted $y$ is $a$ [unit].&quot; (often unrealistic; mention if outside data range)</li>
+</ul>
+<hr />
+<h2>4. Product moment correlation coefficient $r$</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Formula</td>
+<td>$r = \dfrac{S_{xy}}{\sqrt{S_{xx}\,S_{yy}}}$</td>
+</tr>
+<tr>
+<td>Range</td>
+<td>$-1 \le r \le 1$</td>
+</tr>
+<tr>
+<td>$r=+1$</td>
+<td>Perfect positive linear: all points on a line with positive gradient</td>
+</tr>
+<tr>
+<td>$r=-1$</td>
+<td>Perfect negative linear: line with negative gradient</td>
+</tr>
+<tr>
+<td>$r=0$</td>
+<td>No <em>linear</em> correlation; data may still follow a curve</td>
+</tr>
+<tr>
+<td>$|r|>0.9$</td>
+<td>Strong correlation</td>
+</tr>
+<tr>
+<td>$0.5<|r|<0.9$</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>$|r|<0.5$</td>
+<td>Weak</td>
+</tr>
+<tr>
+<td>Sign</td>
+<td>Same as $S_{xy}$, same as slope $b$</td>
+</tr>
+<tr>
+<td>Affected by linear coding?</td>
+<td><strong>No</strong> — $r$ is invariant</td>
+</tr>
+<tr>
+<td>Affected by swapping $x,y$?</td>
+<td><strong>No</strong> — symmetric in $x,y$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Coding — how each statistic transforms</h2>
+<p>For coding $p=\dfrac{x-a_1}{b_1}$ and $q=\dfrac{y-a_2}{b_2}$:</p>
+<table>
+<thead>
+<tr>
+<th>Statistic</th>
+<th>Coded ↔ Original</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\bar x$</td>
+<td>$\bar p=\dfrac{\bar x - a_1}{b_1}$, so $\bar x = b_1\bar p + a_1$</td>
+</tr>
+<tr>
+<td>$\bar y$</td>
+<td>similarly</td>
+</tr>
+<tr>
+<td>$S_{xx}$</td>
+<td>$S_{pp}=\dfrac{S_{xx}}{b_1^2}$, so $S_{xx}=b_1^2 S_{pp}$</td>
+</tr>
+<tr>
+<td>$S_{yy}$</td>
+<td>$S_{qq}=\dfrac{S_{yy}}{b_2^2}$</td>
+</tr>
+<tr>
+<td>$S_{xy}$</td>
+<td>$S_{pq}=\dfrac{S_{xy}}{b_1 b_2}$</td>
+</tr>
+<tr>
+<td>Slope $b$</td>
+<td>$b_{q\,\text{on}\,p}=\dfrac{S_{pq}}{S_{pp}}=\dfrac{b_1}{b_2}\cdot \dfrac{S_{xy}}{S_{xx}}$</td>
+</tr>
+<tr>
+<td><strong>PMCC $r$</strong></td>
+<td><strong>Unchanged</strong> — $r_{pq}=r_{xy}$</td>
+</tr>
+<tr>
+<td>Regression line</td>
+<td>Substitute $p,q$ into the coded equation, then rearrange to get $y$ in terms of $x$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Procedure to decode a regression line:</strong></p>
+<ol>
+<li>Write the coded line, e.g. $q = \alpha + \beta p$.</li>
+<li>Substitute $p=\dfrac{x-a_1}{b_1},\; q=\dfrac{y-a_2}{b_2}$.</li>
+<li>Expand and rearrange into $y = A + Bx$.</li>
+</ol>
+<hr />
+<h2>6. Decision flow — what's being asked?</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;Describe the correlation&quot;</td>
+<td>Look at $r$ (or scatter diagram): direction (sign) + strength (magnitude); state in context</td>
+</tr>
+<tr>
+<td>&quot;Interpret the gradient/intercept&quot;</td>
+<td>Sentence in context with units, referring back to $x$ and $y$</td>
+</tr>
+<tr>
+<td>&quot;Find the regression line&quot;</td>
+<td>Compute $S_{xx},S_{xy},\bar x,\bar y$ → $b=S_{xy}/S_{xx}$ → $a=\bar y - b\bar x$</td>
+</tr>
+<tr>
+<td>&quot;Predict $y$ when $x=...$&quot;</td>
+<td>Plug into $y=a+bx$; check whether $x$ is <strong>inside</strong> data range (interpolation = OK, extrapolation = flag)</td>
+</tr>
+<tr>
+<td>&quot;Predict $x$ when $y=...$&quot;</td>
+<td><strong>Don't</strong> use $y$-on-$x$ line! Need regression of $x$ on $y$</td>
+</tr>
+<tr>
+<td>&quot;Find PMCC&quot;</td>
+<td>$r=\dfrac{S_{xy}}{\sqrt{S_{xx}S_{yy}}}$</td>
+</tr>
+<tr>
+<td>&quot;Coded data given&quot;</td>
+<td>Compute everything in coded variables; use coding rules to decode if asked</td>
+</tr>
+<tr>
+<td>&quot;Comment on causation&quot;</td>
+<td>Correlation ≠ causation; identify possible confounders, sample issues</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Worked archetypes</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$n=5$; $\sum x=300,\sum x^2=22000,\sum y=288.6,\sum xy=18238$. Find regression line.</td>
+<td>$S_{xx}=22000-300^2/5=4000$; $S_{xy}=18238-300(288.6)/5=922$; $b=922/4000=0.2305$; $\bar x=60,\bar y=57.72$ → $a=57.72-0.2305(60)=43.89$. <strong>$y=43.89+0.2305x$</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>$r$ with $\sum x=176.9,\sum y=679,\sum x^2=2576.47,\sum y^2=39771,\sum xy=9915.3$, $n=15$.</td>
+<td>$S_{xx}=490.23$; $S_{yy}=9034.93$; $S_{xy}=1907.63$; $r=1907.63/\sqrt{490.23\cdot 9034.93}=0.906$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Coding: $x=10c,\ y=(m-700)/5$. Coded line: $y=36.2-4.05x$. Decode for $m,c$.</td>
+<td>Substitute: $(m-700)/5 = 36.2 - 4.05(10c)$ ⇒ $m=881.07-202.4c$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$r$ unchanged under coding. Coded $r_{AB}=0.973$. Find $r_{xy}$.</td>
+<td>$r_{xy}=0.973$ (invariant)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Predict $y$ at $x=58$ where data range is $20\le x\le 100$.</td>
+<td>Interpolation; reliable. Plug in: $y=43.89+0.2305(58)=57.3$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Predict $y$ at $x=130$ where data range is $20\le x\le 100$.</td>
+<td>Extrapolation; flag as unreliable</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using regression line of $y$ on $x$ to predict $x$ from $y$</td>
+<td>Need a <em>separate</em> regression line of $x$ on $y$ — coefficients differ</td>
+</tr>
+<tr>
+<td>Confusing causation with correlation</td>
+<td>$r$ near $\pm 1$ shows linear association, <strong>never</strong> that one variable causes the other</td>
+</tr>
+<tr>
+<td>Forgetting that $r$ is unchanged under linear coding</td>
+<td>If you computed $r$ in coded variables, that <em>is</em> $r$ for the original variables</td>
+</tr>
+<tr>
+<td>Stating &quot;perfect&quot; correlation when $r=0.99$</td>
+<td>Reserve &quot;perfect&quot; for $r=\pm 1$ exactly; otherwise &quot;very strong&quot;</td>
+</tr>
+<tr>
+<td>Forgetting to check interpolation vs extrapolation</td>
+<td>Always quote the data range $x_{\min}\le x\le x_{\max}$ and check</td>
+</tr>
+<tr>
+<td>Quoting interpretation without units / context</td>
+<td>&quot;$b=0.5$&quot; is wrong — say &quot;an extra gram of supplement increases shell hardness by 0.5 units&quot;</td>
+</tr>
+<tr>
+<td>Using formula $r=S_{xy}/\sqrt{S_{xx}+S_{yy}}$</td>
+<td>The denominator is $\sqrt{S_{xx}\cdot S_{yy}}$ (product, not sum)</td>
+</tr>
+<tr>
+<td>Computing $a$ before $b$</td>
+<td>Order matters: $b=S_{xy}/S_{xx}$ first, <em>then</em> $a=\bar y - b\bar x$</td>
+</tr>
+<tr>
+<td>Dropping decimal places mid-calculation</td>
+<td>Keep at least 4 s.f. throughout; round only the final answer (3 s.f. typical)</td>
+</tr>
+<tr>
+<td>Saying &quot;the regression line shows that $x$ causes $y$&quot;</td>
+<td>Regression assumes a model — does not establish causality</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Big picture (30-second mental model)</h2>
+<p>Bivariate analysis = <strong>three numbers</strong> that summarise a linear relationship:</p>
+<ol>
+<li><strong>$S_{xx}, S_{yy}, S_{xy}$</strong> — three &quot;centred sums of products&quot; computed from the data.</li>
+<li><strong>Regression line $y=a+bx$:</strong> $b=S_{xy}/S_{xx}$ (slope), $a=\bar y - b\bar x$ (forces line through centroid). Use it to <strong>predict $y$</strong> from $x$ inside the data range.</li>
+<li><strong>PMCC $r=S_{xy}/\sqrt{S_{xx}S_{yy}}\in[-1,1]$:</strong> measures <em>strength</em> of linear fit. Same sign as slope $b$. <strong>Invariant</strong> under linear coding.</li>
+<li><strong>Coding</strong> simplifies arithmetic: rescales $\bar x, \bar y, S_{xx}$ etc. predictably; decode by substituting back.</li>
+<li><strong>Two warnings:</strong> correlation does not imply causation; and predictions outside the data range (extrapolation) are unreliable.</li>
+</ol>
+<p>Three sums, two formulas, one invariant — that's the chapter.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP1 Ch 6 — Transformations Using Matrices | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP1 Ch 6 — Transformations Using Matrices | Recall Sheet</h1>
+  <div class="meta">FP1 · Ch 6 · Exam: 2026-05-21 · Recall sheet for spaced repetition</div>
+  <h1>FP1 Ch 6 — Transformations Using Matrices</h1>
+<p><strong>The whole chapter in one mental model.</strong> Every <strong>linear transformation</strong> of the plane (one that fixes the origin and acts linearly on $x,y$) corresponds to a $2\times 2$ matrix $\mathbf{M}$ whose columns are the images of $\binom{1}{0}$ and $\binom{0}{1}$. Reflections, rotations, stretches, enlargements all sit in standard matrices — combine them by multiplication ($\mathbf{PQ}$ = &quot;do $\mathbf{Q}$ first, then $\mathbf{P}$&quot;), undo them with $\mathbf{M}^{-1}$, and read off the area scale factor from $\det\mathbf{M}$ (negative det → orientation flipped, i.e. a reflection is involved).</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transformation</strong></td>
+<td>A rule mapping each point $\binom{x}{y}$ in the plane to a new point $\binom{x'}{y'}$ called its <strong>image</strong>. The rule can be written $\mathbf{T}:\binom{x}{y}\mapsto\binom{f(x,y)}{g(x,y)}$. Examples include translations, reflections, rotations, stretches.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Linear transformation</strong></td>
+<td>A transformation in which both new coordinates are <em>linear</em> in $x,y$: i.e. of the form $x'=ax+by,\ y'=cx+dy$ — no constants, no $x^2,y^2,xy,\sin x$ etc. Two equivalent properties: (i) origin maps to origin; (ii) $\mathbf{T}(k\mathbf{u}+\mathbf{v})=k\mathbf{T}\mathbf{u}+\mathbf{T}\mathbf{v}$ (preserves linear combinations).</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Translation (NOT linear)</strong></td>
+<td>Mapping $\binom{x}{y}\mapsto\binom{x+a}{y+b}$ with $a,b\neq 0$. Origin moves to $(a,b)$, so it's not linear and can't be represented by a $2\times 2$ matrix on column vectors.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Matrix of a linear transformation</strong></td>
+<td>The unique $2\times 2$ matrix $\mathbf{M}=\begin{pmatrix}a&b\\c&d\end{pmatrix}$ such that $\mathbf{T}\binom{x}{y}=\mathbf{M}\binom{x}{y}$. The first column is $\mathbf{T}\binom{1}{0}$, second column is $\mathbf{T}\binom{0}{1}$. So you build the matrix by tracking where the unit vectors go.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Image of a shape</strong></td>
+<td>After applying the transformation to every vertex (and thus every point) of a shape, the new shape is the image, often denoted $S'$ or $T'$. To find image vertices: multiply the matrix by each vertex written as a column vector.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Invariant point</strong></td>
+<td>A point that maps to itself: $\mathbf{T}P=P$. The origin is always invariant under any linear transformation. The full set of invariant points is found by solving $(\mathbf{M}-\mathbf{I})\binom{x}{y}=\binom{0}{0}$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Invariant line</strong></td>
+<td>A line that maps to itself <em>as a set</em> (each point on the line goes to <em>some</em> point still on the same line — not necessarily the same point). E.g. for reflection in the $y$-axis, every horizontal line $y=k$ is invariant: it maps onto itself, but individual points slide along it.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Reflection matrices (the four standard)</strong></td>
+<td>$y$-axis: $\begin{pmatrix}-1&0\\0&1\end{pmatrix}$. $x$-axis: $\begin{pmatrix}1&0\\0&-1\end{pmatrix}$. Line $y=x$: $\begin{pmatrix}0&1\\1&0\end{pmatrix}$. Line $y=-x$: $\begin{pmatrix}0&-1\\-1&0\end{pmatrix}$. Each has $\det=-1$. Each is <strong>self-inverse</strong>: $\mathbf{R}^2=\mathbf{I}$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Rotation matrix</strong> $R_\theta$</td>
+<td>$R_\theta=\begin{pmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{pmatrix}$ for an <strong>anticlockwise</strong> rotation about the origin by angle $\theta$. $\det=1$ (preserves area &amp; orientation). For clockwise rotations, replace $\theta$ by $-\theta$ (or equivalently use $360°-\theta$ anticlockwise). Composition: $R_\alpha R_\beta=R_{\alpha+\beta}$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Stretch matrix</strong></td>
+<td>$\begin{pmatrix}a&0\\0&b\end{pmatrix}$ — stretch by factor $a$ parallel to the $x$-axis and factor $b$ parallel to the $y$-axis. If $a=b$ this is an <strong>enlargement</strong> with scale factor $a$. Negative entries flip the corresponding axis (reflection combined with stretch).</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Enlargement</strong></td>
+<td>Special case of stretch with $a=b$. Matrix $\begin{pmatrix}k&0\\0&k\end{pmatrix}=k\mathbf{I}$. <strong>Linear scale factor</strong> $k$, <strong>area scale factor</strong> $k^2$. Negative $k$ also rotates by $180°$.</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Area scale factor</strong></td>
+<td>$\lvert\det\mathbf{M}\rvert$. Every region's area is multiplied by this factor under the transformation. If $\det\mathbf{M}<0$, orientation is reversed (a reflection-type transformation has happened); if $\det=0$, every point collapses onto a single line through the origin (singular transformation).</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Successive transformations</strong></td>
+<td>Apply $\mathbf{Q}$ first, then $\mathbf{P}$: the combined matrix is $\mathbf{PQ}$. Note the <strong>right-to-left</strong> reading order — the matrix nearer the column vector acts first.</td>
+<td>6.4</td>
+</tr>
+<tr>
+<td><strong>Inverse transformation</strong></td>
+<td>The transformation that reverses $\mathbf{T}$. Its matrix is $\mathbf{M}^{-1}$. To find the pre-image $P$ of a known image $P'$: solve $\mathbf{M}\binom{x}{y}=\binom{x'}{y'}$ by left-multiplying by $\mathbf{M}^{-1}$. Reflections and $180°$ rotations are self-inverse ($\mathbf{M}^{-1}=\mathbf{M}$).</td>
+<td>6.5</td>
+</tr>
+<tr>
+<td><strong>Self-inverse matrix</strong></td>
+<td>$\mathbf{M}\mathbf{M}=\mathbf{I}$, i.e. $\mathbf{M}^{-1}=\mathbf{M}$. Includes all reflections, $180°$ rotation, and identity. Equivalently, applying the transformation twice returns the original point.</td>
+<td>6.5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The standard transformation matrices (memorise EVERY entry)</h2>
+<table>
+<thead>
+<tr>
+<th>Transformation</th>
+<th>Matrix</th>
+<th>Determinant</th>
+<th>Invariant points</th>
+<th>Invariant lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity</td>
+<td>$\begin{pmatrix}1&0\\0&1\end{pmatrix}$</td>
+<td>$1$</td>
+<td>All of $\mathbb{R}^2$</td>
+<td>All lines</td>
+</tr>
+<tr>
+<td>Reflection in $x$-axis</td>
+<td>$\begin{pmatrix}1&0\\0&-1\end{pmatrix}$</td>
+<td>$-1$</td>
+<td>$x$-axis ($y=0$)</td>
+<td>$y=0$, all vertical lines $x=k$</td>
+</tr>
+<tr>
+<td>Reflection in $y$-axis</td>
+<td>$\begin{pmatrix}-1&0\\0&1\end{pmatrix}$</td>
+<td>$-1$</td>
+<td>$y$-axis ($x=0$)</td>
+<td>$x=0$, all horizontal lines $y=k$</td>
+</tr>
+<tr>
+<td>Reflection in $y=x$</td>
+<td>$\begin{pmatrix}0&1\\1&0\end{pmatrix}$</td>
+<td>$-1$</td>
+<td>$y=x$</td>
+<td>$y=x$, all $y=-x+k$</td>
+</tr>
+<tr>
+<td>Reflection in $y=-x$</td>
+<td>$\begin{pmatrix}0&-1\\-1&0\end{pmatrix}$</td>
+<td>$-1$</td>
+<td>$y=-x$</td>
+<td>$y=-x$, all $y=x+k$</td>
+</tr>
+<tr>
+<td>Rotation $\theta$ anticlockwise</td>
+<td>$\begin{pmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{pmatrix}$</td>
+<td>$1$</td>
+<td>Origin only</td>
+<td>None (unless $\theta=180°$, then all lines through origin)</td>
+</tr>
+<tr>
+<td>Rotation $90°$ ACW</td>
+<td>$\begin{pmatrix}0&-1\\1&0\end{pmatrix}$</td>
+<td>$1$</td>
+<td>Origin</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Rotation $180°$</td>
+<td>$\begin{pmatrix}-1&0\\0&-1\end{pmatrix}=-\mathbf{I}$</td>
+<td>$1$</td>
+<td>Origin</td>
+<td>All lines through origin</td>
+</tr>
+<tr>
+<td>Rotation $270°$ ACW (= $90°$ CW)</td>
+<td>$\begin{pmatrix}0&1\\-1&0\end{pmatrix}$</td>
+<td>$1$</td>
+<td>Origin</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Stretch $a$ along $x$, $b$ along $y$</td>
+<td>$\begin{pmatrix}a&0\\0&b\end{pmatrix}$</td>
+<td>$ab$</td>
+<td>Origin (always); $y$-axis if $a=1$; $x$-axis if $b=1$</td>
+<td>Both axes; for $a\neq b$: only the axes</td>
+</tr>
+<tr>
+<td>Enlargement scale factor $k$</td>
+<td>$\begin{pmatrix}k&0\\0&k\end{pmatrix}=k\mathbf{I}$</td>
+<td>$k^2$</td>
+<td>Origin</td>
+<td>Every line through origin</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. The two-step recipe — building the matrix from a description</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Identify where $\binom{1}{0}$ goes — sketch a unit square, watch the bottom-right corner</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Identify where $\binom{0}{1}$ goes — watch the top-left corner</td>
+</tr>
+<tr>
+<td>3</td>
+<td>First column = image of $\binom{1}{0}$; second column = image of $\binom{0}{1}$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Verify by checking a third point (e.g. $\binom{1}{1}$ should land on the sum of the columns)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked check:</strong> rotation by $90°$ anticlockwise: $\binom{1}{0}\to\binom{0}{1}$, $\binom{0}{1}\to\binom{-1}{0}$, so $\mathbf{M}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$. ✓</p>
+<hr />
+<h2>4. Finding invariant points and invariant lines</h2>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Equation</th>
+<th>Solution method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invariant points (mapped to themselves)</td>
+<td>$\mathbf{M}\binom{x}{y}=\binom{x}{y}$, i.e. $(\mathbf{M}-\mathbf{I})\binom{x}{y}=\binom{0}{0}$</td>
+<td>If $\mathbf{M}-\mathbf{I}$ non-singular, only origin; if singular, a whole line of fixed points</td>
+</tr>
+<tr>
+<td>Invariant lines through origin $y=mx$</td>
+<td>Substitute $\binom{x}{mx}$, multiply by $\mathbf{M}$, set image $=\binom{x'}{mx'}$, solve for $m$</td>
+<td>Get a quadratic-in-$m$ equation; up to two values</td>
+</tr>
+<tr>
+<td>Invariant lines NOT through origin $y=mx+c$</td>
+<td>Same idea but with constant — usually appears for reflections (parallels to mirror line)</td>
+<td></td>
+</tr>
+<tr>
+<td>Special case: stretches</td>
+<td>$x$ and $y$ axes are always invariant lines</td>
+<td></td>
+</tr>
+<tr>
+<td>Special case: rotations $\theta\neq 0,180°$</td>
+<td>Only origin is invariant; no invariant lines</td>
+<td></td>
+</tr>
+<tr>
+<td>Special case: $180°$ rotation</td>
+<td>Every line through origin is invariant</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Composition rules — read right to left</h2>
+<table>
+<thead>
+<tr>
+<th>Construction</th>
+<th>Single matrix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apply $\mathbf{Q}$, then $\mathbf{P}$</td>
+<td>$\mathbf{PQ}$ (P on the left because it acts last)</td>
+</tr>
+<tr>
+<td>Apply $\mathbf{R}$, then $\mathbf{Q}$, then $\mathbf{P}$</td>
+<td>$\mathbf{PQR}$</td>
+</tr>
+<tr>
+<td>Reverse a transformation $\mathbf{M}$</td>
+<td>$\mathbf{M}^{-1}$</td>
+</tr>
+<tr>
+<td>Apply $\mathbf{M}$ then reverse it</td>
+<td>$\mathbf{M}^{-1}\mathbf{M}=\mathbf{I}$ — back to start</td>
+</tr>
+<tr>
+<td>Apply $\mathbf{M}$ twice (squared)</td>
+<td>$\mathbf{M}^2$</td>
+</tr>
+<tr>
+<td>Apply $\mathbf{M}$ $n$ times</td>
+<td>$\mathbf{M}^n$ — for rotation $R_\theta$: $R_\theta^n=R_{n\theta}$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Two reflections compose to a rotation:</strong> reflecting in line $\ell_1$ then in line $\ell_2$ where the angle between them is $\alpha$ gives a rotation by $2\alpha$ about their intersection.</p>
+<hr />
+<h2>6. Decoding a &quot;rotation × enlargement&quot; matrix (Section 6.4 trick)</h2>
+<p>Given $\mathbf{M}$ that's a rotation by $\theta$ then enlargement by $k$ (or vice versa — they commute when both are about origin):</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Compute $\det\mathbf{M}$</td>
+<td>This equals $k^2$ if pure rotation+enlargement</td>
+</tr>
+<tr>
+<td>2</td>
+<td>$k=\sqrt{\det\mathbf{M}}$ (positive scale factor)</td>
+<td>Extracts the enlargement</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Divide each entry of $\mathbf{M}$ by $k$ → pure rotation matrix</td>
+<td>$\frac{1}{k}\mathbf{M}=\begin{pmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Read $\theta$ off using both $\cos$ and $\sin$ entries</td>
+<td>Use both to fix the quadrant</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Worked archetypes (memorise the <em>shape</em>)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Find image of $(1,1),(3,1),(3,3),(1,3)$ under $\begin{pmatrix}-1&2\\2&1\end{pmatrix}$</td>
+<td>Multiply each vertex; image vertices $(1,3),(-1,7),(3,9),(5,5)$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Identify the transformation $\mathbf{M}=\begin{pmatrix}0&-1\\-1&0\end{pmatrix}$</td>
+<td>$\binom{1}{0}\to\binom{0}{-1}$, $\binom{0}{1}\to\binom{-1}{0}$ — reflection in $y=-x$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Show $y=3x$ invariant under $180°$ rotation</td>
+<td>$\begin{pmatrix}-1&0\\0&-1\end{pmatrix}\binom{x}{3x}=\binom{-x}{-3x}$, and $-3x=3(-x)$ — image still on line</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Find rotation matrix for $135°$</td>
+<td>$\cos 135°=-\sqrt2/2$, $\sin 135°=\sqrt2/2$, so $\begin{pmatrix}-\sqrt2/2 & -\sqrt2/2\\\sqrt2/2 & -\sqrt2/2\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Triangle area $A$, transformed by $\mathbf{M}$ with $\det=8$</td>
+<td>New area $=8A$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$\mathbf{M}=\begin{pmatrix}-2\sqrt2 & -2\sqrt2\\2\sqrt2 & -2\sqrt2\end{pmatrix}$ — rotation+enlargement</td>
+<td>$\det=16$, $k=4$, $\frac{1}{4}\mathbf{M}=\begin{pmatrix}-\sqrt2/2 & -\sqrt2/2\\\sqrt2/2 & -\sqrt2/2\end{pmatrix}$ → $\theta=135°$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>&quot;Reflection in $y$-axis followed by reflection in $y=-x$&quot;</td>
+<td>Composition $\mathbf{M}_{y=-x}\mathbf{M}_{y\text{-axis}}=\begin{pmatrix}0&-1\\-1&0\end{pmatrix}\begin{pmatrix}-1&0\\0&1\end{pmatrix}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ → rotation $90°$ ACW</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Find pre-image of $(6,10)$ under $\mathbf{A}=\begin{pmatrix}2&4\\-2&-5\end{pmatrix}$</td>
+<td>$\det\mathbf{A}=-2$, $\mathbf{A}^{-1}=\frac{1}{-2}\begin{pmatrix}-5&-4\\2&2\end{pmatrix}$, multiply by $\binom{6}{10}$ → $(35,-16)$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Decision flow — pick the right approach</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linear transformation given as $\binom{x}{y}\mapsto\binom{ax+by}{cx+dy}$</td>
+<td>Matrix is $\begin{pmatrix}a&b\\c&d\end{pmatrix}$ — read off coefficients</td>
+</tr>
+<tr>
+<td>Description of a transformation (rotation, reflection, stretch)</td>
+<td>Use standard matrix from §2 table</td>
+</tr>
+<tr>
+<td>Need matrix for rotation by specific $\theta$</td>
+<td>$\begin{pmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>Asked for area scale factor</td>
+<td>$\lvert\det\mathbf{M}\rvert$</td>
+</tr>
+<tr>
+<td>Asked whether orientation flipped</td>
+<td>$\det\mathbf{M}<0$ → yes, includes a reflection</td>
+</tr>
+<tr>
+<td>Asked for invariant lines</td>
+<td>Substitute $\binom{x}{mx+c}$, equate, solve for $m,c$</td>
+</tr>
+<tr>
+<td>Asked for the pre-image (where did the point come from?)</td>
+<td>Multiply image by $\mathbf{M}^{-1}$</td>
+</tr>
+<tr>
+<td>Composition &quot;do A then B&quot;</td>
+<td>Matrix is $\mathbf{BA}$ — right-to-left</td>
+</tr>
+<tr>
+<td>&quot;$\mathbf{M}=\mathbf{rotation}\times\mathbf{enlargement}$, find $\theta,k$&quot;</td>
+<td>$k=\sqrt{\det\mathbf{M}}$, then $(1/k)\mathbf{M}$ is pure rotation; read $\theta$</td>
+</tr>
+<tr>
+<td>Squared/repeated transformation</td>
+<td>Use $\mathbf{M}^n$; for rotations $R_\theta^n=R_{n\theta}$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiplying matrices in wrong order for composition</td>
+<td>&quot;Do $\mathbf{Q}$ then $\mathbf{P}$&quot; = $\mathbf{PQ}$ — the LAST transformation is on the LEFT</td>
+</tr>
+<tr>
+<td>Confusing rotation direction (clockwise vs anticlockwise)</td>
+<td>Standard formula is <strong>anticlockwise</strong>; for clockwise $\theta$, use $-\theta$ or $360°-\theta$</td>
+</tr>
+<tr>
+<td>Treating translation as a $2\times 2$ matrix transformation</td>
+<td>It's not linear — origin doesn't fix; you'd need $3\times 3$ homogeneous coordinates</td>
+</tr>
+<tr>
+<td>Reporting $\det\mathbf{M}$ as area scale factor when it's negative</td>
+<td>Area scale factor is $\lvert\det\mathbf{M}\rvert$; sign tells you about orientation flip</td>
+</tr>
+<tr>
+<td>Writing first column as image of $(0,1)$</td>
+<td>First column is image of $\binom{1}{0}$, second column is image of $\binom{0}{1}$</td>
+</tr>
+<tr>
+<td>Forgetting that reflection matrices have $\det=-1$</td>
+<td>All four standard reflections do — useful sanity check</td>
+</tr>
+<tr>
+<td>Forgetting reflections are self-inverse</td>
+<td>$\mathbf{R}^{-1}=\mathbf{R}$ for any reflection, simplifies inverse problems</td>
+</tr>
+<tr>
+<td>Using rotation matrix for rotation about a point other than origin</td>
+<td>Standard formula only works for rotation about origin; for other centres, translate first</td>
+</tr>
+<tr>
+<td>Swapping signs on reflection in $y=-x$</td>
+<td>Correct: $\begin{pmatrix}0&-1\\-1&0\end{pmatrix}$ — both off-diagonal entries negative</td>
+</tr>
+<tr>
+<td>Reporting answer as position vector instead of coordinates</td>
+<td>Write $(x,y)$ for coordinates; $\binom{x}{y}$ is the column vector</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (the 30-second mental model)</h2>
+<ol>
+<li><strong>A linear transformation = a $2\times 2$ matrix</strong> $\mathbf{M}$, where $\mathbf{M}\binom{x}{y}$ gives the image. Built from the unit-vector images: column 1 = $\mathbf{M}\binom{1}{0}$, column 2 = $\mathbf{M}\binom{0}{1}$.</li>
+<li><strong>Reflections, rotations, stretches</strong> each have standard matrices (Section §2). Reflections have $\det=-1$ (orientation flip), rotations have $\det=1$ (rigid), stretches have $\det=ab$ (area $\times ab$).</li>
+<li><strong>Composition</strong> = matrix multiplication. &quot;Do $\mathbf{Q}$ then $\mathbf{P}$&quot; composes to $\mathbf{PQ}$ — read right to left.</li>
+<li><strong>Inverse transformation</strong> = inverse matrix. Reflections and $180°$ rotations are self-inverse.</li>
+<li><strong>Determinant</strong> is the universal area scale factor (sign = orientation). $\det\mathbf{M}=0$ means the transformation collapses everything onto a line.</li>
+<li><strong>Invariant points/lines</strong> come from solving $\mathbf{M}\mathbf{v}=\mathbf{v}$ (point) or $\mathbf{M}\mathbf{v}=\lambda\mathbf{v}$ for some scalar (line direction), foreshadowing eigenvectors in FP3.</li>
+</ol>
+<p>Two tables (standard matrices, area effects), one rule (right-to-left composition), one inverse (matrix inverse). That's the chapter.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP2 Ch 2 — Series (Method of Differences) | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP2 Ch 2 — Series (Method of Differences) | Recall Sheet</h1>
+  <div class="meta">FP2 · Ch 2 · Exam: 2026-06-01 · Recall sheet for spaced repetition</div>
+  <h1>FP2 Ch 2 — Series (Method of Differences)</h1>
+<p><strong>The whole chapter in one mental model.</strong> A finite sum $\sum_{r=1}^n u_r$ <strong>collapses dramatically</strong> if you can express the general term as a <em>difference</em> $u_r=f(r)-f(r+1)$ — then writing out the sum, almost all middle terms cancel, leaving just $f(1)-f(n+1)$. The chapter is one technique applied to two flavours: <strong>partial-fraction telescoping</strong> ($\tfrac{1}{r(r+1)}=\tfrac{1}{r}-\tfrac{1}{r+1}$) and <strong>algebraic-identity telescoping</strong> ($r^3$ as a difference of cubes). Same recipe; different ways to spot the difference structure.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Series</strong></td>
+<td>The sum of the terms of a sequence. In FP2 we focus on <strong>finite</strong> series $\sum_{r=1}^n u_r$ (sum of the first $n$ terms). The <em>summand</em> $u_r$ is the general term — a function of the index $r$.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>General term</strong> $u_r$</td>
+<td>The expression for the $r$-th term of the sequence. Whole game: rewrite $u_r$ as a difference $f(r)-f(r+1)$ (or $f(r+1)-f(r)$) so the sum collapses.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Method of differences (telescoping)</strong></td>
+<td>Identifying $u_r=f(r)-f(r+1)$ and summing. After cancellation $\sum_{r=1}^n u_r=f(1)-f(n+1)$. The metaphor: the sum collapses like a telescope sliding shut, leaving only the endpoints.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Telescoping cancellation</strong></td>
+<td>When you write the sum out: $u_1=f(1)-f(2),\ u_2=f(2)-f(3),\ \dots$ — each $f(2),f(3),\dots,f(n)$ appears once positive and once negative and cancels. Only $f(1)$ (from the first term) and $-f(n+1)$ (from the last) survive.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Partial fractions</strong></td>
+<td>Decomposing $\dfrac{P(r)}{Q(r)}$ where $\deg P<\deg Q$ into a sum of simpler fractions, each with a linear denominator. The standard FP2 trick: $\dfrac{1}{r(r+1)}=\dfrac{1}{r}-\dfrac{1}{r+1}$ — automatically a difference structure.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Two-step difference</strong> $f(r)-f(r+2)$</td>
+<td>When the natural decomposition skips by 2 (e.g. $\tfrac{2}{(r+1)(r+3)}=\tfrac{1}{r+1}-\tfrac{1}{r+3}$), only every other term cancels. After summation, <strong>four</strong> boundary terms survive: $f(1)+f(2)-f(n+1)-f(n+2)$.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Telescoping by algebraic identity</strong></td>
+<td>Spotting that $4r^3=r^2(r+1)^2-(r-1)^2 r^2$, i.e. $u_r=g(r)-g(r-1)$ where $g(r)=r^2(r+1)^2$. Sum collapses to $g(n)-g(0)$. Used to <em>prove</em> standard sum formulas (e.g. $\sum r^2$, $\sum r^3$) without induction.</td>
+<td>2.1 Ex 1</td>
+</tr>
+<tr>
+<td><strong>Identity $\equiv$</strong></td>
+<td>Same notation as equation $=$ but read as &quot;is identically equal to&quot; — true for every $r$, not just at solution values. Often used in FP2 to emphasise the algebraic structure.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Boundary terms / surviving terms</strong></td>
+<td>After cancellation, the remaining <em>unfolded</em> terms. For 1-step difference: $f(1),\ -f(n+1)$. For 2-step: $f(1),\ f(2),\ -f(n+1),\ -f(n+2)$. Identifying these correctly is where most algebraic mistakes happen.</td>
+<td>2.1 Ex 4</td>
+</tr>
+<tr>
+<td><strong>Common-denominator simplification</strong></td>
+<td>After getting the closed form (e.g. $\tfrac{5}{6}-\tfrac{1}{n+2}-\tfrac{1}{n+3}$), combine into a single fraction with denominator $6(n+2)(n+3)$ and simplify the numerator. Final answer should be a single algebraic fraction.</td>
+<td>2.1 Ex 4</td>
+</tr>
+<tr>
+<td><strong>Partial sum from $r=k$ to $r=N$</strong></td>
+<td>$\sum_{r=k}^N u_r=\sum_{r=1}^N u_r-\sum_{r=1}^{k-1}u_r$. Use the closed form once for upper limit, once for the offset, subtract. Same trick as FP1 §7.</td>
+<td>2.1 Ex 4c</td>
+</tr>
+<tr>
+<td><strong>Verifying with small $n$</strong></td>
+<td>Test the closed form at $n=1,2$ to catch slips. E.g. $\sum_{r=1}^1 \tfrac{1}{r(r+1)}=\tfrac{1}{2}$, and the closed form $1-\tfrac{1}{n+1}$ at $n=1$ gives $\tfrac{1}{2}$ ✓</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Common spotting trick</strong> $u_r=\dfrac{1}{r(r+a)}$</td>
+<td>Always partial-fractions to $\dfrac{1}{a}\left(\dfrac{1}{r}-\dfrac{1}{r+a}\right)$ — the $\dfrac{1}{a}$ pulls out front, then telescoping with skip $a$.</td>
+<td>2.1 Ex 3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The core formulas (memorise these two)</h2>
+<table>
+<thead>
+<tr>
+<th>Form of $u_r$</th>
+<th>After summing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$u_r=f(r)-f(r+1)$</td>
+<td>$\sum_{r=1}^n u_r=f(1)-f(n+1)$</td>
+</tr>
+<tr>
+<td>$u_r=f(r+1)-f(r)$</td>
+<td>$\sum_{r=1}^n u_r=f(n+1)-f(1)$</td>
+</tr>
+<tr>
+<td>$u_r=f(r)-f(r+2)$ (skip 2)</td>
+<td>$\sum_{r=1}^n u_r=f(1)+f(2)-f(n+1)-f(n+2)$</td>
+</tr>
+<tr>
+<td>$u_r=f(r)-f(r+k)$ (skip $k$)</td>
+<td>$\sum_{r=1}^n u_r=\big(f(1)+\dots+f(k)\big)-\big(f(n+1)+\dots+f(n+k)\big)$</td>
+</tr>
+<tr>
+<td>$u_r=g(r)-g(r-1)$ (one-step backward)</td>
+<td>$\sum_{r=1}^n u_r=g(n)-g(0)$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. The four-step recipe (memorise)</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Identify the difference structure.</strong> If $u_r$ is a partial fraction, do the partial-fraction decomposition. If it's polynomial, look for an algebraic identity (cube/square diffs).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Write out the first few terms</strong> explicitly: $u_1, u_2, u_3$, AND <strong>the last few</strong>: $u_{n-1}, u_n$.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Cancel</strong> the matching middle terms (cross out in pencil so it's still readable).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Read off the surviving terms</strong> = the closed form. Combine into a single algebraic fraction if asked.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. Standard partial-fraction telescopes (memorise)</h2>
+<table>
+<thead>
+<tr>
+<th>$u_r$</th>
+<th>Decomposition</th>
+<th>Telescope result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\dfrac{1}{r(r+1)}$</td>
+<td>$\dfrac{1}{r}-\dfrac{1}{r+1}$</td>
+<td>$1-\dfrac{1}{n+1}=\dfrac{n}{n+1}$</td>
+</tr>
+<tr>
+<td>$\dfrac{1}{r(r+2)}$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{1}{r}-\dfrac{1}{r+2}\right)$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{3}{2}-\dfrac{1}{n+1}-\dfrac{1}{n+2}\right)=\dfrac{n(3n+5)}{4(n+1)(n+2)}$</td>
+</tr>
+<tr>
+<td>$\dfrac{1}{(r+1)(r+2)}$</td>
+<td>$\dfrac{1}{r+1}-\dfrac{1}{r+2}$</td>
+<td>$\dfrac{1}{2}-\dfrac{1}{n+2}=\dfrac{n}{2(n+2)}$</td>
+</tr>
+<tr>
+<td>$\dfrac{1}{(2r-1)(2r+1)}$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{1}{2r-1}-\dfrac{1}{2r+1}\right)$</td>
+<td>$\dfrac{1}{2}\left(1-\dfrac{1}{2n+1}\right)=\dfrac{n}{2n+1}$</td>
+</tr>
+<tr>
+<td>$\dfrac{1}{(2r+1)(2r+3)}$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{1}{2r+1}-\dfrac{1}{2r+3}\right)$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{1}{3}-\dfrac{1}{2n+3}\right)=\dfrac{n}{3(2n+3)}$</td>
+</tr>
+<tr>
+<td>$\dfrac{1}{r(r+1)(r+2)}$</td>
+<td>$\dfrac{1}{2}\left(\dfrac{1}{r(r+1)}-\dfrac{1}{(r+1)(r+2)}\right)$</td>
+<td>$\dfrac{1}{4}-\dfrac{1}{2(n+1)(n+2)}$</td>
+</tr>
+<tr>
+<td>$\dfrac{r}{(r+1)!}$</td>
+<td>$\dfrac{1}{r!}-\dfrac{1}{(r+1)!}$</td>
+<td>$1-\dfrac{1}{(n+1)!}$</td>
+</tr>
+<tr>
+<td>$\dfrac{2r+1}{r^2(r+1)^2}$</td>
+<td>$\dfrac{1}{r^2}-\dfrac{1}{(r+1)^2}$</td>
+<td>$1-\dfrac{1}{(n+1)^2}=\dfrac{n(n+2)}{(n+1)^2}$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Algebraic-identity telescopes — proving FP1 standard sums</h2>
+<table>
+<thead>
+<tr>
+<th>Sum to prove</th>
+<th>Identity to use</th>
+<th>$f(r)$</th>
+<th>After telescoping</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\sum_{r=1}^n r$</td>
+<td>$r=\tfrac{1}{2}(r(r+1)-r(r-1))$</td>
+<td>$f(r)=r(r-1)$</td>
+<td>$\tfrac{1}{2}(n(n+1)-0)=\tfrac{1}{2}n(n+1)$</td>
+</tr>
+<tr>
+<td>$\sum_{r=1}^n r^2$</td>
+<td>$6r^2+2=(r+1)^3-(r-1)^3$, or $r^2=\tfrac{1}{3}(r(r+1)(r+2)-...)$</td>
+<td>Various</td>
+<td>$\tfrac{1}{6}n(n+1)(2n+1)$</td>
+</tr>
+<tr>
+<td>$\sum_{r=1}^n r^3$</td>
+<td>$4r^3=r^2(r+1)^2-(r-1)^2r^2$</td>
+<td>$f(r)=(r-1)^2r^2$</td>
+<td>$4\sum=n^2(n+1)^2$, so $\sum=\tfrac{1}{4}n^2(n+1)^2$</td>
+</tr>
+</tbody>
+</table>
+<p>The algebraic-identity approach gives an alternative (non-induction) proof of the standard sums.</p>
+<hr />
+<h2>6. The two-step skip — boundary book-keeping</h2>
+<p>When $u_r=\dfrac{1}{(r+a)(r+b)}$ with $b-a\geq 2$, the partial fraction $u_r=\tfrac{1}{b-a}\big(\tfrac{1}{r+a}-\tfrac{1}{r+b}\big)$ has skip $k=b-a$. Summing:</p>
+<table>
+<thead>
+<tr>
+<th>Skip $k$</th>
+<th>Surviving terms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$k=1$</td>
+<td>$f(1)$ at front, $f(n+1)$ at back</td>
+</tr>
+<tr>
+<td>$k=2$</td>
+<td>$f(1)+f(2)$ at front, $f(n+1)+f(n+2)$ at back</td>
+</tr>
+<tr>
+<td>$k=3$</td>
+<td>$f(1)+f(2)+f(3)$ at front, $f(n+1)+f(n+2)+f(n+3)$ at back</td>
+</tr>
+<tr>
+<td>general $k$</td>
+<td>$\sum_{j=1}^k f(j)$ at front, $-\sum_{j=1}^k f(n+j)$ at back</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked example (Ex 4):</strong> $\sum_{r=1}^n \tfrac{2}{(r+1)(r+3)}=\sum \big(\tfrac{1}{r+1}-\tfrac{1}{r+3}\big)$. Skip 2. Surviving: $\tfrac{1}{2}+\tfrac{1}{3}-\tfrac{1}{n+2}-\tfrac{1}{n+3}=\tfrac{5}{6}-\tfrac{1}{n+2}-\tfrac{1}{n+3}$. Combine: $\tfrac{n(5n+13)}{6(n+2)(n+3)}$.</p>
+<hr />
+<h2>7. Decision flow — what to do in 5 seconds</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$u_r$ is a fraction with quadratic denominator</td>
+<td>Partial-fractions → look for the &quot;$f(r)-f(r+k)$&quot; form</td>
+</tr>
+<tr>
+<td>$u_r=\tfrac{1}{r(r+1)}$, $\tfrac{1}{(r+1)(r+2)}$ etc.</td>
+<td>Decompose to $\tfrac{1}{r}-\tfrac{1}{r+1}$ pattern (skip 1)</td>
+</tr>
+<tr>
+<td>Difference of squares in denominator: $4r^2-1$</td>
+<td>Factor: $(2r-1)(2r+1)$, then partial fractions</td>
+</tr>
+<tr>
+<td>Higher-order: $\tfrac{1}{r(r+1)(r+2)}$</td>
+<td>Use the identity given in question, or decompose to $\tfrac{1}{r(r+1)}-\tfrac{1}{(r+1)(r+2)}$ form</td>
+</tr>
+<tr>
+<td>Polynomial $r^k$</td>
+<td>Look for an algebraic identity expressing it as a difference of consecutive $g(r),\ g(r-1)$</td>
+</tr>
+<tr>
+<td>&quot;$\sum_{r=k}^n$&quot; instead of from $r=1$</td>
+<td>Use $\sum_{r=k}^n=\sum_{r=1}^n-\sum_{r=1}^{k-1}$, plug both into closed form</td>
+</tr>
+<tr>
+<td>Question says &quot;show that $\sum=\tfrac{n(an+b)}{\dots}$, find $a,b$&quot;</td>
+<td>Derive closed form, simplify to common denominator, match form to identify $a,b$</td>
+</tr>
+<tr>
+<td>Verify result via induction (alternative method)</td>
+<td>The textbook flag: this should also work — sometimes mentioned as an alternative</td>
+</tr>
+<tr>
+<td>Question gives $\equiv$ identity to prove first</td>
+<td>Verify the identity (expand both sides), then use it for the sum</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Worked archetypes (memorise the <em>shape</em>)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sum</th>
+<th>Decomposition</th>
+<th>Closed form</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$\sum_{r=1}^n r^3$</td>
+<td>$4r^3=r^2(r+1)^2-(r-1)^2 r^2$, sum collapses to $n^2(n+1)^2$, divide by 4</td>
+<td>$\tfrac{1}{4}n^2(n+1)^2$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>$\sum_{r=1}^n \tfrac{1}{r(r+1)}$</td>
+<td>$\tfrac{1}{r}-\tfrac{1}{r+1}$, telescope</td>
+<td>$\tfrac{n}{n+1}$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$\sum_{r=1}^n \tfrac{1}{4r^2-1}$</td>
+<td>$\tfrac{1}{2}\big(\tfrac{1}{2r-1}-\tfrac{1}{2r+1}\big)$, telescope</td>
+<td>$\tfrac{n}{2n+1}$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$\sum_{r=1}^n \tfrac{2}{(r+1)(r+3)}$</td>
+<td>$\tfrac{1}{r+1}-\tfrac{1}{r+3}$, skip-2 telescope</td>
+<td>$\tfrac{n(5n+13)}{6(n+2)(n+3)}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>$\sum_{r=1}^n \tfrac{1}{r(r+2)}$</td>
+<td>$\tfrac{1}{2}\big(\tfrac{1}{r}-\tfrac{1}{r+2}\big)$, skip-2</td>
+<td>$\tfrac{n(3n+5)}{4(n+1)(n+2)}$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$\sum_{r=1}^n \tfrac{r}{(r+1)!}$</td>
+<td>$\tfrac{1}{r!}-\tfrac{1}{(r+1)!}$, telescope (note: $r=(r+1)-1$ trick)</td>
+<td>$1-\tfrac{1}{(n+1)!}$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>$\sum_{r=21}^{30} u_r$ given $\sum_{r=1}^n=g(n)$</td>
+<td>$g(30)-g(20)$</td>
+<td>Plug in</td>
+</tr>
+<tr>
+<td>8</td>
+<td>$\sum_{r=1}^n \tfrac{1}{r(r+1)(r+2)}$ given identity</td>
+<td>Use given $\tfrac{1}{2r(r+1)}-\tfrac{1}{2(r+1)(r+2)}$, telescope</td>
+<td>$\tfrac{n(n+3)}{4(n+1)(n+2)}$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Common pitfalls (and the marks they cost)</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stopping after writing $u_1,u_2,u_3$ — not enough to see cancellation</td>
+<td>Write out 3-4 terms at front AND 1-2 at back, with $\vdots$ in between</td>
+</tr>
+<tr>
+<td>For skip-2, only writing $f(1)$ and $-f(n+1)$ surviving</td>
+<td>Skip 2 → FOUR boundary terms: $f(1),f(2),-f(n+1),-f(n+2)$. Don't skip $f(2)$</td>
+</tr>
+<tr>
+<td>Partial-fraction error: getting wrong sign on $A,B$</td>
+<td>Check by adding back: $\tfrac{A}{r}+\tfrac{B}{r+1}$ should reproduce $\tfrac{1}{r(r+1)}$. Plug $r=1$ both sides</td>
+</tr>
+<tr>
+<td>For $\tfrac{1}{(2r-1)(2r+1)}$ — forgetting the $\tfrac{1}{2}$ multiplier</td>
+<td>Numerator of difference of two reciprocals is $\tfrac{(2r+1)-(2r-1)}{(2r-1)(2r+1)}=\tfrac{2}{(2r-1)(2r+1)}$, so $\tfrac{1}{(2r-1)(2r+1)}=\tfrac{1}{2}(\dots)$</td>
+</tr>
+<tr>
+<td>Forgetting to combine into single fraction at the end</td>
+<td>If question wants $\tfrac{n(an+b)}{c(\dots)}$, you must combine and identify $a,b,c$</td>
+</tr>
+<tr>
+<td>Mixing up $r=k$ vs $r=k-1$ when subtracting partial sums</td>
+<td>$\sum_{r=k}^n=\sum_{r=1}^n-\sum_{r=1}^{k-1}$ — subtract up to $k-1$ NOT $k$</td>
+</tr>
+<tr>
+<td>Telescoping in wrong direction: $f(r+1)-f(r)$ vs $f(r)-f(r+1)$</td>
+<td>Check signs: writing out $u_1,u_2$ should reveal which terms cancel</td>
+</tr>
+<tr>
+<td>Treating $\equiv$ as if it were an equation to be solved</td>
+<td>$\equiv$ is an <em>identity</em> — true for all $r$. You verify by expansion, you don't solve</td>
+</tr>
+<tr>
+<td>For factorial telescope $\tfrac{r}{(r+1)!}$: simply attempting partial fractions</td>
+<td>Write $r=(r+1)-1$, then $\tfrac{r}{(r+1)!}=\tfrac{(r+1)-1}{(r+1)!}=\tfrac{1}{r!}-\tfrac{1}{(r+1)!}$</td>
+</tr>
+<tr>
+<td>Robin's mistake (Q7 chapter review): assuming partial fractions exist for any rational</td>
+<td>Need $\deg(\text{num}) < \deg(\text{denom})$; for $\tfrac{2r+1}{r(r+1)}$ check first — actually here $\deg=1 < 2$ so it works, but the actual mistake was in computing $A,B$ values</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (the 30-second mental model)</h2>
+<ol>
+<li><strong>The whole technique:</strong> rewrite $u_r$ as $f(r)-f(r+1)$. The sum then telescopes to $f(1)-f(n+1)$.</li>
+<li><strong>How to spot the difference structure:</strong>
+<ul>
+<li>Fractional $u_r$ → partial fractions (90% of FP2 cases)</li>
+<li>Polynomial $u_r$ → algebraic identity (cube-of-difference, square-of-difference, factorial trick)</li>
+</ul>
+</li>
+<li><strong>Skip-$k$ generalisation:</strong> if $u_r=f(r)-f(r+k)$, sum is $\sum_{j=1}^k f(j) - \sum_{j=1}^k f(n+j)$. Watch boundary book-keeping.</li>
+<li><strong>Procedure:</strong> write out first 3 + last 2 terms, cancel middle, simplify boundary, combine into single fraction.</li>
+<li><strong>Always usable, always faster than induction</strong> for closed-form sum problems. Induction works as backup but can't <em>find</em> the closed form.</li>
+</ol>
+<p>One technique, two flavours: telescoping is the entire chapter.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

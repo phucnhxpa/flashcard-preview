@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S1 Ch 2 — Measures of Location and Spread | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>S1 Ch 2 — Measures of Location and Spread | Recall Sheet</h1>
+  <div class="meta">S1 · Ch 2 · Exam: 2026-05-19 · Recall sheet for spaced repetition</div>
+  <h1>S1 Ch 2 — Measures of Location and Spread</h1>
+<p><strong>The whole chapter in one mental model.</strong> Take any data set and squeeze out <strong>two numbers</strong>: a <em>location</em> (centre — mean / median / mode / quartile / percentile) and a <em>spread</em> (range / IQR / interpercentile / variance / SD). For grouped data you <strong>estimate</strong> centre &amp; spread using class midpoints and <strong>interpolation</strong>. <strong>Coding</strong> $y=\tfrac{x-a}{b}$ shifts the mean by $-a/b$ but only scales the SD by $1/b$ — additive shifts vanish from spread.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Quantitative vs qualitative</strong></td>
+<td>Quantitative variables produce numbers (heights, times, scores); qualitative ones produce categories (colours, names, brands). Only quantitative data has a meaningful mean/median/SD; qualitative data is restricted to mode and proportions.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Discrete vs continuous</strong></td>
+<td>Discrete variables take isolated values from a list (number of coins, shoe size — gaps allowed in between). Continuous variables can take <em>any</em> value in a range, limited only by measuring precision (mass, time, length). The distinction drives whether you draw bar charts or histograms.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Frequency table / grouped frequency table</strong></td>
+<td>A compact way of writing many observations: each row holds a value (or class) $x$ alongside how often it occurred, $f$. Grouped tables bin continuous data into <strong>classes</strong>; you lose the exact data but gain readability.</td>
+<td>2.1</td>
+</tr>
+<tr>
+<td><strong>Class boundaries</strong></td>
+<td>The actual numerical limits of a class. If the table reads &quot;55–65&quot; with no gaps, boundaries are exactly 55 and 65; if rounded data has gaps like &quot;55–65, 66–70&quot;, boundaries shift to 65.5 / 65.5 (halfway). Used for class width and interpolation.</td>
+<td>2.1 Ex 2</td>
+</tr>
+<tr>
+<td><strong>Midpoint</strong></td>
+<td>Centre of a class: $\tfrac{1}{2}(L+U)$ where $L,U$ are class boundaries. Used as the value of $x$ in any formula on grouped data — assumes data are evenly spread within each class.</td>
+<td>2.1 Ex 2</td>
+</tr>
+<tr>
+<td><strong>Mean $\bar x$</strong></td>
+<td>The arithmetic average $\bar x = \dfrac{\sum x}{n}$ (raw) or $\bar x = \dfrac{\sum fx}{\sum f}$ (frequency table). Uses <em>every</em> value, so distorted by outliers. The &quot;balance point&quot; of the distribution — but not necessarily a value that exists in the data.</td>
+<td>2.2</td>
+</tr>
+<tr>
+<td><strong>Median $Q_2$</strong></td>
+<td>The middle value once the data are ordered: the $\tfrac{n+1}{2}$-th value for <strong>discrete</strong> data, the $\tfrac{n}{2}$-th value for <strong>grouped/cumulative</strong> data. Robust to outliers — splits the dataset 50/50.</td>
+<td>2.2/2.3</td>
+</tr>
+<tr>
+<td><strong>Mode / modal class</strong></td>
+<td>The most-frequent value (or class with the highest frequency). The only &quot;average&quot; usable for qualitative data. A dataset can be unimodal, bimodal, or have no mode.</td>
+<td>2.2</td>
+</tr>
+<tr>
+<td><strong>Combined mean</strong></td>
+<td>When two sub-samples are merged: $\bar x = \dfrac{n_1\bar x_1+n_2\bar x_2}{n_1+n_2}$. Reweights each group's mean by its size — <em>not</em> the simple average of the means unless $n_1=n_2$.</td>
+<td>2.2</td>
+</tr>
+<tr>
+<td><strong>Quartiles $Q_1,Q_2,Q_3$</strong></td>
+<td>The values that split ordered data into four equal blocks. Discrete rule: compute $\tfrac{n}{4}$ or $\tfrac{3n}{4}$; if integer → midway between that value and the next, if not → round up. Grouped: use $\tfrac{n}{4}$-th value with interpolation.</td>
+<td>2.3</td>
+</tr>
+<tr>
+<td><strong>Percentile $P_k$</strong></td>
+<td>Value $k\%$ of the way through the ordered data; $P_{10}$ is the 10th percentile, $Q_2=P_{50}$. Found by interpolation in grouped tables: $\frac{P_k - L}{U-L} = \frac{kn/100 - F_<}{f}$.</td>
+<td>2.3 Ex 7</td>
+</tr>
+<tr>
+<td><strong>Linear interpolation</strong></td>
+<td>Estimating a value inside a class by <em>assuming uniform spread</em>. If the value you want sits a fraction $p$ of the way through a class, place it $p$ of the way between its boundaries: $Q = L + p(U-L)$ where $p=\frac{\text{rank}-F_<}{f}$.</td>
+<td>2.3</td>
+</tr>
+<tr>
+<td><strong>Range</strong></td>
+<td>$\text{max}-\text{min}$. Crude — uses only two values, distorted by outliers. Ideal for &quot;what's the worst-case spread?&quot; but not robust.</td>
+<td>2.4</td>
+</tr>
+<tr>
+<td><strong>Interquartile range (IQR)</strong></td>
+<td>$Q_3-Q_1$ — spread of the middle 50%. Robust to outliers because it ignores both tails. The default &quot;honest spread&quot; in box-plot summaries.</td>
+<td>2.4</td>
+</tr>
+<tr>
+<td><strong>Interpercentile range</strong></td>
+<td>$P_b-P_a$ for any chosen $a<b$. The 10–90 IPR is popular: it uses 80% of the data and dodges the most extreme 10% on each side, so it's robust without throwing away half the dataset like IQR.</td>
+<td>2.4</td>
+</tr>
+<tr>
+<td><strong>Variance $\sigma^2$</strong></td>
+<td>Mean squared deviation from the mean: $\sigma^2 = \dfrac{\sum(x-\bar x)^2}{n} = \dfrac{\sum x^2}{n}-\left(\dfrac{\sum x}{n}\right)^2 = \dfrac{S_{xx}}{n}$. &quot;Mean of the squares minus the square of the mean.&quot; Units are squared, which is why we usually report $\sigma$.</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td><strong>Standard deviation $\sigma$</strong></td>
+<td>$\sigma=\sqrt{\sigma^2}$ — same units as the data, so directly comparable to $\bar x$. About 2/3 of a normal-shaped dataset lies within $\bar x\pm\sigma$. The single most-used measure of spread.</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td><strong>$S_{xx}$</strong></td>
+<td>Compact notation: $S_{xx}=\sum(x-\bar x)^2 = \sum x^2 - \dfrac{(\sum x)^2}{n}$. Lets you write variance as $\sigma^2=S_{xx}/n$. Often given pre-computed in exam questions.</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td><strong>Coding</strong></td>
+<td>A linear transformation $y=\dfrac{x-a}{b}$ applied before computing statistics, to keep the numbers tidy. After computing $\bar y,\sigma_y$, decode: $\bar x = b\bar y+a$, $\sigma_x=b\sigma_y$. The shift $a$ vanishes from $\sigma$ — only the scale $b$ matters for spread.</td>
+<td>2.6</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Measures of central tendency — formula table</h2>
+<p>The &quot;best&quot; average depends on the data type and presence of outliers.</p>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Raw data</th>
+<th>Ungrouped frequency table</th>
+<th>Grouped frequency table</th>
+<th>When to use</th>
+<th>Outlier-robust?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mode</strong></td>
+<td>Most-frequent value</td>
+<td>Value with highest $f$</td>
+<td>Modal class (highest $f$)</td>
+<td>Qualitative data, &quot;most popular&quot; questions</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Median $Q_2$</strong></td>
+<td>$\tfrac{n+1}{2}$-th ordered value</td>
+<td>$\tfrac{n+1}{2}$-th value (cumulative $f$)</td>
+<td>$\tfrac{n}{2}$-th value via interpolation</td>
+<td>Skewed / outlier-prone data</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Mean $\bar x$</strong></td>
+<td>$\dfrac{\sum x}{n}$</td>
+<td>$\dfrac{\sum fx}{\sum f}$</td>
+<td>$\dfrac{\sum fx}{\sum f}$ with $x=$midpoint (estimate)</td>
+<td>Clean, symmetric data — uses every value</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td><strong>Combined mean</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Merging two groups</td>
+<td>$\bar x=\dfrac{n_1\bar x_1+n_2\bar x_2}{n_1+n_2}$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Other measures of location — quartile &amp; percentile rules</h2>
+<p>Different rules for <strong>discrete</strong> vs <strong>grouped</strong> data — don't mix them up.</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Discrete data rule</th>
+<th>Grouped/cumulative data rule</th>
+<th>Interpolation formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>$Q_1$ (lower quartile)</strong></td>
+<td>$\tfrac{n}{4}$. Integer → midway with next value; non-integer → round up</td>
+<td>$\tfrac{n}{4}$-th value</td>
+<td>$\dfrac{Q_1-L}{U-L}=\dfrac{n/4-F_<}{f}$</td>
+</tr>
+<tr>
+<td><strong>$Q_2$ (median)</strong></td>
+<td>$\tfrac{n+1}{2}$-th value</td>
+<td>$\tfrac{n}{2}$-th value</td>
+<td>$\dfrac{Q_2-L}{U-L}=\dfrac{n/2-F_<}{f}$</td>
+</tr>
+<tr>
+<td><strong>$Q_3$ (upper quartile)</strong></td>
+<td>$\tfrac{3n}{4}$. Integer → midway; non-integer → round up</td>
+<td>$\tfrac{3n}{4}$-th value</td>
+<td>$\dfrac{Q_3-L}{U-L}=\dfrac{3n/4-F_<}{f}$</td>
+</tr>
+<tr>
+<td><strong>$P_k$ (kth percentile)</strong></td>
+<td>$\tfrac{kn}{100}$, same rounding rule</td>
+<td>$\tfrac{kn}{100}$-th value</td>
+<td>$\dfrac{P_k-L}{U-L}=\dfrac{kn/100-F_<}{f}$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notation:</strong> $L,U$ = lower/upper class boundaries containing the rank; $f$ = frequency of that class; $F_<$ = cumulative frequency <em>before</em> the class.</p>
+<hr />
+<h2>4. Measures of spread — formulas</h2>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Formula</th>
+<th>Robustness</th>
+<th>Uses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Range</strong></td>
+<td>$\text{max}-\text{min}$</td>
+<td>Worst — single outlier ruins it</td>
+<td>Quick spread, error bounds</td>
+</tr>
+<tr>
+<td><strong>IQR</strong></td>
+<td>$Q_3-Q_1$</td>
+<td>Excellent — ignores both tails</td>
+<td>Box plots, comparison</td>
+</tr>
+<tr>
+<td><strong>10–90 IPR</strong></td>
+<td>$P_{90}-P_{10}$</td>
+<td>Strong — ignores extreme 10% each side</td>
+<td>Robust spread using 80% of data</td>
+</tr>
+<tr>
+<td><strong>Variance $\sigma^2$</strong></td>
+<td>$\dfrac{\sum(x-\bar x)^2}{n}=\dfrac{\sum x^2}{n}-\bar x^2 = \dfrac{S_{xx}}{n}$</td>
+<td>Sensitive to outliers (squares amplify)</td>
+<td>Building block for SD, normal model</td>
+</tr>
+<tr>
+<td><strong>Standard deviation $\sigma$</strong></td>
+<td>$\sqrt{\sigma^2}$ — same units as data</td>
+<td>Sensitive</td>
+<td>&quot;Average distance from $\bar x$&quot;</td>
+</tr>
+<tr>
+<td><strong>Frequency-table SD</strong></td>
+<td>$\sigma=\sqrt{\dfrac{\sum fx^2}{\sum f}-\left(\dfrac{\sum fx}{\sum f}\right)^2}$</td>
+<td>—</td>
+<td>Apply to midpoints for grouped data (gives <strong>estimate</strong>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mnemonic for variance:</strong> <em>&quot;Mean of the squares minus the square of the mean.&quot;</em>
+$$\sigma^2=\overline{x^2}-(\bar x)^2.$$</p>
+<hr />
+<h2>5. Variance — three equivalent forms (when to use which)</h2>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Best when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\dfrac{\sum(x-\bar x)^2}{n}$</td>
+<td>You only have a few values and want to <em>show working</em> with deviations</td>
+</tr>
+<tr>
+<td>$\dfrac{\sum x^2}{n}-\left(\dfrac{\sum x}{n}\right)^2$</td>
+<td>Question gives you $\sum x$ and $\sum x^2$ — plug-and-chug</td>
+</tr>
+<tr>
+<td>$\dfrac{S_{xx}}{n}$</td>
+<td>Question gives $S_{xx}$ pre-computed (or you ran calculator stats)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Coding — how each statistic transforms</h2>
+<p>Transform: $y=\dfrac{x-a}{b}$ (or rearranged $x=by+a$).</p>
+<table>
+<thead>
+<tr>
+<th>Original statistic</th>
+<th>Coded statistic</th>
+<th>Decode (recover $x$-stat)</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mean $\bar x$</td>
+<td>$\bar y = \dfrac{\bar x - a}{b}$</td>
+<td>$\bar x = b\bar y + a$</td>
+<td>Mean is linear in $x$</td>
+</tr>
+<tr>
+<td>Variance $\sigma_x^2$</td>
+<td>$\sigma_y^2 = \dfrac{\sigma_x^2}{b^2}$</td>
+<td>$\sigma_x^2 = b^2\sigma_y^2$</td>
+<td>Squaring the scaling factor</td>
+</tr>
+<tr>
+<td>Standard deviation $\sigma_x$</td>
+<td>$\sigma_y = \dfrac{\sigma_x}{b}$</td>
+<td>$\sigma_x = b\sigma_y$</td>
+<td>The shift $a$ doesn't affect spread</td>
+</tr>
+<tr>
+<td>$S_{xx}$</td>
+<td>$S_{yy} = \dfrac{S_{xx}}{b^2}$</td>
+<td>$S_{xx} = b^2 S_{yy}$</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Median, quartiles</td>
+<td>$Q_y = \dfrac{Q_x-a}{b}$</td>
+<td>$Q_x = b Q_y + a$</td>
+<td>Order-statistics transform like the mean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key insight:</strong> <strong>adding a constant</strong> changes the centre but not the spread. <strong>Multiplying by a constant</strong> scales both centre and spread.</p>
+<hr />
+<h2>7. Decision flow — choosing centre &amp; spread</h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Centre to use</th>
+<th>Spread to use</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qualitative data</td>
+<td>Mode</td>
+<td>—</td>
+<td>No arithmetic possible</td>
+</tr>
+<tr>
+<td>Symmetric quantitative, no outliers</td>
+<td>Mean</td>
+<td>SD</td>
+<td>Mean uses every datum</td>
+</tr>
+<tr>
+<td>Skewed / has outliers</td>
+<td>Median</td>
+<td>IQR</td>
+<td>Both robust</td>
+</tr>
+<tr>
+<td>Grouped frequency table</td>
+<td>Estimated mean (midpoints) or median class</td>
+<td>Estimated SD or IQR (interpolate)</td>
+<td>Exact values lost — must estimate</td>
+</tr>
+<tr>
+<td>Two combined groups</td>
+<td>Combined mean formula</td>
+<td>Re-pool $\sum x,\sum x^2$ then SD</td>
+<td>Don't average SDs!</td>
+</tr>
+<tr>
+<td>Coded data given</td>
+<td>Decode: $\bar x=b\bar y+a$</td>
+<td>Decode: $\sigma_x=b\sigma_y$</td>
+<td>Constant shift drops</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Worked archetypes (memorise the shape)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Raw list of 7 marks: $3,4,6,2,8,8,5$. Find $\sigma$.</td>
+<td>$\sum x=36,\sum x^2=218 \to \sigma^2=\tfrac{218}{7}-\left(\tfrac{36}{7}\right)^2=4.69 \to \sigma=2.17$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Frequency table of shirt sizes; find mean.</td>
+<td>$\bar x = \dfrac{\sum fx}{\sum f}$ — multiply each $x$ by $f$, sum, divide</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Combined groups: $n_1=8,\bar x_1=65;\ n_2=12,\bar x_2=72$.</td>
+<td>$\bar x=\dfrac{8\cdot 65+12\cdot 72}{20}=69.2$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Grouped table; find $Q_3$ via interpolation.</td>
+<td>Locate class containing $\tfrac{3n}{4}$th value; $Q_3=L+\dfrac{3n/4 - F_<}{f}(U-L)$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Coded $y=(x-300)/10$, $\bar y=3,\sigma_y=1.72$. Find $\bar x,\sigma_x$.</td>
+<td>$\bar x = 10(3)+300=330$; $\sigma_x=10(1.72)=17.2$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$\bar x,\sigma$ given for $x$. New variable $z=1.04 x$. Find new $\bar z,\sigma_z$.</td>
+<td>$\bar z=1.04\bar x$; $\sigma_z=1.04\sigma$ (purely scaling)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using $\tfrac{n+1}{2}$ for grouped median instead of $\tfrac{n}{2}$</td>
+<td>Discrete: $\tfrac{n+1}{2}$. Grouped: $\tfrac{n}{2}$.</td>
+</tr>
+<tr>
+<td>Forgetting to round up non-integer $\tfrac{n}{4}$ for discrete quartile</td>
+<td>Integer → midway. Non-integer → round up.</td>
+</tr>
+<tr>
+<td>Including the shift $a$ when finding $\sigma_x$ from $\sigma_y$</td>
+<td>$\sigma$ ignores $a$: $\sigma_x=b\sigma_y$ only.</td>
+</tr>
+<tr>
+<td>Adding the SDs of two groups</td>
+<td>NEVER. Re-compute $\sum x,\sum x^2$ for the pooled set.</td>
+</tr>
+<tr>
+<td>Using class boundaries instead of midpoints for mean</td>
+<td>Mean uses <strong>midpoints</strong>. Boundaries are for interpolation only.</td>
+</tr>
+<tr>
+<td>Forgetting class boundaries shift by $\pm 0.5$ when data has gaps</td>
+<td>&quot;5.0–5.9, 6.0–6.9&quot; → boundaries 4.95/5.95/6.95 (rounded data has gaps)</td>
+</tr>
+<tr>
+<td>Variance has wrong units in answer</td>
+<td>Variance $=$ data units$^2$. Answer should report $\sigma$ (same units as data) when comparing to $\bar x$.</td>
+</tr>
+<tr>
+<td>Square-rooting before subtracting in $\sigma^2 = \overline{x^2}-\bar x^2$</td>
+<td>Order: square the values first, <em>then</em> subtract, <em>then</em> square-root for $\sigma$.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (30-second mental model)</h2>
+<ol>
+<li><strong>Two numbers per dataset:</strong> a centre and a spread. Pick the pair (mean+SD or median+IQR) based on outliers.</li>
+<li><strong>Grouped data → estimate.</strong> Use midpoints for $\bar x$ and $\sigma$; use linear interpolation for $Q_1,Q_2,Q_3,P_k$ — assume uniform spread within each class.</li>
+<li><strong>Variance shortcut:</strong> $\sigma^2=\overline{x^2}-\bar x^2 = \dfrac{S_{xx}}{n}$. For frequency data, every $\sum$ becomes $\sum f\cdot$.</li>
+<li><strong>Coding</strong> rescues messy numbers: subtract a base $a$, divide by a step $b$. Mean shifts and scales; SD only scales (constants don't change spread).</li>
+<li><strong>Combining groups:</strong> weight means by size; pool $\sum x$ and $\sum x^2$ before re-computing $\sigma$.</li>
+</ol>
+<p>Two formulae and three rounding rules — that's the chapter.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

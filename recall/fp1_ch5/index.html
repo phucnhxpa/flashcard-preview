@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP1 Ch 5 — Matrices | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP1 Ch 5 — Matrices | Recall Sheet</h1>
+  <div class="meta">FP1 · Ch 5 · Exam: 2026-05-21 · Recall sheet for spaced repetition</div>
+  <h1>FP1 Ch 5 — Matrices</h1>
+<p><strong>The whole chapter in one mental model.</strong> A matrix is a rectangular grid of numbers with its own arithmetic: <strong>add/subtract</strong> elementwise (same shape required), <strong>multiply</strong> row × column (inner sizes must match, order matters), and for $2\times 2$ matrices compute a single number called the <strong>determinant</strong> $ad-bc$ which decides whether the matrix has an <strong>inverse</strong>. The inverse formula $\mathbf{M}^{-1}=\frac{1}{\det\mathbf{M}}\begin{pmatrix}d & -b \\ -c & a\end{pmatrix}$ is the entire chapter compressed into one line.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Matrix</strong></td>
+<td>A rectangular array of numbers (called <em>elements</em> or <em>entries</em>) inside brackets. Described by its <strong>size</strong> $n\times m$: $n$ rows × $m$ columns. Bold capital letters denote matrices ($\mathbf{A},\mathbf{M}$). A column vector is a $n\times 1$ matrix; a row vector is a $1\times m$ matrix.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Square matrix</strong></td>
+<td>A matrix where the number of rows equals the number of columns ($n=m$). Only square matrices have determinants and inverses. The chapter focuses on $2\times 2$ squares.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Zero matrix</strong> $\mathbf{0}$</td>
+<td>A matrix in which every element is 0. Acts like 0 under addition: $\mathbf{A}+\mathbf{0}=\mathbf{A}$. Note: $\mathbf{A}\mathbf{B}=\mathbf{0}$ does NOT imply $\mathbf{A}=\mathbf{0}$ or $\mathbf{B}=\mathbf{0}$ — matrix arithmetic differs from real-number arithmetic.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Identity matrix</strong> $\mathbf{I}$</td>
+<td>The square matrix with 1s on the main diagonal and 0s elsewhere. Acts like 1 under multiplication: $\mathbf{A}\mathbf{I}=\mathbf{I}\mathbf{A}=\mathbf{A}$. The $2\times 2$ identity is $\mathbf{I}_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Scalar</strong></td>
+<td>A plain number (not a matrix). To multiply a matrix by a scalar $k$, multiply every element by $k$. Distinguished from matrices by being non-bold ($k$ vs $\mathbf{A}$).</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Additively conformable</strong></td>
+<td>Two matrices the same size — they can be added or subtracted. $2\times 3$ + $2\times 3$ ✓; $2\times 3$ + $3\times 2$ ✗.</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td><strong>Multiplicatively conformable</strong></td>
+<td>$\mathbf{AB}$ exists iff the number of columns of $\mathbf{A}$ equals the number of rows of $\mathbf{B}$. $(n\times m)\times(m\times k)=(n\times k)$. The &quot;inner&quot; dimensions must match; the &quot;outer&quot; dimensions become the product's size.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Matrix product (row × column rule)</strong></td>
+<td>The $(i,j)$ entry of $\mathbf{AB}$ is the dot product of $\mathbf{A}$'s row $i$ with $\mathbf{B}$'s column $j$: sum the pairwise products. E.g. $\begin{pmatrix}a&b\\c&d\end{pmatrix}\begin{pmatrix}e&f\\g&h\end{pmatrix}=\begin{pmatrix}ae+bg & af+bh\\ce+dg & cf+dh\end{pmatrix}$.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Non-commutativity</strong></td>
+<td>In general $\mathbf{AB}\neq\mathbf{BA}$. Even if both products exist they can be different sizes (e.g. $\mathbf{A}$ is $2\times 3$, $\mathbf{B}$ is $3\times 2$ → $\mathbf{AB}$ is $2\times 2$, $\mathbf{BA}$ is $3\times 3$). Order matters everywhere in matrix algebra.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Associativity</strong></td>
+<td>Bracketing doesn't matter as long as the order is preserved: $(\mathbf{AB})\mathbf{C}=\mathbf{A}(\mathbf{BC})$. So $\mathbf{ABC}$ is unambiguous. Distributivity also holds: $\mathbf{A}(\mathbf{B}+\mathbf{C})=\mathbf{AB}+\mathbf{AC}$.</td>
+<td>5.2</td>
+</tr>
+<tr>
+<td><strong>Determinant</strong> $\det\mathbf{M}$ or $\lvert\mathbf{M}\rvert$</td>
+<td>A scalar associated with a square matrix. For $\mathbf{M}=\begin{pmatrix}a&b\\c&d\end{pmatrix}$: $\det\mathbf{M}=ad-bc$. Geometrically (FP3) it's the signed area scale factor of the linear map. Algebraically it tells you if $\mathbf{M}$ is invertible.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Singular matrix</strong></td>
+<td>A square matrix with $\det\mathbf{M}=0$. <strong>Has no inverse</strong>. Equivalently, the rows (or columns) are linearly dependent — one is a scalar multiple of the other for $2\times 2$.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Non-singular matrix</strong></td>
+<td>A square matrix with $\det\mathbf{M}\neq 0$. <strong>Invertible</strong> — $\mathbf{M}^{-1}$ exists.</td>
+<td>5.3</td>
+</tr>
+<tr>
+<td><strong>Inverse matrix</strong> $\mathbf{M}^{-1}$</td>
+<td>The unique matrix satisfying $\mathbf{MM}^{-1}=\mathbf{M}^{-1}\mathbf{M}=\mathbf{I}$. Acts as the &quot;matrix reciprocal&quot;. For $2\times 2$: $\mathbf{M}^{-1}=\dfrac{1}{\det\mathbf{M}}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$ — swap the diagonal, negate the off-diagonal, divide by determinant.</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><strong>Inverse-of-product rule</strong></td>
+<td>$(\mathbf{AB})^{-1}=\mathbf{B}^{-1}\mathbf{A}^{-1}$. Order <strong>reverses</strong> under inversion (think: socks-and-shoes — last on, first off). The most-tested algebraic identity in this chapter.</td>
+<td>5.4</td>
+</tr>
+<tr>
+<td><strong>Solving a matrix equation</strong></td>
+<td>Use inverses to &quot;divide&quot;: from $\mathbf{AB}=\mathbf{C}$ get $\mathbf{B}=\mathbf{A}^{-1}\mathbf{C}$ (multiply on the LEFT by $\mathbf{A}^{-1}$). From $\mathbf{BA}=\mathbf{C}$ get $\mathbf{B}=\mathbf{CA}^{-1}$ (multiply on the RIGHT). Side matters because of non-commutativity.</td>
+<td>5.4 Ex 12–13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The four operations — head-to-head</h2>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Rule</th>
+<th>Size requirement</th>
+<th>Result size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Addition $\mathbf{A}+\mathbf{B}$</td>
+<td>Add elementwise</td>
+<td>Same size $n\times m$</td>
+<td>$n\times m$</td>
+</tr>
+<tr>
+<td>Subtraction $\mathbf{A}-\mathbf{B}$</td>
+<td>Subtract elementwise</td>
+<td>Same size $n\times m$</td>
+<td>$n\times m$</td>
+</tr>
+<tr>
+<td>Scalar mult. $k\mathbf{A}$</td>
+<td>Multiply every entry by $k$</td>
+<td>Any</td>
+<td>Same as $\mathbf{A}$</td>
+</tr>
+<tr>
+<td>Matrix mult. $\mathbf{AB}$</td>
+<td>Row $i$ of $\mathbf{A}$ · column $j$ of $\mathbf{B}$</td>
+<td>$\mathbf{A}$ has $n\times m$, $\mathbf{B}$ has $m\times k$</td>
+<td>$n\times k$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. The six properties — what does and doesn't hold</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Real numbers</th>
+<th>Matrices</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Addition commutative $\mathbf{A}+\mathbf{B}=\mathbf{B}+\mathbf{A}$</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Multiplication commutative $\mathbf{AB}=\mathbf{BA}$</td>
+<td>✓</td>
+<td>✗ (in general)</td>
+</tr>
+<tr>
+<td>Associative $(\mathbf{AB})\mathbf{C}=\mathbf{A}(\mathbf{BC})$</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Distributive $\mathbf{A}(\mathbf{B}+\mathbf{C})=\mathbf{AB}+\mathbf{AC}$</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Cancellation $\mathbf{AB}=\mathbf{0}\Rightarrow\mathbf{A}=\mathbf{0}$ or $\mathbf{B}=\mathbf{0}$</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Cancellation $\mathbf{AB}=\mathbf{AC}\Rightarrow\mathbf{B}=\mathbf{C}$</td>
+<td>✓ (if $\mathbf{A}\neq 0$)</td>
+<td>✗ in general; ✓ if $\mathbf{A}$ non-singular (then mult. by $\mathbf{A}^{-1}$)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. Determinant &amp; inverse formulas — the entire chapter on one line</h2>
+<p>For $\mathbf{M}=\begin{pmatrix}a&b\\c&d\end{pmatrix}$:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Formula</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Determinant</td>
+<td>$\det\mathbf{M}=ad-bc$</td>
+<td>Memorise: leading diagonal product − anti-diagonal product</td>
+</tr>
+<tr>
+<td>Inverse</td>
+<td>$\mathbf{M}^{-1}=\dfrac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$</td>
+<td>Swap $a\leftrightarrow d$, negate $b,c$, divide by $\det$</td>
+</tr>
+<tr>
+<td>Singular condition</td>
+<td>$ad-bc=0$</td>
+<td>No inverse; $\mathbf{M}^{-1}$ undefined</td>
+</tr>
+<tr>
+<td>Inverse of product</td>
+<td>$(\mathbf{AB})^{-1}=\mathbf{B}^{-1}\mathbf{A}^{-1}$</td>
+<td>Order reverses</td>
+</tr>
+<tr>
+<td>Determinant of product</td>
+<td>$\det(\mathbf{AB})=\det\mathbf{A}\cdot\det\mathbf{B}$</td>
+<td>Useful identity</td>
+</tr>
+<tr>
+<td>$\mathbf{I}$ self-inverse</td>
+<td>$\mathbf{I}\mathbf{I}=\mathbf{I}$</td>
+<td>$\det\mathbf{I}=1$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Worked archetypes (memorise the <em>shape</em>)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Key step</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$\mathbf{A}=\begin{pmatrix}1&-2\\3&4\end{pmatrix}$, $\mathbf{B}=\begin{pmatrix}-3\\2\end{pmatrix}$, find $\mathbf{AB}$</td>
+<td>Sizes $(2\times2)(2\times1)\to 2\times 1$; row · col</td>
+<td>$\begin{pmatrix}-7\\-1\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Same matrices, find $\mathbf{BA}$</td>
+<td>Sizes $(2\times1)(2\times2)$ — inner dimensions don't match</td>
+<td>Doesn't exist</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$\mathbf{A}=\begin{pmatrix}6&5\\1&2\end{pmatrix}$, find $\det\mathbf{A}$</td>
+<td>$6\cdot 2-5\cdot 1=12-5$</td>
+<td>$\det=7$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$\mathbf{A}=\begin{pmatrix}3&2\\-1&1\end{pmatrix}$, find $\mathbf{A}^{-1}$</td>
+<td>$\det=3\cdot1-2\cdot(-1)=5$; swap diag, negate off-diag</td>
+<td>$\frac{1}{5}\begin{pmatrix}1&-2\\1&3\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>$\mathbf{A}=\begin{pmatrix}2&5\\1&3\end{pmatrix}$, $\det=1$</td>
+<td>$\mathbf{A}^{-1}=\begin{pmatrix}3&-5\\-1&2\end{pmatrix}$</td>
+<td>(no $1/\det$ scaling — already 1)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$\mathbf{A}=\begin{pmatrix}4&p+2\\-1&3-p\end{pmatrix}$ singular</td>
+<td>$\det=4(3-p)+(p+2)=14-3p=0$</td>
+<td>$p=14/3$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>$\mathbf{A}=\begin{pmatrix}1&2\\0&1\end{pmatrix}$, find $\mathbf{A}^k$</td>
+<td>Compute $\mathbf{A}^2,\mathbf{A}^3$, spot pattern</td>
+<td>$\mathbf{A}^k=\begin{pmatrix}1&2k\\0&1\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>8</td>
+<td>$\mathbf{BAB}=\mathbf{I}$, find $\mathbf{A}$</td>
+<td>Multiply by $\mathbf{B}^{-1}$ on both sides: $\mathbf{A}=\mathbf{B}^{-1}\mathbf{B}^{-1}$</td>
+<td>Plug in $\mathbf{B}$ values</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Solving matrix equations — the side-of-multiplication rule</h2>
+<table>
+<thead>
+<tr>
+<th>Given equation</th>
+<th>Solve by multiplying by $\mathbf{A}^{-1}$ on the…</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\mathbf{AX}=\mathbf{B}$</td>
+<td>LEFT (both sides): $\mathbf{A}^{-1}\mathbf{AX}=\mathbf{A}^{-1}\mathbf{B}$</td>
+<td>$\mathbf{X}=\mathbf{A}^{-1}\mathbf{B}$</td>
+</tr>
+<tr>
+<td>$\mathbf{XA}=\mathbf{B}$</td>
+<td>RIGHT (both sides): $\mathbf{XAA}^{-1}=\mathbf{BA}^{-1}$</td>
+<td>$\mathbf{X}=\mathbf{BA}^{-1}$</td>
+</tr>
+<tr>
+<td>$\mathbf{AXB}=\mathbf{C}$</td>
+<td>$\mathbf{A}^{-1}$ on LEFT, $\mathbf{B}^{-1}$ on RIGHT</td>
+<td>$\mathbf{X}=\mathbf{A}^{-1}\mathbf{CB}^{-1}$</td>
+</tr>
+<tr>
+<td>$\mathbf{ABC}=\mathbf{I}$</td>
+<td>Pre-mult by $\mathbf{A}^{-1}$, post-mult by $\mathbf{C}^{-1}$</td>
+<td>$\mathbf{B}=\mathbf{A}^{-1}\mathbf{C}^{-1}$ — or use $(\mathbf{ABC})^{-1}=\mathbf{C}^{-1}\mathbf{B}^{-1}\mathbf{A}^{-1}$</td>
+</tr>
+<tr>
+<td>$\mathbf{BAB}=\mathbf{I}$</td>
+<td>Pre-mult by $\mathbf{B}^{-1}$, post-mult by $\mathbf{B}^{-1}$</td>
+<td>$\mathbf{A}=\mathbf{B}^{-1}\mathbf{B}^{-1}=(\mathbf{B}^{-1})^2$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mnemonic:</strong> to undo something on the left, multiply on the left; to undo on the right, multiply on the right. Same side as where the matrix sits.</p>
+<hr />
+<h2>7. Decision flow — common questions</h2>
+<table>
+<thead>
+<tr>
+<th>Spot this</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;Find $\det$ of a matrix with unknown $k$&quot;</td>
+<td>Apply $ad-bc$, simplify; solve $=0$ for singular condition</td>
+</tr>
+<tr>
+<td>&quot;$\mathbf{M}$ is singular, find $k$&quot;</td>
+<td>Set $\det\mathbf{M}=0$, solve for $k$</td>
+</tr>
+<tr>
+<td>&quot;Find inverse of $\mathbf{M}$ in terms of $a,b$&quot;</td>
+<td>Compute $\det$ first; use the swap-and-negate formula</td>
+</tr>
+<tr>
+<td>&quot;$\mathbf{AB}=\mathbf{C}$, find $\mathbf{B}$&quot;</td>
+<td>$\mathbf{B}=\mathbf{A}^{-1}\mathbf{C}$ — pre-multiply (if $\mathbf{A}$ non-singular)</td>
+</tr>
+<tr>
+<td>&quot;$\mathbf{BA}=\mathbf{C}$, find $\mathbf{B}$&quot;</td>
+<td>$\mathbf{B}=\mathbf{CA}^{-1}$ — post-multiply</td>
+</tr>
+<tr>
+<td>&quot;Show $\mathbf{A}^2=\mathbf{I}$&quot;</td>
+<td>Compute $\mathbf{A}^2$ directly, check it equals identity</td>
+</tr>
+<tr>
+<td>&quot;$\mathbf{A}^2=2\mathbf{A}+5\mathbf{I}$&quot; type</td>
+<td>Compute $\mathbf{A}^2$, RHS=$2\mathbf{A}+5\mathbf{I}$, equate elements</td>
+</tr>
+<tr>
+<td>&quot;$(\mathbf{AB})^{-1}=$ ?&quot;</td>
+<td>$\mathbf{B}^{-1}\mathbf{A}^{-1}$ — order reverses</td>
+</tr>
+<tr>
+<td>&quot;Find $\mathbf{A}^k$ for general $k$&quot;</td>
+<td>Compute $\mathbf{A}^2,\mathbf{A}^3$; conjecture pattern; (sometimes prove by induction)</td>
+</tr>
+<tr>
+<td>Mixed product $\mathbf{ABC}$ where some don't fit</td>
+<td>Group via associativity: try $\mathbf{(BC)A}$ or $\mathbf{B(CA)}$ — sometimes one ordering is conformable, others not</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiplying matrices in the wrong order</td>
+<td>$\mathbf{AB}\neq\mathbf{BA}$ in general — read the question carefully</td>
+</tr>
+<tr>
+<td>Adding matrices of different sizes</td>
+<td>They must be identical $n\times m$; otherwise undefined</td>
+</tr>
+<tr>
+<td>Trying to invert a singular matrix</td>
+<td>$\det=0$ → no inverse exists; check first</td>
+</tr>
+<tr>
+<td>Forgetting the $1/\det$ in the inverse formula</td>
+<td>$\mathbf{M}^{-1}=\frac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$ — the scale factor is essential</td>
+</tr>
+<tr>
+<td>Sign error in the inverse formula</td>
+<td>Swap $a\leftrightarrow d$ AND negate $b,c$ (not all four)</td>
+</tr>
+<tr>
+<td>Reversing $(\mathbf{AB})^{-1}$ as $\mathbf{A}^{-1}\mathbf{B}^{-1}$</td>
+<td>Wrong — it's $\mathbf{B}^{-1}\mathbf{A}^{-1}$ (order reverses)</td>
+</tr>
+<tr>
+<td>Cancelling $\mathbf{AB}=\mathbf{AC}\Rightarrow\mathbf{B}=\mathbf{C}$ blindly</td>
+<td>Only valid if $\mathbf{A}$ is non-singular (so $\mathbf{A}^{-1}$ exists)</td>
+</tr>
+<tr>
+<td>Treating &quot;size $n\times m$&quot; as $m\times n$</td>
+<td>Convention is rows × columns. Check with calculator notation.</td>
+</tr>
+<tr>
+<td>Multiplying $\binom{a}{b}\binom{c}{d}$ as if both were column vectors</td>
+<td>Two column vectors cannot multiply directly; you may need a transpose</td>
+</tr>
+<tr>
+<td>Forgetting to pre/post-multiply on the SAME side both ways</td>
+<td>If you multiply by $\mathbf{A}^{-1}$ on left of LHS, must also do so on RHS</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Big picture (the 30-second mental model)</h2>
+<ol>
+<li>Matrices = grids of numbers, named by size $n\times m$. Special cases: square, zero, identity.</li>
+<li>Addition/scalar-mult: elementwise, easy. Matrix multiplication: row-by-column dot products, <strong>non-commutative</strong>, <strong>size-restrictive</strong>.</li>
+<li>The $2\times 2$ determinant $ad-bc$ tells you everything: zero → singular (no inverse), non-zero → non-singular (has inverse).</li>
+<li>The inverse is given by the swap-and-negate formula $\dfrac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$, and satisfies $(\mathbf{AB})^{-1}=\mathbf{B}^{-1}\mathbf{A}^{-1}$ (order reverses).</li>
+<li>Solving matrix equations means <strong>multiplying by inverses on the correct side</strong> to isolate the unknown — left for left, right for right.</li>
+</ol>
+<p>Everything else (powers, identities like $\mathbf{A}^2=2\mathbf{A}+5\mathbf{I}$, products $\mathbf{ABC}$) is just careful application of these basics. (FP3 will give matrices a geometric interpretation as transformations of the plane and 3D space.)</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

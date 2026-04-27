@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP1 Ch 3 — Numerical Solutions of Equations | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP1 Ch 3 — Numerical Solutions of Equations | Recall Sheet</h1>
+  <div class="meta">FP1 · Ch 3 · Exam: 2026-05-21 · Recall sheet for spaced repetition</div>
+  <h1>FP1 Ch 3 — Numerical Solutions of Equations</h1>
+<p><strong>The whole chapter in one mental model.</strong> When you can't solve $\mathrm{f}(x)=0$ exactly, <strong>trap the root</strong> in an interval where $\mathrm{f}$ changes sign, then <strong>squeeze</strong> that interval down with a recipe: bisection (always halve), linear interpolation (similar triangles), or Newton–Raphson (slide along the tangent). Each method is just a rule that turns one approximation into a better one — repeat until accuracy is reached.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Root</strong></td>
+<td>A value $x=\alpha$ where $\mathrm{f}(\alpha)=0$. Geometrically, where the graph $y=\mathrm{f}(x)$ crosses the $x$-axis. The chapter is about finding roots <strong>numerically</strong> when no algebraic formula is available — e.g. $\mathrm{e}^x=\ln x+5$ has no closed-form solution.</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td><strong>Continuous function on $[a,b]$</strong></td>
+<td>A function whose graph has no jumps, breaks, or vertical asymptotes inside $[a,b]$. You can draw it without lifting the pen. Crucial: change-of-sign root location <em>only works</em> on continuous intervals — a vertical asymptote can fake a sign change without a root.</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td><strong>Change-of-sign rule (IVT)</strong></td>
+<td>If $\mathrm{f}$ is continuous on $[a,b]$ and $\mathrm{f}(a),\mathrm{f}(b)$ have opposite signs, then <strong>at least one</strong> root lies in $(a,b)$. &quot;At least one&quot; — there might be three or five (always odd if signs differ). Conversely, no sign change does NOT mean no root: an even number of roots can hide.</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td><strong>Three traps in change-of-sign</strong></td>
+<td>(i) Multiple roots with sign change → odd count (e.g. 3); (ii) Multiple roots without sign change → even count (e.g. 2 — both missed); (iii) Vertical asymptote inside the interval → sign changes but no root exists. Always check continuity.</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td><strong>Interval bisection</strong></td>
+<td>Iterative recipe: take midpoint $m=(a+b)/2$, evaluate $\mathrm{f}(m)$. The root lies in whichever half has the sign change ($[a,m]$ if $\mathrm{f}(a)\mathrm{f}(m)<0$, else $[m,b]$). Replace the bad endpoint with $m$ and repeat. Each iteration halves the uncertainty. Reliable but slow (linear convergence).</td>
+<td>3.2</td>
+</tr>
+<tr>
+<td><strong>Linear interpolation</strong></td>
+<td>Replace $\mathrm{f}$ on $[a,b]$ with the straight line through $(a,\mathrm{f}(a))$ and $(b,\mathrm{f}(b))$, then take the line's $x$-intercept as the next approximation $x_1$. Found by similar triangles: $\dfrac{x_1-a}{b-x_1}=\dfrac{\lvert\mathrm{f}(a)\rvert}{\lvert\mathrm{f}(b)\rvert}$. Faster than bisection on smooth functions.</td>
+<td>3.3</td>
+</tr>
+<tr>
+<td><strong>Newton–Raphson method</strong></td>
+<td>Iterative recipe using the tangent line: from $x_n$, draw the tangent at $(x_n,\mathrm{f}(x_n))$; its $x$-intercept is the next approximation. Formula: $x_{n+1}=x_n-\dfrac{\mathrm{f}(x_n)}{\mathrm{f}'(x_n)}$. <strong>Quadratic</strong> convergence near a simple root — typically doubles the number of correct digits per iteration.</td>
+<td>3.4</td>
+</tr>
+<tr>
+<td><strong>Tangent line at $x_n$</strong></td>
+<td>The straight line $y=\mathrm{f}(x_n)+\mathrm{f}'(x_n)(x-x_n)$. Setting $y=0$ and solving gives the Newton–Raphson formula. The geometric picture: the tangent points &quot;downhill&quot; toward the root if $x_n$ is on a smooth slope.</td>
+<td>3.4</td>
+</tr>
+<tr>
+<td><strong>Failure modes of Newton–Raphson</strong></td>
+<td>(i) $\mathrm{f}'(x_n)=0$ at any iteration → division by zero, the tangent is horizontal and never crosses the axis; (ii) $\mathrm{f}'(x_n)$ is small (near a turning point) → tangent skids off far from the root, may converge slowly or to a different root; (iii) function shape (e.g. inflection points) can send iterates oscillating away.</td>
+<td>3.4</td>
+</tr>
+<tr>
+<td><strong>Convergence to a root</strong></td>
+<td>Successive approximations $x_0,x_1,x_2,\dots$ get arbitrarily close to the actual root $\alpha$. Numerical methods are deemed &quot;convergent at this accuracy&quot; when two successive iterates agree to the required number of decimal places.</td>
+<td>3.2–3.4</td>
+</tr>
+<tr>
+<td><strong>Verification by sign change</strong></td>
+<td>After getting an approximation $\alpha\approx 1.856$ to 3 d.p., confirm by checking $\mathrm{f}(1.8555)$ and $\mathrm{f}(1.8565)$ have opposite signs — this proves the true root lies in $[1.8555,1.8565]$, hence rounds to $1.856$. The standard &quot;show your answer is correct to N d.p.&quot; technique.</td>
+<td>3.4 Ex 7c</td>
+</tr>
+<tr>
+<td><strong>Iterative formula / recurrence</strong></td>
+<td>A rule of the form $x_{n+1}=g(x_n)$ that takes you from one term to the next. Each numerical method here is a different choice of $g$: bisection picks midpoint, NR uses tangent, linear interpolation uses chord intercept.</td>
+<td>3.4</td>
+</tr>
+<tr>
+<td><strong>Stationary point</strong></td>
+<td>Where $\mathrm{f}'(x)=0$. In Newton–Raphson, <strong>never use a stationary point as a starting value</strong> — division by zero. If $x_0$ is <em>near</em> a stationary point, the method may converge very slowly or jump far away.</td>
+<td>3.4</td>
+</tr>
+<tr>
+<td><strong>First / second approximation</strong></td>
+<td>$x_1$ is the first iterate (output of one application of the method to $x_0$). $x_2$ is the second iterate. Exam wording matters: &quot;Apply the method twice&quot; usually means produce $x_2$.</td>
+<td>3.2–3.4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. The four numerical methods — head-to-head comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Iteration formula</th>
+<th>Inputs needed</th>
+<th>Convergence rate</th>
+<th>When it shines</th>
+<th>When it fails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Change-of-sign root locator</strong></td>
+<td>(none — just a check)</td>
+<td>$\mathrm{f}(a)\mathrm{f}(b)<0$ and continuity</td>
+<td>n/a (just locates an interval)</td>
+<td>Always — a starting tool</td>
+<td>Even number of roots; vertical asymptotes</td>
+</tr>
+<tr>
+<td><strong>Interval bisection</strong></td>
+<td>$m=\dfrac{a+b}{2}$; replace whichever endpoint has the same sign as $\mathrm{f}(m)$</td>
+<td>$\mathrm{f}$ alone (no derivative)</td>
+<td>Linear: error halves each step</td>
+<td>Robust — guaranteed to converge</td>
+<td>Slow; needs many iterations for high accuracy</td>
+</tr>
+<tr>
+<td><strong>Linear interpolation</strong></td>
+<td>$x_1=\dfrac{a\,\mathrm{f}(b)-b\,\mathrm{f}(a)}{\mathrm{f}(b)-\mathrm{f}(a)}$ (chord's $x$-intercept)</td>
+<td>$\mathrm{f}$ alone</td>
+<td>Better than bisection, super-linear</td>
+<td>Smooth, near-linear $\mathrm{f}$ on the interval</td>
+<td>Endpoints stuck on one side; convergence can stall</td>
+</tr>
+<tr>
+<td><strong>Newton–Raphson</strong></td>
+<td>$x_{n+1}=x_n-\dfrac{\mathrm{f}(x_n)}{\mathrm{f}'(x_n)}$</td>
+<td>Both $\mathrm{f}$ and $\mathrm{f}'$</td>
+<td>Quadratic: digits double</td>
+<td>Smooth $\mathrm{f}$ with computable derivative; near a simple root</td>
+<td>Stationary point → division by zero; near turning point → instability</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Linear interpolation — similar triangles formula derivation</h2>
+<p>Picture: chord through $A=(a,\mathrm{f}(a))$ and $B=(b,\mathrm{f}(b))$ with $\mathrm{f}(a)<0<\mathrm{f}(b)$. The chord crosses the $x$-axis at $x_1$.</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Expression</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Distance from $a$ to $x_1$</td>
+<td>$x_1-a$</td>
+<td>&quot;Horizontal run&quot; on left side</td>
+</tr>
+<tr>
+<td>Distance from $x_1$ to $b$</td>
+<td>$b-x_1$</td>
+<td>&quot;Horizontal run&quot; on right side</td>
+</tr>
+<tr>
+<td>Vertical drop on left</td>
+<td>$\lvert\mathrm{f}(a)\rvert$</td>
+<td>Negative $y$-value at $a$</td>
+</tr>
+<tr>
+<td>Vertical rise on right</td>
+<td>$\lvert\mathrm{f}(b)\rvert$</td>
+<td>Positive $y$-value at $b$</td>
+</tr>
+<tr>
+<td>Similar-triangles equation</td>
+<td>$\dfrac{x_1-a}{\lvert\mathrm{f}(a)\rvert}=\dfrac{b-x_1}{\lvert\mathrm{f}(b)\rvert}$</td>
+<td>The triangles share the chord's slope</td>
+</tr>
+<tr>
+<td>Solving for $x_1$</td>
+<td>$x_1=\dfrac{a\,\lvert\mathrm{f}(b)\rvert+b\,\lvert\mathrm{f}(a)\rvert}{\lvert\mathrm{f}(a)\rvert+\lvert\mathrm{f}(b)\rvert}$</td>
+<td>Weighted average of $a,b$, weighted by opposite-side $\mathrm{f}$ values</td>
+</tr>
+<tr>
+<td>Algebraic form (no abs values)</td>
+<td>$x_1=\dfrac{a\,\mathrm{f}(b)-b\,\mathrm{f}(a)}{\mathrm{f}(b)-\mathrm{f}(a)}$</td>
+<td>Same thing using signed $\mathrm{f}$ values</td>
+</tr>
+</tbody>
+</table>
+<p>After finding $x_1$, evaluate $\mathrm{f}(x_1)$. The new interval is whichever half contains the sign change. Iterate.</p>
+<hr />
+<h2>4. Newton–Raphson — geometric picture and formula derivation</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Symbol/result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Start at point $P=(x_n,\mathrm{f}(x_n))$ on the curve</td>
+<td>$x_n$ given</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Draw the tangent line at $P$</td>
+<td>Slope $=\mathrm{f}'(x_n)$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tangent equation</td>
+<td>$y-\mathrm{f}(x_n)=\mathrm{f}'(x_n)(x-x_n)$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Set $y=0$ to find where tangent hits $x$-axis</td>
+<td>$-\mathrm{f}(x_n)=\mathrm{f}'(x_n)(x_{n+1}-x_n)$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Solve for $x_{n+1}$</td>
+<td>$x_{n+1}=x_n-\dfrac{\mathrm{f}(x_n)}{\mathrm{f}'(x_n)}$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why it converges fast:</strong> if $\mathrm{f}$ is smooth and $x_n$ is close to a simple root $\alpha$, the error roughly squares each step. $0.1$ → $0.01$ → $0.0001$ → $10^{-8}$.</p>
+<hr />
+<h2>5. Worked archetypes (memorise the <em>shape</em> of each)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Method</th>
+<th>Single iteration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>$\mathrm{f}(x)=x^3-4x^2+3x+1$, show root in $[1.4,1.5]$</td>
+<td>Change of sign</td>
+<td>$\mathrm{f}(1.4)=0.104>0$, $\mathrm{f}(1.5)=-0.125<0$ → sign change → root exists</td>
+</tr>
+<tr>
+<td>2</td>
+<td>$\mathrm{f}(x)=2^x-x-3$, root in $[2,3]$</td>
+<td>Bisection</td>
+<td>$m=2.5,\mathrm{f}(2.5)>0$ so root in $[2,2.5]$; $m=2.25,\mathrm{f}(2.25)<0$ so root in $[2.25,2.5]$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>$\mathrm{f}(x)=3^x-5x$, root in $[2,3]$, $\mathrm{f}(2)=-1$, $\mathrm{f}(3)=12$</td>
+<td>Linear interpolation</td>
+<td>$x_1=\dfrac{2\cdot 12-3\cdot(-1)}{12-(-1)}=\dfrac{27}{13}\approx 2.08$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$\mathrm{f}(x)=x^3+2x^2-5x-4$, $x_0=2$</td>
+<td>Newton–Raphson</td>
+<td>$\mathrm{f}'=3x^2+4x-5$; $\mathrm{f}(2)=2,\mathrm{f}'(2)=15$; $x_1=2-2/15=1.8\overline{6}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Verify $\alpha=1.856$ is correct to 3 d.p.</td>
+<td>Sign-change check</td>
+<td>$\mathrm{f}(1.8555)<0$ and $\mathrm{f}(1.8565)>0$ → true root in $[1.8555,1.8565]$, rounds to $1.856$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Decision flow — pick the right method</h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Best method</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Just need to <em>locate</em> a root quickly</td>
+<td>Change of sign on $\mathrm{f}(a),\mathrm{f}(b)$</td>
+<td>One evaluation each, no iteration</td>
+</tr>
+<tr>
+<td>Slow but <strong>guaranteed</strong> convergence, no derivative known</td>
+<td>Bisection</td>
+<td>Always halves; can't get worse</td>
+</tr>
+<tr>
+<td>Smooth function, want faster than bisection, derivative not available</td>
+<td>Linear interpolation</td>
+<td>Uses function values cleverly via similar triangles</td>
+</tr>
+<tr>
+<td>Smooth function, derivative computable, want fast convergence</td>
+<td>Newton–Raphson</td>
+<td>Quadratic convergence near simple roots</td>
+</tr>
+<tr>
+<td>Function has vertical asymptote in $[a,b]$</td>
+<td>NONE of these — exclude the asymptote first</td>
+<td>Sign change misleads otherwise</td>
+</tr>
+<tr>
+<td>$\mathrm{f}'(x_0)=0$ or near-zero</td>
+<td>NOT Newton–Raphson; use bisection or pick different $x_0$</td>
+<td>Division by zero / runaway tangent</td>
+</tr>
+<tr>
+<td>Need to <em>prove</em> an answer is correct to N d.p.</td>
+<td>Sign-change verification on $[\alpha-5\times 10^{-(N+1)},\alpha+5\times 10^{-(N+1)}]$</td>
+<td>Standard exam technique</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claiming &quot;no root&quot; because no sign change</td>
+<td>Even number of roots can hide; must also check graph or use other evidence</td>
+</tr>
+<tr>
+<td>Claiming &quot;root exists&quot; from sign change near a vertical asymptote</td>
+<td>First check continuity on the interval — exclude singularities</td>
+</tr>
+<tr>
+<td>Using degrees instead of radians for $\sin x,\cos x,\tan x$</td>
+<td>Always radians in numerical-methods questions</td>
+</tr>
+<tr>
+<td>Newton–Raphson with $x_0$ at a turning point</td>
+<td>$\mathrm{f}'(x_0)=0$, division by zero — pick a different starting value</td>
+</tr>
+<tr>
+<td>Rounding intermediate iterates aggressively</td>
+<td>Carry full calculator precision; only round the <em>final</em> answer</td>
+</tr>
+<tr>
+<td>Reporting &quot;$x_1=$ ...&quot; when the question asked for $x_2$</td>
+<td>&quot;Apply the method twice&quot; → produce $x_2$, not $x_1$</td>
+</tr>
+<tr>
+<td>Forgetting the $-$ sign in $x_{n+1}=x_n-\mathrm{f}/\mathrm{f}'$</td>
+<td>The sign comes from solving the tangent equation; mnemonic: tangent points <em>toward</em> the root, so subtract</td>
+</tr>
+<tr>
+<td>Using bisection without showing a sign change at each step</td>
+<td>Each iteration must justify which half by stating signs of $\mathrm{f}$ at midpoint</td>
+</tr>
+<tr>
+<td>Linear interpolation: forgetting to update the interval</td>
+<td>After finding $x_1$, evaluate $\mathrm{f}(x_1)$, identify the new sign-change interval, then iterate</td>
+</tr>
+<tr>
+<td>Verifying &quot;to 3 d.p.&quot; with the wrong half-width</td>
+<td>The bracket should be $\pm 5\times 10^{-4}$ around the rounded answer</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Big picture (the 30-second mental model)</h2>
+<p>Every numerical-equations problem follows the same three-step shape:</p>
+<ol>
+<li><strong>Locate</strong> — find an interval $[a,b]$ where $\mathrm{f}$ continuous and $\mathrm{f}(a)\mathrm{f}(b)<0$. Now a root is guaranteed inside (caveats: continuity, possibly multiple roots).</li>
+<li><strong>Refine</strong> — apply an iterative method to shrink the bracket or improve the estimate:
+<ul>
+<li>Bisection: $x_{n+1}=(a_n+b_n)/2$, halve.</li>
+<li>Linear interpolation: $x_{n+1}=$ chord's $x$-intercept, similar triangles.</li>
+<li>Newton–Raphson: $x_{n+1}=x_n-\mathrm{f}(x_n)/\mathrm{f}'(x_n)$, tangent slide.</li>
+</ul>
+</li>
+<li><strong>Verify</strong> — check the sign of $\mathrm{f}$ at the rounded-up and rounded-down boundaries to prove the answer's accuracy to the stated number of decimal places.</li>
+</ol>
+<p>Reliability ↘ vs speed ↗: bisection (slow, safe) → linear interpolation (medium) → Newton–Raphson (fast but can fail). Choose by what's available (derivative? smooth? near a turning point?) and what the exam asks.</p>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>

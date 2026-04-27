@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FP3 Ch 6 — Further Matrix Algebra | Recall Sheet</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    chtml: { displayAlign: 'left' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --line: #d2d2d7;
+    --accent: #0066cc;
+    --th-bg: #f5f5f7;
+    --hover: #f9f9fc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 36px 28px 80px; }
+  header.recall { padding: 28px 32px; background: linear-gradient(180deg,#fff,#f5f5f7); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 28px; }
+  header.recall h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.01em; }
+  header.recall .meta { color: var(--muted); font-size: 14px; }
+  header.recall .lede { margin: 14px 0 0; font-size: 15px; color: #333; }
+  header.recall a.btn { display: inline-block; margin-top: 14px; padding: 7px 14px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; }
+  header.recall a.btn:hover { opacity: 0.9; }
+  h2 {
+    font-size: 19px; letter-spacing: -0.005em;
+    color: var(--accent);
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 22px 0 10px; }
+  p { margin: 8px 0 12px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--th-bg);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--hover); }
+  code, kbd { background: var(--th-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 4px 0; }
+  mjx-container { font-size: 100% !important; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px; text-align: center; }
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 12px 60px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="recall">
+  <h1>FP3 Ch 6 — Further Matrix Algebra | Recall Sheet</h1>
+  <div class="meta">FP3 · Ch 6 · Exam: 2026-06-10 · Recall sheet for spaced repetition</div>
+  <h1>FP3 Ch 6 — Further Matrix Algebra</h1>
+<p><strong>The whole chapter in one mental model.</strong> Lift FP1's $2\times 2$ matrix toolkit up to <strong>$3\times 3$</strong>: transpose, determinant (by cofactor expansion), inverse (via cofactors → transpose → divide by det), then use these to represent <strong>3D linear transformations</strong> $T:\mathbb R^3\to\mathbb R^3$ and reverse them with $\mathbf T^{-1}$. The crown jewels are <strong>eigenvalues/eigenvectors</strong> $\mathbf{Ax}=\lambda\mathbf x$ — directions that don't change under $T$ — found via the <strong>characteristic equation</strong> $\det(\mathbf A-\lambda\mathbf I)=0$. For symmetric matrices, the eigenvectors are mutually orthogonal, so $\mathbf P^\top\mathbf{AP}=\mathbf D$ <strong>diagonalises</strong> $\mathbf A$, with the eigenvalues sitting on the diagonal.</p>
+<hr />
+
+  <a class="btn" href="recall.pdf">Download PDF</a>
+</header>
+<h2>1. Jargon glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transpose $\mathbf A^\top$</strong></td>
+<td>Swap rows and columns. $n\times m$ becomes $m\times n$. Rule: $(\mathbf{AB})^\top=\mathbf B^\top\mathbf A^\top$ (note the flipped order). $(\mathbf A^\top)^\top=\mathbf A$. Both $\mathbf{AA}^\top$ and $\mathbf A^\top\mathbf A$ are symmetric.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Symmetric matrix</strong></td>
+<td>$\mathbf A=\mathbf A^\top$, i.e. mirror-image across the leading diagonal. $3\times 3$ form $\begin{pmatrix}a&b&c\\b&d&e\\c&e&f\end{pmatrix}$. Eigenvalues are real, eigenvectors corresponding to distinct eigenvalues are orthogonal — basis for diagonalisation.</td>
+<td>6.1, 6.7</td>
+</tr>
+<tr>
+<td><strong>Identity matrix $\mathbf I$</strong></td>
+<td>Square matrix with 1s on leading diagonal, 0s elsewhere. $\mathbf{IA}=\mathbf{AI}=\mathbf A$. The &quot;do-nothing&quot; matrix.</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td><strong>Determinant</strong></td>
+<td>A scalar built from a square matrix. For $3\times 3$ via cofactor expansion along row 1: $\det\mathbf A=a\det M_a-b\det M_b+c\det M_c$ where $M_x$ is the $2\times 2$ minor obtained by deleting the row+column of element $x$. Watch the alternating signs: $+,-,+$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Singular</strong></td>
+<td>$\det\mathbf A=0$ — the matrix has no inverse. Geometrically: collapses 3D space onto a plane/line/point (loses a dimension). One eigenvalue is $0$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Non-singular</strong></td>
+<td>$\det\mathbf A\ne 0$ — invertible. Multiplication by it preserves dimension.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Multiplicative property</strong></td>
+<td>$\det(\mathbf{AB})=\det(\mathbf A)\det(\mathbf B)$ — a clean way to verify a product computation, and shows that singular×non-singular = singular. Also $\det(\mathbf A^\top)=\det(\mathbf A)$.</td>
+<td>6.2</td>
+</tr>
+<tr>
+<td><strong>Minor</strong></td>
+<td>The $2\times 2$ determinant left after deleting the row and column of a chosen element. There are 9 minors for a $3\times 3$.</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Cofactor</strong></td>
+<td>A minor with the <strong>chequerboard sign</strong> $\begin{pmatrix}+&-&+\\-&+&-\\+&-&+\end{pmatrix}$ applied. The matrix of cofactors $\mathbf C$ has these signed minors as entries.</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Adjugate (transpose of cofactor)</strong></td>
+<td>$\mathbf C^\top$ — the matrix obtained by taking the cofactor matrix and transposing it. Sometimes written $\operatorname{adj}\mathbf A$.</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Inverse $\mathbf A^{-1}$</strong></td>
+<td>Defined by $\mathbf{AA}^{-1}=\mathbf A^{-1}\mathbf A=\mathbf I$. Formula: $\mathbf A^{-1}=\dfrac{1}{\det\mathbf A}\,\mathbf C^\top$. Exists iff $\det\mathbf A\ne 0$. Properties: $(\mathbf{AB})^{-1}=\mathbf B^{-1}\mathbf A^{-1}$, $(\mathbf A^{-1})^\top=(\mathbf A^\top)^{-1}$.</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td><strong>Linear transformation</strong></td>
+<td>Map $T:\mathbb R^3\to\mathbb R^3$ satisfying $T(k\mathbf x)=kT(\mathbf x)$ and $T(\mathbf x_1+\mathbf x_2)=T(\mathbf x_1)+T(\mathbf x_2)$. Equivalently: $T(\mathbf x)=\mathbf{Tx}$ for some matrix $\mathbf T$.</td>
+<td>6.4</td>
+</tr>
+<tr>
+<td><strong>Image</strong></td>
+<td>The output point $T(\mathbf x)=\mathbf{Tx}$ — where the input point gets sent. Lines map to lines, planes to planes (unless $\mathbf T$ is singular, when planes can collapse to lines).</td>
+<td>6.4</td>
+</tr>
+<tr>
+<td><strong>Composition</strong></td>
+<td>If $T$ has matrix $\mathbf T$ and $U$ has $\mathbf U$, then $U\circ T$ (&quot;apply $T$ first, then $U$&quot;) has matrix $\mathbf{UT}$ (read <strong>right-to-left</strong>).</td>
+<td>6.4</td>
+</tr>
+<tr>
+<td><strong>Eigenvector</strong></td>
+<td>Non-zero vector $\mathbf x$ satisfying $\mathbf{Ax}=\lambda\mathbf x$ — a direction that the transformation <strong>preserves</strong> (only stretches/squashes). Any non-zero scalar multiple is also an eigenvector.</td>
+<td>6.6</td>
+</tr>
+<tr>
+<td><strong>Eigenvalue $\lambda$</strong></td>
+<td>The stretch factor for an eigenvector: how much the eigenvector is scaled by. Can be positive, negative or zero ($\lambda=0$ ⇔ matrix is singular).</td>
+<td>6.6</td>
+</tr>
+<tr>
+<td><strong>Characteristic equation</strong></td>
+<td>$\det(\mathbf A-\lambda\mathbf I)=0$ — the polynomial equation whose roots are the eigenvalues. For $2\times 2$: quadratic in $\lambda$. For $3\times 3$: cubic in $\lambda$ (use factor theorem to find one root, then factor out).</td>
+<td>6.6</td>
+</tr>
+<tr>
+<td><strong>Normalised vector</strong></td>
+<td>A vector divided by its own magnitude: $\hat{\mathbf x}=\mathbf x/\lvert\mathbf x\rvert$. Has length 1. Used when assembling an orthogonal matrix from eigenvectors.</td>
+<td>6.6</td>
+</tr>
+<tr>
+<td><strong>Invariant line</strong></td>
+<td>A line through the origin every point of which is mapped to <em>another</em> point on the same line — the line of action of an eigenvector. If $\lambda=1$, every point is fixed (line of invariant points).</td>
+<td>6.6</td>
+</tr>
+<tr>
+<td><strong>Orthogonal matrix</strong></td>
+<td>Square matrix $\mathbf M$ with $\mathbf{MM}^\top=\mathbf I$, equivalently $\mathbf M^{-1}=\mathbf M^\top$. Columns are mutually perpendicular unit vectors. Geometrically: a rotation/reflection (preserves lengths and angles).</td>
+<td>6.7</td>
+</tr>
+<tr>
+<td><strong>Diagonal matrix</strong></td>
+<td>Square matrix with all off-diagonal entries zero. Easy to manipulate: $\mathbf D^n$ just raises each diagonal entry to the power $n$.</td>
+<td>6.7</td>
+</tr>
+<tr>
+<td><strong>Diagonalisation</strong></td>
+<td>For symmetric $\mathbf A$: $\mathbf P^\top\mathbf{AP}=\mathbf D$, where $\mathbf P$'s columns are normalised eigenvectors of $\mathbf A$ and $\mathbf D$'s diagonal entries are the corresponding eigenvalues (in matching order). $\mathbf P$ is automatically orthogonal so $\mathbf P^\top=\mathbf P^{-1}$.</td>
+<td>6.7</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Determinant of a $3\times 3$ matrix (Section 6.2)</h2>
+<p>For $\mathbf A=\begin{pmatrix}a&b&c\\d&e&f\\g&h&i\end{pmatrix}$, expand along <strong>row 1</strong>:</p>
+<p>$$\det\mathbf A=a\det\begin{pmatrix}e&f\\h&i\end{pmatrix}-b\det\begin{pmatrix}d&f\\g&i\end{pmatrix}+c\det\begin{pmatrix}d&e\\g&h\end{pmatrix}$$</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Watch out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Pick top row, walk left→right: $a,b,c$</td>
+<td>Could expand along any row/column with the right sign pattern</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Each gets a sign: $+a,-b,+c$</td>
+<td>Middle term is <strong>negative</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Each gets a $2\times 2$ minor: cross out its row+column</td>
+<td>Use $ad-bc$ for the $2\times 2$</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Sum the three signed $2\times 2$ determinants</td>
+<td>Algebra mistakes most common in negatives</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key identities:</strong></p>
+<ul>
+<li>$\det(\mathbf{AB})=\det\mathbf A\cdot\det\mathbf B$</li>
+<li>$\det(\mathbf A^\top)=\det\mathbf A$</li>
+<li>$\det(k\mathbf A)=k^n\det\mathbf A$ for an $n\times n$ matrix (so $k^3$ for $3\times 3$)</li>
+<li>$\det\mathbf A=0$ ⇔ rows (or columns) are linearly dependent ⇔ matrix is singular</li>
+</ul>
+<hr />
+<h2>3. Inverse of a $3\times 3$ matrix — the 5-step recipe (Section 6.3)</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Compute $\det\mathbf A$</td>
+<td>Scalar (must be $\ne 0$)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Form <strong>matrix of minors $\mathbf M$</strong>: replace each entry $a_{ij}$ with the $2\times 2$ minor (delete row $i$, col $j$)</td>
+<td>$3\times 3$ matrix</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Apply chequerboard $\begin{pmatrix}+&-&+\\-&+&-\\+&-&+\end{pmatrix}$ → <strong>matrix of cofactors $\mathbf C$</strong></td>
+<td>$3\times 3$ matrix</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Transpose: $\mathbf C^\top$ (also called the <strong>adjugate</strong>)</td>
+<td>$3\times 3$ matrix</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Divide by determinant: $\mathbf A^{-1}=\dfrac{1}{\det\mathbf A}\,\mathbf C^\top$</td>
+<td>The inverse</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Inverse identities:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Identity</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$(\mathbf{AB})^{-1}=\mathbf B^{-1}\mathbf A^{-1}$</td>
+<td>Reverse compositions: apply inverses in reverse order</td>
+</tr>
+<tr>
+<td>$(\mathbf A^{-1})^{-1}=\mathbf A$</td>
+<td>Inverse of inverse is original</td>
+</tr>
+<tr>
+<td>$(\mathbf A^\top)^{-1}=(\mathbf A^{-1})^\top$</td>
+<td>Transpose and inverse commute</td>
+</tr>
+<tr>
+<td>$\det(\mathbf A^{-1})=1/\det\mathbf A$</td>
+<td>Quick check</td>
+</tr>
+<tr>
+<td>$\mathbf{AA}^{-1}=\mathbf A^{-1}\mathbf A=\mathbf I$</td>
+<td>Definition; useful for solving $\mathbf{Ax}=\mathbf b$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Solving systems:</strong> $\mathbf{Ax}=\mathbf b\Rightarrow\mathbf x=\mathbf A^{-1}\mathbf b$ when $\mathbf A$ is non-singular.</p>
+<hr />
+<h2>4. Linear transformations in 3D (Section 6.4)</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Formula / fact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matrix from rule</td>
+<td>If $T:(x,y,z)\mapsto(Lx+My+Nz,\ldots)$, write coefficients as rows</td>
+</tr>
+<tr>
+<td>Matrix from images</td>
+<td>Image of $\mathbf i$ = column 1 of $\mathbf T$; image of $\mathbf j$ = col 2; image of $\mathbf k$ = col 3</td>
+</tr>
+<tr>
+<td>Image of a point</td>
+<td>$\mathbf{Tx}$</td>
+</tr>
+<tr>
+<td>Image of a line $\mathbf r=\mathbf a+t\mathbf b$</td>
+<td>$\mathbf r=\mathbf{Ta}+t(\mathbf{Tb})$</td>
+</tr>
+<tr>
+<td>Image of a plane $\mathbf r=\mathbf a+s\mathbf b+t\mathbf c$</td>
+<td>$\mathbf r=\mathbf{Ta}+s\mathbf{Tb}+t\mathbf{Tc}$</td>
+</tr>
+<tr>
+<td>Composition $U\circ T$</td>
+<td>$\mathbf{UT}$ — apply $T$ first, <strong>left-multiply</strong> by $U$</td>
+</tr>
+<tr>
+<td>Inverse transformation</td>
+<td>Has matrix $\mathbf T^{-1}$, undoing $T$</td>
+</tr>
+<tr>
+<td>Singular $\mathbf T$</td>
+<td>Plane can collapse to a line; line can collapse to a point</td>
+</tr>
+<tr>
+<td>Volume scaling factor</td>
+<td>$\lvert\det\mathbf T\rvert$ — image of unit cube has this volume</td>
+</tr>
+<tr>
+<td>Sign of $\det\mathbf T$</td>
+<td>Positive: orientation preserved. Negative: orientation flipped (involves a reflection).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Finding $\mathbf T$ from data:</strong> if you're told three image-pre-image pairs, set $\mathbf T=\begin{pmatrix}a&b&c\\d&e&f\\g&h&i\end{pmatrix}$ and equate $\mathbf{Tx}_k=\mathbf y_k$ to extract 9 simultaneous equations.</p>
+<hr />
+<h2>5. Eigenvalues and eigenvectors (Section 6.6)</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Form $\mathbf A-\lambda\mathbf I$ — subtract $\lambda$ from each diagonal entry</td>
+<td>$\mathbf I$ is the right-sized identity</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Compute $\det(\mathbf A-\lambda\mathbf I)$ — the <strong>characteristic polynomial</strong></td>
+<td>Quadratic for $2\times 2$, cubic for $3\times 3$</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Solve $\det(\mathbf A-\lambda\mathbf I)=0$ — the <strong>characteristic equation</strong></td>
+<td>Roots are the eigenvalues</td>
+</tr>
+<tr>
+<td>4</td>
+<td>For each $\lambda$: solve $(\mathbf A-\lambda\mathbf I)\mathbf x=\mathbf 0$, i.e. $\mathbf{Ax}=\lambda\mathbf x$</td>
+<td>At least one variable is free; choose convenient values</td>
+</tr>
+<tr>
+<td>5</td>
+<td>(Optional) <strong>Normalise</strong>: divide by $\lvert\mathbf x\rvert$</td>
+<td>Required for diagonalisation</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Setup</th>
+<th>Characteristic polynomial degree</th>
+<th>Number of eigenvalues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$2\times 2$</td>
+<td>quadratic in $\lambda$</td>
+<td>up to 2 (real)</td>
+</tr>
+<tr>
+<td>$3\times 3$</td>
+<td>cubic in $\lambda$</td>
+<td>up to 3 (real)</td>
+</tr>
+<tr>
+<td>Triangular matrix</td>
+<td>$(\lambda-d_1)(\lambda-d_2)(\lambda-d_3)$</td>
+<td>diagonal entries are eigenvalues (free!)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>$3\times 3$ tip:</strong> Often a hint or factor theorem reveals one eigenvalue (try $\lambda=1,-1,2,\ldots$); polynomial-divide it out, then quadratic-formula the remaining factor.</p>
+<p><strong>Eigenvector facts:</strong></p>
+<ul>
+<li>Eigenvectors corresponding to <em>distinct</em> eigenvalues are linearly independent.</li>
+<li>For a <em>symmetric</em> matrix, eigenvectors of distinct eigenvalues are <strong>orthogonal</strong>.</li>
+<li>Any non-zero scalar multiple of an eigenvector is itself an eigenvector (with the same $\lambda$).</li>
+<li>$\lambda=0$ ⇔ $\mathbf A$ is singular ⇔ eigenvector is in the kernel of $\mathbf A$.</li>
+<li>$\lambda=1$ ⇔ line of <em>invariant points</em> (every point on the line is fixed).</li>
+</ul>
+<hr />
+<h2>6. Diagonalising a symmetric matrix (Section 6.7)</h2>
+<p>For symmetric $\mathbf A$:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Find all eigenvalues $\lambda_1,\lambda_2,\lambda_3$ from $\det(\mathbf A-\lambda\mathbf I)=0$</td>
+<td>Three real numbers</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Find an eigenvector $\mathbf v_k$ for each $\lambda_k$</td>
+<td>Three vectors</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Normalise: $\hat{\mathbf v}_k=\mathbf v_k/\lvert\mathbf v_k\rvert$</td>
+<td>Three unit vectors</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Build $\mathbf P=(\hat{\mathbf v}_1\mid\hat{\mathbf v}_2\mid\hat{\mathbf v}_3)$ — eigenvectors as <strong>columns</strong></td>
+<td>$3\times 3$ orthogonal matrix</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Compute $\mathbf P^\top$ — automatic since $\mathbf P^\top=\mathbf P^{-1}$</td>
+<td>(Just transpose)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>$\mathbf D=\mathbf P^\top\mathbf{AP}$ — diagonal with eigenvalues on the diagonal in matching order</td>
+<td>The diagonalised form</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why it works:</strong> $\mathbf{AP}$ has columns $\mathbf A\hat{\mathbf v}_k=\lambda_k\hat{\mathbf v}_k$; left-multiplying by $\mathbf P^\top$ projects each column onto its own eigenvector, leaving $\lambda_k$ on the diagonal.</p>
+<p><strong>Orthogonal matrix tests</strong> (any equivalent):</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Algebraic</td>
+<td>$\mathbf{MM}^\top=\mathbf I$</td>
+</tr>
+<tr>
+<td>Inverse identity</td>
+<td>$\mathbf M^{-1}=\mathbf M^\top$</td>
+</tr>
+<tr>
+<td>Column structure</td>
+<td>Columns are mutually perpendicular unit vectors: $\hat{\mathbf v}_i\cdot\hat{\mathbf v}_j=\delta_{ij}$</td>
+</tr>
+<tr>
+<td>Row structure</td>
+<td>Same for rows</td>
+</tr>
+<tr>
+<td>Determinant</td>
+<td>$\det\mathbf M=\pm 1$</td>
+</tr>
+<tr>
+<td>Geometric</td>
+<td>Represents a rotation ($\det=+1$) or rotation-with-reflection ($\det=-1$)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Cross-cutting recall — what each property tells you</h2>
+<table>
+<thead>
+<tr>
+<th>Property of $\mathbf A$</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\det\mathbf A=0$</td>
+<td>Singular; one eigenvalue is 0; not invertible; columns linearly dependent</td>
+</tr>
+<tr>
+<td>$\det\mathbf A\ne 0$</td>
+<td>Invertible; eigenvalues all non-zero; $\mathbf{Ax}=\mathbf b$ has unique solution</td>
+</tr>
+<tr>
+<td>$\mathbf A=\mathbf A^\top$ (symmetric)</td>
+<td>Real eigenvalues; eigenvectors orthogonal; diagonalisable by orthogonal $\mathbf P$</td>
+</tr>
+<tr>
+<td>$\mathbf{AA}^\top=\mathbf I$ (orthogonal)</td>
+<td>$\mathbf A^{-1}=\mathbf A^\top$; preserves lengths/angles; det $=\pm 1$</td>
+</tr>
+<tr>
+<td>$\det\mathbf A=1$</td>
+<td>Volume- and orientation-preserving; rotation if also orthogonal</td>
+</tr>
+<tr>
+<td>$\det\mathbf A=-1$</td>
+<td>Volume-preserving but orientation-flipping (reflection component)</td>
+</tr>
+<tr>
+<td>$\lambda=1$ is an eigenvalue</td>
+<td>Has a line of fixed points (line of invariant points)</td>
+</tr>
+<tr>
+<td>$\lambda=-1$ is an eigenvalue</td>
+<td>Reverses direction along that line; suggests a 180° rotation/reflection axis</td>
+</tr>
+<tr>
+<td>Trace = sum of eigenvalues</td>
+<td>$\operatorname{tr}\mathbf A=\sum\lambda_k$</td>
+</tr>
+<tr>
+<td>Determinant = product of eigenvalues</td>
+<td>$\det\mathbf A=\prod\lambda_k$</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. Worked-out archetype examples</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Setup</th>
+<th>Key step</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Find $\det$ of $\begin{pmatrix}1&2&4\\3&2&1\\-1&4&3\end{pmatrix}$</td>
+<td>Cofactor row 1</td>
+<td>$1(2)-2(10)+4(14)=38$</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Show $\begin{pmatrix}2&-1&3\\8&-2&7\\4&2&-4\end{pmatrix}$ singular</td>
+<td>Det = $-12-60+72=0$</td>
+<td>Singular</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Find $\mathbf A^{-1}$ for $\begin{pmatrix}1&3&1\\0&4&1\\2&-1&0\end{pmatrix}$</td>
+<td>$\det=-1$, build cofactors, transpose, divide</td>
+<td>Output is integer-valued</td>
+</tr>
+<tr>
+<td>4</td>
+<td>$T:(x,y,z)\mapsto(x+z,y,x+2y+z)$. Matrix?</td>
+<td>Rows = coefficient vectors</td>
+<td>$\begin{pmatrix}1&0&1\\0&1&0\\1&2&1\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Image of line $\mathbf r=\mathbf a+t\mathbf b$ under $\mathbf T$</td>
+<td>$\mathbf{Ta}+t\mathbf{Tb}$</td>
+<td>New line through $\mathbf{Ta}$, direction $\mathbf{Tb}$</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Eigenvalues of $\begin{pmatrix}2&5\\-1&-4\end{pmatrix}$</td>
+<td>$(2-\lambda)(-4-\lambda)+5=\lambda^2+2\lambda-3=0$</td>
+<td>$\lambda=1,-3$</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Eigenvector for $\lambda=1$ above</td>
+<td>$2x+5y=x\Rightarrow x=-5y$</td>
+<td>$\binom{-5}{1}$ (or any multiple)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Diagonalise $\begin{pmatrix}2&-1\\-1&2\end{pmatrix}$ (symmetric)</td>
+<td>$\lambda=1,3$; eigenvecs $(1,1)$ &amp; $(1,-1)$; normalise</td>
+<td>$\mathbf P=\tfrac{1}{\sqrt 2}\begin{pmatrix}1&1\\1&-1\end{pmatrix}$, $\mathbf D=\begin{pmatrix}1&0\\0&3\end{pmatrix}$</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Verify $\mathbf{MM}^\top=\mathbf I$ for $\mathbf M=\tfrac13\begin{pmatrix}1&2&2\\-2&2&-1\\-2&-1&2\end{pmatrix}$</td>
+<td>Check off-diagonal entries are 0</td>
+<td>Orthogonal</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Common exam pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forgetting middle minus sign in cofactor expansion</td>
+<td>Pattern is $+,-,+$ along row 1</td>
+</tr>
+<tr>
+<td>Computing $(\mathbf{AB})^\top=\mathbf A^\top\mathbf B^\top$ (wrong order)</td>
+<td>$(\mathbf{AB})^\top=\mathbf B^\top\mathbf A^\top$ — flip the order</td>
+</tr>
+<tr>
+<td>Computing $(\mathbf{AB})^{-1}=\mathbf A^{-1}\mathbf B^{-1}$ (wrong order)</td>
+<td>$(\mathbf{AB})^{-1}=\mathbf B^{-1}\mathbf A^{-1}$ — same flip rule</td>
+</tr>
+<tr>
+<td>Forgetting to <strong>transpose</strong> the cofactor matrix when inverting</td>
+<td>Always do step 4 (the transpose) before dividing by det</td>
+</tr>
+<tr>
+<td>Forgetting the $\dfrac{1}{\det\mathbf A}$ factor</td>
+<td>Inverse formula is $\dfrac{1}{\det\mathbf A}\mathbf C^\top$</td>
+</tr>
+<tr>
+<td>Solving $\mathbf{Ax}=\lambda\mathbf x$ with $\mathbf x=\mathbf 0$</td>
+<td>Eigenvectors are by definition non-zero; the trivial solution doesn't count</td>
+</tr>
+<tr>
+<td>Using only one equation for $3\times 3$ eigenvector</td>
+<td>Usually need 2 of the 3; the third is redundant. Sometimes all 3 give same info — then $x$ is free.</td>
+</tr>
+<tr>
+<td>Writing composition $U\circ T$ as $\mathbf{TU}$</td>
+<td>It's $\mathbf{UT}$ — the matrix of &quot;$T$ then $U$&quot; is &quot;$U$ multiplied on the left of $T$&quot;</td>
+</tr>
+<tr>
+<td>Forgetting to <strong>normalise</strong> eigenvectors before forming $\mathbf P$</td>
+<td>Diagonalisation needs $\mathbf P$ orthogonal — only true if columns are unit vectors</td>
+</tr>
+<tr>
+<td>Putting eigenvectors as <strong>rows</strong> in $\mathbf P$</td>
+<td>They go as <strong>columns</strong></td>
+</tr>
+<tr>
+<td>Mismatching order of $\lambda$s in $\mathbf D$ to columns in $\mathbf P$</td>
+<td>$\mathbf D$'s $k$-th diagonal must match $\mathbf P$'s $k$-th column eigenvalue</td>
+</tr>
+<tr>
+<td>Forgetting that singular $\mathbf T$ collapses planes to lines</td>
+<td>Image of plane under singular $\mathbf T$ may not be a plane</td>
+</tr>
+<tr>
+<td>Sign errors in $\mathbf A-\lambda\mathbf I$</td>
+<td>Subtract $\lambda$ only from the diagonal; off-diagonal entries unchanged</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>10. Big picture (the 30-second mental model)</h2>
+<p>A $3\times 3$ matrix $\mathbf A$ is a <strong>3D linear transformation</strong>: tells you where the unit vectors $\mathbf i,\mathbf j,\mathbf k$ go (those are its three columns). From there:</p>
+<ol>
+<li><strong>Determinant</strong> = scalar measuring how much $\mathbf A$ stretches volumes (with sign for orientation). Zero → collapsed dimension → singular → no inverse.</li>
+<li><strong>Inverse</strong> $\mathbf A^{-1}=\dfrac{1}{\det\mathbf A}\mathbf C^\top$ undoes $\mathbf A$. Found via cofactor matrix, transposed, scaled.</li>
+<li><strong>Eigenvectors</strong> are special directions $\mathbf x$ with $\mathbf{Ax}=\lambda\mathbf x$ — the transformation only stretches them by $\lambda$. Found by solving the <em>characteristic equation</em> $\det(\mathbf A-\lambda\mathbf I)=0$.</li>
+<li><strong>Symmetric</strong> matrices are extra-nice: their eigenvectors are mutually perpendicular, so we can build an <strong>orthogonal</strong> $\mathbf P$ with eigenvectors as columns and <strong>diagonalise</strong>: $\mathbf P^\top\mathbf{AP}=\mathbf D$ (eigenvalues on diagonal).</li>
+<li>The whole chapter is: extend $2\times 2$ tricks → 3D, then learn to <strong>find directions that don't change</strong> (eigenvectors), and exploit that for symmetric matrices via diagonalisation.</li>
+</ol>
+
+<footer>Recall sheet · Edexcel IAL · spaced repetition</footer>
+</div>
+</body>
+</html>
