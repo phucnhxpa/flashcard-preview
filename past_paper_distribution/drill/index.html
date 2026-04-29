@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Drill Mode — M1 · P1 · P2</title>
+<style>
+:root{
+  --ink:#1d1d1f;--ink-2:#2c2c2e;--muted:#6e6e73;--muted-2:#86868b;
+  --line:#d2d2d7;--bg:#fff;--bg-soft:#fbfbfd;--bg-tint:#f5f5f7;
+  --blue:#0071e3;--blue-soft:#e8f0fa;--blue-deep:#0033a0;
+  --orange:#ff9500;--green:#34c759;--purple:#af52de;--red:#ff3b30;
+  --gold:#ffb800;
+  --r-sm:8px;--r-md:12px;--r-lg:18px;
+  --content-w:1100px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  color:var(--ink);background:var(--bg);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:var(--blue);text-decoration:none;}a:hover{text-decoration:underline;}
+
+/* TOPBAR */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);
+}
+.topbar .crumbs{color:var(--ink);font-weight:600;}
+.topbar nav a{margin-left:18px;font-size:13px;}
+
+/* HERO */
+.hero{max-width:var(--content-w);margin:0 auto;padding:52px 28px 20px;}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--blue-deep);background:var(--blue-soft);
+  padding:5px 12px;border-radius:99px;}
+.hero h1{font-size:40px;line-height:1.1;letter-spacing:-0.02em;font-weight:700;margin:16px 0 8px;}
+.hero .lede{font-size:17px;color:var(--muted);max-width:780px;line-height:1.45;}
+
+/* CONTROLS */
+.controls{max-width:var(--content-w);margin:0 auto;padding:20px 28px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+
+.unit-tabs{display:flex;gap:6px;background:var(--bg-tint);padding:4px;border-radius:10px;border:1px solid var(--line);}
+.unit-tab{padding:7px 20px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;
+  border:none;background:transparent;color:var(--muted);transition:all .15s;}
+.unit-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+.toggle-wrap{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.rep-toggle{
+  display:flex;align-items:center;gap:8px;padding:8px 16px;
+  background:var(--bg-tint);border:1px solid var(--line);border-radius:8px;
+  cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .15s;
+}
+.rep-toggle.on{background:var(--gold);border-color:#e6a500;color:#5a3c00;}
+.rep-toggle .icon{font-size:16px;}
+
+/* STATS BAR */
+.stats-bar{max-width:var(--content-w);margin:0 auto;padding:16px 28px 0;
+  display:flex;gap:20px;font-size:13px;color:var(--muted);}
+.stats-bar b{color:var(--ink);}
+
+/* CHAPTER SECTIONS */
+.chapters{max-width:var(--content-w);margin:0 auto;padding:24px 28px 60px;}
+
+.ch-block{margin-bottom:44px;}
+.ch-block .ch-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;
+  border-bottom:2px solid var(--line);
+}
+.ch-block .ch-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--bg-tint);border:1px solid var(--line);padding:3px 10px;border-radius:99px;color:var(--muted-2);}
+.ch-block .ch-title{font-size:22px;font-weight:700;letter-spacing:-0.01em;}
+.ch-block .ch-meta{font-size:13px;color:var(--muted);margin-left:auto;}
+
+/* ARCHETYPE CARDS */
+.archetype-card{
+  border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:14px;
+  background:#fff;overflow:hidden;transition:box-shadow .15s;
+}
+.archetype-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.06);}
+
+.arch-header{
+  display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;
+  background:var(--bg-soft);border-bottom:1px solid var(--line);
+}
+.arch-rank{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted-2);background:var(--bg-tint);border:1px solid var(--line);
+  padding:2px 8px;border-radius:99px;white-space:nowrap;}
+.arch-rank.top{color:#0033a0;background:#e8f0fa;border-color:#b8d0f5;}
+.arch-name{font-size:16px;font-weight:700;flex:1;}
+.arch-freq{font-size:12.5px;color:var(--muted);font-family:"SF Mono",monospace;margin-left:auto;}
+.arch-marks{font-size:12.5px;color:var(--muted);font-family:"SF Mono",monospace;margin-left:12px;}
+.arch-chevron{color:var(--muted-2);font-size:12px;margin-left:8px;transition:transform .2s;}
+.arch-chevron.open{transform:rotate(180deg);}
+
+.arch-body{padding:18px 20px 16px;display:none;}
+.arch-body.open{display:block;}
+
+.arch-move{
+  font-size:14px;color:var(--ink-2);line-height:1.6;
+  background:var(--bg-tint);border-left:3px solid var(--blue);
+  padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:14px;
+}
+
+/* QUESTION LIST */
+.q-grid{display:flex;flex-direction:column;gap:6px;}
+
+.q-row{
+  display:flex;align-items:center;gap:10px;padding:9px 14px;
+  border-radius:8px;border:1px solid var(--line);background:#fff;
+  transition:all .15s;
+}
+.q-row:hover{border-color:#a1a1a6;background:var(--bg-soft);}
+.q-row.rep{border-color:#e6a500;background:#fffbf0;}
+.q-row.rep:hover{border-color:#c8860a;background:#fff8e1;}
+.q-row.hidden{display:none;}
+
+.rep-badge{
+  display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;color:#5a3c00;
+  background:var(--gold);padding:2px 8px;border-radius:99px;white-space:nowrap;
+}
+.skip-badge{
+  font-size:11px;color:var(--muted-2);background:var(--bg-tint);
+  border:1px solid var(--line);padding:2px 7px;border-radius:99px;white-space:nowrap;
+}
+
+.q-session{font-size:13.5px;font-weight:600;min-width:100px;}
+.q-marks{font-size:12px;color:var(--muted);font-family:"SF Mono",monospace;min-width:32px;}
+.q-category{font-size:13px;color:var(--ink-2);flex:1;}
+.q-links{display:flex;gap:6px;margin-left:auto;}
+.q-link{
+  font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;
+  border:1px solid var(--line);color:var(--muted);transition:all .15s;
+  white-space:nowrap;
+}
+.q-link:hover{border-color:var(--blue);color:var(--blue);text-decoration:none;}
+.q-link.qp{background:var(--blue-soft);}
+
+.arch-note{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic;}
+
+/* REP-ONLY mode — hide non-rep */
+body.rep-only .q-row:not(.rep){display:none!important;}
+body.rep-only .arch-body{display:block!important;}
+
+/* UNIT VISIBILITY */
+.unit-block{display:none;}
+.unit-block.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="crumbs">revision <span style="color:#86868b;margin:0 6px">/</span> drill mode</span>
+  <nav>
+    <a href="../">dashboard</a>
+    <a href="../per_paper_70/">70% per paper</a>
+    <a href="../revision/">all questions</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">⚡ drill mode</div>
+  <h1>Archetype drill — M1 · P1 · P2</h1>
+  <p class="lede">355 questions compressed to <b>61 representative picks</b>. Each archetype = one distinct problem-solving move. Master the move once, skip the repeats.</p>
+</div>
+
+<div class="controls">
+  <div class="unit-tabs">
+    <button class="unit-tab active" onclick="switchUnit('M1')">M1 Mechanics</button>
+    <button class="unit-tab" onclick="switchUnit('P1')">P1 Pure 1</button>
+    <button class="unit-tab" onclick="switchUnit('P2')">P2 Pure 2</button>
+  </div>
+  <div class="toggle-wrap">
+    <button class="rep-toggle" id="repToggle" onclick="toggleRep()">
+      <span class="icon">⭐</span> Rep picks only
+    </button>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <span>Showing <b id="statTotal">—</b> archetypes</span>
+  <span>·</span>
+  <span><b id="statRep">—</b> rep picks</span>
+  <span>·</span>
+  <span><b id="statMarks">—</b> marks covered</span>
+</div>
+
+<div class="chapters">
+
+<!-- =============================== M1 ================================ -->
+<div class="unit-block active" id="unit-M1">
+
+  <!-- CH2 -->
+  <div class="ch-block">
+    <div class="ch-header">
+      <span class="ch-label">ch2</span>
+      <span class="ch-title">Vectors in Mechanics</span>
+      <span class="ch-meta">20 q · 221m</span>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank top">#1 most marks</span>
+        <span class="arch-name">Constant Velocity — Position Tracking &amp; Bearing</span>
+        <span class="arch-freq">10 q</span>
+        <span class="arch-marks">4–17m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Write <b>r_A(t) = r₀_A + v_A·t</b>, form relative vector <b>r_AB(t)</b>. Bearing = arctan(Δi/Δj) clockwise from North. "Due North/East" → set one component of r_AB = 0. Distance at time T → |r_AB(T)|.</div>
+        <div class="q-grid">
+          <div class="q-row rep">
+            <span class="rep-badge">⭐ rep pick</span>
+            <span class="q-session">Jun 2022 Q8</span><span class="q-marks">17m</span>
+            <span class="q-category">Multi-part: bearing + "when due North" + distance — full archetype sweep</span>
+            <div class="q-links">
+              <a class="q-link" href="../revision/M1/ch2/q-Jun_2022-Q8.html">View →</a>
+              <a class="q-link qp" href="../revision/pdfs/M1/Jun_2022_QP.pdf" target="_blank">QP</a>
+              <a class="q-link" href="../revision/pdfs/M1/Jun_2022_MS.pdf" target="_blank">MS</a>
+            </div>
+          </div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q2</span><span class="q-marks">13m</span><span class="q-category">Constant velocity: relative position & bearings</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2019-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q8</span><span class="q-marks">14m</span><span class="q-category">Relative position and velocity vectors</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2022-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q8</span><span class="q-marks">16m</span><span class="q-category">Vector kinematics relative position</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Oct_2022-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2023 Q4</span><span class="q-marks">10m</span><span class="q-category">Vector kinematics constant velocity</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Oct_2023-Q4.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q5</span><span class="q-marks">9m</span><span class="q-category">Vector kinematics constant acceleration</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jun_2021-Q5.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#2</span>
+        <span class="arch-name">Minimum Distance Between Moving Particles</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">9–12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Form <b>r_AB(t)</b>, compute <b>D²(t) = |r_AB|²</b> as quadratic in t. Differentiate, set d(D²)/dt = 0 → t*. Back-substitute. Key check: at closest approach, relative velocity ⊥ relative position.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q6</span><span class="q-marks">12m</span><span class="q-category">Full minimisation: relative velocity setup, D² quadratic, solve</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2021-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q7</span><span class="q-marks">11m</span><span class="q-category">Relative position & shortest distance</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2024-Q7.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2023 Q8</span><span class="q-marks">9m</span><span class="q-category">Vector kinematics relative position</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jun_2023-Q8.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#3</span>
+        <span class="arch-name">Dynamics with Vectors — F = ma in i,j</span>
+        <span class="arch-freq">2 q</span>
+        <span class="arch-marks">8–11m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Compute <b>F_net = ΣFₖ</b> as vector → <b>a = F_net/m</b> → chain into vector SUVAT: v = u + at, r = r₀ + ut + ½at². Acceleration must be <em>derived from forces</em>, not pre-given.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2020 Q6</span><span class="q-marks">11m</span><span class="q-category">Multi-force → derive a → full vector SUVAT chain</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2020-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2020_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q4</span><span class="q-marks">8m</span><span class="q-category">Resultant force with unknown magnitude</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2024-Q4.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#4</span>
+        <span class="arch-name">Vector SUVAT — Pre-given Acceleration</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">6–12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">r₀, u, a all pre-given as vectors. Key sub-tasks: (i) position at time t; (ii) "when moving in specific direction" → set appropriate component of v(t) = 0; (iii) equate i and j components independently for position conditions.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2022 Q6</span><span class="q-marks">12m</span><span class="q-category">Includes "when moving in specific direction" sub-task</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2022-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2022_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q3</span><span class="q-marks">10m</span><span class="q-category">Vector kinematics with constant acceleration</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jan_2023-Q3.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2022 Q6</span><span class="q-marks">6m</span><span class="q-category">Constant acceleration vector kinematics</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jun_2022-Q6.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#5</span>
+        <span class="arch-name">Interception — Solve for Unknown Velocity</span>
+        <span class="arch-freq">2 q</span>
+        <span class="arch-marks">13–15m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">One particle's velocity unknown. Set <b>r_A(t*) = r_B(t*)</b>, equate i and j components → two equations in unknown velocity components → solve → find bearing via arctan. Velocity is an <em>unknown to solve for</em>, not a given to track.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2023 Q6</span><span class="q-marks">15m</span><span class="q-category">Full interception: velocity solution + bearing</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Oct_2023-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2023_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q7</span><span class="q-marks">13m</span><span class="q-category">Collision / interception: relative position vector</span><div class="q-links"><a class="q-link" href="../revision/M1/ch2/q-Jun_2024-Q7.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /ch2 -->
+
+  <!-- CH3 -->
+  <div class="ch-block">
+    <div class="ch-header">
+      <span class="ch-label">ch3</span>
+      <span class="ch-title">Kinematics in a Straight Line</span>
+      <span class="ch-meta">23 q · 234m</span>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank top">#1 most marks</span>
+        <span class="arch-name">v-t Graph — Multi-Stage Horizontal</span>
+        <span class="arch-freq">9 q</span>
+        <span class="arch-marks">9–14m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Piecewise linear v-t graph. Each segment is a trapezium or triangle. <b>Total distance = sum of areas.</b> Equate area to given total distance to find unknown time or speed. When sketch required: label all key (t, v) vertices, gradients correctly signed.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2024 Q5</span><span class="q-marks">14m</span><span class="q-category">Multi-stage: graph sketch + area-equation algebra for unknowns</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jun_2024-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jun_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jun_2024_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q6</span><span class="q-marks">14m</span><span class="q-category">Train journey analysis with graph</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2019-Q6.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q7</span><span class="q-marks">12m</span><span class="q-category">Multi-stage with graph</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2021-Q7.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q8</span><span class="q-marks">13m</span><span class="q-category">Sketch speed-time graphs and calculate</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jun_2021-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2023 Q5</span><span class="q-marks">11m</span><span class="q-category">Analyze and sketch speed-time graphs</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jun_2023-Q5.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2023 Q2</span><span class="q-marks">10m</span><span class="q-category">Multi-stage with graph</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Oct_2023-Q2.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#2</span>
+        <span class="arch-name">v-t Graph — Two Particles (Overtaking)</span>
+        <span class="arch-freq">2 q</span>
+        <span class="arch-marks">10–13m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Plot both velocity profiles on same v-t axes. Overtaking ↔ equal cumulative displacement → areas under respective graphs equal from common start. Must sketch two distinct piecewise-linear profiles on <em>one diagram</em>.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2020 Q5</span><span class="q-marks">10m</span><span class="q-category">Car & motorcyclist: sketch both + equal-area for overtaking point</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2020-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2020_MS.pdf" target="_blank">MS</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#3</span>
+        <span class="arch-name">v-t Graph — Vertical Projectile (Sign Reversal at Apex)</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">5–12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Gradient = −g throughout. v = 0 at apex. <b>v becomes negative after apex</b> → area below t-axis = downward distance. Total distance = rise + fall ≠ |total displacement|. Key trap: summing signed areas incorrectly.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2022 Q5</span><span class="q-marks">9m</span><span class="q-category">Vertical projectile: sign-reversal interpretation, separate areas</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Oct_2022-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2022_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q6</span><span class="q-marks">12m</span><span class="q-category">Vertical motion kinematics</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2024-Q6.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q6</span><span class="q-marks">5m</span><span class="q-category">Kinematics velocity-time graph</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Oct_2021-Q6.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#4</span>
+        <span class="arch-name">SUVAT — Two Vertical Particles Meeting</span>
+        <span class="arch-freq">4 q</span>
+        <span class="arch-marks">6–11m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Write <b>h_A(t) = H_A + u_A·t − ½g·t²</b> and <b>h_B(t)</b>. Set h_A = h_B → solve for meeting time t*. Substitute back for height and velocities. Mastering two-particle version covers the simpler single-particle case automatically.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2020 Q3</span><span class="q-marks">11m</span><span class="q-category">Two particles from different heights: intersection time + height</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2020-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2020_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q1</span><span class="q-marks">6m</span><span class="q-category">Vertical motion under gravity (single particle)</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2021-Q1.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q4</span><span class="q-marks">8m</span><span class="q-category">Vertical motion under gravity (single particle)</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2022-Q4.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2024 Q7</span><span class="q-marks">11m</span><span class="q-category">Kinematics collision with restitution</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Oct_2024-Q7.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#5</span>
+        <span class="arch-name">Multi-Stage SUVAT — Simultaneous Equations</span>
+        <span class="arch-freq">4 q</span>
+        <span class="arch-marks">7–10m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Horizontal journey with N stages, each different constant acceleration. <b>Continuity: v_final(stage k) = v_initial(stage k+1).</b> Apply SUVAT per stage. Unknowns across stages → form and solve simultaneous equations. Purely algebraic — no graph or area method.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2021 Q3</span><span class="q-marks">10m</span><span class="q-category">Multi-stage: two-equation simultaneous solution from SUVAT constraints</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Oct_2021-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2021_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q2</span><span class="q-marks">8m</span><span class="q-category">Constant acceleration kinematics</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jun_2021-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2022 Q2</span><span class="q-marks">7m</span><span class="q-category">Constant acceleration kinematics</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jun_2022-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q5</span><span class="q-marks">9m</span><span class="q-category">Multi-segment kinematics</span><div class="q-links"><a class="q-link" href="../revision/M1/ch3/q-Jan_2023-Q5.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /ch3 -->
+
+  <!-- CH4 -->
+  <div class="ch-block">
+    <div class="ch-header">
+      <span class="ch-label">ch4</span>
+      <span class="ch-title">Dynamics: Forces &amp; Newton's Laws</span>
+      <span class="ch-meta">31 q · 299m</span>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank top">#1 most marks</span>
+        <span class="arch-name">Connected Particles — Incline + Hanging + Friction</span>
+        <span class="arch-freq">9 q</span>
+        <span class="arch-marks">7–18m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">String over smooth pulley at incline top. FBD per particle. Incline particle: T − Mg sinθ − μMg cosθ = Ma. Hanging: mg − T = ma. Shared a and T → solve 2×2. Extension: string cut → independent forces, find μ from subsequent motion.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2019 Q7</span><span class="q-marks">16m</span><span class="q-category">Connected system + post-string-cut independent motion — most complete specimen</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2019-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2019_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2019_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q7</span><span class="q-marks">18m</span><span class="q-category">N2L connected particles on inclined planes</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2020-Q7.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q8</span><span class="q-marks">17m</span><span class="q-category">N2L connected particles on inclined planes</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2021-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q7</span><span class="q-marks">13m</span><span class="q-category">N2L connected particles on inclined planes</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2022-Q7.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q8</span><span class="q-marks">15m</span><span class="q-category">N2L inclined plane friction</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2023-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q6</span><span class="q-marks">13m</span><span class="q-category">N2L inclined plane</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jun_2021-Q6.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q8</span><span class="q-marks">15m</span><span class="q-category">N2L connected particles</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jun_2024-Q8.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q7</span><span class="q-marks">14m</span><span class="q-category">N2L connected particles</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Oct_2021-Q7.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2023 Q7</span><span class="q-marks">13m</span><span class="q-category">N2L connected particles & pulley</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Oct_2023-Q7.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#2</span>
+        <span class="arch-name">Direct Collision — Momentum + Impulse</span>
+        <span class="arch-freq">11 q</span>
+        <span class="arch-marks">4–8m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Apply <b>m₁u₁ + m₂u₂ = m₁v₁ + m₂v₂</b>. Impulse <b>J = mΔv</b> per particle. By N3L: impulse on A from B = −impulse on B from A. No restitution coefficient — momentum alone closes the system. Always check direction (v &lt; 0 = reversal).</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2020 Q1</span><span class="q-marks">8m</span><span class="q-category">Post-collision velocity + impulse magnitude + direction verification</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2020-Q1.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2020_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q1</span><span class="q-marks">6m</span><span class="q-category">Collision & impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2019-Q1.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q2</span><span class="q-marks">6m</span><span class="q-category">Direct collision impulse-momentum</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2021-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q2</span><span class="q-marks">7m</span><span class="q-category">Collision & impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2022-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q2</span><span class="q-marks">8m</span><span class="q-category">Collision dynamics with momentum & impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2023-Q2.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q1</span><span class="q-marks">7m</span><span class="q-category">Collision with conservation of momentum</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jun_2021-Q1.html">View →</a></div></div>
+        </div>
+        <div class="arch-note">6 more questions in this archetype — all covered by same method.</div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#3</span>
+        <span class="arch-name">Collision + Newton's Law of Restitution</span>
+        <span class="arch-freq">4 q</span>
+        <span class="arch-marks">7–10m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move"><b>Two equations:</b> (1) momentum conservation; (2) <b>e = (v₂ − v₁)/(u₁ − u₂)</b>. Solve 2×2 for v₁, v₂. Verify 0 ≤ e ≤ 1 and particles separate correctly. Distinct from basic collision: coefficient of restitution is introduced.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2023 Q3</span><span class="q-marks">10m</span><span class="q-category">Full NLR: two-equation system + post-collision velocities + impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Oct_2023-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2023_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q1</span><span class="q-marks">5m</span><span class="q-category">Restitution & impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jun_2024-Q1.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q2</span><span class="q-marks">6m</span><span class="q-category">Inelastic collision common velocity & impulse</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Jan_2024-Q2.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#4</span>
+        <span class="arch-name">Connected Particles — Horizontal + Vertical (Atwood Variant)</span>
+        <span class="arch-freq">2 q</span>
+        <span class="arch-marks">13–14m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Particle A on <b>horizontal</b> rough surface: N_A = m_Ag (full weight, cosθ = 1), friction = μm_Ag. T − μm_Ag = m_Aa. Particle B hanging: m_Bg − T = m_Ba. <b>Critical distinction from incline archetype:</b> normal reaction = full weight, not reduced by cosθ.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2024 Q5</span><span class="q-marks">13m</span><span class="q-category">Horizontal + vertical: forces cleanly distinguish from incline archetype</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Oct_2024-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2024_MS.pdf" target="_blank">MS</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#5 unique</span>
+        <span class="arch-name">Lift / Apparent Weight — Accelerating Frame</span>
+        <span class="arch-freq">1 q</span>
+        <span class="arch-marks">6m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move"><b>R − mg = ma</b> (up) or <b>mg − R = ma</b> (down). R = apparent weight / scale reading. "Weighs less" ↔ decelerating upward or accelerating downward. R = 0 ↔ freefall. The N ≠ mg principle is unique to this archetype in M1.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2022 Q4</span><span class="q-marks">6m</span><span class="q-category">Only lift question in the entire paper set — irreplaceable</span><div class="q-links"><a class="q-link" href="../revision/M1/ch4/q-Oct_2022-Q4.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2022_MS.pdf" target="_blank">MS</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /ch4 -->
+
+  <!-- CH5 -->
+  <div class="ch-block">
+    <div class="ch-header">
+      <span class="ch-label">ch5</span>
+      <span class="ch-title">Statics of a Particle</span>
+      <span class="ch-meta">19 q · 180m</span>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#1</span>
+        <span class="arch-name">Smooth Equilibrium — 3 Forces (Ceiling Ropes / Lami's Theorem)</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">6–10m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Particle hangs from two strings at angles α, β from ceiling. Resolve ΣFx = 0, ΣFy = 0 → two unknown tensions → solve 2×2. Alternative: <b>Lami's theorem</b> F₁/sinα₁ = F₂/sinα₂ = F₃/sinα₃ if angles are clean.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2019 Q5</span><span class="q-marks">10m</span><span class="q-category">Ceiling rope setup: two tensions, resolution + simultaneous equations</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2019-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2019_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2019_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q6</span><span class="q-marks">8m</span><span class="q-category">Multiple forces equilibrium</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2023-Q6.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q1</span><span class="q-marks">6m</span><span class="q-category">Particle equilibrium multiple forces</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2024-Q1.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank top">#2 most marks</span>
+        <span class="arch-name">Rough Horizontal Surface Equilibrium</span>
+        <span class="arch-freq">8 q</span>
+        <span class="arch-marks">6–12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Force P at angle θ above horizontal: N = W − P sinθ. At limiting equilibrium F = μN. Find P for motion to begin, OR find range [P_min, P_max] — friction reverses direction at lower limit (particle would slide back without P). Two-direction friction is the key trap.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2023 Q5</span><span class="q-marks">12m</span><span class="q-category">Range-of-P analysis with friction in both directions</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Oct_2023-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2023_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q4</span><span class="q-marks">10m</span><span class="q-category">Statics with friction</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2020-Q4.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q3</span><span class="q-marks">9m</span><span class="q-category">Equilibrium on rough surface</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2021-Q3.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2022 Q4</span><span class="q-marks">12m</span><span class="q-category">Newton's laws with friction</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jun_2022-Q4.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q6</span><span class="q-marks">12m</span><span class="q-category">Statics & kinematics on rough plane</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jun_2024-Q6.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#3</span>
+        <span class="arch-name">Rough Inclined Plane Equilibrium</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">8–12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Applied force P at angle α to incline. Resolve ⊥ incline: N = W cosθ − P sinα. Resolve ∥ incline. <b>Friction direction reverses</b> depending on whether P tends to push particle up vs. particle tends to slide down → solve both cases for P_max and P_min.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2024 Q6</span><span class="q-marks">12m</span><span class="q-category">Applied force on rough incline: full range-of-P with both friction directions</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Oct_2024-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Oct_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Oct_2024_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q5</span><span class="q-marks">8m</span><span class="q-category">Equilibrium on rough inclined plane</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2022-Q5.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q3</span><span class="q-marks">11m</span><span class="q-category">Equilibrium rough inclined plane</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Oct_2022-Q3.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#4</span>
+        <span class="arch-name">Equilibrium via Force Vectors (i, j notation)</span>
+        <span class="arch-freq">3 q</span>
+        <span class="arch-marks">7–10m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Forces given as F_k = aᵢ i + bₖ j. Equilibrium: Σaₖ = 0 and Σbₖ = 0. Solve for unknown components. Find |F| = √(a²+b²) and θ = arctan(a/b). If resultant must have given direction, set component ratio = tan(required bearing).</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2023 Q2</span><span class="q-marks">10m</span><span class="q-category">Solve for unknown components + compute magnitude and direction</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jun_2023-Q2.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jun_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jun_2023_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q3</span><span class="q-marks">9m</span><span class="q-category">Vector forces equilibrium</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jun_2021-Q3.html">View →</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q6</span><span class="q-marks">9m</span><span class="q-category">Newton's 2nd law & vector forces</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Oct_2022-Q6.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="archetype-card">
+      <div class="arch-header" onclick="toggleArch(this)">
+        <span class="arch-rank">#5</span>
+        <span class="arch-name">Statics → Dynamics Bridge (Equilibrium → N2L → SUVAT)</span>
+        <span class="arch-freq">2 q</span>
+        <span class="arch-marks">12m</span>
+        <span class="arch-chevron">▼</span>
+      </div>
+      <div class="arch-body">
+        <div class="arch-move">Part (a) — find all forces in equilibrium. Part (b) — condition changes (force removed, surface roughens) → those same forces become inputs to N2L → find acceleration → SUVAT. Forces from Part (a) feed directly into Part (b) without additional force work.</div>
+        <div class="q-grid">
+          <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2024 Q8</span><span class="q-marks">12m</span><span class="q-category">Inclined plane statics → N2L → SUVAT: cleanest bridge specimen</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jan_2024-Q8.html">View →</a><a class="q-link qp" href="../revision/pdfs/M1/Jan_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/M1/Jan_2024_MS.pdf" target="_blank">MS</a></div></div>
+          <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q6</span><span class="q-marks">12m</span><span class="q-category">Statics & kinematics on rough plane</span><div class="q-links"><a class="q-link" href="../revision/M1/ch5/q-Jun_2024-Q6.html">View →</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /ch5 -->
+
+</div><!-- /unit-M1 -->
+
+
+<!-- =============================== P1 ================================ -->
+<div class="unit-block" id="unit-P1">
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch1</span><span class="ch-title">Algebra and Functions</span><span class="ch-meta">77 q · compressed to 8 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#1</span><span class="arch-name">Index &amp; Surd Manipulation</span><span class="arch-freq">15 q</span><span class="arch-marks">3–7m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Simplify fractional/negative indices OR rationalize surd denominator (multiply by conjugate) → collect terms → write in form p + q√k. Sometimes the simplified result feeds into solving an equation.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2022 Q3</span><span class="q-marks">7m</span><span class="q-category">Multi-step rationalization AND solving from result — full chain</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2022-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q2</span><span class="q-marks">3m</span><span class="q-category">Simplify algebraic indices</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2019-Q2.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2019 Q2</span><span class="q-marks">5m</span><span class="q-category">Surd rationalisation & equation solving</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jun_2019-Q2.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2023 Q4</span><span class="q-marks">7m</span><span class="q-category">Algebraic simplification</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jun_2023-Q4.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#2 dominant</span><span class="arch-name">Completing the Square → Full Quadratic Analysis</span><span class="arch-freq">24 q</span><span class="arch-marks">6–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Rewrite ax²+bx+c in form a(x+p)²+q → vertex (−p, q), min/max, axis of symmetry → sketch → follow-up on range, domain, inequality, or intersection with second curve. Single most-drilled archetype in ch1.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2024 Q9</span><span class="q-marks">10m</span><span class="q-category">CTS + vertex + sketch + polynomial extension — complete pipeline</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2024-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q8</span><span class="q-marks">6m</span><span class="q-category">Graph transformations & properties</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2019-Q8.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q6</span><span class="q-marks">10m</span><span class="q-category">Graph sketching and intersections</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2021-Q6.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q7</span><span class="q-marks">10m</span><span class="q-category">Functions, graphs, transformations & intersections</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2023-Q7.html">View →</a></div></div>
+    </div><div class="arch-note">20 more questions covered by same method.</div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">Line/Curve Intersection via Discriminant</span><span class="arch-freq">8 q</span><span class="arch-marks">6–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Substitute y=mx+c into curve → rearrange to Ax²+Bx+C=0 → impose b²−4ac condition: = 0 (tangent), &lt; 0 (no intersection), &gt; 0 (two intersections) → find unknown constant k or range of k.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2024 Q7</span><span class="q-marks">9m</span><span class="q-category">Reciprocal curve y=k/x — non-trivial rearrangement before discriminant applies</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2024-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q9</span><span class="q-marks">7m</span><span class="q-category">Discriminant for no real roots</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2019-Q9.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q10</span><span class="q-marks">9m</span><span class="q-category">Graph sketching & conditions for intersection</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2022-Q10.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4a</span><span class="arch-name">Substitution → Quadratic (Exponential: u = aˣ)</span><span class="arch-freq">5 q</span><span class="arch-marks">5–8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Recognise u = aˣ to obtain Au²+Bu+C=0. Back-substitution requires logarithm. Reject u ≤ 0 (since aˣ &gt; 0 always). Recognition step cannot be drilled from polynomial practice alone.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2024 Q4</span><span class="q-marks">6m</span><span class="q-category">Exponential substitution u=2ˣ: recognition + log back-sub</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2024-Q4.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q5</span><span class="q-marks">6m</span><span class="q-category">Solve exponential equation</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2023-Q5.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4b</span><span class="arch-name">Substitution → Quadratic (Polynomial: u = xⁿ or √x)</span><span class="arch-freq">11 q</span><span class="arch-marks">5–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Standard hidden-quadratic pipeline: let u = f(x) → Au²+Bu+C=0 → solve → back-substitute, rejecting solutions violating domain constraints. Most common variant in ch1.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2019 Q5</span><span class="q-marks">7m</span><span class="q-category">Polynomial substitution: canonical algebraic form with follow-up analysis</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jun_2019-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2019_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2019_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q5</span><span class="q-marks">7m</span><span class="q-category">Solve cubic & related equation</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2020-Q5.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q2</span><span class="q-marks">10m</span><span class="q-category">Solve polynomial & related equations</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jun_2021-Q2.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#5</span><span class="arch-name">Graph Transformations — Sketch Transformed f(x)</span><span class="arch-freq">7 q</span><span class="arch-marks">7–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Apply transformations: f(x±a), f(x)±b, af(x), f(ax), reflections — sketch result labelling transformed key coordinates and asymptotes. Or identify mapping from one graph to another.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2020 Q10</span><span class="q-marks">8m</span><span class="q-category">Cubic base — can't rely on parabola symmetry; tests genuine transformation rules</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2020-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2020_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2019 Q10</span><span class="q-marks">8m</span><span class="q-category">Sketching graph transformations</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Oct_2019-Q10.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q3</span><span class="q-marks">9m</span><span class="q-category">Graph transformations</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Oct_2021-Q3.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#6</span><span class="arch-name">Defining Regions with Inequalities</span><span class="arch-freq">3 q</span><span class="arch-marks">3–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">System of linear and/or quadratic inequalities → find intersection points → determine which region satisfies all conditions → shade on diagram, state inequalities, or compute enclosed area.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2022 Q5</span><span class="q-marks">9m</span><span class="q-category">Quadratic AND linear inequalities: intersections + shading + all boundary conditions</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jun_2022-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q4</span><span class="q-marks">3m</span><span class="q-category">Define region using inequalities</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2019-Q4.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#7</span><span class="arch-name">Algebraic Modelling — Fit Constants from Data</span><span class="arch-freq">2 q</span><span class="arch-marks">5–6m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Given model equation with unknown constants + data values at known inputs → form simultaneous equations by substituting each data point → solve for constants → interpret or find critical value.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q2</span><span class="q-marks">6m</span><span class="q-category">Simultaneous equations from data: setup + solve + interpret cycle</span><div class="q-links"><a class="q-link" href="../revision/P1/ch1/q-Jan_2021-Q2.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+    </div></div></div>
+  </div><!-- /P1 ch1 -->
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch3</span><span class="ch-title">Trigonometry</span><span class="ch-meta">36 q · 5 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#1 dominant</span><span class="arch-name">Sector/Arc — Composite Shape Area &amp; Perimeter</span><span class="arch-freq">15 q</span><span class="arch-marks">5–14m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Use s = rθ (arc), A = ½r²θ (sector area), θ in radians. Set up equations for composite shape (sector+triangle, overlapping circles). Find r or θ from constraint. Compute perimeter (arc + chord segments) AND area separately.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2023 Q6</span><span class="q-marks">10m</span><span class="q-category">Standard composite: full pipeline — r, θ, perimeter, area</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2023-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2023_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row rep"><span class="rep-badge">⭐ hard variant</span><span class="q-session">Oct 2022 Q8</span><span class="q-marks">14m</span><span class="q-category">Circles+triangles: geometric reasoning required before any formula</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Oct_2022-Q8.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Oct_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Oct_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q4</span><span class="q-marks">9m</span><span class="q-category">Area & perimeter with sectors</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2020-Q4.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q8</span><span class="q-marks">9m</span><span class="q-category">Area & perimeter of composite sectors</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2024-Q8.html">View →</a></div></div>
+    </div><div class="arch-note">11 more questions covered by same method.</div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">Trig Graph — Read Parameters from Sketch</span><span class="arch-freq">7 q</span><span class="arch-marks">4–6m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Given sketch of y = A sin(Bx+C)+D — extract amplitude A from max/min, period T then B = 2π/T, phase shift from labelled root/peak, vertical shift D. Reverse of sketching — tests what each parameter controls visually.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2024 Q11</span><span class="q-marks">6m</span><span class="q-category">Read all parameters including phase shift from graph</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jun_2024-Q11.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q9</span><span class="q-marks">4m</span><span class="q-category">Trig graph transformations</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2022-Q9.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q9</span><span class="q-marks">4m</span><span class="q-category">Analyze trig function parameters</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2023-Q9.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">Trig Graph — Sketch Transformed + Solve in Domain</span><span class="arch-freq">5 q</span><span class="arch-marks">5–7m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Sketch y = A sin(Bx)+C over one period (label exact coordinates). Solve A sin(Bx) = k within domain by locating intersections + applying periodicity/symmetry to list ALL solutions. Key error: not mapping domain under the B-stretch.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2019 Q9</span><span class="q-marks">7m</span><span class="q-category">Sketch + solve within non-trivial domain — domain-mapping step is key</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jun_2019-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2019_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2019_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q5</span><span class="q-marks">6m</span><span class="q-category">Trig graph interpretation & solutions</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2019-Q5.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4</span><span class="arch-name">Solving Triangles — Sine &amp; Cosine Rules</span><span class="arch-freq">8 q</span><span class="arch-marks">5–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Select rule: sine rule (angle-opposite-side pairs) vs cosine rule (two sides + included angle). Area = ½ab sinC. <b>Ambiguous case</b>: sine rule may yield two valid triangles — present both.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2021 Q3</span><span class="q-marks">9m</span><span class="q-category">Both sine + cosine rules in sequence + area — full toolkit in one question</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jun_2021-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row rep"><span class="rep-badge">⭐ ambiguous case</span><span class="q-session">Jun 2022 Q2</span><span class="q-marks">5m</span><span class="q-category">Sine rule (ambiguous case): two valid triangles — distinct move</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jun_2022-Q2.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q7</span><span class="q-marks">6m</span><span class="q-category">Solving triangles geometry</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jan_2019-Q7.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#5 unique</span><span class="arch-name">Trig Identities — Simplify &amp; Solve</span><span class="arch-freq">1 q</span><span class="arch-marks">8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Apply sin²θ + cos²θ ≡ 1 and/or tanθ ≡ sinθ/cosθ to rewrite in single-trig form → solve within domain → list ALL solutions via CAST or graph symmetry.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2022 Q9</span><span class="q-marks">8m</span><span class="q-category">Only P1 identity specimen — identity simplification + equation solving + solution listing</span><div class="q-links"><a class="q-link" href="../revision/P1/ch3/q-Jun_2022-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+    </div></div></div>
+  </div><!-- /P1 ch3 -->
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch4</span><span class="ch-title">Differentiation</span><span class="ch-meta">29 q · 6 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#1</span><span class="arch-name">Differentiation from First Principles</span><span class="arch-freq">8 q</span><span class="arch-marks">5–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">f′(x) = lim[h→0] [f(x+h)−f(x)]/h. Expand f(x+h), factor and cancel h, take limit. For rational/fractional powers: conjugate multiplication or binomial step needed to clear surd — completely different execution from polynomial.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2024 Q3</span><span class="q-marks">9m</span><span class="q-category">Rational powers: rationalization of numerator required — hardest variant</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2024-Q3.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Oct_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Oct_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q3</span><span class="q-marks">6m</span><span class="q-category">Gradient of tangent and chord</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2020-Q3.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2019 Q7</span><span class="q-marks">6m</span><span class="q-category">Gradient from first principles</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2019-Q7.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#2 most common</span><span class="arch-name">Tangent or Normal — Line Equation at Known Point</span><span class="arch-freq">9 q</span><span class="arch-marks">5–8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Differentiate f(x) → substitute given x-value → gradient m (tangent) or m_N = −1/m (normal) → y−y₁ = m(x−x₁). Negative-reciprocal step is the critical error-prone moment for normals.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q1</span><span class="q-marks">8m</span><span class="q-category">Normal equation variant: negative-reciprocal + algebraic tidying, multiple sub-parts</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2021-Q1.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2019 Q1</span><span class="q-marks">6m</span><span class="q-category">Find equation of tangent</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jun_2019-Q1.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q1</span><span class="q-marks">6m</span><span class="q-category">Differentiate and evaluate derivative</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2022-Q1.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">Find Point Where f′(x) = k</span><span class="arch-freq">4 q</span><span class="arch-marks">5–11m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">x-value is unknown. Extract gradient k from a parallel line → set f′(x) = k → solve (often cubic or quadratic equation) for x → find y → write tangent/normal. Distinct from Archetype 2: x must be computed from f′.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2020 Q8</span><span class="q-marks">11m</span><span class="q-category">Parallel tangent: extract m from line, solve f′(x)=m, write equation, further analysis</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2020-Q8.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Oct_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Oct_2020_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q2</span><span class="q-marks">5m</span><span class="q-category">Find x-coords for given gradient</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2021-Q2.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4</span><span class="arch-name">Stationary Points, Classification &amp; Curve Sketch</span><span class="arch-freq">5 q</span><span class="arch-marks">5–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Differentiate → set f′(x) = 0 → solve for all stationary x-values → substitute into f(x) → classify via f″(x) sign or first-derivative sign change → sketch curve labelling stationary points, intercepts, end behaviour.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2023 Q10</span><span class="q-marks">10m</span><span class="q-category">Cubic: both stationary points, both classified, labelled sketch, further analysis</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2023-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2023_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q9</span><span class="q-marks">6m</span><span class="q-category">Find stationary point x-coordinate</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2020-Q9.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q6</span><span class="q-marks">10m</span><span class="q-category">Cubic functions & differentiation</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Oct_2021-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#5</span><span class="arch-name">f″(x) Applications</span><span class="arch-freq">3 q</span><span class="arch-marks">7–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Differentiate twice. Apply to: (a) solve f″(x) = c to find specific x-values, (b) confirm nature of stationary points, (c) determine where concavity changes. f″ is itself the object of study here, not merely a classification tool.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q7</span><span class="q-marks">9m</span><span class="q-category">Find f″(x) + solve equation in it + interpret result — beyond basic classification</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2021-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2019 Q6</span><span class="q-marks">7m</span><span class="q-category">Differentiation and solving equations</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jan_2019-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#6 ⚠️ hard</span><span class="arch-name">Normal/Tangent Meets Curve Again → Further Analysis</span><span class="arch-freq">2 q</span><span class="arch-marks">11–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Find tangent/normal equation → substitute back into f(x) → form polynomial → factor out known root (contact point) → solve for second intersection → use result to compute area (integration), length, or ratio. Multi-step algebra with no scaffold.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ hard variant</span><span class="q-session">Jun 2022 Q10</span><span class="q-marks">12m</span><span class="q-category">Highest-mark P1 differentiation question — full extended multi-step sequence</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Jun_2022-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P1/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P1/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Specimen 2018 Q9</span><span class="q-marks">11m</span><span class="q-category">Equation of normal & intersections</span><div class="q-links"><a class="q-link" href="../revision/P1/ch4/q-Specimen_2018-Q9.html">View →</a></div></div>
+    </div></div></div>
+  </div><!-- /P1 ch4 -->
+</div><!-- /unit-P1 -->
+
+
+<!-- =============================== P2 ================================ -->
+<div class="unit-block" id="unit-P2">
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch3</span><span class="ch-title">Coordinate Geometry of Circles</span><span class="ch-meta">16 q · 4 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#1</span><span class="arch-name">Tangent via Perpendicular Radius</span><span class="arch-freq">5 q</span><span class="arch-marks">6–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Extract centre from circle equation (complete the square) → gradient of radius OP → m_tan = −1/m_rad → line equation y−y₁ = m(x−x₁).</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2020 Q4</span><span class="q-marks">9m</span><span class="q-category">Build full circle equation first, then find tangent — both sub-skills chained</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Oct_2020-Q4.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2020_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q6</span><span class="q-marks">8m</span><span class="q-category">Circle properties and tangents</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jan_2022-Q6.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2019 Q6</span><span class="q-marks">7m</span><span class="q-category">Circle properties with tangent</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Oct_2019-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">Perpendicular Bisector → Centre → Circle Equation</span><span class="arch-freq">4 q</span><span class="arch-marks">7–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Midpoint of chord/diameter → perpendicular gradient → bisector line equation → intersect with second bisector (or condition) → centre → radius → circle equation (x−a)²+(y−b)²=r².</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2024 Q10</span><span class="q-marks">10m</span><span class="q-category">Bisector construction + area of triangle follow-up — richest multi-deliverable version</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Oct_2024-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q9</span><span class="q-marks">10m</span><span class="q-category">Circle equation and tangent</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jan_2021-Q9.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2023 Q3</span><span class="q-marks">7m</span><span class="q-category">Equation of perpendicular bisector</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jun_2023-Q3.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3 ⚠️ hard</span><span class="arch-name">Line–Circle Substitution + Discriminant</span><span class="arch-freq">2 q</span><span class="arch-marks">6–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Substitute y=mx+c into circle equation → quadratic in x → b²−4ac = 0 for tangency condition. Algebraically dense; fully distinct from the perpendicular-radius approach.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ hard variant</span><span class="q-session">Jun 2022 Q10</span><span class="q-marks">12m</span><span class="q-category">Tangent condition requires discriminant=0 algebraically — only question at this depth</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jun_2022-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q7</span><span class="q-marks">6m</span><span class="q-category">Find intersection of line and circle</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jun_2024-Q7.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4</span><span class="arch-name">Differentiation Tangent + Area</span><span class="arch-freq">3 q</span><span class="arch-marks">6–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Differentiate curve/circle equation explicitly or implicitly → evaluate dy/dx at point → tangent/normal line → extend to area of triangle formed with axes.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2023 Q7</span><span class="q-marks">8m</span><span class="q-category">Differentiation tangent + triangle area — two distinct sub-moves in one question</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Oct_2023-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2023_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q3</span><span class="q-marks">6m</span><span class="q-category">Find equation of tangent</span><div class="q-links"><a class="q-link" href="../revision/P2/ch3/q-Jan_2024-Q3.html">View →</a></div></div>
+    </div></div></div>
+  </div>
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch4</span><span class="ch-title">Sequences and Series</span><span class="ch-meta">43 q · 5 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#1</span><span class="arch-name">Binomial Coefficient Extraction</span><span class="arch-freq">9 q</span><span class="arch-marks">3–8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Write T_{r+1} = ⁿCᵣ · aⁿ⁻ʳ · (bx)ʳ → identify r from power constraint ("term in x²", "independent of x") → set up equations to find unknown constants a or b. Approximation variant: evaluate at small x to get numerical approximation.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2020 Q1</span><span class="q-marks">7m</span><span class="q-category">Find both unknowns a and b from two conditions, then evaluate specific term</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Oct_2020-Q1.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2020_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q4</span><span class="q-marks">8m</span><span class="q-category">Binomial expansion coefficient</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2021-Q4.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q4</span><span class="q-marks">8m</span><span class="q-category">Binomial expansion with approximation</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jun_2021-Q4.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">AP — Constraint System</span><span class="arch-freq">6 q</span><span class="arch-marks">5–11m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Translate contextual problem into simultaneous equations in a, d using Sₙ = n/2(2a+(n−1)d) and/or uₙ = a+(n−1)d. Solve multi-constraint system. May involve "when does sum exceed X" → quadratic inequality in n.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2020 Q5</span><span class="q-marks">11m</span><span class="q-category">Most constraint-rich AP: build and solve multiple simultaneous equations</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Oct_2020-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2020_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2020_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q1</span><span class="q-marks">7m</span><span class="q-category">Arithmetic series application</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jun_2021-Q1.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q5</span><span class="q-marks">8m</span><span class="q-category">Arithmetic progression parameters & terms</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2024-Q5.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">GP — Sequence and Series</span><span class="arch-freq">8 q</span><span class="arch-marks">3–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Use a and r. Form equations from term relationships. Evaluate Sₙ or S∞. Solve quadratic in r when needed (from two sum conditions). S∞ = a/(1−r) only if |r| &lt; 1 — always verify convergence condition.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2021 Q7</span><span class="q-marks">10m</span><span class="q-category">Multi-part: find r, Sₙ, S∞ with convergence — full GP skill sweep</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Oct_2021-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q5</span><span class="q-marks">8m</span><span class="q-category">Geometric sequence modelling</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2020-Q5.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2022 Q6</span><span class="q-marks">8m</span><span class="q-category">Geometric sequence with S∞</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jun_2022-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4</span><span class="arch-name">Mixed AP + GP — Coupled System</span><span class="arch-freq">8 q</span><span class="arch-marks">7–11m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Specific named terms satisfy BOTH AP and GP conditions simultaneously. Set up equations from both formula types → solve non-linear system (usually quadratic in one variable). Requires fluent cross-progression algebra.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q10</span><span class="q-marks">11m</span><span class="q-category">Full deduction chain: equations from both progressions, non-linear system</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2021-Q10.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q8</span><span class="q-marks">9m</span><span class="q-category">Arithmetic & geometric sequences</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2022-Q8.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2023 Q6</span><span class="q-marks">9m</span><span class="q-category">Mixed AP and GP problem</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jun_2023-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#5</span><span class="arch-name">Recurrence Relation → Algebraic Proof</span><span class="arch-freq">4 q</span><span class="arch-marks">5–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Given uₙ₊₁ = f(uₙ) → compute uₙ₊₁ − uₙ (or ratio) in terms of uₙ → show this is constant → formally conclude AP or GP. Requires algebraic manipulation + proof language ("show that", "hence").</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2022 Q2</span><span class="q-marks">7m</span><span class="q-category">Cleanest algebraic proof of AP from recurrence — clear "show that" structure</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Oct_2022-Q2.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2021 Q8</span><span class="q-marks">7m</span><span class="q-category">Recurrence relation arithmetic sequence</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2021-Q8.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q3</span><span class="q-marks">7m</span><span class="q-category">Recursive sequence properties</span><div class="q-links"><a class="q-link" href="../revision/P2/ch4/q-Jan_2023-Q3.html">View →</a></div></div>
+    </div></div></div>
+  </div>
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch5</span><span class="ch-title">Exponentials and Logarithms</span><span class="ch-meta">18 q · 3 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#1 dominant</span><span class="arch-name">Quadratic Substitution — a^(2x) Type</span><span class="arch-freq">7 q</span><span class="arch-marks">5–8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Recognise a^(2x) = (aˣ)² → let u = aˣ → Au²+Bu+C = 0 → solve quadratic → <b>reject u ≤ 0</b> (since aˣ &gt; 0 always) → apply log to recover x. Rejection step is the key examiner trap.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2024 Q6</span><span class="q-marks">8m</span><span class="q-category">Two roots, one rejected on domain grounds — full reasoning chain including rejection</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jan_2024-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jan_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jan_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2023 Q4</span><span class="q-marks">6m</span><span class="q-category">Quadratic substitution: a^2x type</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jan_2023-Q4.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q4</span><span class="q-marks">8m</span><span class="q-category">Solve exponential equation (quadratic form)</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Oct_2022-Q4.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">Log Law Chain Reduction</span><span class="arch-freq">5 q</span><span class="arch-marks">5–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Apply product/quotient/power rules to consolidate to single log → solve algebraic equation → validate (reject if argument ≤ 0). Simultaneous variant: treat log x and log y as unknowns in 2×2 system.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2021 Q7</span><span class="q-marks">10m</span><span class="q-category">Longest multi-step chain: multiple law applications + validation step</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jun_2021-Q7.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2022 Q4</span><span class="q-marks">6m</span><span class="q-category">Simultaneous log equations: 2×2 system treating log x, log y as unknowns</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jun_2022-Q4.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q4</span><span class="q-marks">5m</span><span class="q-category">Solve logarithmic equation</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jan_2022-Q4.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">Exponential Growth/Decay Model</span><span class="arch-freq">3 q</span><span class="arch-marks">7–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Set up N = Ae^(kt) (or N = Ab^t). Use given conditions to find A and k. Solve for t or N at target value. Sketch graph with asymptote and labelled features. Contextual interpretation required.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2022 Q9</span><span class="q-marks">9m</span><span class="q-category">Decay model + solve for time + contextual interpretation — most complete example</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jun_2022-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q9</span><span class="q-marks">7m</span><span class="q-category">Exponential modelling (decay/growth) + sketch</span><div class="q-links"><a class="q-link" href="../revision/P2/ch5/q-Jan_2020-Q9.html">View →</a></div></div>
+    </div></div></div>
+  </div>
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch6</span><span class="ch-title">Trigonometry</span><span class="ch-meta">16 q · 4 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#1</span><span class="arch-name">Transformed Angle Equation — trig(ax + b) = k</span><span class="arch-freq">4 q</span><span class="arch-marks">6–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Expand solution interval to [a·LB+b, a·UB+b] → find all values of (ax+b) using CAST/unit circle → divide by a to recover x. Key: track ALL solutions in range. Hard variant: identity manipulation required first before transformed solve.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Oct 2022 Q5</span><span class="q-marks">8m</span><span class="q-category">Identity first → then trig(ax+b)=k: two-layer difficulty</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Oct_2022-Q5.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Oct_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Oct_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q7</span><span class="q-marks">7m</span><span class="q-category">Trigonometric equation proof & solve</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jan_2020-Q7.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2022 Q5</span><span class="q-marks">6m</span><span class="q-category">Solve trig equation with compound angle</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jun_2022-Q5.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">Pythagorean Identity → Quadratic in Trig</span><span class="arch-freq">2 q</span><span class="arch-marks">8m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Apply sin²x+cos²x=1 (or sec²x=1+tan²x) to eliminate one trig function → quadratic in sinx, cosx, or tanx → solve → list all angles in given range.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2021 Q6</span><span class="q-marks">8m</span><span class="q-category">"Show that" proof sub-part + solve: tests identity recognition AND angle-finding</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jan_2021-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jan_2021_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jan_2021_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2022 Q7</span><span class="q-marks">8m</span><span class="q-category">Solve trigonometric equations</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jan_2022-Q7.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#3 most common</span><span class="arch-name">Double Angle Formulae</span><span class="arch-freq">8 q</span><span class="arch-marks">7–14m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Choose correct form of cos2x (= 1−2sin²x or 2cos²x−1) to reduce to single trig function → factorise or solve quadratic → find ALL solutions in range. Strategic decision: which cos2x form to use is the discriminating move.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2023 Q8</span><span class="q-marks">9m</span><span class="q-category">Proof sub-part requires formula choice, then solve — tests strategic decision, not just execution</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jan_2023-Q8.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jan_2023_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jan_2023_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2021 Q8</span><span class="q-marks">10m</span><span class="q-category">Solve trigonometric equations</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jun_2021-Q8.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2020 Q7</span><span class="q-marks">7m</span><span class="q-category">Trig identity proof and equation</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Oct_2020-Q7.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jun 2024 Q8</span><span class="q-marks">12m</span><span class="q-category">Double angle HARD</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Jun_2024-Q8.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4 unique</span><span class="arch-name">R-Formula — a sinx + b cosx = c</span><span class="arch-freq">2 q</span><span class="arch-marks">9–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Express a sinx + b cosx as R sin(x+α) where R = √(a²+b²), tanα = b/a → solve R sin(x+α) = k → state max/min = ±R. Entirely different setup from double-angle questions.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Specimen 2018 Q9</span><span class="q-marks">9m</span><span class="q-category">Full R-formula: find R and α, state max/min, solve equation — most complete example</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Specimen_2018-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Specimen_2018_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Specimen_2018_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q10</span><span class="q-marks">10m</span><span class="q-category">Solve trig equation (R-formula)</span><div class="q-links"><a class="q-link" href="../revision/P2/ch6/q-Oct_2021-Q10.html">View →</a></div></div>
+    </div></div></div>
+  </div>
+
+  <div class="ch-block">
+    <div class="ch-header"><span class="ch-label">ch8</span><span class="ch-title">Integration</span><span class="ch-meta">27 q · 4 archetypes</span></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank top">#1 most common</span><span class="arch-name">Trapezium Rule</span><span class="arch-freq">11 q</span><span class="arch-marks">4–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">T = h/2[y₀ + 2(y₁+…+yₙ₋₁) + yₙ] with h = (b−a)/n. Complete y-value table if needed. Compare with exact integral. State over/underestimate from graph concavity (concave up → overestimate; concave down → underestimate).</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2022 Q2</span><span class="q-marks">8m</span><span class="q-category">Trapezium rule + integral inequality comparison — tests understanding, not just formula</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jun_2022-Q2.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q1</span><span class="q-marks">7m</span><span class="q-category">Trapezium rule & integral properties</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jan_2020-Q1.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2021 Q3</span><span class="q-marks">8m</span><span class="q-category">Trapezium rule & logarithm properties</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Oct_2021-Q3.html">View →</a></div></div>
+    </div><div class="arch-note">8 more questions in this archetype — all identical method after this one.</div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#2</span><span class="arch-name">Area by Integration — Difference of Curves</span><span class="arch-freq">8 q</span><span class="arch-marks">6–10m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Find intersection points by solving f(x)=g(x) → integrate (upper−lower) over interval → evaluate exactly. Split domain if curve crosses x-axis mid-region (area would be underestimated by signed integral).</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jan 2022 Q9</span><span class="q-marks">10m</span><span class="q-category">Two distinct curves: intersections + net area integral — canonical multi-step version</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jan_2022-Q9.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jan_2022_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jan_2022_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2020 Q4</span><span class="q-marks">6m</span><span class="q-category">Area between curve and line</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jan_2020-Q4.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2020 Q6</span><span class="q-marks">9m</span><span class="q-category">Area between two curves</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Oct_2020-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#3</span><span class="arch-name">Integration by Substitution</span><span class="arch-freq">4 q</span><span class="arch-marks">7–9m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">Let u = g(x) → compute du/dx → rewrite integrand entirely in u → change limits when definite → integrate standard form → back-substitute if indefinite. Limit change step is the most common error point.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ rep pick</span><span class="q-session">Jun 2024 Q6</span><span class="q-marks">9m</span><span class="q-category">Substitution + definite with explicit limit change — full process tested</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jun_2024-Q6.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Jun_2024_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Jun_2024_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q10</span><span class="q-marks">9m</span><span class="q-category">Integration by substitution</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jan_2024-Q10.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2022 Q6</span><span class="q-marks">7m</span><span class="q-category">Definite integral by substitution</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Oct_2022-Q6.html">View →</a></div></div>
+    </div></div></div>
+
+    <div class="archetype-card"><div class="arch-header" onclick="toggleArch(this)"><span class="arch-rank">#4 ⚠️ hard</span><span class="arch-name">Integration by Parts (Repeated)</span><span class="arch-freq">3 q</span><span class="arch-marks">8–12m</span><span class="arch-chevron">▼</span></div>
+    <div class="arch-body"><div class="arch-move">∫u(dv/dx)dx = uv − ∫v(du/dx)dx via LIATE. May need to apply twice (repeated parts) — knowing WHEN to apply the formula a second time is the key discriminating skill. Hard mastery benchmark.</div>
+    <div class="q-grid">
+      <div class="q-row rep"><span class="rep-badge">⭐ hard variant</span><span class="q-session">Specimen 2018 Q8</span><span class="q-marks">12m</span><span class="q-category">Repeated integration by parts — highest mark, essential mastery benchmark</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Specimen_2018-Q8.html">View →</a><a class="q-link qp" href="../revision/pdfs/P2/Specimen_2018_QP.pdf" target="_blank">QP</a><a class="q-link" href="../revision/pdfs/P2/Specimen_2018_MS.pdf" target="_blank">MS</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Jan 2024 Q4</span><span class="q-marks">9m</span><span class="q-category">Integration by parts (definite)</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Jan_2024-Q4.html">View →</a></div></div>
+      <div class="q-row"><span class="skip-badge">skip</span><span class="q-session">Oct 2024 Q8</span><span class="q-marks">8m</span><span class="q-category">Repeated integration by parts</span><div class="q-links"><a class="q-link" href="../revision/P2/ch8/q-Oct_2024-Q8.html">View →</a></div></div>
+    </div></div></div>
+  </div>
+
+</div><!-- /unit-P2 -->
+
+</div><!-- /chapters -->
+
+<script>
+function switchUnit(unit) {
+  document.querySelectorAll('.unit-block').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('unit-' + unit).classList.add('active');
+  document.querySelectorAll('.unit-tab').forEach(t => {
+    if (t.textContent.startsWith(unit)) t.classList.add('active');
+  });
+  updateStats();
+}
+
+function toggleArch(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.arch-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
+let repOnly = false;
+function toggleRep() {
+  repOnly = !repOnly;
+  document.body.classList.toggle('rep-only', repOnly);
+  document.getElementById('repToggle').classList.toggle('on', repOnly);
+  updateStats();
+}
+
+function updateStats() {
+  const activeUnit = document.querySelector('.unit-block.active');
+  if (!activeUnit) return;
+  const archetypes = activeUnit.querySelectorAll('.archetype-card').length;
+  const repPicks = activeUnit.querySelectorAll('.q-row.rep').length;
+  let marks = 0;
+  activeUnit.querySelectorAll('.q-row.rep .q-marks').forEach(m => {
+    marks += parseInt(m.textContent) || 0;
+  });
+  document.getElementById('statTotal').textContent = archetypes;
+  document.getElementById('statRep').textContent = repPicks;
+  document.getElementById('statMarks').textContent = marks + 'm';
+}
+
+// Auto-open rep-only archetypes on load
+document.querySelectorAll('.arch-body').forEach(b => b.classList.remove('open'));
+updateStats();
+</script>
+</body>
+</html>
