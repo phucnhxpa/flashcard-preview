@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P1 Jan 2020 Q10 — Cubic Curve and Transformations</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P1 · Jan 2020 Q10 · 8m</div>
+  <h1>Jan 2020 Q10 — Sketch cubic, find transformed roots and g(x) [8m]</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The curve $C_1$ has equation $y = f(x)$, where</p><p>$$f(x) = (4x - 3)(x - 5)^2$$</p><p><strong>(a)</strong> Sketch $C_1$ showing the coordinates of any point where the curve touches or crosses the coordinate axes. [3]</p><p><strong>(b)</strong> Hence or otherwise:</p><p><strong>(i)</strong> find the values of $x$ for which $f\!\left(\tfrac{x}{4}\right) = 0$</p><p><strong>(ii)</strong> find the value of the constant $p$ such that the curve with equation $y = f(x) + p$ passes through the origin. [2]</p><p>A second curve $C_2$ has equation $y = g(x)$, where $g(x) = f(x + 1)$.</p><p><strong>(c)</strong> <strong>(i)</strong> Find, in simplest form, $g(x)$. You may leave your answer in a factorised form.</p><p><strong>(ii)</strong> Hence, or otherwise, find the $y$-intercept of curve $C_2$. [3]</p>
+    <div class="q-diagram"><div style="max-width:360px;margin:0 auto 8px;"><svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" font-style="italic"><defs>
+  <marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#1d1d1f"/></marker>
+  <marker id="arr-g" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#8e8e93"/></marker>
+</defs>
+  <line x1="30" y1="120" x2="320" y2="120" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="60" y1="210" x2="60" y2="20" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="322" y="124" font-size="12">x</text>
+  <text x="63" y="18" font-size="12">y</text>
+  <!-- Original cubic f(x) -->
+  <path d="M 40 165 Q 80 170 100 120 Q 120 70 160 80 Q 200 90 230 120 Q 250 145 270 175" fill="none" stroke="#8e8e93" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="272" y="172" font-size="12" fill="#8e8e93">y=f(x)</text>
+  <!-- Transformed cubic (shifted right 2, up 30) -->
+  <path d="M 80 135 Q 120 140 140 90 Q 160 40 200 50 Q 240 60 270 90 Q 290 115 310 145" fill="none" stroke="#1d1d1f" stroke-width="2"/>
+  <text x="310" y="142" font-size="12">y=g(x)</text>
+  <!-- Key point transformation -->
+  <circle cx="100" cy="120" r="3" fill="#8e8e93"/>
+  <circle cx="140" cy="90" r="3" fill="#1d1d1f"/>
+  <line x1="100" y1="120" x2="137" y2="91" stroke="#1d1d1f" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-g)"/>
+  <text x="50" y="210" font-size="11" fill="#8e8e93">Key points: (x,y) → (x+a, y+b) under translation</text>
+</svg></div></div>
+    <p class="q-marks">[8 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">(a) — Sketch C₁ <span class="pmarks">[3 marks] · 1 step</span></h2>
+  <div class="given">$f(x) = (4x - 3)(x - 5)^2$</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Find x-intercepts, y-intercept, and shape</span></span>
+    <span class="step-marks">B1 B1 B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Factorised form reveals roots directly. Single factor → crosses; squared factor → touches.</p><p><strong>x-intercepts</strong> (set $f(x) = 0$):</p><p>$$4x - 3 = 0 \implies x = \frac{3}{4} \quad \text{(crosses)}$$</p><p>$$(x - 5)^2 = 0 \implies x = 5 \quad \text{(touches — even multiplicity)}$$</p><p><strong>y-intercept</strong> ($x = 0$):</p><p>$$f(0) = (0 - 3)(0 - 5)^2 = (-3)(25) = -75$$</p><p><strong>Shape:</strong> Leading term $4x \cdot x^2 = 4x^3$ (positive cubic): rises from bottom-left to top-right.</p><div class="why"><strong>Watch:</strong> Do not confuse the actual function $(4x-3)(x-5)^2$ with a simple cubic $x^3$. The y-intercept is $(0, -75)$ — a large negative value. The curve crosses at $(\tfrac{3}{4}, 0)$ and <em>touches</em> (bounces off) at $(5, 0)$.</div>
+    
+    <div class="step-result">$\boxed{\text{Crosses at } (\tfrac{3}{4}, 0) \text{ and } (0, -75); \text{ touches at } (5, 0)}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(b)(i) — Values of x where f(x/4) = 0 <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given">Roots of $f(x) = 0$ are $x = \tfrac{3}{4}$ and $x = 5$</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Set x/4 equal to each root of f</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $f\!\left(\tfrac{x}{4}\right) = 0$ when $\tfrac{x}{4}$ equals a root of $f$. This is a horizontal stretch by factor 4.</p><p>$$\frac{x}{4} = \frac{3}{4} \implies x = 3$$</p><p>$$\frac{x}{4} = 5 \implies x = 20$$</p><div class="why"><strong>Watch:</strong> Each root is multiplied by 4, not divided. $y = f(ax)$ stretches horizontally by $\tfrac{1}{a}$, so $y = f(\tfrac{x}{4})$ stretches by factor 4.</div>
+    
+    <div class="step-result">$\boxed{x = 3 \text{ and } x = 20}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(b)(ii) — Find p such that y = f(x) + p passes through origin <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given">$f(0) = -75$</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Substitute (0,0) into y = f(x) + p</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>The curve $y = f(x) + p$ passes through origin means $(0, 0)$ is on it:</p><p>$$0 = f(0) + p = -75 + p \implies p = 75$$</p><p>This is a vertical translation of 75 units upward.</p>
+    
+    <div class="step-result">$\boxed{p = 75}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(c)(i) — Find g(x) = f(x + 1) in factorised form <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given">$f(x) = (4x - 3)(x - 5)^2$</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Replace x with (x + 1) and simplify each factor</span></span>
+    <span class="step-marks">M1A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Horizontal translation 1 unit left. Replace every $x$ in $f(x)$ with $(x + 1)$.</p><p>$$g(x) = f(x + 1) = \bigl(4(x+1) - 3\bigr)\bigl((x+1) - 5\bigr)^2$$</p><p>Simplify each bracket:</p><p>$$4(x+1) - 3 = 4x + 4 - 3 = 4x + 1$$</p><p>$$(x + 1) - 5 = x - 4$$</p><p>$$g(x) = (4x + 1)(x - 4)^2$$</p><div class="why"><strong>Watch:</strong> Do not expand unnecessarily — leaving in factorised form is explicitly allowed and preferred.</div>
+    
+    <div class="step-result">$\boxed{g(x) = (4x + 1)(x - 4)^2}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(c)(ii) — Find y-intercept of C₂ <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given">$g(x) = (4x + 1)(x - 4)^2$</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Substitute x = 0 into g(x)</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>$$g(0) = (4(0) + 1)(0 - 4)^2 = (1)(16) = 16$$</p><p>The $y$-intercept of $C_2$ is $(0, 16)$.</p>
+    
+    <div class="step-result">$\boxed{y\text{-intercept} = 16}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;">
+  <button id="export-btn" onclick="exportCard()" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ Export PNG</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function exportCard() {
+  const btn = document.getElementById('export-btn-wrap');
+  btn.style.display = 'none';
+  html2canvas(document.querySelector('.card') || document.body, {scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(canvas => {
+    const a = document.createElement('a');
+    a.download = (document.title||'card')+'.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    btn.style.display='block';
+    document.getElementById('export-btn').textContent='✓ Saved';
+    setTimeout(()=>{document.getElementById('export-btn').textContent='⬇ Export PNG';},2000);
+  }).catch(()=>{btn.style.display='block';});
+}
+</script>
+</body>
+</html>

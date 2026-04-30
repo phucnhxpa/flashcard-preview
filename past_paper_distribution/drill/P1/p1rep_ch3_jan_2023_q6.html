@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sector Area and Perimeter — Composite Shape</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P1 · p1rep_ch3_jan_2023_q6</div>
+  <h1>Sector Area and Perimeter — Composite Shape</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>See original question paper.</p>
+    
+    <p class="q-marks">[0 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">a <span class="pmarks">[4 marks] · 4 steps</span></h2>
+  <div class="given">Sector OAB with radius r and angle θ. The perimeter of the sector equals 3.2r.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">Write the formula for the perimeter of a sector</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> The perimeter of a sector consists of two radii plus the arc length.</p><p><strong>Formula (Arc Length):</strong> $s = r\theta$</p><p>Perimeter $= r + r + r\theta = 2r + r\theta$</p>
+    
+    <div class="step-result">$\text{Perimeter} = 2r + r\theta$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>$\text{Perimeter} = 2r + r\theta$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">Set up the equation using the given perimeter</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Substitute the given perimeter value and solve for θ.</p><p>$2r + r\theta = 3.2r$</p>
+    
+    <div class="step-result">$2r + r\theta = 3.2r$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>$2r + r\theta = 3.2r$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">Factor out r and simplify</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Divide both sides by r (since r > 0).</p><p>$r(2 + \theta) = 3.2r$</p><p>$2 + \theta = 3.2$</p><div class="why">Common error: forgetting that r ≠ 0 is required to divide by r, but this is given implicitly as r is a radius.</div>
+    
+    <div class="step-result">$2 + \theta = 3.2$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 3:</span>$2 + \theta = 3.2$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">Solve for θ</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Subtract 2 from both sides.</p><p>$\theta = 3.2 - 2$</p><p>$\theta = 1.2$</p>
+    
+    <div class="step-result">$\boxed{\theta = 1.2 \text{ radians}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">b <span class="pmarks">[6 marks] · 6 steps</span></h2>
+  <div class="given">The radius r = 5 cm and angle θ = 1.2 radians.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/6</span><span class="step-goal">Write the formula for the area of a sector</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Use the sector area formula with angle in radians.</p><p><strong>Formula (Sector Area):</strong> $A = \frac{1}{2}r^2\theta$</p>
+    
+    <div class="step-result">$A = \frac{1}{2}r^2\theta$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>$A = \frac{1}{2}r^2\theta$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/6</span><span class="step-goal">Substitute the values to find the area</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Substitute r = 5 and θ = 1.2 into the formula.</p><p>$A = \frac{1}{2} \times 5^2 \times 1.2$</p><p>$A = \frac{1}{2} \times 25 \times 1.2$</p><p>$A = 12.5 \times 1.2$</p>
+    
+    <div class="step-result">$A = 15$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>$A = 15$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/6</span><span class="step-goal">State the area with correct units</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Include appropriate units for area.</p><div class="why">Always include units in your final answer — marks are often lost for missing units.</div>
+    
+    <div class="step-result">$\boxed{\text{Area} = 15 \text{ cm}^2}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/6</span><span class="step-goal">Calculate the arc length</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Use the arc length formula.</p><p><strong>Formula (Arc Length):</strong> $s = r\theta$</p><p>$s = 5 \times 1.2$</p>
+    
+    <div class="step-result">$s = 6 \text{ cm}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 4:</span>$s = 6 \text{ cm}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 5/6</span><span class="step-goal">Calculate the perimeter of the sector</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Add the arc length and two radii.</p><p>Perimeter $= 2r + s$</p><p>Perimeter $= 2(5) + 6$</p><p>Perimeter $= 10 + 6$</p>
+    
+    <div class="step-result">$\text{Perimeter} = 16$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 5:</span>$\text{Perimeter} = 16$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 6/6</span><span class="step-goal">State the perimeter with correct units</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Present the final answer with units.</p>
+    
+    <div class="step-result">$\boxed{\text{Perimeter} = 16 \text{ cm}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;">
+  <button id="export-btn" onclick="exportCard()" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ Export PNG</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function exportCard() {
+  const btn = document.getElementById('export-btn-wrap');
+  btn.style.display = 'none';
+  html2canvas(document.querySelector('.card') || document.body, {scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(canvas => {
+    const a = document.createElement('a');
+    a.download = (document.title||'card')+'.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    btn.style.display='block';
+    document.getElementById('export-btn').textContent='✓ Saved';
+    setTimeout(()=>{document.getElementById('export-btn').textContent='⬇ Export PNG';},2000);
+  }).catch(()=>{btn.style.display='block';});
+}
+</script>
+</body>
+</html>
