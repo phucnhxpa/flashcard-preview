@@ -2,217 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Algebraic modelling fit constants</title>
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']],
-    processEscapes: true
-  },
-  svg: { fontCache: 'global' }
-};
-</script>
+<title>Tree Height Model — Jan 2021 Q2</title>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'global'}};</script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 * { box-sizing: border-box; }
-:root {
-  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
-  --line: #d2d2d7; --soft: #f5f5f7;
-  --work-bg: #fafafa; --work-line: #c7c7cc;
-}
-html, body { margin: 0; padding: 0; background: #f0f0f2; }
-body {
-  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-  padding: 28px 24px 36px;
-}
-.card {
-  max-width: 1180px;
-  margin: 0 auto;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 26px 30px 28px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
-}
-.meta {
-  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 6px;
-}
-h1 {
-  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
-  margin: 0 0 16px; letter-spacing: -0.01em;
-}
-.q-header {
-  background: var(--soft); border-radius: 12px;
-  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
-}
-.q-header .label {
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
-}
-.q-header p { margin: 4px 0; }
-.q-diagram {
-  display: flex; justify-content: center; margin: 10px 0 4px;
-  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
-}
-.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
-.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
-
-/* multi-column flow for steps */
-.parts { /* container for one or more parts */ }
-.part {
-  margin-bottom: 18px;
-}
-.part-h {
-  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
-  margin: 0 0 10px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--line);
-}
-.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
-.given {
-  background: #fff; border-left: 2.5px solid var(--ink);
-  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
-}
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
-  gap: 12px;
-  align-items: start;
-}
-/* orphan last step (odd child in 2-col grid) spans full width */
-.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.step-wrapper {
-  min-width: 0;  /* allow grid items to shrink below content width */
-}
-@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
-.step {
-  border: 1px solid var(--work-line);
-  background: var(--work-bg);
-  border-radius: 10px;
-  padding: 12px 14px 11px;
-  margin: 0;
-}
-.step-top {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
-  border-bottom: 1px solid var(--line);
-}
-.step-tag {
-  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
-  display: flex; align-items: flex-start; gap: 7px; flex: 1;
-}
-.step-num {
-  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
-  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
-  margin-top: 1px;
-}
-.step-marks {
-  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
-  letter-spacing: .04em; margin-top: 3px;
-}
-.step-body { font-size: 13px; line-height: 1.55; }
-.step-body p { margin: 5px 0; }
-.step-body .why {
-  background: #fff; border-left: 2px solid var(--ink);
-  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
-  border-radius: 0 5px 5px 0;
-}
-.step-math { margin: 7px 0; font-size: 13px; }
-.step-math .math { display: block; }
-.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
-.step-diagram svg { max-width: 100%; height: auto; }
-.step-result {
-  margin-top: 8px; padding: 6px 10px; background: #fff;
-  border: 1px dashed var(--work-line); border-radius: 6px;
-  font-size: 12.5px; font-weight: 500;
-}
-.step-result strong { font-weight: 600; }
-.carry-in {
-  font-size: 0.78em;
-  color: #6b7280;
-  margin: 0 0 4px 0;
-  padding: 0;
-  background: none;
-  border: none;
-}
-.carry-label {
-  font-weight: 600;
-  color: #9ca3af;
-  margin-right: 4px;
-  font-size: 1em;
-  text-transform: none;
-  letter-spacing: 0;
-  display: inline;
-}
-.step-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
-}
+:root { --bg:#ffffff;--ink:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--soft:#f5f5f7;--work-bg:#fafafa;--work-line:#c7c7cc; }
+html,body{margin:0;padding:0;background:#f0f0f2;}
+body{font:14px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:28px 24px 36px;}
+.card{max-width:1180px;margin:0 auto;background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:26px 30px 28px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.meta{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+h1{font:600 21px/1.3 -apple-system,"SF Pro Display",system-ui,sans-serif;margin:0 0 16px;letter-spacing:-0.01em;}
+.q-header{background:var(--soft);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13.5px;line-height:1.55;}
+.q-header .label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;}
+.q-header p{margin:4px 0;}
+.q-marks{font-weight:600;color:var(--ink);margin-top:8px;font-size:12.5px;}
+.parts{}
+.part{margin-bottom:18px;}
+.part-h{font:600 14.5px/1.3 -apple-system,system-ui,sans-serif;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.part-h .pmarks{float:right;font-weight:500;color:var(--muted);font-size:12.5px;}
+.given{background:#fff;border-left:2.5px solid var(--ink);padding:6px 10px;margin:0 0 10px;font-size:12.5px;border-radius:0 6px 6px 0;}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;align-items:start;}
+.steps>.step-wrapper:last-child:nth-child(odd){grid-column:1/-1;}
+.step-wrapper{min-width:0;display:flex;flex-direction:column;gap:0;}
+@media(max-width:740px){.steps{grid-template-columns:1fr;}}
+.step{border:1px solid var(--work-line);background:var(--work-bg);border-radius:10px;padding:12px 14px 11px;margin:0;}
+.step-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--line);}
+.step-tag{font:600 12.5px/1.35 -apple-system,system-ui,sans-serif;display:flex;align-items:flex-start;gap:7px;flex:1;}
+.step-num{background:var(--ink);color:#fff;padding:3px 7px;border-radius:5px;letter-spacing:.04em;font-size:10.5px;flex-shrink:0;line-height:1.2;margin-top:1px;}
+.step-marks{font-size:10.5px;color:var(--muted);font-weight:500;flex-shrink:0;letter-spacing:.04em;margin-top:3px;}
+.step-body{font-size:13px;line-height:1.55;}
+.step-body p{margin:5px 0;}
+.step-result{margin-top:8px;padding:6px 10px;background:#fff;border:1px dashed var(--work-line);border-radius:6px;font-size:12.5px;font-weight:500;}
+.carry-in{font-size:0.78em;color:#6b7280;margin:0 0 4px 0;padding:0;background:none;border:none;}
+.carry-label{font-weight:600;color:#9ca3af;margin-right:4px;font-size:1em;text-transform:none;letter-spacing:0;display:inline;}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="meta">P1 · p1rep_ch1_jan_2021_q2</div>
-  <h1>Algebraic Modelling: Fitting Exponential Model Constants</h1>
+  <h1>Tree Height Model — Simultaneous Equations</h1>
   <div class="q-header">
-    <span class="label">Question</span>
-    <p>A population P (in millions) is modelled by P = a·b<sup>t</sup> + c, where t is time in years. As t → ∞, P → 5.5. When t = 0, P = 10. When t = 1, P = 7. Find the values of a, b and c.</p>
-    
-    <p class="q-marks">[[6] marks]</p>
+    <span class="label">Question — Jan 2021 Q2</span>
+    <p>A tree was planted. Exactly 3 years after it was planted, the height of the tree was 2 m. Exactly 5 years after it was planted, the height of the tree was 2.4 m.</p>
+    <p>Given that the height, $H$ metres, of the tree, $t$ years after it was planted, can be modelled by the equation $H^3 = pt^2 + q$, where $p$ and $q$ are constants,</p>
+    <p><strong>(a)</strong> find, to 3 significant figures where necessary, the value of $p$ and the value of $q$. <em>[4]</em></p>
+    <p>Exactly $T$ years after the tree was planted, its height was 5 m.</p>
+    <p><strong>(b)</strong> Find the value of $T$ according to the model, giving your answer to one decimal place. <em>[2]</em></p>
+    <p class="q-marks">[6 marks total]</p>
   </div>
   <div class="parts">
-    
+
 <div class="part">
-  <h2 class="part-h">Solution <span class="pmarks">[6 marks] · 3 steps</span></h2>
-  <div class="given">P = a·b^t + c</div>
+  <h2 class="part-h">a <span class="pmarks">[4 marks] · 4 steps</span></h2>
+  <div class="given">$H^3 = pt^2 + q$; when $t=3, H=2$; when $t=5, H=2.4$</div>
   <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
-    <span class="step-marks">M1 A1</span>
-  </div>
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span><span class="step-marks">M1</span></div>
   <div class="step-body">
-    <p><strong>Strategy:</strong> As t → ∞, if |b| < 1 then b^t → 0, so P → c</p><p><strong>Formula:</strong> $\lim_{t \to \infty} P = c$</p><p>As t → ∞, P → 5.5, therefore c = 5.5</p><div class="why">The limiting value gives c directly because the exponential term decays to zero</div>
-    
-    <div class="step-result">$\boxed{c = 5.5}$</div>
+    <p>Substitute both data points into $H^3 = pt^2 + q$:</p>
+    <p>At $t=3, H=2$: $\quad 2^3 = p(3^2) + q \Rightarrow 8 = 9p + q$</p>
+    <p>At $t=5, H=2.4$: $\quad (2.4)^3 = p(5^2) + q \Rightarrow 13.824 = 25p + q$</p>
+    <div class="step-result">Two equations: $9p + q = 8$ and $25p + q = 13.824$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>c = 5.5</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
-    <span class="step-marks">M1 A1</span>
-  </div>
+</div></div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>subtract to eliminate $q$</div><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span><span class="step-marks">dM1</span></div>
   <div class="step-body">
-    <p><strong>Strategy:</strong> Substitute t = 0 and use b^0 = 1</p><p><strong>Formula:</strong> $P(0) = a \cdot b^0 + c = a + c$</p><p>When t = 0: P = 10</p><p>a + 5.5 = 10</p><p>a = 10 − 5.5 = 4.5</p><div class="why">Any base raised to power 0 equals 1, eliminating b from this equation</div>
-    
-    <div class="step-result">$\boxed{a = 4.5}$</div>
+    <p>Subtract equation 1 from equation 2:</p>
+    <p>$16p = 13.824 - 8 = 5.824$</p>
+    <p>$p = \dfrac{5.824}{16} = 0.364$</p>
+    <div class="step-result">$p = 0.364$ (3 s.f.)</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>a = 4.5, c = 5.5</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
-    <span class="step-marks">M1 A1</span>
-  </div>
+</div></div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>find $q$</div><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 3</span></span><span class="step-marks">A1</span></div>
   <div class="step-body">
-    <p><strong>Strategy:</strong> Substitute t = 1 with known values of a and c</p><p><strong>Formula:</strong> $P(1) = a \cdot b^1 + c = ab + c$</p><p>When t = 1: P = 7</p><p>4.5b + 5.5 = 7</p><p>4.5b = 1.5</p><p>b = 1.5 ÷ 4.5 = 1/3</p><div class="why">Since b = 1/3 < 1, this confirms our assumption that b^t → 0 as t → ∞</div>
-    
-    <div class="step-result">$\boxed{b = \frac{1}{3}}$</div>
+    <p>Substitute $p = 0.364$ into $9p + q = 8$:</p>
+    <p>$q = 8 - 9(0.364) = 8 - 3.276 = 4.724$</p>
+    <div class="step-result">$q = 4.72$ (3 s.f.)</div>
   </div>
-</div>
-</div>
+</div></div>
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 4 (part b)</span></span><span class="step-marks">M1 A1</span></div>
+  <div class="step-body">
+    <p>When $H = 5$: $5^3 = 0.364T^2 + 4.724$</p>
+    <p>$125 = 0.364T^2 + 4.724$</p>
+    <p>$T^2 = \dfrac{120.276}{0.364} = 330.43...$</p>
+    <p>$T = \sqrt{330.43} \approx 18.178...$</p>
+    <div class="step-result">$T = 18.2$ years (1 d.p.)</div>
+  </div>
+</div></div>
   </div>
 </div>
 
   </div>
 </div>
 <div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button onclick="window.open('p1rep_ch1_jan_2021_q2.png','_blank')" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:system-ui;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">&#8595; Export PNG</button></div>
-
 </body>
 </html>

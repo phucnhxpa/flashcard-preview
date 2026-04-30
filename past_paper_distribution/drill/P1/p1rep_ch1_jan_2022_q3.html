@@ -2,307 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>P1 Jan 2022 Q3 — Surd Manipulation</title>
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']],
-    processEscapes: true
-  },
-  svg: { fontCache: 'global' }
-};
-</script>
+<title>Surds — Expanding and Solving — Jan 2022 Q3</title>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'global'}};</script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 * { box-sizing: border-box; }
-:root {
-  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
-  --line: #d2d2d7; --soft: #f5f5f7;
-  --work-bg: #fafafa; --work-line: #c7c7cc;
-}
-html, body { margin: 0; padding: 0; background: #f0f0f2; }
-body {
-  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-  padding: 28px 24px 36px;
-}
-.card {
-  max-width: 1180px;
-  margin: 0 auto;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 26px 30px 28px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
-}
-.meta {
-  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 6px;
-}
-h1 {
-  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
-  margin: 0 0 16px; letter-spacing: -0.01em;
-}
-.q-header {
-  background: var(--soft); border-radius: 12px;
-  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
-}
-.q-header .label {
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
-}
-.q-header p { margin: 4px 0; }
-.q-diagram {
-  display: flex; justify-content: center; margin: 10px 0 4px;
-  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
-}
-.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
-.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
-
-/* multi-column flow for steps */
-.parts { /* container for one or more parts */ }
-.part {
-  margin-bottom: 18px;
-}
-.part-h {
-  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
-  margin: 0 0 10px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--line);
-}
-.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
-.given {
-  background: #fff; border-left: 2.5px solid var(--ink);
-  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
-}
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
-  gap: 12px;
-  align-items: start;
-}
-/* orphan last step (odd child in 2-col grid) spans full width */
-.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.step-wrapper {
-  min-width: 0;  /* allow grid items to shrink below content width */
-}
-@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
-.step {
-  border: 1px solid var(--work-line);
-  background: var(--work-bg);
-  border-radius: 10px;
-  padding: 12px 14px 11px;
-  margin: 0;
-}
-.step-top {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
-  border-bottom: 1px solid var(--line);
-}
-.step-tag {
-  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
-  display: flex; align-items: flex-start; gap: 7px; flex: 1;
-}
-.step-num {
-  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
-  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
-  margin-top: 1px;
-}
-.step-marks {
-  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
-  letter-spacing: .04em; margin-top: 3px;
-}
-.step-body { font-size: 13px; line-height: 1.55; }
-.step-body p { margin: 5px 0; }
-.step-body .why {
-  background: #fff; border-left: 2px solid var(--ink);
-  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
-  border-radius: 0 5px 5px 0;
-}
-.step-math { margin: 7px 0; font-size: 13px; }
-.step-math .math { display: block; }
-.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
-.step-diagram svg { max-width: 100%; height: auto; }
-.step-result {
-  margin-top: 8px; padding: 6px 10px; background: #fff;
-  border: 1px dashed var(--work-line); border-radius: 6px;
-  font-size: 12.5px; font-weight: 500;
-}
-.step-result strong { font-weight: 600; }
-.carry-in {
-  font-size: 0.78em;
-  color: #6b7280;
-  margin: 0 0 4px 0;
-  padding: 0;
-  background: none;
-  border: none;
-}
-.carry-label {
-  font-weight: 600;
-  color: #9ca3af;
-  margin-right: 4px;
-  font-size: 1em;
-  text-transform: none;
-  letter-spacing: 0;
-  display: inline;
-}
-.step-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
-}
+:root { --bg:#ffffff;--ink:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--soft:#f5f5f7;--work-bg:#fafafa;--work-line:#c7c7cc; }
+html,body{margin:0;padding:0;background:#f0f0f2;}
+body{font:14px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:28px 24px 36px;}
+.card{max-width:1180px;margin:0 auto;background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:26px 30px 28px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.meta{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+h1{font:600 21px/1.3 -apple-system,"SF Pro Display",system-ui,sans-serif;margin:0 0 16px;letter-spacing:-0.01em;}
+.q-header{background:var(--soft);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13.5px;line-height:1.55;}
+.q-header .label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;font-weight:600;}
+.q-header p{margin:4px 0;}
+.q-marks{font-weight:600;color:var(--ink);margin-top:8px;font-size:12.5px;}
+.parts{} .part{margin-bottom:18px;}
+.part-h{font:600 14.5px/1.3 -apple-system,system-ui,sans-serif;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.part-h .pmarks{float:right;font-weight:500;color:var(--muted);font-size:12.5px;}
+.given{background:#fff;border-left:2.5px solid var(--ink);padding:6px 10px;margin:0 0 10px;font-size:12.5px;border-radius:0 6px 6px 0;}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;align-items:start;}
+.steps>.step-wrapper:last-child:nth-child(odd){grid-column:1/-1;}
+.step-wrapper{min-width:0;display:flex;flex-direction:column;gap:0;}
+@media(max-width:740px){.steps{grid-template-columns:1fr;}}
+.step{border:1px solid var(--work-line);background:var(--work-bg);border-radius:10px;padding:12px 14px 11px;margin:0;}
+.step-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--line);}
+.step-tag{font:600 12.5px/1.35 -apple-system,system-ui,sans-serif;display:flex;align-items:flex-start;gap:7px;flex:1;}
+.step-num{background:var(--ink);color:#fff;padding:3px 7px;border-radius:5px;letter-spacing:.04em;font-size:10.5px;flex-shrink:0;line-height:1.2;margin-top:1px;}
+.step-marks{font-size:10.5px;color:var(--muted);font-weight:500;flex-shrink:0;letter-spacing:.04em;margin-top:3px;}
+.step-body{font-size:13px;line-height:1.55;} .step-body p{margin:5px 0;}
+.step-result{margin-top:8px;padding:6px 10px;background:#fff;border:1px dashed var(--work-line);border-radius:6px;font-size:12.5px;font-weight:500;}
+.carry-in{font-size:0.78em;color:#6b7280;margin:0 0 4px 0;padding:0;background:none;border:none;}
+.carry-label{font-weight:600;color:#9ca3af;margin-right:4px;font-size:1em;text-transform:none;letter-spacing:0;display:inline;}
 </style>
 </head>
 <body>
-<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button onclick="window.open('p1rep_ch1_jan_2022_q3.png','_blank')" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:system-ui;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">&#8595; Export PNG</button></div>
 <div class="card">
-  <div class="meta">P1 (WMA11/01) · Q3 · Jan 2022</div>
-  <h1>Q3 — Expand f(x) in integer form; solve surd equation</h1>
+  <div class="meta">P1 · p1rep_ch1_jan_2022_q3</div>
+  <h1>Surds — Expanding and Solving Linear Equations</h1>
   <div class="q-header">
-    <span class="label">Question</span>
-    <p>See original paper.</p>
-    
-    <p class="q-marks">[7 marks]</p>
+    <span class="label">Question — Jan 2022 Q3 (show all stages; no calculator)</span>
+    <p><strong>(i)</strong> $f(x) = (x + \sqrt{2})^2 + (3x - 5\sqrt{8})^2$</p>
+    <p>Express $f(x)$ in the form $ax^2 + bx\sqrt{2} + c$ where $a$, $b$ and $c$ are integers to be found. <em>[3]</em></p>
+    <p><strong>(ii)</strong> Solve the equation $3(4y - 3\sqrt{3}) = 5y + \sqrt{3}$, giving your answer in the form $p + q\sqrt{3}$ where $p$ and $q$ are simplified fractions to be found. <em>[4]</em></p>
+    <p class="q-marks">[7 marks total]</p>
   </div>
   <div class="parts">
-    
+
 <div class="part">
-  <h2 class="part-h">(i) <span class="pmarks">[3 marks] · 4 steps</span></h2>
-  
+  <h2 class="part-h">i <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">$f(x) = (x+\sqrt{2})^2 + (3x - 5\sqrt{8})^2$. Note $\sqrt{8} = 2\sqrt{2}$.</div>
   <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal"></span></span>
-    
-  </div>
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span><span class="step-marks">M1</span></div>
   <div class="step-body">
-    \(5\sqrt{8} = 5\sqrt{4 \times 2} = 5 \times 2\sqrt{2} = 10\sqrt{2}\)
-
-<div class="why">⚠️ Always simplify surds first before expanding — this prevents errors when combining like terms later.</div>
-    
-    <div class="step-result">\(5\sqrt{8} = 10\sqrt{2}\)</div>
+    <p>Simplify: $5\sqrt{8} = 5 \cdot 2\sqrt{2} = 10\sqrt{2}$</p>
+    <p>Expand $(x+\sqrt{2})^2 = x^2 + 2x\sqrt{2} + 2$</p>
+    <div class="step-result">$(x+\sqrt{2})^2 = x^2 + 2x\sqrt{2} + 2$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>\(5\sqrt{8} = 10\sqrt{2}\)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal"></span></span>
-    
-  </div>
+</div></div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>expand second bracket</div><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span><span class="step-marks">M1</span></div>
   <div class="step-body">
-    \((x + 2)^2 = x^2 + 2(x)(2) + 2^2 = x^2 + 4x + 4\)
-
-<div class="why">⚠️ Don't forget the middle term — a common error is writing \(x^2 + 4\) only.</div>
-    
-    <div class="step-result">\((x + 2)^2 = x^2 + 4x + 4\)</div>
+    <p>Expand $(3x - 10\sqrt{2})^2 = 9x^2 - 60x\sqrt{2} + 200$</p>
+    <div class="step-result">$(3x-10\sqrt{2})^2 = 9x^2 - 60x\sqrt{2} + 200$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>\((x + 2)^2 = x^2 + 4x + 4\)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal"></span></span>
-    
-  </div>
+</div></div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>combine</div><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 3</span></span><span class="step-marks">A1</span></div>
   <div class="step-body">
-    \((3x - 10\sqrt{2})^2 = (3x)^2 - 2(3x)(10\sqrt{2}) + (10\sqrt{2})^2\)
-
-\(= 9x^2 - 60\sqrt{2}\,x + 100 \times 2\)
-
-\(= 9x^2 - 60\sqrt{2}\,x + 200\)
-
-<div class="why">⚠️ Remember \((\sqrt{2})^2 = 2\), so \((10\sqrt{2})^2 = 100 \times 2 = 200\), not \(100\sqrt{2}\).</div>
-    
-    <div class="step-result">\((3x - 10\sqrt{2})^2 = 9x^2 - 60\sqrt{2}\,x + 200\)</div>
+    <p>$f(x) = (x^2 + 2x\sqrt{2} + 2) + (9x^2 - 60x\sqrt{2} + 200)$</p>
+    <p>$= 10x^2 - 58x\sqrt{2} + 202$</p>
+    <div class="step-result">$f(x) = 10x^2 - 58x\sqrt{2} + 202$, so $a=10, b=-58, c=202$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 3:</span>\((x + 2)^2 = x^2 + 4x + 4\);  \((3x - 10\sqrt{2})^2 = 9x^2 - 60\sqrt{2}\,x + 200\)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal"></span></span>
-    
-  </div>
-  <div class="step-body">
-    \(f(x) = (x^2 + 4x + 4) + (9x^2 - 60\sqrt{2}\,x + 200)\)
-
-\(= 10x^2 + (4 - 60\sqrt{2})x + 204\)
-
-For integer coefficients, extract the rational part of each coefficient:
-- \(a = 10\) (coefficient of \(x^2\))
-- \(b = 4\) (integer part of coefficient of \(x\))
-- \(c = 204\) (constant term)
-
-<div class="why">⚠️ The question specifies integer values — the surd term \(-60\sqrt{2}\,x\) indicates this question may have a transcription issue, but exam technique: state the integer coefficients as required.</div>
-    
-    <div class="step-result">\(\boxed{a = 10,\; b = 4,\; c = 204}\)</div>
-  </div>
-</div>
-</div>
+</div></div>
   </div>
 </div>
 
-  
 <div class="part">
-  <h2 class="part-h">(ii) <span class="pmarks">[4 marks] · 3 steps</span></h2>
-  
+  <h2 class="part-h">ii <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given">Solve $3(4y - 3\sqrt{3}) = 5y + \sqrt{3}$</div>
   <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
-    
-  </div>
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 4</span></span><span class="step-marks">M1</span></div>
   <div class="step-body">
-    \(3(4y - 3\sqrt{3}) = 12y - 9\sqrt{3}\)
-
-So the equation becomes: \(12y - 9\sqrt{3} = 5y + 3\)
-
-<div class="why">⚠️ Distribute carefully — the surd \(\sqrt{3}\) stays as \(\sqrt{3}\), giving \(-9\sqrt{3}\).</div>
-    
-    <div class="step-result">\(12y - 9\sqrt{3} = 5y + 3\)</div>
+    <p>Expand: $12y - 9\sqrt{3} = 5y + \sqrt{3}$</p>
+    <p>Collect $y$ terms: $12y - 5y = \sqrt{3} + 9\sqrt{3}$</p>
+    <div class="step-result">$7y = 10\sqrt{3}$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>\(12y - 9\sqrt{3} = 5y + 3\)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
-    
-  </div>
+</div></div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 4:</span>divide and express in form $p + q\sqrt{3}$</div><div class="step">
+  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 5</span></span><span class="step-marks">A1</span></div>
   <div class="step-body">
-    \(12y - 5y = 3 + 9\sqrt{3}\)
-
-\(7y = 3 + 9\sqrt{3}\)
-
-<div class="why">⚠️ Move the surd term to the RHS with the rational constant — keep rational and irrational parts together.</div>
-    
-    <div class="step-result">\(7y = 3 + 9\sqrt{3}\)</div>
+    <p>$y = \dfrac{10\sqrt{3}}{7} = 0 + \dfrac{10}{7}\sqrt{3}$</p>
+    <div class="step-result">$y = 0 + \dfrac{10}{7}\sqrt{3}$, so $p = 0,\; q = \dfrac{10}{7}$</div>
   </div>
-</div>
-</div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>\(7y = 3 + 9\sqrt{3}\)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
-    
-  </div>
-  <div class="step-body">
-    \(y = \frac{3 + 9\sqrt{3}}{7} = \frac{3}{7} + \frac{9}{7}\sqrt{3}\)
-
-Comparing with \(p + q\sqrt{3}\):
-- \(p = \frac{3}{7}\)
-- \(q = \frac{9}{7}\)
-
-Both fractions are already in simplest form (3 and 7 are coprime; 9 and 7 are coprime).
-
-<div class="why">⚠️ Check simplification: \(\gcd(3,7) = 1\) and \(\gcd(9,7) = 1\), so no further reduction needed.</div>
-    
-    <div class="step-result">\(\boxed{p = \frac{3}{7},\; q = \frac{9}{7}}\)</div>
-  </div>
-</div>
-</div>
+</div></div>
   </div>
 </div>
 
   </div>
 </div>
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button onclick="window.open('p1rep_ch1_jan_2022_q3.png','_blank')" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:system-ui;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">&#8595; Export PNG</button></div>
 </body>
 </html>
