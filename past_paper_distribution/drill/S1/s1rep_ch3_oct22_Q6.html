@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S1 Probability — Conditional Probability with Tree Diagrams</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: #0071e3; color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error {
+  background: #fff5f5; border-left: 3px solid #c72c2c;
+  padding: 6px 10px; margin: 7px 0; font-size: 12px; color: #5b1212;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error strong { color: #a31515; }
+.step-body .tutor-error .label {
+  display: inline-block; background: #c72c2c; color: #fff;
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; margin-right: 5px;
+  font-weight: 600;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">S1 (WST01/01) · Q6 · October 2022</div>
+  <h1>Conditional probability: Weather and cycling to work</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Each day Aamir travels to work. When it rains he travels to work by bus. When it does not rain he cycles to work or he travels to work by bus.</p><p>The probability that it rains on any given day is $0.3$</p><p>When it does not rain, the probability that Aamir cycles to work is $0.6$</p><p>(a) Draw a tree diagram to represent this information.</p><p>(b) Find the probability that on a randomly chosen day Aamir cycles to work.</p><p>Given that Aamir cycled to work on Monday,</p><p>(c) find the probability that it rained on Monday.</p><p>Given that Aamir did not cycle to work on Tuesday,</p><p>(d) find the probability that it rained on Tuesday.</p>
+    
+    <p class="q-marks">[10 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">(a) <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>First branch: Rain outcomes</p><p>$P(\text{Rain}) = 0.3$</p><p>$P(\text{No Rain}) = 1 - 0.3 = 0.7$</p><div class="why">Exam pitfall: probabilities on branches from same node must sum to 1.</div>
+    
+    <div class="step-result">$\boxed{P(R) = 0.3, \; P(R') = 0.7}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $P(R) = 0.3$, $P(R') = 0.7$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>Second branches from Rain: When it rains, Aamir always takes the bus</p><p>$P(\text{Bus} | \text{Rain}) = 1$</p><p>$P(\text{Cycle} | \text{Rain}) = 0$</p><div class="why">Exam pitfall: read carefully — "when it rains he travels by bus" means P(Cycle|Rain) = 0, not just unlikely.</div>
+    
+    <div class="step-result">$\boxed{P(B|R) = 1, \; P(C|R) = 0}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> Rain branch complete with $P(B|R) = 1$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>Second branches from No Rain:</p><p>$P(\text{Cycle} | \text{No Rain}) = 0.6$</p><p>$P(\text{Bus} | \text{No Rain}) = 1 - 0.6 = 0.4$</p><p><strong>Complete Tree Diagram:</strong></p><pre>                    ┌─ Cycle (0) ─→ 0.3 × 0 = 0
+         ┌─ Rain (0.3)
+         │          └─ Bus (1) ─→ 0.3 × 1 = 0.3
+    Start
+         │          ┌─ Cycle (0.6) ─→ 0.7 × 0.6 = 0.42
+         └─ No Rain (0.7)
+                    └─ Bus (0.4) ─→ 0.7 × 0.4 = 0.28</pre><div class="why">Exam pitfall: label ALL branches with probabilities and ensure each pair sums to 1.</div>
+    
+    <div class="step-result">$\boxed{\text{Tree diagram complete with all probabilities}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(b) <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">From (a): Tree diagram with $P(R) = 0.3$, $P(R') = 0.7$, $P(C|R') = 0.6$, $P(C|R) = 0$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Formula: Total probability</p><p>$P(C) = P(C \cap R) + P(C \cap R')$</p><p>$P(C) = P(R) \times P(C|R) + P(R') \times P(C|R')$</p><div class="why">Exam pitfall: use multiplication along branches, then add the separate paths to the same outcome.</div>
+    
+    <div class="step-result">$\boxed{P(C) = P(R) \cdot P(C|R) + P(R') \cdot P(C|R')}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $P(C) = P(R) \cdot P(C|R) + P(R') \cdot P(C|R')$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Substituting values from tree diagram:</p><p>$P(C) = 0.3 \times 0 + 0.7 \times 0.6$</p><p>$P(C) = 0 + 0.42$</p><p>$P(C) = 0.42$</p><div class="why">Exam pitfall: the Rain→Cycle branch contributes 0 because Aamir never cycles when it rains.</div>
+    
+    <div class="step-result">$\boxed{P(C) = 0.42}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(c) <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">From (a): $P(R) = 0.3$, $P(C|R) = 0$; From (b): $P(C) = 0.42$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Formula: Bayes' theorem / conditional probability</p><p>$P(R|C) = \dfrac{P(R \cap C)}{P(C)}$</p><p>We need $P(R \cap C) = P(R) \times P(C|R)$</p><p>$P(R \cap C) = 0.3 \times 0 = 0$</p><div class="why">Exam pitfall: "Given that Aamir cycled" tells you the condition — what you're dividing by.</div>
+    
+    <div class="step-result">$\boxed{P(R \cap C) = 0}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $P(R \cap C) = 0$, and $P(C) = 0.42$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Substituting into conditional probability formula:</p><p>$P(R|C) = \dfrac{0}{0.42}$</p><p>$P(R|C) = 0$</p><p>This makes sense: if Aamir cycled, it definitely did not rain (since he only cycles when it doesn't rain).</p><div class="why">Exam pitfall: a probability of 0 is a valid answer — don't second-guess logical conclusions.</div>
+    
+    <div class="step-result">$\boxed{P(R|C) = 0}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(d) <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">From (a): $P(R) = 0.3$, $P(B|R) = 1$, $P(B|R') = 0.4$; From (b): $P(C) = 0.42$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>First find $P(C')$ — probability of NOT cycling (i.e., taking the bus)</p><p>$P(C') = 1 - P(C)$</p><p>$P(C') = 1 - 0.42 = 0.58$</p><p>Alternatively, from tree: $P(C') = P(R) \times P(B|R) + P(R') \times P(B|R')$</p><p>$P(C') = 0.3 \times 1 + 0.7 \times 0.4 = 0.3 + 0.28 = 0.58$ ✓</p><div class="why">Exam pitfall: "did not cycle" means took the bus — verify using complement OR tree paths.</div>
+    
+    <div class="step-result">$\boxed{P(C') = 0.58}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $P(C') = 0.58$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Formula: Conditional probability</p><p>$P(R|C') = \dfrac{P(R \cap C')}{P(C')}$</p><p>Find $P(R \cap C')$: Rain AND took bus</p><p>$P(R \cap C') = P(R) \times P(B|R)$</p><p>$P(R \cap C') = 0.3 \times 1 = 0.3$</p><div class="why">Exam pitfall: $P(R \cap C')$ means the Rain-Bus path on the tree, not Rain alone.</div>
+    
+    <div class="step-result">$\boxed{P(R \cap C') = 0.3}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $P(R \cap C') = 0.3$, $P(C') = 0.58$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Substituting into conditional probability formula:</p><p>$P(R|C') = \dfrac{0.3}{0.58}$</p><p>$P(R|C') = \dfrac{30}{58} = \dfrac{15}{29}$</p><p>As a decimal: $P(R|C') \approx 0.517$ (3 s.f.)</p><div class="why">Exam pitfall: give exact fraction unless decimals specified — $\frac{15}{29}$ is exact, 0.517 is approximate.</div>
+    
+    <div class="step-result">$\boxed{P(R|C') = \dfrac{15}{29} \approx 0.517}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+<a id="export-png-link" target="_blank" href="" style="position:fixed;top:14px;right:20px;z-index:100;background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 16px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ PNG</a><script>(function(){var a=document.getElementById("export-png-link");var png=location.pathname.replace(/\.html$/,".png");a.href=png;})();</script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S1 Representation of Data — Histograms, Quartiles & Skewness</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: #0071e3; color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error {
+  background: #fff5f5; border-left: 3px solid #c72c2c;
+  padding: 6px 10px; margin: 7px 0; font-size: 12px; color: #5b1212;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error strong { color: #a31515; }
+.step-body .tutor-error .label {
+  display: inline-block; background: #c72c2c; color: #fff;
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; margin-right: 5px;
+  font-weight: 600;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">S1 (WST01/01) · Q1 · January 2024</div>
+  <h1>Grouped frequency data: histogram, median, quartiles by linear interpolation, and skewness</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The table shows the time, $t$ minutes, taken by 120 students to complete an online test.</p>
+<table class="data-table" style="border-collapse:collapse;margin:12px 0;">
+<tr><th style="border:1px solid #ccc;padding:8px;">Time ($t$ minutes)</th><th style="border:1px solid #ccc;padding:8px;">Frequency</th></tr>
+<tr><td style="border:1px solid #ccc;padding:8px;">$10 \leq t < 20$</td><td style="border:1px solid #ccc;padding:8px;">8</td></tr>
+<tr><td style="border:1px solid #ccc;padding:8px;">$20 \leq t < 25$</td><td style="border:1px solid #ccc;padding:8px;">17</td></tr>
+<tr><td style="border:1px solid #ccc;padding:8px;">$25 \leq t < 30$</td><td style="border:1px solid #ccc;padding:8px;">35</td></tr>
+<tr><td style="border:1px solid #ccc;padding:8px;">$30 \leq t < 40$</td><td style="border:1px solid #ccc;padding:8px;">42</td></tr>
+<tr><td style="border:1px solid #ccc;padding:8px;">$40 \leq t < 60$</td><td style="border:1px solid #ccc;padding:8px;">18</td></tr>
+</table>
+<p>(a) On graph paper, draw a histogram to represent these data.</p>
+<p>(b) Use linear interpolation to estimate the median time.</p>
+<p>(c) Use linear interpolation to estimate the interquartile range.</p>
+<p>(d) Describe the skewness of the distribution. Give a reason for your answer.</p>
+    
+    <p class="q-marks">[10 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">(a) <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>For a histogram, area ∝ frequency, so we need frequency density:</p>
+<p>$$\text{Frequency density} = \dfrac{\text{Frequency}}{\text{Class width}}$$</p>
+<p>Calculate class widths and frequency densities:</p>
+<table style="border-collapse:collapse;margin:10px 0;font-size:14px;">
+<tr><th style="border:1px solid #ccc;padding:6px;">Class</th><th style="border:1px solid #ccc;padding:6px;">Width</th><th style="border:1px solid #ccc;padding:6px;">Freq</th><th style="border:1px solid #ccc;padding:6px;">Freq Density</th></tr>
+<tr><td style="border:1px solid #ccc;padding:6px;">$10-20$</td><td style="border:1px solid #ccc;padding:6px;">10</td><td style="border:1px solid #ccc;padding:6px;">8</td><td style="border:1px solid #ccc;padding:6px;">$8÷10=0.8$</td></tr>
+<tr><td style="border:1px solid #ccc;padding:6px;">$20-25$</td><td style="border:1px solid #ccc;padding:6px;">5</td><td style="border:1px solid #ccc;padding:6px;">17</td><td style="border:1px solid #ccc;padding:6px;">$17÷5=3.4$</td></tr>
+<tr><td style="border:1px solid #ccc;padding:6px;">$25-30$</td><td style="border:1px solid #ccc;padding:6px;">5</td><td style="border:1px solid #ccc;padding:6px;">35</td><td style="border:1px solid #ccc;padding:6px;">$35÷5=7$</td></tr>
+<tr><td style="border:1px solid #ccc;padding:6px;">$30-40$</td><td style="border:1px solid #ccc;padding:6px;">10</td><td style="border:1px solid #ccc;padding:6px;">42</td><td style="border:1px solid #ccc;padding:6px;">$42÷10=4.2$</td></tr>
+<tr><td style="border:1px solid #ccc;padding:6px;">$40-60$</td><td style="border:1px solid #ccc;padding:6px;">20</td><td style="border:1px solid #ccc;padding:6px;">18</td><td style="border:1px solid #ccc;padding:6px;">$18÷20=0.9$</td></tr>
+</table>
+<div class="why">Exam pitfall: with unequal class widths, you MUST use frequency density — not raw frequency.</div>
+    
+    <div class="step-result">$\boxed{\text{Frequency densities: } 0.8, 3.4, 7, 4.2, 0.9}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Frequency densities: $0.8, 3.4, 7, 4.2, 0.9$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Draw histogram with:</p>
+<ul>
+<li>Horizontal axis: time $t$ (minutes) from 10 to 60</li>
+<li>Vertical axis: frequency density</li>
+<li>Bars with NO gaps, heights matching calculated densities</li>
+<li>Bar widths matching class intervals</li>
+</ul>
+<div class="why">Exam pitfall: bars must touch (continuous data) and use class BOUNDARIES on x-axis.</div>
+    
+    <div class="step-result">$\boxed{\text{Histogram drawn with correct frequency densities}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> Histogram structure established</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Check histogram requirements:</p>
+<ul>
+<li>✓ Correct scale on both axes with labels</li>
+<li>✓ All 5 bars drawn with correct widths</li>
+<li>✓ Heights: 0.8, 3.4, 7, 4.2, 0.9</li>
+<li>✓ No gaps between bars</li>
+</ul>
+<div class="why">Exam pitfall: marks lost for gaps between bars or plotting frequency instead of frequency density.</div>
+    
+    <div class="step-result">$\boxed{\text{Fully labelled histogram complete}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(b) <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Linear interpolation formula for median:</p>
+<p>$$Q_2 = L + \dfrac{\frac{n}{2} - F}{f} \times w$$</p>
+<p>Where: $L$ = lower boundary, $F$ = cumulative frequency before median class, $f$ = frequency of median class, $w$ = class width</p>
+<p>Find median position: $\dfrac{n}{2} = \dfrac{120}{2} = 60$</p>
+<p>Build cumulative frequencies:</p>
+<ul>
+<li>$10-20$: CF = 8</li>
+<li>$20-25$: CF = $8+17=25$</li>
+<li>$25-30$: CF = $25+35=60$</li>
+<li>$30-40$: CF = $60+42=102$</li>
+</ul>
+<p>Position 60 falls in class $25 \leq t < 30$ (CF reaches exactly 60 at upper boundary)</p>
+<div class="why">Exam pitfall: median class contains the 60th item — check where CF first reaches or exceeds n/2.</div>
+    
+    <div class="step-result">$\boxed{\text{Median class: } 25 \leq t < 30}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Median class $25-30$, position 60, $F=25$, $f=35$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Substitute into formula:</p>
+<p>$$Q_2 = 25 + \dfrac{60 - 25}{35} \times 5$$</p>
+<p>$$Q_2 = 25 + \dfrac{35}{35} \times 5$$</p>
+<p>$$Q_2 = 25 + 1 \times 5$$</p>
+<p>$$Q_2 = 25 + 5 = 30$$</p>
+<div class="why">Exam pitfall: use class boundaries (25, 30) not class limits; class width is $30-25=5$.</div>
+    
+    <div class="step-result">$\boxed{Q_2 = 30 \text{ minutes}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(c) <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">From (b): Cumulative frequencies: 8, 25, 60, 102, 120</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Find $Q_1$ position: $\dfrac{n}{4} = \dfrac{120}{4} = 30$</p>
+<p>From cumulative frequencies: CF = 25 at end of $20-25$, CF = 60 at end of $25-30$</p>
+<p>Position 30 falls in class $25 \leq t < 30$</p>
+<p>Apply linear interpolation:</p>
+<p>$$Q_1 = L + \dfrac{\frac{n}{4} - F}{f} \times w$$</p>
+<p>$$Q_1 = 25 + \dfrac{30 - 25}{35} \times 5$$</p>
+<p>$$Q_1 = 25 + \dfrac{5}{35} \times 5$$</p>
+<p>$$Q_1 = 25 + \dfrac{25}{35} = 25 + 0.714...$$</p>
+<p>$$Q_1 = 25.71 \text{ (2 d.p.)}$$</p>
+<div class="why">Exam pitfall: $Q_1$ uses position $n/4$, not $n/2$.</div>
+    
+    <div class="step-result">$\boxed{Q_1 = 25.71 \text{ minutes}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $Q_1 = 25.71$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Find $Q_3$ position: $\dfrac{3n}{4} = \dfrac{3 \times 120}{4} = 90$</p>
+<p>From cumulative frequencies: CF = 60 at end of $25-30$, CF = 102 at end of $30-40$</p>
+<p>Position 90 falls in class $30 \leq t < 40$</p>
+<p>Apply linear interpolation:</p>
+<p>$$Q_3 = L + \dfrac{\frac{3n}{4} - F}{f} \times w$$</p>
+<p>$$Q_3 = 30 + \dfrac{90 - 60}{42} \times 10$$</p>
+<p>$$Q_3 = 30 + \dfrac{30}{42} \times 10$$</p>
+<p>$$Q_3 = 30 + \dfrac{300}{42} = 30 + 7.143...$$</p>
+<p>$$Q_3 = 37.14 \text{ (2 d.p.)}$$</p>
+<div class="why">Exam pitfall: class $30-40$ has width 10, not 5 — different from previous classes.</div>
+    
+    <div class="step-result">$\boxed{Q_3 = 37.14 \text{ minutes}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $Q_1 = 25.71$, $Q_3 = 37.14$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Calculate interquartile range:</p>
+<p>$$\text{IQR} = Q_3 - Q_1$$</p>
+<p>$$\text{IQR} = 37.14 - 25.71$$</p>
+<p>$$\text{IQR} = 11.43 \text{ minutes}$$</p>
+<div class="why">Exam pitfall: IQR = $Q_3 - Q_1$ (not $Q_1 - Q_3$); it must be positive.</div>
+    
+    <div class="step-result">$\boxed{\text{IQR} = 11.4 \text{ minutes (3 s.f.)}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">(d) <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">From (b): $Q_2 = 30$; From (c): $Q_1 = 25.71$, $Q_3 = 37.14$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Compare distances from median to quartiles:</p>
+<p>$$Q_2 - Q_1 = 30 - 25.71 = 4.29$$</p>
+<p>$$Q_3 - Q_2 = 37.14 - 30 = 7.14$$</p>
+<p>Since $Q_3 - Q_2 > Q_2 - Q_1$:</p>
+<p>The upper tail (from median to $Q_3$) is longer than the lower tail.</p>
+<div class="why">Exam pitfall: always compare $Q_2 - Q_1$ with $Q_3 - Q_2$, not the quartile values themselves.</div>
+    
+    <div class="step-result">$\boxed{Q_3 - Q_2 = 7.14 > Q_2 - Q_1 = 4.29}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Upper distance $(7.14)$ > Lower distance $(4.29)$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Interpretation:</p>
+<p>When $Q_3 - Q_2 > Q_2 - Q_1$, the distribution has a longer upper tail.</p>
+<p>This indicates <strong>positive skewness</strong> (skewed to the right).</p>
+<p>Alternative reasoning: The histogram shows a longer tail extending towards higher values (right side).</p>
+<div class="why">Exam pitfall: must give numerical evidence from quartiles — "the histogram looks skewed" alone scores 0 marks.</div>
+    
+    <div class="step-result">$\boxed{\text{Positive skew because } Q_3 - Q_2 > Q_2 - Q_1}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+<a id="export-png-link" target="_blank" href="" style="position:fixed;top:14px;right:20px;z-index:100;background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 16px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ PNG</a><script>(function(){var a=document.getElementById("export-png-link");var png=location.pathname.replace(/\.html$/,".png");a.href=png;})();</script>
+</body>
+</html>
