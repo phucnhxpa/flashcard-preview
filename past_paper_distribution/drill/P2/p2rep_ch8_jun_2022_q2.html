@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trapezium Rule with Logarithmic-Trig Function</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q2 · Jun 2022</div>
+  <h1>Integration — Trapezium Rule</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>$$y = 1 - \log_{10}(\sin x)$$</p><p>The table shows some values of $y$ for $0.5 \leq x \leq 3$</p><p><table><tr><td>$x$</td><td>0.5</td><td>1</td><td>1.5</td><td>2</td><td>2.5</td><td>3</td></tr><tr><td>$y$</td><td>1.319</td><td></td><td>1.001</td><td></td><td>1.223</td><td>1.850</td></tr></table></p><p><strong>(a)</strong> Complete the table, giving the missing values of $y$ to 3 decimal places. [2]</p><p><strong>(b)</strong> Use the trapezium rule, with all the values of $y$ in the completed table, to obtain an estimate for $$\int_{0.5}^{3} (1 - \log_{10}(\sin x))\,dx$$ giving your answer to 2 decimal places. [4]</p><p><strong>(c)</strong> Using your answer to part (b), and making your method clear, obtain an estimate for $$\int_{0.5}^{3} (3 + \log_{10}(\sin x))\,dx$$ [2]</p>
+    
+    <p class="q-marks">[8 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Complete the table <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Substitute $x = 1$ into $y = 1 - \log_{10}(\sin x)$</strong></p><p>Calculator must be in <strong>radians</strong>:</p><p>$$\sin 1 \approx 0.841471$$</p><p>$$\log_{10}(0.841471) \approx -0.075001$$</p><p>$$y = 1 - (-0.075001) = 1.075$$</p><div class='why'>Pitfall: Using degrees instead of radians gives completely wrong values — $\sin 1°$ is tiny!</div>
+    
+    <div class="step-result">$\boxed{y(1) = 1.075}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$y(1) = 1.075$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Substitute $x = 2$ into $y = 1 - \log_{10}(\sin x)$</strong></p><p>$$\sin 2 \approx 0.909297$$</p><p>$$\log_{10}(0.909297) \approx -0.041275$$</p><p>$$y = 1 - (-0.041275) = 1.041$$</p><div class='why'>Pitfall: Misreading which $y$ values are missing — check column alignment carefully against $x$ values.</div>
+    
+    <div class="step-result">$\boxed{y(2) = 1.041}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Trapezium rule estimate <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given">$y(1) = 1.075$, $y(2) = 1.041$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Identify parameters for trapezium rule</strong></p><p>$$h = \frac{b - a}{n} = \frac{3 - 0.5}{5} = 0.5$$</p><p>6 ordinates: $y_0 = 1.319,\; y_1 = 1.075,\; y_2 = 1.001,\; y_3 = 1.041,\; y_4 = 1.223,\; y_5 = 1.850$</p><div class='why'>Pitfall: $n$ = number of strips (5), not number of ordinates (6).</div>
+    
+    <div class="step-result">$\boxed{h = 0.5}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$h = 0.5$, all $y$ values identified</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Apply trapezium rule formula</strong></p><p>$$\int_a^b y\,dx \approx \frac{h}{2}\left[y_0 + y_n + 2(y_1 + y_2 + \cdots + y_{n-1})\right]$$</p><p>$$= \frac{0.5}{2}\left[1.319 + 1.850 + 2(1.075 + 1.001 + 1.041 + 1.223)\right]$$</p><p>$$= 0.25\left[3.169 + 2(4.340)\right]$$</p><div class='why'>Pitfall: First and last ordinates are NOT doubled — only interior values.</div>
+    
+    <div class="step-result">$\boxed{0.25 \times 11.849}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$0.25 \times 11.849$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Calculate final value</strong></p><p>$$= 0.25 \times 11.849 = 2.96225$$</p><p>$$\approx 2.96 \text{ (2 d.p.)}$$</p><div class='why'>Pitfall: Keep extra precision in working — only round the final answer to 2 d.p.</div>
+    
+    <div class="step-result">$\boxed{2.96}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Related integral <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">$\int_{0.5}^{3} (1 - \log_{10}(\sin x))\,dx \approx 2.96$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Rewrite integrand using $y = 1 - \log_{10}(\sin x)$</strong></p><p>Rearranging: $\log_{10}(\sin x) = 1 - y$</p><p>So: $3 + \log_{10}(\sin x) = 3 + (1 - y) = 4 - y$</p><p>$$\int_{0.5}^{3} (3 + \log_{10}(\sin x))\,dx = \int_{0.5}^{3} 4\,dx - \int_{0.5}^{3} y\,dx$$</p><div class='why'>Pitfall: Failing to connect $\log_{10}(\sin x)$ to $y$ from part (a) — this is the key insight!</div>
+    
+    <div class="step-result">$\boxed{\int_{0.5}^{3} 4\,dx - 2.96}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$\int_{0.5}^{3} 4\,dx - 2.96$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Evaluate the constant integral</strong></p><p>$$\int_{0.5}^{3} 4\,dx = 4(3 - 0.5) = 4 \times 2.5 = 10$$</p><p>$$\therefore \int_{0.5}^{3} (3 + \log_{10}(\sin x))\,dx = 10 - 2.96 = 7.04$$</p><div class='why'>Pitfall: Don't recalculate using trapezium rule — use part (b) result directly as instructed.</div>
+    
+    <div class="step-result">$\boxed{7.04}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button id="export-btn" onclick="exportCard()" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ Export PNG</button></div><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script>function exportCard(){const btn=document.getElementById('export-btn-wrap');btn.style.display='none';html2canvas(document.querySelector('.card')||document.body,{scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{const a=document.createElement('a');a.download=(document.title||'card')+'.png';a.href=canvas.toDataURL('image/png');a.click();btn.style.display='block';document.getElementById('export-btn').textContent='✓ Saved';setTimeout(()=>{document.getElementById('export-btn').textContent='⬇ Export PNG';},2000);}).catch(()=>{btn.style.display='block';});}}</script>
+</body>
+</html>
