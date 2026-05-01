@@ -54,18 +54,9 @@ h1 {
   color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
 }
 .q-header p { margin: 4px 0; }
-.q-diagram {
-  display: flex; justify-content: center; margin: 10px 0 4px;
-  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
-}
-.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
 .q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
-
-/* multi-column flow for steps */
-.parts { /* container for one or more parts */ }
-.part {
-  margin-bottom: 18px;
-}
+.parts { }
+.part { margin-bottom: 18px; }
 .part-h {
   font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
   margin: 0 0 10px; padding-bottom: 6px;
@@ -78,14 +69,16 @@ h1 {
 }
 .steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 12px;
   align-items: start;
 }
-/* orphan last step (odd child in 2-col grid) spans full width */
 .steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .step-wrapper {
-  min-width: 0;  /* allow grid items to shrink below content width */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 @media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
 .step {
@@ -109,10 +102,6 @@ h1 {
   letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
   margin-top: 1px;
 }
-.step-marks {
-  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
-  letter-spacing: .04em; margin-top: 3px;
-}
 .step-body { font-size: 13px; line-height: 1.55; }
 .step-body p { margin: 5px 0; }
 .step-body .why {
@@ -120,38 +109,35 @@ h1 {
   padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
   border-radius: 0 5px 5px 0;
 }
-.step-math { margin: 7px 0; font-size: 13px; }
-.step-math .math { display: block; }
-.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
-.step-diagram svg { max-width: 100%; height: auto; }
 .step-result {
   margin-top: 8px; padding: 6px 10px; background: #fff;
   border: 1px dashed var(--work-line); border-radius: 6px;
   font-size: 12.5px; font-weight: 500;
 }
-.step-result strong { font-weight: 600; }
 .carry-in {
-  font-size: 0.78em;
-  color: #6b7280;
-  margin: 0 0 4px 0;
-  padding: 0;
-  background: none;
-  border: none;
+  font-size: 0.78em; color: #6b7280; margin: 0 0 4px 0;
+  padding: 0; background: none; border: none;
 }
 .carry-label {
-  font-weight: 600;
-  color: #9ca3af;
-  margin-right: 4px;
-  font-size: 1em;
-  text-transform: none;
-  letter-spacing: 0;
-  display: inline;
+  font-weight: 600; color: #9ca3af; margin-right: 4px;
+  font-size: 1em; text-transform: none; letter-spacing: 0; display: inline;
 }
-.step-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
+.concept-box {
+  background: #f0f4ff;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 12px 0 18px;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.concept-box .concept-title {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #2563eb;
+  margin-bottom: 8px;
 }
 </style>
 </head>
@@ -159,7 +145,7 @@ h1 {
 <div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button onclick="window.open('s1rep_ch5_oct22_Q7.png','_blank')" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:system-ui;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">&#8595; Export PNG</button></div>
 <div class="card">
   <div class="meta">S1 (WST01/01) · Q7 · Oct 2022</div>
-  <h1>X with P(X=0)=0.1, P(X=5)=0.2, P(X=10)=0.7 — find E(X), Var(X), P(X₁<X₂), distribution of X₁X₂</h1>
+  <h1>Discrete RV \(X\): E(X), Var(X), Linear Transforms, Two Independent Observations</h1>
   <div class="q-header">
     <span class="label">Question</span>
     <p>Adana selects one number at random from the distribution of $X$ which has the following probability distribution.</p>
@@ -178,30 +164,49 @@ h1 {
   <div class="parts">
     
 <div class="part">
-  <h2 class="part-h">(a) P(X = 0 | X ≠ 5) <span class="pmarks">[1 mark · 1 step]</span></h2>
+  <h2 class="part-h">(a) Conditional Probability <span class="pmarks">[1 mark · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">Conditional Probability</div>
+    \[P(A \mid B) = \frac{P(A \cap B)}{P(B)}\]
+    <strong>Here:</strong> "Given \(X \neq 5\)" means we restrict to the outcomes \(\{X=0, X=10\}\). Their combined probability is \(P(X \neq 5) = 0.1 + 0.7 = 0.8\).<br>
+    The conditional probability that \(X = 0\) given this restriction is the probability of 0 as a fraction of the surviving probability mass.
+  </div>
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
     <div class="step-wrapper"><div class="step">
   <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
   <div class="step-body">
-    Given X ≠ 5, the remaining outcomes are X = 0 (prob 0.1) and X = 10 (prob 0.7), total = 0.8.<br>
-    $P(X=0 | X\neq 5) = \dfrac{P(X=0)}{P(X\neq5)} = \dfrac{0.1}{0.1+0.7} = \dfrac{0.1}{0.8} = \dfrac{1}{8}$
-    <div class="step-result">$P(X=0 \mid X\neq5) = \dfrac{1}{8}$</div>
+    <p><strong>Apply the conditional probability formula</strong></p>
+<p>Given \(X \neq 5\), the remaining outcomes are \(X = 0\) (probability 0.1) and \(X = 10\) (probability 0.7).</p>
+\[P(X \neq 5) = 0.1 + 0.7 = 0.8\]
+\[P(X=0 \mid X \neq 5) = \frac{P(X=0)}{P(X \neq 5)} = \frac{0.1}{0.8} = \frac{1}{8}\]
+<div class="why"><strong>Why just \(P(X=0)\) in the numerator?</strong> Since \(\{X=0\} \subseteq \{X \neq 5\}\), we have \(P(X=0 \cap X\neq 5) = P(X=0) = 0.1\). The event "X=0 AND X≠5" is just "X=0".</div>
+    <div class="step-result">$P(X=0 \mid X\neq 5) = \boxed{\dfrac{1}{8}}$</div>
   </div>
 </div></div>
   </div>
 </div>
 
 <div class="part">
-  <h2 class="part-h">(b) Show E(X²) = 75 <span class="pmarks">[2 marks · 1 step]</span></h2>
+  <h2 class="part-h">(b) Show \(E(X^2) = 75\) <span class="pmarks">[1 mark · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">Computing E(X²)</div>
+    \[E(X^2) = \sum_x x^2 \cdot P(X = x)\]
+    <strong>Method:</strong> Square each possible value of \(X\), multiply by its probability, then sum all terms.<br>
+    <strong>Do not confuse \(E(X^2)\) with \([E(X)]^2\)</strong> — these are generally different and serve different roles.
+  </div>
   
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
     <div class="step-wrapper"><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span>
   </div>
   <div class="step-body">
-    <p>$E(X^2) = 0^2(0.1) + 5^2(0.2) + 10^2(0.7) = 0 + 5 + 70 = 75$ ✓</p>
-    <div class="step-result">$E(X^2) = 0 + 5 + 70 = 75$ ✓ (shown)</div>
+    <p><strong>Substitute each value into \(E(X^2) = \sum x^2 P(X=x)\)</strong></p>
+\[E(X^2) = 0^2 \times 0.1 + 5^2 \times 0.2 + 10^2 \times 0.7\]
+\[= 0 \times 0.1 + 25 \times 0.2 + 100 \times 0.7\]
+\[= 0 + 5 + 70 = 75 \checkmark\]
+<div class="why"><strong>Arithmetic check:</strong> \(0^2 = 0\), \(5^2 = 25\), \(10^2 = 100\). Multiply: \(25 \times 0.2 = 5\), \(100 \times 0.7 = 70\). Sum: \(0 + 5 + 70 = 75\) ✓</div>
+    <div class="step-result">$E(X^2) = 0 + 5 + 70 = \boxed{75}$ ✓ (shown)</div>
   </div>
 </div>
 </div>
@@ -209,18 +214,29 @@ h1 {
 </div>
 
 <div class="part">
-  <h2 class="part-h">(c) Find Var(X) <span class="pmarks">[3 marks · 1 step]</span></h2>
+  <h2 class="part-h">(c) Find \(\text{Var}(X)\) <span class="pmarks">[3 marks · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">Variance Formula</div>
+    \[\text{Var}(X) = E(X^2) - [E(X)]^2\]
+    <strong>Derivation:</strong> \(\text{Var}(X) = E[(X-\mu)^2]\). Expanding: \(= E[X^2 - 2\mu X + \mu^2] = E(X^2) - 2\mu \cdot E(X) + \mu^2 = E(X^2) - \mu^2\).<br>
+    <strong>Step 1:</strong> First compute \(E(X) = \sum x \cdot P(X=x)\) from the probability table.<br>
+    <strong>Step 2:</strong> Square \(E(X)\) to get \([E(X)]^2\).<br>
+    <strong>Step 3:</strong> Subtract from \(E(X^2)\).
+  </div>
   
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$E(X) = 8$, $E(X^2) = 75$</div><div class="step">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">From part (b):</span>$E(X^2) = 75$</div><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span>
   </div>
   <div class="step-body">
-    <p>$E(X) = 0(0.1) + 5(0.2) + 10(0.7) = 0 + 1 + 7 = 8$</p>
-    <p><strong>Var formula:</strong> $\text{Var}(X) = E(X^2) - [E(X)]^2 = 75 - 8^2 = 75 - 64$</p>
-    <div class="why">Must SQUARE E(X): $[E(X)]^2 = 64$, not $E(X)=8$</div>
-    <div class="step-result">$\boxed{\text{Var}(X) = 11}$</div>
+    <p><strong>Compute \(E(X)\), then apply \(\text{Var}(X) = E(X^2) - [E(X)]^2\)</strong></p>
+\[E(X) = \sum x \cdot P(X=x) = 0(0.1) + 5(0.2) + 10(0.7)\]
+\[= 0 + 1 + 7 = 8\]
+<p>Now apply the variance formula:</p>
+\[\text{Var}(X) = E(X^2) - [E(X)]^2 = 75 - 8^2 = 75 - 64 = 11\]
+<div class="why"><strong>Common mistake:</strong> Writing \([E(X)]^2 = E(X) = 8\) instead of squaring: \([E(X)]^2 = 8^2 = 64\). <strong>Always square \(E(X)\)</strong> before subtracting.</div>
+    <div class="step-result">$E(X) = 8;\quad \boxed{\text{Var}(X) = 11}$</div>
   </div>
 </div></div>
   </div>
@@ -228,18 +244,29 @@ h1 {
 
   
 <div class="part">
-  <h2 class="part-h">(d) <span class="pmarks">[2 marks] · 1 step</span></h2>
-  <div class="given">$\text{Var}(X)=11$</div>
+  <h2 class="part-h">(d) Find \(\text{Var}(4-3X)\) <span class="pmarks">[2 marks · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">Variance of a Linear Transform</div>
+    For constants \(a\) and \(b\):
+    \[\text{Var}(aX + b) = a^2 \cdot \text{Var}(X)\]
+    <strong>Key points:</strong>
+    <ul style="margin: 4px 0; padding-left: 20px;">
+      <li>The constant \(b\) has <strong>no effect</strong> on variance — shifting every outcome by \(b\) doesn't change the spread</li>
+      <li>The coefficient \(a\) is <strong>squared</strong> — even if \(a\) is negative, \(a^2 > 0\), so variance is always non-negative</li>
+    </ul>
+    Here: \(4 - 3X = -3X + 4\), so \(a = -3\), \(b = 4\), giving \(\text{Var}(4-3X) = (-3)^2 \text{Var}(X) = 9\text{Var}(X)\).
+  </div>
+  <div class="given">$\text{Var}(X) = 11$ (from part (c))</div>
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$\text{Var}(X)=11$</div><div class="step">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">From part (c):</span>$\text{Var}(X) = 11$</div><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
-    
+    <span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span>
   </div>
   <div class="step-body">
-    <p><strong>Formula:</strong> $\text{Var}(a + bX) = b^2\,\text{Var}(X)$</p>
-<p>$\text{Var}(4-3X) = (-3)^2 \times 11 = 9 \times 11$</p>
-<div class="why">The constant $+4$ vanishes; coefficient must be squared</div>
+    <p><strong>Apply \(\text{Var}(aX + b) = a^2\,\text{Var}(X)\)</strong></p>
+<p>Identify \(a = -3\) and \(b = +4\) in the expression \(4 - 3X = -3X + 4\):</p>
+\[\text{Var}(4-3X) = (-3)^2 \times \text{Var}(X) = 9 \times 11 = 99\]
+<div class="why"><strong>Why does \(+4\) vanish?</strong> Adding 4 to every outcome shifts the whole distribution right by 4. But variance measures <em>spread</em> — how far values are from the mean. The mean also shifts by 4, so deviations from the mean are unchanged. Therefore the constant \(b = 4\) contributes nothing to variance.</div>
     
     <div class="step-result">$\boxed{\text{Var}(4-3X) = 99}$</div>
   </div>
@@ -250,22 +277,31 @@ h1 {
 
   
 <div class="part">
-  <h2 class="part-h">(d) <span class="pmarks">[3 marks] · 1 step</span></h2>
-  <div class="given">$X_1, X_2$ independent copies of $X$</div>
+  <h2 class="part-h">(e) \(P(X_1 > X_2)\) where \(X_1, X_2\) are independent <span class="pmarks">[3 marks · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">P(X₁ &gt; X₂) Using Symmetry</div>
+    When \(X_1\) and \(X_2\) are <strong>independent and identically distributed</strong> (i.i.d.), there are three mutually exclusive cases:
+    \[P(X_1 > X_2) + P(X_1 = X_2) + P(X_1 < X_2) = 1\]
+    By symmetry: \(P(X_1 > X_2) = P(X_1 < X_2)\). So:
+    \[P(X_1 > X_2) = \frac{1 - P(X_1 = X_2)}{2}\]
+    To find \(P(X_1 = X_2)\): since \(X_1\) and \(X_2\) are independent, \(P(X_1 = x \text{ and } X_2 = x) = [P(X=x)]^2\), so:
+    \[P(X_1 = X_2) = \sum_x [P(X=x)]^2\]
+  </div>
+  <div class="given">$P(X=0)=0.1,\; P(X=5)=0.2,\; P(X=10)=0.7$; $X_1, X_2$ i.i.d.</div>
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$P(X=0)=0.1,\ P(X=5)=0.2,\ P(X=10)=0.7$</div><div class="step">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">From the probability table:</span>$P(X=0)=0.1,\ P(X=5)=0.2,\ P(X=10)=0.7$</div><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
-    
+    <span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span>
   </div>
   <div class="step-body">
-    <p><strong>Key identity:</strong> $P(X_1 = X_2) = \sum [P(X=x)]^2$</p>
-<p>$P(X_1=X_2) = 0.1^2 + 0.2^2 + 0.7^2 = 0.01 + 0.04 + 0.49 = 0.54$</p>
-<p>By symmetry $P(X_1 < X_2) = P(X_1 > X_2)$, so:</p>
-<p>$P(X_1 < X_2) = \dfrac{1 - P(X_1=X_2)}{2} = \dfrac{1 - 0.54}{2} = \dfrac{0.46}{2}$</p>
-<div class="why">Symmetry works because $X_1$ and $X_2$ have the same distribution (i.i.d.)</div>
+    <p><strong>Find \(P(X_1 = X_2)\), then use symmetry</strong></p>
+\[P(X_1 = X_2) = [P(X=0)]^2 + [P(X=5)]^2 + [P(X=10)]^2\]
+\[= 0.1^2 + 0.2^2 + 0.7^2 = 0.01 + 0.04 + 0.49 = 0.54\]
+<p>By symmetry (\(X_1\) and \(X_2\) have the same distribution):</p>
+\[P(X_1 > X_2) = \frac{1 - P(X_1 = X_2)}{2} = \frac{1 - 0.54}{2} = \frac{0.46}{2} = 0.23\]
+<div class="why"><strong>Why symmetry works:</strong> Since \(X_1\) and \(X_2\) are i.i.d., the situation "\(X_1 > X_2\)" is just as likely as "\(X_2 > X_1\)" (which is "\(X_1 < X_2\)"). So both halves are equal, and we split the remaining probability equally.</div>
     
-    <div class="step-result">$\boxed{P(X_1 < X_2) = 0.23}$</div>
+    <div class="step-result">$\boxed{P(X_1 > X_2) = 0.23}$</div>
   </div>
 </div>
 </div>
@@ -274,23 +310,41 @@ h1 {
 
   
 <div class="part">
-  <h2 class="part-h">(e) <span class="pmarks">[4 marks] · 1 step</span></h2>
-  <div class="given">$X_1, X_2$ independent, $D = X_1 X_2$</div>
+  <h2 class="part-h">(f) Distribution of \(D = X_1 X_2\) <span class="pmarks">[4 marks · 1 step]</span></h2>
+  <div class="concept-box">
+    <div class="concept-title">Distribution of a Product of Two Independent RVs</div>
+    When \(X_1\) and \(X_2\) are independent, \(P(X_1 = a \text{ and } X_2 = b) = P(X_1 = a) \times P(X_2 = b)\).<br>
+    To find the distribution of \(D = X_1 X_2\):
+    <ol style="margin: 4px 0; padding-left: 20px;">
+      <li>Identify all possible products \(d = x_1 \times x_2\)</li>
+      <li>For each value of \(d\), find all combinations of \((x_1, x_2)\) giving that product</li>
+      <li>Sum the probabilities of those combinations</li>
+    </ol>
+    <strong>Possible products:</strong> \(X\) takes values 0, 5, 10. Products: \(0\times\text{anything} = 0\), \(5\times 5=25\), \(5\times 10 = 10\times 5=50\), \(10\times 10=100\). So \(D \in \{0, 25, 50, 100\}\).
+  </div>
+  <div class="given">$X_1, X_2$ independent copies of $X$; $D = X_1 X_2$</div>
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$P(X=0)=0.1,\ P(X=5)=0.2,\ P(X=10)=0.7$</div><div class="step">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">From the probability table:</span>$P(X=0)=0.1,\ P(X=5)=0.2,\ P(X=10)=0.7$</div><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
-    
+    <span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span>
   </div>
   <div class="step-body">
-    <p>Products that can arise: $D \in \{0, 25, 50, 100\}$</p>
-<p>$P(D=0) = 1 - P(\text{neither is 0}) = 1 - 0.9^2 = 1 - 0.81 = 0.19$</p>
-<p>$P(D=25) = P(X_1=5)\cdot P(X_2=5) = 0.2^2 = 0.04$</p>
-<p>$P(D=50) = 2 \times P(X=5)\cdot P(X=10) = 2(0.2)(0.7) = 0.28$</p>
-<p>$P(D=100) = P(X=10)^2 = 0.7^2 = 0.49$</p>
-<div class="why">Check: $0.19+0.04+0.28+0.49 = 1$ ✓</div>
+    <p><strong>Find \(P(D = d)\) for each possible product value</strong></p>
+<p>\(P(D = 0)\): This happens whenever at least one of \(X_1, X_2\) equals 0.</p>
+\[P(D=0) = 1 - P(\text{neither is 0}) = 1 - P(X_1 \neq 0) \times P(X_2 \neq 0) = 1 - 0.9^2 = 1 - 0.81 = 0.19\]
+<p>\(P(D = 25)\): Requires both \(X_1 = 5\) and \(X_2 = 5\).</p>
+\[P(D=25) = P(X_1=5) \times P(X_2=5) = 0.2 \times 0.2 = 0.04\]
+<p>\(P(D = 50)\): Either \((X_1=5, X_2=10)\) or \((X_1=10, X_2=5)\).</p>
+\[P(D=50) = 2 \times P(X=5) \times P(X=10) = 2 \times 0.2 \times 0.7 = 0.28\]
+<p>\(P(D = 100)\): Requires both \(X_1 = 10\) and \(X_2 = 10\).</p>
+\[P(D=100) = P(X=10)^2 = 0.7^2 = 0.49\]
+<p><strong>Check:</strong> \(0.19 + 0.04 + 0.28 + 0.49 = 1.00\) ✓</p>
+<div class="why"><strong>Why the factor of 2 for \(D=50\)?</strong> There are two distinct ordered pairs: \((X_1=5, X_2=10)\) and \((X_1=10, X_2=5)\) — both give \(D = 50\). Add both contributions. For \(D=25\) and \(D=100\), there's only one pair each.</div>
     
-    <div class="step-result">$D$: 0 (0.19), 25 (0.04), 50 (0.28), 100 (0.49)</div>
+    <div class="step-result">
+      Distribution of \(D\):<br>
+      $d$: 0 (prob 0.19), 25 (prob 0.04), 50 (prob 0.28), 100 (prob 0.49)
+    </div>
   </div>
 </div>
 </div>
@@ -299,6 +353,6 @@ h1 {
 
   </div>
 </div>
-<a id="export-png-link" target="_blank" href="" style="position:fixed;top:14px;right:20px;z-index:100;background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 16px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ PNG</a><script>(function(){var a=document.getElementById("export-png-link");var png=location.pathname.replace(/\.html$/,".png");a.href=png;})();</script>
+<a id="export-png-link" target="_blank" href="" style="position:fixed;top:14px;right:20px;z-index:100;background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 16px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ PNG</a><script>(function(){var a=document.getElementById('export-png-link');var png=location.pathname.replace(/\.html$/,'.png');a.href=png;})();</script>
 </body>
 </html>
