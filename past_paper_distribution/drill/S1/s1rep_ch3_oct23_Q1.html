@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Sugar Dissolving — Regression & Correlation</title>
+<title>Sally's Game — Win/Lose Tree Diagram & Conditional Probability</title>
 <script>
 window.MathJax = {
   tex: {
@@ -54,18 +54,9 @@ h1 {
   color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
 }
 .q-header p { margin: 4px 0; }
-.q-diagram {
-  display: flex; justify-content: center; margin: 10px 0 4px;
-  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
-}
-.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
 .q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
-
-/* multi-column flow for steps */
-.parts { /* container for one or more parts */ }
-.part {
-  margin-bottom: 18px;
-}
+.parts { }
+.part { margin-bottom: 18px; }
 .part-h {
   font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
   margin: 0 0 10px; padding-bottom: 6px;
@@ -78,16 +69,18 @@ h1 {
 }
 .steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 12px;
   align-items: start;
 }
-/* orphan last step (odd child in 2-col grid) spans full width */
 .steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.step-wrapper {
-  min-width: 0;  /* allow grid items to shrink below content width */
-}
 @media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
 .step {
   border: 1px solid var(--work-line);
   background: var(--work-bg);
@@ -109,10 +102,6 @@ h1 {
   letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
   margin-top: 1px;
 }
-.step-marks {
-  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
-  letter-spacing: .04em; margin-top: 3px;
-}
 .step-body { font-size: 13px; line-height: 1.55; }
 .step-body p { margin: 5px 0; }
 .step-body .why {
@@ -120,10 +109,6 @@ h1 {
   padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
   border-radius: 0 5px 5px 0;
 }
-.step-math { margin: 7px 0; font-size: 13px; }
-.step-math .math { display: block; }
-.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
-.step-diagram svg { max-width: 100%; height: auto; }
 .step-result {
   margin-top: 8px; padding: 6px 10px; background: #fff;
   border: 1px dashed var(--work-line); border-radius: 6px;
@@ -131,27 +116,30 @@ h1 {
 }
 .step-result strong { font-weight: 600; }
 .carry-in {
-  font-size: 0.78em;
-  color: #6b7280;
-  margin: 0 0 4px 0;
-  padding: 0;
-  background: none;
-  border: none;
+  font-size: 0.78em; color: #6b7280;
+  margin: 0 0 4px 0; padding: 0; background: none; border: none;
 }
 .carry-label {
-  font-weight: 600;
-  color: #9ca3af;
-  margin-right: 4px;
-  font-size: 1em;
-  text-transform: none;
-  letter-spacing: 0;
-  display: inline;
+  font-weight: 600; color: #9ca3af; margin-right: 4px;
+  font-size: 1em; text-transform: none; letter-spacing: 0; display: inline;
 }
-.step-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
+/* Concept box */
+.concept-box {
+  background: #f0f4ff;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 12px 0 18px;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.concept-box .concept-title {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #2563eb;
+  margin-bottom: 8px;
 }
 </style>
 </head>
@@ -159,76 +147,223 @@ h1 {
 <div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button onclick="window.open('s1rep_ch3_oct23_Q1.png','_blank')" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:system-ui;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">&#8595; Export PNG</button></div>
 <div class="card">
   <div class="meta">S1 (WST01/01) · Q1 · Oct 2023</div>
-  <h1>Sally's Game — Win/Lose, Tree Diagram & Conditional Probability</h1>
+  <h1>Sally's Game — Win/Lose, Tree Diagram &amp; Conditional Probability</h1>
   <div class="q-header">
     <span class="label">Question</span>
-    <p>Sally plays a game in which she can either win or lose.</p>
-<p>A turn consists of up to 3 games. On each turn Sally plays the game up to 3 times. If she wins the first 2 games or loses the first 2 games, then she will not play the 3rd game.</p>
-<ul style="margin:4px 0 4px 20px;">
-<li>The probability that Sally wins the first game in a turn is 0.7</li>
-<li>If Sally wins a game the probability that she wins the next game is 0.6</li>
-<li>If Sally loses a game the probability that she wins the next game is 0.2</li>
-</ul>
-<p><strong>(a)</strong> Use this information to complete the tree diagram. <em>[3]</em></p>
-<p><strong>(b)</strong> Find the probability that Sally wins the first 2 games in a turn. <em>[2]</em></p>
-<p><strong>(c)</strong> Find the probability that Sally wins exactly 2 games in a turn. <em>[2]</em></p>
-<p>Given that Sally wins 2 games in a turn,</p>
-<p><strong>(d)</strong> find the probability that she won the first 2 games. <em>[2]</em></p>
-<p>Given that Sally won the first game in a turn,</p>
-<p><strong>(e)</strong> find the probability that she won 2 games. <em>[2]</em></p>
+    <p>Sally plays a game in which she can either win (W) or lose (L) each individual game.</p>
+    <p>A turn consists of up to 3 games. On each turn Sally plays up to 3 times. If she wins the first 2 games OR loses the first 2 games, she does <strong>not</strong> play the 3rd game.</p>
+    <ul style="margin:4px 0 4px 20px;">
+      <li>The probability that Sally wins the first game in a turn is 0.7</li>
+      <li>If Sally wins a game, the probability she wins the next game is 0.6</li>
+      <li>If Sally loses a game, the probability she wins the next game is 0.2</li>
+    </ul>
+    <p><strong>(a)</strong> Use this information to complete the tree diagram. <em>[3]</em></p>
+    <p><strong>(b)</strong> Find the probability that Sally wins the first 2 games in a turn. <em>[2]</em></p>
+    <p><strong>(c)</strong> Find the probability that Sally wins exactly 2 games in a turn. <em>[2]</em></p>
+    <p>Given that Sally wins exactly 2 games in a turn,</p>
+    <p><strong>(d)</strong> find the probability that she won the first 2 games. <em>[2]</em></p>
+    <p>Given that Sally won the first game in a turn,</p>
+    <p><strong>(e)</strong> find the probability that she won exactly 2 games. <em>[2]</em></p>
     <p class="q-marks">[11 marks]</p>
   </div>
+
   <div class="parts">
+
+<!-- PART (a) -->
 <div class="part">
-  <h2 class="part-h">(a) Complete tree diagram <span class="pmarks">[3 marks · 1 step]</span></h2>
-    <div class="given">P(win 1st)=0.7; P(win next|won)=0.6; P(win next|lost)=0.2</div>
-  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+  <h2 class="part-h">(a) Complete tree diagram <span class="pmarks">[3 marks · 2 steps]</span></h2>
+    <div class="given">P(W₁) = 0.7; P(W|prev W) = 0.6; P(W|prev L) = 0.2</div>
+
+  <div class="concept-box">
+    <div class="concept-title">🌳 Tree Diagram Structure — Variable-Length Paths</div>
+    <p><strong>Key rules:</strong></p>
+    <ul style="margin:4px 0 4px 18px;">
+      <li><strong>Multiply along branches:</strong> Each branch shows a conditional probability. The overall path probability = product of branch probabilities.</li>
+      <li><strong>Add across paths:</strong> To find P(outcome), sum the probabilities of ALL paths leading to that outcome.</li>
+    </ul>
+    <p><strong>This tree has variable depth</strong> — some paths END after 2 games (if WW or LL), others continue to a 3rd game (if WL or LW). This is because winning or losing twice in a row ends the turn early.</p>
+    <p><strong>Branch probabilities depend on the previous result</strong> — this is directly stated in the problem (conditional probabilities). The 3rd game branches use the same conditional probabilities as game 2.</p>
+    <p><strong>All possible paths:</strong> WW (stop), WL→W (WLW), WL→L (WLL), LW→W (LWW), LW→L (LWL), LL (stop). That's 6 terminal outcomes.</p>
+  </div>
+
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
-  <div class="step-body">1st game: W(0.7), L(0.3)<br>2nd game: W→W(0.6), W→L(0.4); L→W(0.2), L→L(0.8)<br>3rd game (only if 1st≠2nd): WL→W(0.6),WL→L(0.4); LW→W(0.6),LW→L(0.4)<br><div class="why">If WW or LL after 2 games, stop — no 3rd game.</div><div class="step-result">Branches: WW(stops), WLW, WLL, LWW, LWL, LL(stops)</div></div>
-</div></div>
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span></div>
+      <div class="step-body">
+        <p><strong>Game 1 and Game 2 branches:</strong></p>
+        <p><em>Game 1:</em> P(W₁) = 0.7, P(L₁) = 0.3</p>
+        <p><em>Game 2 — after W₁:</em> P(W₂|W₁) = 0.6, P(L₂|W₁) = 0.4<br>→ Path WW: STOP (2 wins → turn ends)<br>→ Path WL: CONTINUE to game 3</p>
+        <p><em>Game 2 — after L₁:</em> P(W₂|L₁) = 0.2, P(L₂|L₁) = 0.8<br>→ Path LW: CONTINUE to game 3<br>→ Path LL: STOP (2 losses → turn ends)</p>
+        <div class="why">WHY stop after WW or LL? The rules say so — these are the early-stopping conditions. The tree must reflect this by having no 3rd-level branches after WW or LL.</div>
+      </div>
+    </div></div>
+
+    <div class="step-wrapper"><div class="step">
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span></div>
+      <div class="step-body">
+        <p><strong>Game 3 branches (only for WL and LW paths):</strong></p>
+        <p><em>After WL (last result was L):</em> P(W₃|L) = 0.2, P(L₃|L) = 0.8<br>→ Paths: WLW (prob = 0.7 × 0.4 × 0.2 = 0.056), WLL (prob = 0.7 × 0.4 × 0.8 = 0.224)</p>
+        <p><em>After LW (last result was W):</em> P(W₃|W) = 0.6, P(L₃|W) = 0.4<br>→ Paths: LWW (prob = 0.3 × 0.2 × 0.6 = 0.036), LWL (prob = 0.3 × 0.2 × 0.4 = 0.024)</p>
+        <div class="step-result">
+          6 terminal paths: WW (0.42), WLW (0.056), WLL (0.224), LWW (0.036), LWL (0.024), LL (0.24)<br>
+          Check: 0.42 + 0.056 + 0.224 + 0.036 + 0.024 + 0.24 = 1.000 ✓
+        </div>
+      </div>
+    </div></div>
   </div>
 </div>
+
+<!-- PART (b) -->
 <div class="part">
   <h2 class="part-h">(b) P(wins first 2 games) <span class="pmarks">[2 marks · 1 step]</span></h2>
-  
+
+  <div class="concept-box">
+    <div class="concept-title">🎯 "Wins First 2 Games" = Path WW Only</div>
+    <p>"Wins the first 2 games" means: Game 1 = W AND Game 2 = W. This is exactly one path: WW.</p>
+    <p><strong>Multiply along branches</strong> (the events are sequential and each branch is the conditional probability given the previous result):</p>
+    \[P(WW) = P(W_1) \times P(W_2 \mid W_1)\]
+    <p>Note: "Wins first 2" does NOT ask about game 3, and since WW stops the turn, there is no game 3 anyway.</p>
+  </div>
+
   <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
-  <div class="step-body">P(WW) = P(W1st)×P(W|won) = 0.7 × 0.6 = 0.42<div class="step-result">$P(\text{wins first 2}) = 0.42$</div></div>
-</div></div>
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span></div>
+      <div class="step-body">
+        <p><strong>Multiply the two branch probabilities along the WW path:</strong></p>
+        \[P(\text{wins first 2}) = P(WW) = P(W_1) \times P(W_2 \mid W_1)\]
+        \[= 0.7 \times 0.6 = 0.42\]
+        <div class="step-result">\(P(\text{wins first 2 games}) = 0.42\)</div>
+      </div>
+    </div></div>
   </div>
 </div>
+
+<!-- PART (c) -->
 <div class="part">
-  <h2 class="part-h">(c) P(wins exactly 2 games) <span class="pmarks">[2 marks · 1 step]</span></h2>
-  
-  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+  <h2 class="part-h">(c) P(wins exactly 2 games) <span class="pmarks">[2 marks · 2 steps]</span></h2>
+
+  <div class="concept-box">
+    <div class="concept-title">🎯 "Exactly 2 Wins" — Which Paths Have Exactly 2 Wins?</div>
+    <p>"Exactly 2 wins" means the total count of W's in a turn = 2. List all 6 terminal paths and count wins in each:</p>
+    <ul style="margin:4px 0 4px 18px; font-size:12.5px;">
+      <li><strong>WW:</strong> 2 wins ✓ (turn stops here)</li>
+      <li><strong>WLW:</strong> 2 wins ✓</li>
+      <li><strong>WLL:</strong> 1 win ✗</li>
+      <li><strong>LWW:</strong> 2 wins ✓ (turn stops after 3rd game? No — LW means we play game 3, LWW = 2 wins in 3 games)</li>
+      <li><strong>LWL:</strong> 1 win ✗</li>
+      <li><strong>LL:</strong> 0 wins ✗ (turn stops here)</li>
+    </ul>
+    <p><strong>So "exactly 2 wins" = WW OR WLW OR LWW</strong> — these are mutually exclusive paths → ADD their probabilities.</p>
+    <p><strong>Common pitfall:</strong> Don't confuse "wins exactly 2 games" with "wins the first 2 games." WLW and LWW also give 2 total wins but DON'T win the first 2.</p>
+  </div>
+
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
-  <div class="step-body">"Exactly 2 wins" can happen as: WW (stop, 2 wins), WLW (2 wins), LWW (stop after game 2? No: LW continues to 3rd). Wait: WW→stop (2 wins ✓); LL→stop (0 wins); WLW (2 wins ✓); LWW→stop (2 wins ✓). Also LWL = 1 win, WLL = 1 win.<br>P(WW) = 0.42; P(WLW) = 0.7×0.4×0.6 = 0.168; P(LWW) = 0.3×0.2×0.6 = 0.036<br>P(exactly 2) = 0.42+0.168+0.036 = ... but WW has 2 wins and stops, LWW has 2 wins and stops.<br>P(exactly 2) = P(WLW)+P(LWW) = 0.168+0.036 = 0.204? Or include WW?<br>WW = 2 wins. P(exactly 2) = P(WW)+P(WLW)+P(LWW) = 0.42+0.168+0.036 = 0.624<div class="step-result">$P(\text{exactly 2 wins}) = 0.624$</div></div>
-</div></div>
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span></div>
+      <div class="step-body">
+        <p><strong>Identify and compute all paths with exactly 2 wins:</strong></p>
+        \[P(WW) = 0.7 \times 0.6 = 0.42\]
+        \[P(WLW) = 0.7 \times 0.4 \times 0.2 = 0.056\]
+        \[P(LWW) = 0.3 \times 0.2 \times 0.6 = 0.036\]
+        <div class="why">For LWW: L first (prob 0.3), then W (prob 0.2 given prev L), then W (prob 0.6 given prev W). Three sequential multiplications.</div>
+      </div>
+    </div></div>
+
+    <div class="step-wrapper"><div class="step">
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span></div>
+      <div class="step-body">
+        <p><strong>Add the three mutually exclusive paths:</strong></p>
+        \[P(\text{exactly 2 wins}) = P(WW) + P(WLW) + P(LWW)\]
+        \[= 0.42 + 0.056 + 0.036\]
+        \[= 0.512\]
+        <div class="step-result">\(P(\text{exactly 2 wins}) = 0.512\)</div>
+        <div class="why">Sanity check: P(exactly 0 wins) = P(LL) = 0.3×0.8 = 0.24; P(exactly 1 win) = P(WLL)+P(LWL) = 0.224+0.024 = 0.248. Total = 0.24+0.248+0.512 = 1.000 ✓</div>
+      </div>
+    </div></div>
   </div>
 </div>
+
+<!-- PART (d) -->
 <div class="part">
-  <h2 class="part-h">(d) P(won first 2 | won exactly 2) <span class="pmarks">[2 marks · 1 step]</span></h2>
-  
-  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+  <h2 class="part-h">(d) P(won first 2 | exactly 2 wins) <span class="pmarks">[2 marks · 2 steps]</span></h2>
+
+  <div class="concept-box">
+    <div class="concept-title">📐 Conditional Probability — P(A|B) = P(A∩B) / P(B)</div>
+    <p><strong>Formula:</strong> \[P(A \mid B) = \frac{P(A \cap B)}{P(B)}\]</p>
+    <p><strong>Why it works:</strong> "Given B happened" restricts our sample space to only outcomes where B occurs. Within that restricted space, we ask what fraction is also A. Dividing by P(B) re-scales so the probabilities sum to 1.</p>
+    <p><strong>In this problem:</strong><br>
+    A = "won the first 2 games" (= path WW)<br>
+    B = "exactly 2 wins" (= paths WW, WLW, LWW)<br>
+    A∩B = "won first 2 AND had exactly 2 wins" = just path WW (since WW ⊂ "exactly 2 wins")</p>
+    <p><strong>When to use:</strong> Any time the question says "given that…" before asking for a probability.</p>
+  </div>
+
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
-  <div class="step-body">$P(\text{first 2 won} | \text{exactly 2}) = \frac{P(WW)}{P(\text{exactly 2})} = \frac{0.42}{0.624} = \frac{420}{624} = \frac{35}{52}$<div class="step-result">$P = \dfrac{35}{52} \approx 0.673$</div></div>
-</div></div>
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span></div>
+      <div class="step-body">
+        <p><strong>Identify A∩B:</strong></p>
+        <p>"Won first 2" AND "exactly 2 wins" = path WW only. (WLW and LWW don't have the first 2 as wins.)</p>
+        \[P(A \cap B) = P(WW) = 0.42\]
+        \[P(B) = P(\text{exactly 2 wins}) = 0.512\]
+      </div>
+    </div></div>
+
+    <div class="step-wrapper"><div class="step">
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span></div>
+      <div class="step-body">
+        <p><strong>Apply the formula:</strong></p>
+        \[P(\text{won first 2} \mid \text{exactly 2}) = \frac{P(WW)}{P(\text{exactly 2})} = \frac{0.42}{0.512}\]
+        <p>Convert to fractions: \(\dfrac{0.42}{0.512} = \dfrac{420}{512} = \dfrac{105}{128}\)</p>
+        <div class="step-result">\(P = \dfrac{105}{128} \approx 0.820\)</div>
+        <div class="why">Makes sense: given Sally won exactly 2 games, the WW path (prob 0.42) is far more likely than WLW (0.056) or LWW (0.036), so P ≈ 0.82 is reasonable.</div>
+      </div>
+    </div></div>
   </div>
 </div>
+
+<!-- PART (e) -->
 <div class="part">
-  <h2 class="part-h">(e) P(won 2 games | won 1st game) <span class="pmarks">[2 marks · 1 step]</span></h2>
-  
-  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+  <h2 class="part-h">(e) P(exactly 2 wins | won 1st game) <span class="pmarks">[2 marks · 2 steps]</span></h2>
+
+  <div class="concept-box">
+    <div class="concept-title">📐 Conditional Probability — Restricting to "Won 1st Game" Branches</div>
+    <p><strong>Formula:</strong> \[P(\text{exactly 2 wins} \mid W_1) = \frac{P(\text{exactly 2 wins} \cap W_1)}{P(W_1)}\]</p>
+    <p><strong>Given W₁ occurred:</strong> We only consider paths that <em>start with W</em>. The relevant paths from the tree are:</p>
+    <ul style="margin:4px 0 4px 18px; font-size:12.5px;">
+      <li>WW: 2 wins ✓ (starts with W)</li>
+      <li>WLW: 2 wins ✓ (starts with W)</li>
+      <li>WLL: 1 win ✗ (starts with W, but only 1 win)</li>
+    </ul>
+    <p>"Exactly 2 wins AND won 1st game" = WW or WLW (not LWW, because LWW starts with a loss).</p>
+    <p><strong>Denominator:</strong> P(W₁) = 0.7 (directly from the given probabilities).</p>
+  </div>
+
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
-  <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span><span class="step-goal"></span></span></div>
-  <div class="step-body">Given won 1st: branches WW(0.42) or WLW(0.168) or WLL(0.7×0.4×0.4=0.112). "Won 2 games given won 1st" = WW+WLW.<br>$P(\text{1st won}) = 0.7$. $P(\text{won 2} \cap \text{1st won}) = P(WW)+P(WLW) = 0.42+0.168 = 0.588$<br>$P(\text{2 wins}|\text{1st won}) = 0.588/0.7 = 0.84$<div class="step-result">$P = 0.84$</div></div>
-</div></div>
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1</span></span></div>
+      <div class="step-body">
+        <p><strong>Find P(exactly 2 wins ∩ won 1st game):</strong></p>
+        <p>Paths that start with W and have exactly 2 wins: WW and WLW.</p>
+        \[P(\text{2 wins} \cap W_1) = P(WW) + P(WLW)\]
+        \[= 0.42 + 0.056 = 0.476\]
+        <div class="why">LWW is excluded because it starts with a LOSS, not a win — it does not satisfy "won 1st game."</div>
+      </div>
+    </div></div>
+
+    <div class="step-wrapper"><div class="step">
+      <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2</span></span></div>
+      <div class="step-body">
+        <p><strong>Apply the conditional probability formula:</strong></p>
+        \[P(\text{exactly 2 wins} \mid W_1) = \frac{0.476}{P(W_1)} = \frac{0.476}{0.7}\]
+        \[= 0.68\]
+        <div class="step-result">\(P(\text{exactly 2 wins} \mid \text{won 1st game}) = 0.68\)</div>
+        <div class="why">Sanity check: given won game 1 (prob 0.7), the paths from W₁ are WW (0.42), WLW (0.056), WLL (0.224). These sum to 0.7 ✓. Of these, WW+WLW = 0.476, giving 0.476/0.7 = 0.68 ✓.</div>
+      </div>
+    </div></div>
   </div>
 </div>
+
   </div>
 </div>
 </body>
