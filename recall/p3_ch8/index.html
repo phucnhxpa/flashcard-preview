@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>P3 Ch 8 — Numerical Methods · Recall Sheet</title>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --accent: #0066cc;
+    --accent2: #e8f0fb;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e2e8f0;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 2rem 1rem;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 {
+    font-size: 1.7rem;
+    color: var(--accent);
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.8rem;
+  }
+  h2 {
+    font-size: 1.15rem;
+    color: var(--accent);
+    background: var(--accent2);
+    border-left: 4px solid var(--accent);
+    padding: 0.5rem 0.9rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 2rem 0 0.8rem;
+  }
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.2rem 0 0.4rem;
+  }
+  p { margin-bottom: 0.7rem; }
+  a { color: var(--accent); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 0.6rem 0 1rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  thead tr { background: var(--accent); color: white; }
+  thead th {
+    padding: 0.55rem 0.85rem;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  tbody tr:nth-child(even) { background: #f4f7fb; }
+  tbody tr:hover { background: var(--accent2); }
+  td, tbody th {
+    padding: 0.5rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    font-size: 0.9rem;
+  }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+
+  /* Code / pre */
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    margin: 0.6rem 0 1rem;
+    box-shadow: var(--shadow);
+  }
+  code {
+    background: #e8f0fb;
+    color: #0050aa;
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: "SF Mono", "Fira Code", monospace;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* Blockquote */
+  blockquote {
+    background: #fff8e7;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.6rem 1rem;
+    margin: 0.6rem 0 1rem;
+    font-size: 0.9rem;
+    color: #7c5a00;
+  }
+
+  /* Card sections */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin: 0.5rem 0 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  /* Archetype */
+  .archetype {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    margin: 0.7rem 0;
+    box-shadow: var(--shadow);
+  }
+  .archetype h3 { margin-top: 0; color: var(--accent); }
+
+  /* Big picture box */
+  .bigpic {
+    background: linear-gradient(135deg, #e8f0fb 0%, #f0fdf4 100%);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin-top: 0.6rem;
+  }
+  .bigpic pre {
+    background: transparent;
+    color: var(--text);
+    padding: 0;
+    font-size: 0.83rem;
+    box-shadow: none;
+  }
+
+  /* Formula highlight */
+  .formula-box {
+    display: inline-block;
+    background: var(--accent2);
+    border: 1px solid #b3ceee;
+    border-radius: 6px;
+    padding: 0.25rem 0.7rem;
+    margin: 0.3rem 0;
+    font-size: 1rem;
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    body { font-size: 14px; padding: 1rem 0.5rem; }
+    h1 { font-size: 1.3rem; }
+    pre { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>P3 Chapter 8 — Numerical Methods · Recall Sheet</h1>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>1. Jargon Glossary</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td>Root</td><td>A value $x = \alpha$ where $f(\alpha) = 0$; graphically, where $y=f(x)$ crosses the $x$-axis</td></tr>
+<tr><td>Continuous</td><td>A function with no jumps or breaks on an interval — graph drawn without lifting the pen</td></tr>
+<tr><td>Change of sign</td><td>$f(a)$ and $f(b)$ have opposite signs (one +, one −), indicating the curve crossed the $x$-axis</td></tr>
+<tr><td>Interval</td><td>A set of real numbers between two bounds; $[a,b]$ (closed) or $(a,b)$ (open)</td></tr>
+<tr><td>Iterative formula</td><td>A recurrence relation $x_{n+1} = g(x_n)$ generating successive approximations to a root</td></tr>
+<tr><td>Staircase diagram</td><td>Graphical iteration where iterates approach the root from the <em>same side</em> — steps look like stairs</td></tr>
+<tr><td>Cobweb diagram</td><td>Graphical iteration where iterates <em>alternate either side</em> of the root — pattern looks like a cobweb</td></tr>
+<tr><td>Convergence</td><td>Iterates $x_0, x_1, x_2, \ldots$ get progressively closer to the root $\alpha$</td></tr>
+<tr><td>Divergence</td><td>Iterates move progressively further away from the root</td></tr>
+<tr><td>Fixed point</td><td>A value $\alpha$ where $g(\alpha) = \alpha$; every root of $f(x)=0$ is a fixed point of $x = g(x)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>2. Method Table — Change-of-Sign Method</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Step</th><th>Action</th><th>Key rule</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Define $f(x)$ so the root satisfies $f(x)=0$</td><td>Rearrange if needed</td></tr>
+<tr><td>2</td><td>Choose interval $[a,b]$ suspected to contain a root</td><td>Try integers first</td></tr>
+<tr><td>3</td><td>Evaluate $f(a)$ and $f(b)$</td><td>Keep enough decimal places</td></tr>
+<tr><td>4</td><td>Check $f(a) \cdot f(b) < 0$</td><td>Same sign ⇒ no conclusion</td></tr>
+<tr><td>5</td><td>State: change of sign + $f$ continuous ⇒ at least one root in $(a,b)$</td><td>Must mention both continuity <em>and</em> sign change</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>When Change of Sign Fails</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Failure mode</th><th>Why it fails</th><th>Reality</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Multiple roots, same sign</td><td>Odd number of roots in $[a,b]$ still gives a sign change</td><td>Sign change ⇒ ≥1 root, not exactly 1</td></tr>
+<tr><td>2</td><td>Even number of roots</td><td>Curve dips and returns — same sign at both ends</td><td>No sign change, yet roots <em>do</em> exist</td></tr>
+<tr><td>3</td><td>Asymptote in $(a,b)$</td><td>Vertical asymptote causes sign flip with no crossing</td><td>Sign change ≠ root; $f$ not continuous ⇒ theorem fails</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>3. Fixed-Point Iteration — Setup Recipes</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>$f(x)=0$ form</th><th>Rearrangement strategy</th><th>Example iterative formula</th></tr></thead>
+<tbody>
+<tr><td>$x^2 - ax + b = 0$</td><td>Divide by $x$: $x = a - b/x$</td><td>$x_{n+1} = a - b/x_n$</td></tr>
+<tr><td>$x^2 - ax + b = 0$</td><td>Isolate $x^2$: $x = \sqrt{ax-b}$</td><td>$x_{n+1} = \sqrt{ax_n - b}$</td></tr>
+<tr><td>$x^3 = px^2 + qx - r$</td><td>Divide by $x$, take square root</td><td>$x_{n+1} = \sqrt{px_n + q - r/x_n}$</td></tr>
+<tr><td>$x^3 + ax^2 = b$</td><td>Cube root: $x = \sqrt[3]{b - ax^2}$</td><td>$x_{n+1} = \sqrt[3]{b - ax_n^2}$</td></tr>
+<tr><td>Trig $f(x)=0$</td><td>Isolate trig term, apply inverse</td><td>$x_{n+1} = (\arccos(\cdots))^{1/2}$</td></tr>
+<tr><td>Exp/log $f(x)=0$</td><td>Isolate $e^x$ or $\ln x$, apply inverse</td><td>$x_{n+1} = \ln(\text{expr})+ c$</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>⚠️ Same $f(x)=0$ can yield multiple rearrangements — different ones may find <strong>different roots</strong> or <strong>diverge</strong>.</blockquote>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>4. Edge-Case Table — 3 Sign-Change Pitfalls</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Pitfall</th><th>Diagram clue</th><th>Correct conclusion</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Odd multiple roots in $[a,b]$</td><td>Curve crosses axis >1 time; sign <em>does</em> change</td><td>Sign change ⇒ <strong>at least one</strong> root (could be 3, 5, …)</td></tr>
+<tr><td>2</td><td>Even number of roots in $[a,b]$</td><td>Curve dips below/above and returns; $f(a)$, $f(b)$ same sign</td><td><strong>No sign change</strong> ⇒ cannot rule out roots — they exist!</td></tr>
+<tr><td>3</td><td>Asymptote in $(a,b)$</td><td>Vertical asymptote (e.g. $\tan x$ near $\pi/2$) → $f\to\pm\infty$</td><td>Sign change ≠ root; $f$ <strong>not continuous</strong> → theorem doesn't apply</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>5. Algorithm — Verify Root to $n$ Decimal Places</h2>
+<div class="card">
+<p>To show root $\alpha = k$ is correct to $n$ d.p.:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Step</th><th>Action</th><th>Example ($\alpha=1.763$ to 3 d.p.)</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rounding interval: $\left[\alpha - \tfrac{1}{2}\times10^{-n},\; \alpha + \tfrac{1}{2}\times10^{-n}\right]$</td><td>$[1.7625,\; 1.7635]$</td></tr>
+<tr><td>2</td><td>Evaluate $f$ at <strong>both</strong> endpoints</td><td>$f(1.7625)=-0.00064\ldots$, $f(1.7635)=+0.00024\ldots$</td></tr>
+<tr><td>3</td><td>Confirm opposite signs + state continuity</td><td>Change of sign, $f$ continuous on interval</td></tr>
+<tr><td>4</td><td>Conclude: root lies in $[1.7625, 1.7635]$ so $\alpha=1.763$ to 3 d.p.</td><td>✓</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>💡 <strong>Memory hook:</strong> half a unit in the <em>last quoted decimal place</em> — always go one digit beyond the stated accuracy.</blockquote>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>6. Rearrangement Reference Table</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Equation</th><th>Form 1</th><th>Form 2</th><th>Form 3</th></tr></thead>
+<tbody>
+<tr><td>$x^2-6x+2=0$</td><td>$x=\dfrac{x^2+2}{6}$</td><td>$x=\sqrt{6x-2}$</td><td>$x=6-\dfrac{2}{x}$</td></tr>
+<tr><td>$x^2-5x-3=0$</td><td>$x=\sqrt{5x+3}$</td><td>$x=\dfrac{x^2-3}{5}$</td><td>—</td></tr>
+<tr><td>$x^2-4x+1=0$</td><td>$x=4-\dfrac{1}{x}$</td><td>$x=\dfrac{x^2+1}{4}$</td><td>—</td></tr>
+<tr><td>$x^3-3x^2-2x+5=0$</td><td>$x=\sqrt{\dfrac{x^3-2x+5}{3}}$</td><td>—</td><td>—</td></tr>
+<tr><td>$x^3+5x^2-2=0$</td><td>$x=\sqrt[3]{2-5x^2}$</td><td>$x=\dfrac{2}{x^2}-5$</td><td>$x=\sqrt{\dfrac{2-x^3}{5}}$</td></tr>
+<tr><td>$\ln x-\dfrac{1}{x}=0$</td><td>$x=e^{1/x}$</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>7. Decision Flow — Spot This → Do This</h2>
+<pre>GIVEN: f(x) = 0,  find / verify a root
+         │
+         ├─ "Show a root exists in [a,b]"
+         │       → Evaluate f(a) and f(b)
+         │       → Check opposite signs
+         │       → State continuity + change of sign
+         │
+         ├─ "Verify root α = k to n d.p."
+         │       → Interval = [k − 0.5×10⁻ⁿ,  k + 0.5×10⁻ⁿ]
+         │       → Evaluate f at both ends, check opposite signs
+         │       → State conclusion with change of sign
+         │
+         ├─ "Find root by iteration"
+         │       → Rearrange f(x)=0 to x = g(x)
+         │       → Write x_{n+1} = g(x_n)
+         │       → Choose x₀ near the root
+         │       → Iterate until convergence
+         │
+         ├─ "Sign change but is there really a root?"
+         │       → Check for asymptote in (a,b)
+         │       → If yes: f is NOT continuous → theorem fails
+         │
+         └─ "No sign change — does a root exist?"
+                 → Check for even number of roots (sketch)
+                 → Sign change sufficient but NOT necessary</pre>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>8. Five Archetype Examples</h2>
+
+<div class="archetype">
+<h3>① Basic Sign-Change Location</h3>
+<p><strong>Problem:</strong> Show $f(x)=x^3-4x^2+3x+1$ has a root in $(2,3)$.</p>
+<p>$f(2)=8-16+6+1=-1<0$;&ensp; $f(3)=27-36+9+1=1>0$</p>
+<p>Change of sign + $f$ continuous ⇒ root in $(2,3)$. ✓</p>
+</div>
+
+<div class="archetype">
+<h3>② Verify Root to 3 d.p.</h3>
+<p><strong>Problem:</strong> Verify $\alpha=1.864$ to 3 d.p. for $f(x)=3+x^2-x^3$.</p>
+<p><strong>Interval:</strong> $[1.8635,\; 1.8645]$</p>
+<p>$f(1.8635)>0$, $f(1.8645)<0$ → change of sign → $\alpha=1.864$ to 3 d.p. ✓</p>
+</div>
+
+<div class="archetype">
+<h3>③ Build and Run an Iterative Formula</h3>
+<p><strong>Problem:</strong> $f(x)=x^2-4x+1=0$, root in $(3,4)$.</p>
+<p><strong>Rearrange:</strong> $x^2=4x-1 \Rightarrow x = 4 - 1/x$</p>
+<p><strong>Formula:</strong> $x_{n+1}=4-1/x_n$, $x_0=3$</p>
+<p>$x_1=3.6\overline{6}$,&ensp; $x_2=3.727\ldots$,&ensp; $x_3=3.7317\ldots$ &ensp;→ converging to $\alpha=3.732\ldots$</p>
+</div>
+
+<div class="archetype">
+<h3>④ Cobweb vs Staircase — Same Function, Two Rearrangements</h3>
+<p><strong>$f(x)=x^2-x-1$:</strong></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rearrangement</th><th>Formula</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td>$x=\sqrt{x+1}$</td><td>$x_{n+1}=\sqrt{x_n+1}$, $x_0=0.5$</td><td><strong>Staircase</strong> — monotone approach from below</td></tr>
+<tr><td>$x=\dfrac{1}{x-1}$</td><td>$x_{n+1}=\dfrac{1}{x_n-1}$, $x_0=-2$</td><td><strong>Cobweb</strong> — alternating either side of root</td></tr>
+<tr><td>$x=x^2-1$</td><td>$x_{n+1}=x_n^2-1$, $x_0=2$</td><td><strong>Diverges</strong> — moves away from root</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="archetype">
+<h3>⑤ Asymptote Pitfall</h3>
+<p><strong>Problem:</strong> $f(x)=2+\tan x$, interval $[1.5, 1.6]$.</p>
+<p>$f(1.5)=2+\tan(1.5)\approx16.1>0$;&ensp; $f(1.6)=2+\tan(1.6)\approx-32.5<0$</p>
+<p>Sign change exists, <strong>but</strong> $\tan x$ has a vertical asymptote at $x=\pi/2\approx1.5708\in(1.5,1.6)$.</p>
+<p>$f$ is <strong>not continuous</strong> on $[1.5,1.6]$ → <strong>no root</strong> in this interval. The theorem does not apply.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>9. Common Pitfalls — Exam Mark-Losers</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Pitfall</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Forgetting to state <strong>continuity</strong></td><td>Always write: "… and $f$ is continuous on $[a,b]$, so …"</td></tr>
+<tr><td>2</td><td>Forgetting to state <strong>change of sign</strong></td><td>Explicitly say "there is a change of sign"</td></tr>
+<tr><td>3</td><td>Wrong verification interval (using $\pm0.5$ instead of $\pm0.5\times10^{-n}$)</td><td>Half a unit in the <em>last quoted decimal place</em></td></tr>
+<tr><td>4</td><td>Assuming sign change ⇒ <em>exactly</em> one root</td><td>Sign change ⇒ <strong>at least one</strong> root</td></tr>
+<tr><td>5</td><td>Assuming no sign change ⇒ no roots</td><td>Even-multiplicity roots don't give sign changes</td></tr>
+<tr><td>6</td><td>Using a rearrangement that diverges</td><td>Try a different rearrangement or different $x_0$</td></tr>
+<tr><td>7</td><td>Not stating domain restrictions (e.g. $x\neq0$)</td><td>State any restriction introduced during rearrangement</td></tr>
+<tr><td>8</td><td>Rounding intermediate iterations</td><td>Keep full calculator precision; round only the final answer</td></tr>
+<tr><td>9</td><td>Cobweb vs staircase confusion</td><td>Staircase = same-side approach; cobweb = alternating sides</td></tr>
+<tr><td>10</td><td>Missing asymptote inside interval</td><td>Sketch first or check for discontinuities before applying theorem</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>10. Big Picture — 30-Second Mental Model</h2>
+<div class="bigpic">
+<pre>NUMERICAL METHODS: two big ideas
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+① SIGN CHANGE  ──────────────────────────────────
+   Continuous f: opposite signs at endpoints
+       ⟹  at least one root between them
+   Use to: LOCATE a root, VERIFY to n d.p.
+   Pitfalls: asymptotes, even roots
+
+② FIXED-POINT ITERATION  ────────────────────────
+   Rearrange f(x) = 0  →  x = g(x)
+   Iterate: x_{n+1} = g(x_n)
+   Converges ─┬─ staircase (same-side approach)
+              └─ cobweb   (alternating sides)
+   Diverges: iterations run away from root
+   Different rearrangements → may find
+   different roots or diverge!
+
+KEY FORMULA PAIR:
+   Root in [a,b]:  f(a)·f(b) &lt; 0  AND  f continuous
+   Root = α to n d.p.:  sign change in
+        [α − 0.5×10⁻ⁿ,  α + 0.5×10⁻ⁿ]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+</div>
+
+<hr/>
+<p style="color:var(--muted); font-size:0.8rem; text-align:center; margin-top:1rem;">
+  P3 Ch 8 Numerical Methods · Recall Sheet · Built for Edexcel IAL Pure 3
+</p>
+</div>
+</body>
+</html>
