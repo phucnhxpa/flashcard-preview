@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FP1 Q10 — Induction: matrix power + divisibility</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">FP1 (WFM01/01) · Q10 · Paper 1 (Jan 2024) · Attempted 19 Apr 2026</div>
+  <h1>Q10 — Prove by induction: (i) matrix power; (ii) $f(n) = 8^{2n+1} + 6^{2n-1}$ divisible by $7$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><strong>(i)</strong> Prove by induction that for $n \in \mathbb{Z}^+$:</p><p>$$\begin{pmatrix} 5 & -1 \\ 4 & 1 \end{pmatrix}^n = 3^{n-1}\begin{pmatrix} 2n+3 & -n \\ 4n & 3-2n \end{pmatrix}$$ <strong>[5]</strong></p><p><strong>(ii)</strong> Prove by induction that for $n \in \mathbb{Z}^+$, $f(n) = 8^{2n+1} + 6^{2n-1}$ is divisible by $7$. <strong>[5]</strong></p>
+    
+    <p class="q-marks">[10 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (i) — Matrix power induction <span class="pmarks">[5 marks] · 5 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>LHS:</strong> $\begin{pmatrix}5&-1\\4&1\end{pmatrix}^1 = \begin{pmatrix}5&-1\\4&1\end{pmatrix}$.</p><p><strong>RHS:</strong> $3^{0}\!\begin{pmatrix}2(1)+3 & -1 \\ 4(1) & 3-2(1)\end{pmatrix} = \begin{pmatrix}5 & -1 \\ 4 & 1\end{pmatrix}$.</p><p>LHS = RHS, so the statement is true for $n=1$. ✓</p>
+    
+    <div class="step-result">True for $n=1$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> True for $n=1$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the inductive hypothesis is the &quot;assume true for $n=k$&quot; sentence. We treat it as a temporary axiom &#x2014; everything in step 3 will be derived from it. Without writing this line down explicitly, the proof loses the M1 method mark.</p><p><strong>Inductive hypothesis</strong> (assume true for some integer $n=k\ge 1$):</p><p>$$A^k \;=\; 3^{k-1}\!\begin{pmatrix} 2k+3 & -k \\ 4k & 3-2k \end{pmatrix}$$</p><p>where $A = \begin{pmatrix}5 & -1\\ 4 & 1\end{pmatrix}$ (the matrix from the question).</p><p>$$\boxed{\;\text{IH: }A^k = 3^{k-1}\!\begin{pmatrix}2k+3 & -k \\ 4k & 3-2k\end{pmatrix}\;}$$</p><div class="why"><strong>Induction structure (memorize):</strong> the assume-step always comes BEFORE the prove-step. The base case ($n=1$) must come FIRST &#x2014; it is what anchors the whole chain. Without a verified base, the inductive step proves nothing. Examiners look for all four sentences in order: BASE &#x2192; ASSUME &#x2192; SHOW &#x2192; CONCLUDE.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $\boxed{\;\text{IH: }A^k = 3^{k-1}\!\begin{pmatrix}2k+3 & -k \\ 4k & 3-2k\end{pmatrix}\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Key move:</strong> $A^{k+1} = A^k \cdot A$.</p><p>$$A^{k+1} = 3^{k-1}\!\begin{pmatrix} 2k+3 & -k \\ 4k & 3-2k \end{pmatrix}\!\begin{pmatrix} 5 & -1 \\ 4 & 1 \end{pmatrix}$$</p><p>Row × column:</p><p>$(1,1) = 5(2k+3) + 4(-k) = 10k+15 - 4k = 6k + 15$</p><p>$(1,2) = -(2k+3) + (-k) = -3k - 3$</p><p>$(2,1) = 5(4k) + 4(3-2k) = 20k + 12 - 8k = 12k + 12$</p><p>$(2,2) = -(4k) + (3-2k) = -6k + 3$</p><p>$$A^{k+1} = 3^{k-1}\begin{pmatrix} 6k+15 & -3k-3 \\ 12k+12 & -6k+3 \end{pmatrix}$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 3:</strong> $A^{k+1} = 3^{k-1}\begin{pmatrix} 6k+15 & -3k-3 \\ 12k+12 & -6k+3 \end{pmatrix}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>$6k+15 = 3(2k+5) = 3[2(k+1)+3]$</p><p>$-3k-3 = 3[-(k+1)]$</p><p>$12k+12 = 3\cdot 4(k+1)$</p><p>$-6k+3 = 3(1 - 2k) = 3[3 - 2(k+1)]$</p><p>$$A^{k+1} = 3^{k-1}\cdot 3\!\begin{pmatrix} 2(k+1)+3 & -(k+1) \\ 4(k+1) & 3-2(k+1) \end{pmatrix} = 3^{k}\!\begin{pmatrix} 2(k+1)+3 & -(k+1) \\ 4(k+1) & 3-2(k+1) \end{pmatrix}$$</p><p>This matches the target with $n$ replaced by $k+1$ ($3^{(k+1)-1} = 3^k$). ✓</p><div class="why"><strong>Critical step:</strong> the RHS has $3^{n-1}$, so after multiplying you MUST factor out a $3$ to advance the exponent. Same factor-early principle as Q8.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 4:</strong> $A^{k+1} = 3^{k-1}\cdot 3\!\begin{pmatrix} 2(k+1)+3 & -(k+1) \\ 4(k+1) & 3-2(k+1) \end{pmatrix} = 3^{k}\!\begin{pmatrix} 2(k+1)+3 & -(k+1) \\ 4(k+1) & 3-2(k+1) \end{pmatrix}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>The statement is true for $n=1$. We have shown that if it is true for $n=k$ then it is true for $n=k+1$. Therefore, by the principle of mathematical induction, the statement is true for all $n \in \mathbb{Z}^+$. $\blacksquare$</p><div class="why"><strong>Examiners reward verbatim phrasing</strong> — always include all four sentences: base case true, hypothesis, inductive step, "by the principle of mathematical induction".</div>
+    
+    <div class="step-result">Statement true $\forall n \in \mathbb{Z}^+$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (ii) — Divisibility induction <span class="pmarks">[5 marks] · 5 steps</span></h2>
+  <div class="given"><strong>4-step template:</strong> base case → assume → show → conclude.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>$$f(1) = 8^{3} + 6^{1} = 512 + 6 = 518 = 7 \times 74$$</p><p>So $f(1)$ is divisible by $7$. ✓</p>
+    
+    <div class="step-result">$f(1) = 518 = 7\cdot 74$ ✓</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $f(1) = 518 = 7\cdot 74$ ✓</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Assume $f(k) = 8^{2k+1} + 6^{2k-1}$ is divisible by $7$, i.e. $f(k) = 7M$ for some integer $M$.</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $M$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>$$f(k+1) = 8^{2(k+1)+1} + 6^{2(k+1)-1} = 8^{2k+3} + 6^{2k+1}$$</p><p>$$= 8^{2k+1}\cdot 8^2 + 6^{2k-1}\cdot 6^2 = 64\cdot 8^{2k+1} + 36\cdot 6^{2k-1}$$</p><p><strong>Tutor trick:</strong> form $f(k+1) - f(k)$:</p><p>$$f(k+1) - f(k) = (64-1)\cdot 8^{2k+1} + (36-1)\cdot 6^{2k-1} = 63\cdot 8^{2k+1} + 35\cdot 6^{2k-1}$$</p><div class="why">$64-1 = 63 = 7\cdot 9$ and $36-1 = 35 = 7\cdot 5$ — both multiples of $7$. <strong>This is the designed hook</strong> of the question.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 3:</strong> $f(k+1) - f(k) = (64-1)\cdot 8^{2k+1} + (36-1)\cdot 6^{2k-1} = 63\cdot 8^{2k+1} + 35\cdot 6^{2k-1}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$f(k+1) - f(k) = 7\bigl(9\cdot 8^{2k+1} + 5\cdot 6^{2k-1}\bigr)$$</p><p>So:</p><p>$$f(k+1) = f(k) + 7\bigl(9\cdot 8^{2k+1} + 5\cdot 6^{2k-1}\bigr) = 7M + 7(\text{integer}) = 7\cdot (\text{integer})$$</p><p>Therefore $f(k+1)$ is divisible by $7$. ✓</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 3:</strong> $f(k+1) = 7M + 7(\\text{integer}) = 7\\cdot(\\text{integer})$, so $f(k+1)$ divisible by 7 ✓</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>The statement is true for $n=1$. We have shown that if $f(k)$ is divisible by $7$ then $f(k+1)$ is divisible by $7$. Therefore, by the principle of mathematical induction, $f(n) = 8^{2n+1} + 6^{2n-1}$ is divisible by $7$ for all $n \in \mathbb{Z}^+$. $\blacksquare$</p>
+    
+    <div class="step-result">$f(n)$ divisible by $7$, $\forall n \in \mathbb{Z}^+$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
