@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P1 Q3 — Graph transformations $f(x+3)$, $f(-3x)$</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P1 (WMA11/01) · Q3 · Paper 2 (Thursday 9 May 2024) · Attempted 5 Apr 2026</div>
+  <h1>Q3 — Sketch $y = f(x+3)$ and $y = f(-3x)$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The curve $y = f(x)$ passes through $(-1, 0)$ and $(0, 2)$, and <strong>touches</strong> the $x$-axis at $(3, 0)$.</p><p>Sketch, on separate diagrams, showing all intercepts clearly:</p><p><strong>(a)</strong> $y = f(x + 3)$ <strong>[3]</strong> &nbsp;&nbsp;<strong>(b)</strong> $y = f(-3x)$ <strong>[3]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="130" x2="360" y2="130" stroke="#1d1d1f" stroke-width="1"/><line x1="190" y1="14" x2="190" y2="190" stroke="#1d1d1f" stroke-width="1"/><text x="362" y="134" font-size="11">x</text><text x="194" y="16" font-size="11">y</text><path d="M 100 195 Q 130 170 160 130 Q 175 100 190 86 C 215 80 260 130 280 130 C 300 130 320 110 340 80" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><circle cx="160" cy="130" r="2.5" fill="#1d1d1f"/><circle cx="190" cy="86" r="2.5" fill="#1d1d1f"/><circle cx="280" cy="130" r="2.5" fill="#1d1d1f"/><text x="146" y="148" font-size="11" font-style="italic">(−1, 0)</text><text x="196" y="84" font-size="11" font-style="italic">(0, 2)</text><text x="266" y="148" font-size="11" font-style="italic">(3, 0) touch</text><text x="62" y="40" font-size="12" font-style="italic">y = f(x)</text></svg></div>
+    <p class="q-marks">[6 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — $y = f(x + 3)$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1 M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> identify which type of transformation $f(x+3)$ represents, write down the rule for moving any labelled point, then apply it to each known point on the original curve.</p><p><strong>Transformation rule (inside $f$, additive):</strong></p><p>$\;\;y = f(x + a)$ &nbsp;⇒ horizontal shift LEFT by $a$ units (if $a > 0$).</p><p>So $y = f(x+3)$ shifts the original curve <strong>3 units to the LEFT</strong>. Coordinate map: $(x, y) \mapsto (x - 3,\, y)$ — only $x$ changes.</p><p><strong>Apply</strong> to the three labelled points of $y = f(x)$:</p><p>$\;\;(-1, 0) \;\to\; (-1 - 3, 0) = (-4, 0)$</p><p>$\;\;(0, 2) \;\to\; (0 - 3, 2) = (-3, 2)$</p><p>$\;\;(3, 0)$ <em>touch</em> $\;\to\; (3 - 3, 0) = (0, 0)$, still <em>touches</em></p><p>$$\boxed{\;(-4,0),\;(-3,2),\;(0,0)\text{ touch}\;}$$</p><div class="why"><strong>The counter-intuitive bit:</strong> $+3$ inside means LEFT, not right. <strong>Why?</strong> $f(x+3) = 0$ when $x+3 = $ original-root, i.e. $x = $ original-root $- 3$ — <em>3 less than before</em>, i.e. shifted left. <strong>Touches stays a touch:</strong> a double root ("touches") stays a double root under any horizontal shift; the curve still kisses the $x$-axis at the new $x$-coordinate.</div>
+    
+    <div class="step-result">$(-4,0),\;(-3,2),\;(0,0)$ — last still touches</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $(-4,0),\;(-3,2),\;(0,0)$ touch</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> draw the same shape as $y = f(x)$ but slid left by 3 units. The shape is preserved exactly — only its horizontal position changes.</p><p><strong>Three key features to show:</strong></p><p>$\;\;(-4, 0)$ — leftmost $x$-intercept (the curve crosses).</p><p>$\;\;(-3, 2)$ — local max (the original $y$-intercept, now 3 left).</p><p>$\;\;(0, 0)$ — tangent contact (curve touches $x$-axis without crossing).</p><p>The new curve also passes through the origin $(0, 0)$, which now serves as the new $y$-intercept (since the touch point ended up on the $y$-axis).</p><div class="why"><strong>Mark scheme cue:</strong> label all three intercepts/key points; the touch behaviour at $(0,0)$ must be visibly tangent (curve approaches and leaves on the same side of the axis), not a crossing. <strong>Common slip:</strong> drawing the curve crossing at $(0,0)$ instead of touching loses the A1.</div>
+    <div class="step-diagram"><svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="130" x2="360" y2="130" stroke="#1d1d1f" stroke-width="1"/><line x1="190" y1="14" x2="190" y2="190" stroke="#1d1d1f" stroke-width="1"/><text x="362" y="134" font-size="11">x</text><text x="194" y="16" font-size="11">y</text><path d="M 10 195 Q 40 170 70 130 Q 85 100 100 86 C 125 80 170 130 190 130 C 210 130 230 110 250 80" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><circle cx="70" cy="130" r="2.5" fill="#1d1d1f"/><circle cx="100" cy="86" r="2.5" fill="#1d1d1f"/><circle cx="190" cy="130" r="2.5" fill="#1d1d1f"/><text x="56" y="148" font-size="11" font-style="italic">(−4, 0)</text><text x="104" y="84" font-size="11" font-style="italic">(−3, 2)</text><text x="194" y="148" font-size="11" font-style="italic">(0, 0) touch</text><text x="220" y="40" font-size="12" font-style="italic">y = f(x + 3)</text></svg></div>
+    <div class="step-result">Curve through $(-4,0)$, $(-3,2)$, tangent at $(0,0)$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — $y = f(-3x)$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (a):</strong> the original three points are $(-1,0)$, $(0,2)$, $(3,0)$ touch — apply a different transformation now.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1 M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $f(-3x)$ has TWO transformations rolled into one: the negative sign and the factor of $3$ both sit inside $f$. Decompose, then apply the coordinate map.</p><p><strong>Effect (1) — minus sign inside:</strong></p><p>$\;\;y = f(-x)$ is the reflection of $y = f(x)$ in the $y$-axis.</p><p><strong>Effect (2) — factor inside:</strong></p><p>$\;\;y = f(ax)$ with $|a| > 1$ is a horizontal <em>compression</em> by factor $\tfrac{1}{|a|}$.</p><p><strong>Combined transformation rule:</strong> for $y = f(ax)$, replace $x$ by $\dfrac{x}{a}$. Coordinate map: $(x, y) \mapsto \bigl(\tfrac{x}{a},\, y\bigr)$.</p><p>Here $a = -3$, so divide each $x$-coordinate by $-3$:</p><p>$\;\;(-1, 0) \;\to\; \bigl(\tfrac{-1}{-3},\, 0\bigr) = \bigl(\tfrac{1}{3},\, 0\bigr)$</p><p>$\;\;(0, 2) \;\to\; \bigl(\tfrac{0}{-3},\, 2\bigr) = (0, 2)$ — unchanged (any horizontal transformation leaves $x = 0$ alone)</p><p>$\;\;(3, 0)$ <em>touch</em> $\;\to\; \bigl(\tfrac{3}{-3},\, 0\bigr) = (-1, 0)$, still <em>touches</em></p><p>$$\boxed{\;\bigl(\tfrac{1}{3},0\bigr),\;(0,2),\;(-1,0)\text{ touch}\;}$$</p><div class="why"><strong>Inside-vs-outside rule:</strong> changes <em>inside</em> $f()$ are HORIZONTAL and counter-intuitive (they affect $x$ in the opposite way you might expect: $f(3x)$ <em>compresses</em>, not stretches). Changes <em>outside</em> $f()$ are VERTICAL and match intuition. Here both changes are inside, so both are horizontal. <strong>Sanity check:</strong> the $y$-intercept $(0, 2)$ is fixed under any horizontal scaling/reflection — only points off the $y$-axis move.</div>
+    
+    <div class="step-result">$\bigl(\tfrac{1}{3},0\bigr),\;(0,2),\;(-1,0)$ touch</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $\bigl(\tfrac{1}{3},0\bigr),\;(0,2),\;(-1,0)$ touch</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> sketch the new curve passing through the three transformed points. The shape is the original mirror-flipped left↔right and compressed to $\tfrac{1}{3}$ of its original horizontal extent.</p><p><strong>Three key features to show:</strong></p><p>$\;\;\bigl(\tfrac{1}{3}, 0\bigr)$ — the new ($x$-intercept that crosses).</p><p>$\;\;(0, 2)$ — local extremum, $y$-intercept (unchanged from original).</p><p>$\;\;(-1, 0)$ — tangent contact (the curve touches but does not cross).</p><p>Visually: original tangent at $(3, 0)$ on the right has migrated to $(-1, 0)$ on the LEFT, and the original crossing at $(-1, 0)$ has migrated to $\tfrac{1}{3}$ on the right.</p><div class="why"><strong>Common slip:</strong> dividing by $3$ instead of $-3$ gives a compression but forgets the reflection — produces a curve that looks similar but lies on the wrong side of the $y$-axis. Always include the sign. <strong>Mark scheme cue:</strong> the touch at $(-1, 0)$ must be visibly tangent (not a crossing) to earn the A1.</div>
+    <div class="step-diagram"><svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="130" x2="360" y2="130" stroke="#1d1d1f" stroke-width="1"/><line x1="190" y1="14" x2="190" y2="190" stroke="#1d1d1f" stroke-width="1"/><text x="362" y="134" font-size="11">x</text><text x="194" y="16" font-size="11">y</text><path d="M 130 30 C 142 60 152 130 160 130 C 170 130 180 105 190 86 Q 196 92 200 130 Q 225 175 260 195" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><circle cx="160" cy="130" r="2.5" fill="#1d1d1f"/><circle cx="190" cy="86" r="2.5" fill="#1d1d1f"/><circle cx="200" cy="130" r="2.5" fill="#1d1d1f"/><text x="125" y="146" font-size="11" font-style="italic">(−1, 0) touch</text><text x="194" y="84" font-size="11" font-style="italic">(0, 2)</text><text x="200" y="148" font-size="11" font-style="italic">($\tfrac{1}{3}$, 0)</text><text x="232" y="40" font-size="12" font-style="italic">y = f(−3x)</text></svg></div>
+    <div class="step-result">Curve through $\bigl(\tfrac{1}{3},0\bigr)$, $(0,2)$, tangent at $(-1,0)$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
