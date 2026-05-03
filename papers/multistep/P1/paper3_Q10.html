@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P1 Q10 — Find $k$ via $f''=0$, then integrate $f'$</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P1 (WMA11/01) · QQ10 · Paper 3 (Tuesday 9 January 2024) · Attempted 6 Apr 2026</div>
+  <h1>Q10 — $f'(x) = 4x^{3/2} + \dfrac{k}{x^2}$, $f''(2) = 0$, $P(2,8\sqrt{2})$ on curve</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Curve $C: y = f(x)$, $x > 0$. Given $P(2,\, 8\sqrt{2})$ lies on $C$, $\;f'(x) = 4x^{3/2} + \dfrac{k}{x^2}\;$ and $\;f''(x) = 0\;$ at $P$.</p><p><strong>(a)</strong> Find the exact value of $k$. <strong>[4]</strong></p><p><strong>(b)</strong> Find $f(x)$. <strong>[4]</strong></p>
+    
+    <p class="q-marks">[8 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Find $k$ <span class="pmarks">[4 marks] · 4 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal"></span></span>
+    
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> we have $f&#x27;(x) = 4x^{3/2} + kx^{-2}$ with two unknowns to deal with: the constant $k$ in the formula, and (eventually) an integration constant $C$ when we integrate to find $f(x)$. The conditions given are $P(2, 8\sqrt{2})$ on $C$ and $f&#x27;&#x27;(2) = 0$ (a stationary point of $f&#x27;$). Choose the order that uses each unknown cleanly.</p><p><strong>Tempting (wrong) plan:</strong> integrate $f&#x27;$ first to get $f(x) = \dots + kx^{?} + C$, then plug in $P$. <em>But</em> that single equation involves BOTH $k$ and $C$ — one equation, two unknowns ⇒ stuck (need a second equation, which won&#x27;t come from $f&#x27;&#x27;$ if we&#x27;ve already integrated).</p><p><strong>Right plan:</strong> notice that $f&#x27;&#x27;(2) = 0$ involves $k$ ALONE (no $C$). Use it FIRST to find $k$, THEN integrate $f&#x27;$ to get $f(x)$ with the now-known $k$, THEN plug in $P$ to find $C$.</p><p><strong>Order of operations:</strong></p><p>$\;\;\;1.\;\;f&#x27;(x) \xrightarrow{\,\text{differentiate}\,} f&#x27;&#x27;(x)$</p><p>$\;\;\;2.\;\;\text{Set } f&#x27;&#x27;(2) = 0 \to \text{ solve for } k$</p><p>$\;\;\;3.\;\;\text{(in part b) integrate } f&#x27;(x) \to f(x) + C, \text{ use } P \to \text{ solve for } C$</p><p>$$\boxed{\;\text{Strategy: differentiate first (find } k\text{), integrate later (find } C\text{)}\;}$$</p><div class="why"><strong>General rule for two unknowns:</strong> find an extra condition that involves <em>only one</em> of them, and use it first to reduce the system to one unknown. Here $f&#x27;&#x27;(2)=0$ is the &quot;clean&quot; condition (only $k$); $P$ on $C$ is the &quot;mixed&quot; condition (both $k$ and $C$).</div>
+    
+    <div class="step-result">Strategy: differentiate first, integrate later.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Strategy: differentiate $f'$ first to get $f''$ (involves $k$ only), then integrate later.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the power rule for differentiation only handles terms of the form $x^n$ for any real $n$ — including negative and fractional exponents. So rewrite any fractions like $\tfrac{1}{x^2}$ as $x^{-2}$ first, then apply the rule term-by-term.</p><p><strong>Rewrite</strong> the given $f&#x27;(x)$ in pure-power form (already done in this case):</p><p>$\;\;\;f&#x27;(x) = 4x^{3/2} + k\, x^{-2}$</p><p><strong>Formula (power rule):</strong></p><p>$$\tfrac{d}{dx}\!\left(x^n\right) = n\, x^{n-1}$$</p><p><strong>Term 1 — differentiate $4x^{3/2}$:</strong></p><p>$\;\;\;\tfrac{d}{dx}\!\left(4x^{3/2}\right) = 4 \cdot \tfrac{3}{2}\, x^{(3/2) - 1} = 6\, x^{1/2}$</p><p><strong>Term 2 — differentiate $k\, x^{-2}$:</strong></p><p>$\;\;\;\tfrac{d}{dx}\!\left(k\, x^{-2}\right) = k \cdot (-2)\, x^{-2 - 1} = -2k\, x^{-3}$</p><p><strong>Sum:</strong></p><p>$$\boxed{\;f&#x27;&#x27;(x) = 6x^{1/2} - 2k\, x^{-3}\;}$$</p><div class="why"><strong>Always rewrite $\tfrac{1}{x^2}$ as $x^{-2}$ first</strong> before differentiating — the power rule needs an exponent, not a fraction. <strong>Watch the new exponent for negative powers:</strong> $-2 - 1 = -3$ (not $-1$). A common slip is to write $-2x^{-1}$ or to forget to multiply by the original $-2$.</div>
+    
+    <div class="step-result">$f''(x) = 6x^{1/2} - 2k\, x^{-3}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $f''(x) = 6x^{1/2} - 2k\, x^{-3}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> we have $f&#x27;&#x27;(x) = 6x^{1/2} - 2k\, x^{-3}$. The condition $f&#x27;&#x27;(2) = 0$ (the question states $f&#x27;$ has a stationary point at $x = 2$) gives one equation in $k$.</p><p><strong>Substitute</strong> $x = 2$:</p><p>$\;\;\;f&#x27;&#x27;(2) = 6 \cdot 2^{1/2} - 2k \cdot 2^{-3}$</p><p>Simplify each piece:</p><p>$\;\;\;2^{1/2} = \sqrt{2}$, &nbsp;and &nbsp;$2^{-3} = \tfrac{1}{8}$</p><p>$\;\;\;f&#x27;&#x27;(2) = 6\sqrt{2} - \tfrac{2k}{8} = 6\sqrt{2} - \tfrac{k}{4}$</p><p><strong>Set equal to $0$</strong> (stationary point condition):</p><p>$\;\;\;6\sqrt{2} - \tfrac{k}{4} = 0$</p><p>Add $\tfrac{k}{4}$ to both sides:</p><p>$$\boxed{\;\dfrac{k}{4} = 6\sqrt{2}\;}$$</p><div class="why"><strong>Why $f&#x27;&#x27;(2) = 0$ matters:</strong> the question specifies that $f&#x27;$ has a stationary point at $x = 2$ — meaning the slope of $f&#x27;$ is zero there, i.e. $\tfrac{d}{dx}f&#x27;(x) = f&#x27;&#x27;(x) = 0$. This is the condition that pins down $k$. <strong>Don&#x27;t confuse with $f$ stationary:</strong> if it had been $f&#x27;(2) = 0$ instead, that would be a stationary point of $f$ — a different condition, leading to a different $k$.</div>
+    
+    <div class="step-result">$\dfrac{k}{4} = 6\sqrt{2}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 3:</span><strong>From STEP 3:</strong> $\dfrac{k}{4} = 6\sqrt{2}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> isolate $k$ by multiplying both sides of $\tfrac{k}{4} = 6\sqrt{2}$ by $4$. Keep everything in surd form — the question wants exact.</p><p><strong>Multiply both sides by $4$:</strong></p><p>$\;\;\;k = 4 \times 6\sqrt{2}$</p><p>$\;\;\;k = 24\sqrt{2}$</p><p>$$\boxed{\;k = 24\sqrt{2}\;}$$</p><div class="why"><strong>&quot;Exact&quot; means keep the surd:</strong> do NOT write $k \approx 33.94$. Examiners deduct marks for converting to decimal — the answer must be in the form $a\sqrt{b}$ with $b$ square-free. <strong>Verify:</strong> $24\sqrt{2}/4 = 6\sqrt{2}$ ✓, matching the previous step.</div>
+    
+    <div class="step-result">$k = 24\sqrt{2}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Find $f(x)$ <span class="pmarks">[4 marks] · 4 steps</span></h2>
+  <div class="given"><strong>From (a):</strong> $k = 24\sqrt{2}$, so $f'(x) = 4x^{3/2} + 24\sqrt{2}\, x^{-2}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> with $k = 24\sqrt{2}$ from part (a), $f&#x27;(x) = 4x^{3/2} + 24\sqrt{2}\, x^{-2}$. Integrate term-by-term using the power rule for integration; the constant of integration $C$ will be pinned down later using $P(2, 8\sqrt{2})$.</p><p><strong>Formula (power rule for integration, $n \ne -1$):</strong></p><p>$$\int x^n\,dx = \dfrac{x^{n+1}}{n+1} + C$$</p><p><strong>Term 1 — integrate $4x^{3/2}$:</strong></p><p>$\;\;\;\int 4x^{3/2}\,dx = 4 \cdot \dfrac{x^{(3/2)+1}}{(3/2)+1} = 4 \cdot \dfrac{x^{5/2}}{5/2}$</p><p>$\;\;\;\phantom{\int 4x^{3/2}\,dx} = 4 \cdot \tfrac{2}{5}\, x^{5/2} = \tfrac{8}{5}x^{5/2}$</p><p><strong>Term 2 — integrate $24\sqrt{2}\, x^{-2}$:</strong></p><p>$\;\;\;\int 24\sqrt{2}\, x^{-2}\,dx = 24\sqrt{2} \cdot \dfrac{x^{-2 + 1}}{-2 + 1} = 24\sqrt{2} \cdot \dfrac{x^{-1}}{-1}$</p><p>$\;\;\;\phantom{\int 24\sqrt{2}\, x^{-2}\,dx} = -24\sqrt{2}\, x^{-1} = -\dfrac{24\sqrt{2}}{x}$</p><p>$$\boxed{\;f(x) = \tfrac{8}{5}x^{5/2} - \dfrac{24\sqrt{2}}{x} + C\;}$$</p><div class="why"><strong>Trap with $x^{-2}$:</strong> the new exponent is $-2 + 1 = -1$ (not $-3$), and dividing by $-1$ flips the sign. <strong>Don&#x27;t confuse</strong> with the rule $\int x^{-1}\,dx = \ln|x|$ — that&#x27;s only when $n = -1$ exactly. Here $n = -2$, so the standard power rule applies.</div>
+    
+    <div class="step-result">$f(x) = \tfrac{8}{5}x^{5/2} - \dfrac{24\sqrt{2}}{x} + C$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $f(x) = \tfrac{8}{5}x^{5/2} - \dfrac{24\sqrt{2}}{x} + C$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> we&#x27;ll plug $x = 2$ into $f(x)$ shortly; first, simplify the non-trivial surd power $2^{5/2}$ in advance so we&#x27;re not juggling fractions of fractions.</p><p><strong>Index-law expansion:</strong> $2^{5/2} = 2^{2 + 1/2} = 2^2 \cdot 2^{1/2}$:</p><p>$\;\;\;2^{5/2} = 4 \cdot \sqrt{2} = 4\sqrt{2}$</p><p><strong>Apply to first term:</strong></p><p>$\;\;\;\tfrac{8}{5}\, (2)^{5/2} = \tfrac{8}{5} \cdot 4\sqrt{2} = \dfrac{32\sqrt{2}}{5}$</p><p><strong>Second term at $x = 2$:</strong></p><p>$\;\;\;\dfrac{24\sqrt{2}}{2} = 12\sqrt{2}$</p><p>$$\boxed{\;2^{5/2} = 4\sqrt{2}\;}$$</p><div class="why"><strong>Memorise the powers-of-2 surd ladder:</strong> $2^{1/2} = \sqrt{2}$, $2^{3/2} = 2\sqrt{2}$, $2^{5/2} = 4\sqrt{2}$, $2^{7/2} = 8\sqrt{2}$ — each step multiplies by $2$. <strong>Why pre-simplify:</strong> avoids ugly fractions like $\tfrac{8}{5}\cdot 2^{5/2}$ in the next step, which is error-prone.</div>
+    
+    <div class="step-result">$2^{5/2} = 4\sqrt{2}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $2^{5/2} = 4\sqrt{2}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $P(2, 8\sqrt{2})$ on $C$ means $f(2) = 8\sqrt{2}$. Substitute and solve the resulting equation for the integration constant $C$.</p><p><strong>Substitute</strong> $x = 2$ into $f(x) = \tfrac{8}{5}x^{5/2} - \dfrac{24\sqrt{2}}{x} + C$:</p><p>$\;\;\;f(2) = \tfrac{8}{5}(2)^{5/2} - \dfrac{24\sqrt{2}}{2} + C$</p><p>Plug in the simplifications from the previous step:</p><p>$\;\;\;f(2) = \tfrac{32\sqrt{2}}{5} - 12\sqrt{2} + C$</p><p><strong>Set equal</strong> to $8\sqrt{2}$:</p><p>$\;\;\;8\sqrt{2} = \tfrac{32\sqrt{2}}{5} - 12\sqrt{2} + C$</p><p>Solve for $C$ — collect $\sqrt{2}$ terms on the RHS:</p><p>$\;\;\;C = 8\sqrt{2} + 12\sqrt{2} - \tfrac{32\sqrt{2}}{5}$</p><p>$\;\;\;C = 20\sqrt{2} - \tfrac{32\sqrt{2}}{5}$</p><p>Common denominator $5$ — write $20\sqrt{2} = \tfrac{100\sqrt{2}}{5}$:</p><p>$\;\;\;C = \tfrac{100\sqrt{2}}{5} - \tfrac{32\sqrt{2}}{5} = \tfrac{68\sqrt{2}}{5}$</p><p>$$\boxed{\;C = \dfrac{68\sqrt{2}}{5}\;}$$</p><div class="why"><strong>Collect like-surds the same way as like-terms:</strong> $20\sqrt{2} - \tfrac{32\sqrt{2}}{5} = (20 - \tfrac{32}{5})\sqrt{2} = \tfrac{68}{5}\sqrt{2}$. <strong>Common-denominator slip:</strong> turning $20$ into $\tfrac{100}{5}$ (not $\tfrac{20}{5}$) is essential — multiply numerator and denominator by $5$.</div>
+    
+    <div class="step-result">$C = \dfrac{68\sqrt{2}}{5}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 3:</span><strong>From STEP 3:</strong> $C = \dfrac{68\sqrt{2}}{5}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> assemble the final $f(x)$ by inserting $C = \tfrac{68\sqrt{2}}{5}$ into the formula from step 1. Check by re-evaluating $f(2)$.</p><p><strong>Final form:</strong></p><p>$$\boxed{\;f(x) = \dfrac{8}{5}x^{5/2} - \dfrac{24\sqrt{2}}{x} + \dfrac{68\sqrt{2}}{5}\;}$$</p><div class="why"><strong>Final sanity check via $f(2)$:</strong> $f(2) = \tfrac{32\sqrt{2}}{5} - 12\sqrt{2} + \tfrac{68\sqrt{2}}{5} = \tfrac{32\sqrt{2} + 68\sqrt{2}}{5} - 12\sqrt{2} = \tfrac{100\sqrt{2}}{5} - 12\sqrt{2} = 20\sqrt{2} - 12\sqrt{2} = 8\sqrt{2}$ ✓ — matches $P$&#x27;s $y$-coordinate. <strong>Sanity-check the form:</strong> $f$ has three terms — the integral of the $x^{3/2}$ piece, the integral of the $kx^{-2}$ piece, and the constant $C$. All three present, all three with surd coefficients (since $k = 24\sqrt{2}$ propagated through).</div>
+    
+    <div class="step-result">$f(x) = \tfrac{8}{5}x^{5/2} - \tfrac{24\sqrt{2}}{x} + \tfrac{68\sqrt{2}}{5}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
