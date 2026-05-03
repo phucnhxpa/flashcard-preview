@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Q3 — Newton-Raphson &amp; Linear Interpolation</title>
+<title>FP1 Q3 — Newton-Raphson Failure &amp; Linear Interpolation</title>
 <script>
 window.MathJax = {
   tex: {
@@ -54,6 +54,11 @@ h1 {
   color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
 }
 .q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 420px; height: auto; display: block; }
 .q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
 .parts { }
 .part { margin-bottom: 18px; }
@@ -114,6 +119,9 @@ h1 {
   border-radius: 0 5px 5px 0;
 }
 .step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
 .step-result {
   margin-top: 8px; padding: 6px 10px; background: #fff;
   border: 1px dashed var(--work-line); border-radius: 6px;
@@ -142,58 +150,167 @@ h1 {
 <body>
 <div class="card">
   <div class="meta">FP1 (WFM01/01) · Q3 · Paper 4 (Jan 2023) · Attempted 2 May 2026</div>
-  <h1>Q3 — Newton-Raphson & Linear Interpolation</h1>
+  <h1>Q3 — Newton-Raphson Failure &amp; Linear Interpolation</h1>
   <div class="q-header">
     <span class="label">Question</span>
-    <p>The equation $f(x) = 0$ has a root $\alpha \in (0.15, 0.25)$. (a) Find $f'(x)$. (b) Explain why $x_0 = 0.25$ fails for NR. (c) Apply NR twice from $x_0 = 0.15$. (d) Linear interpolation.</p>
+    <p>The equation $f(x) = 0$ has a root $\alpha$ where $\alpha \in (0.15,\, 0.25)$.</p>
+    <p>(a) Find $f'(x)$.</p>
+    <p>(b) Explain why $x_0 = 0.25$ cannot be used as a starting value for the Newton-Raphson method.</p>
+    <p>(c) Starting with $x_0 = 0.15$, apply the Newton-Raphson method twice to find $x_2$.</p>
+    <p>(d) Use linear interpolation once on the interval $(0.15,\, 0.25)$ to find an approximation for $\alpha$.</p>
+    <div class="q-diagram"><svg viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1d1d1f"/></marker></defs>
+      <!-- axes -->
+      <line x1="40" y1="180" x2="400" y2="180" stroke="#1d1d1f" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="60" y1="200" x2="60" y2="20" stroke="#1d1d1f" stroke-width="1.2" marker-end="url(#arr)"/>
+      <text x="395" y="196" font-size="11" fill="#6e6e73">x</text>
+      <text x="44" y="28" font-size="11" fill="#6e6e73">y</text>
+      <!-- curve f(x) crossing axis -->
+      <path d="M 80 160 Q 160 40, 240 100 Q 300 140, 380 60" stroke="#1d1d1f" stroke-width="2" fill="none"/>
+      <!-- root α -->
+      <circle cx="200" cy="180" r="3.5" fill="#1d1d1f"/>
+      <text x="192" y="198" font-size="11" font-style="italic">α</text>
+      <!-- x0=0.25 tangent horizontal -->
+      <line x1="280" y1="120" x2="380" y2="120" stroke="#c7c7cc" stroke-width="1" stroke-dasharray="4,3"/>
+      <circle cx="280" cy="120" r="3" fill="#d33"/>
+      <text x="284" y="115" font-size="10" fill="#d33">x₀=0.25</text>
+      <text x="310" y="135" font-size="9" fill="#d33">f'=0 → horizontal tangent!</text>
+      <!-- x0=0.15 -->
+      <circle cx="130" cy="130" r="3" fill="#2d7d46"/>
+      <text x="100" y="125" font-size="10" fill="#2d7d46">x₀=0.15</text>
+    </svg></div>
     <p class="q-marks">[10 marks]</p>
   </div>
   <div class="parts">
+
+<!-- Part (a) -->
 <div class="part">
-  <h2 class="part-h">Solution <span class="pmarks">4 steps</span></h2>
+  <h2 class="part-h">Part (a) — Find $f'(x)$ <span class="pmarks">[1 mark] · 1 step</span></h2>
+  <div class="steps" style="grid-template-columns: 1fr;">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Differentiate $f(x)$</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> This is a straightforward differentiation problem. The function $f(x)$ is given in the exam paper (typically a polynomial or exponential-type function). You need to apply standard differentiation rules — power rule, chain rule, etc. — term by term. Write out each derivative clearly so the examiner can follow your working. In an exam context, this is usually worth one method mark, so even if you make an arithmetic slip later, showing the correct differentiation technique earns credit.</p>
+    <p><strong>Key technique:</strong> If $f(x)$ involves terms like $e^{kx}$, remember $\frac{d}{dx}e^{kx} = ke^{kx}$. For terms like $x^n$, use $\frac{d}{dx}x^n = nx^{n-1}$. Write the full derivative expression clearly. The derivative $f'(x)$ is needed in parts (b) and (c) — it appears in the denominator of the Newton-Raphson formula, so any error here propagates through the entire question.</p>
+    <p><strong>Compute:</strong></p>
+    <p>$$f'(x) = \text{[differentiate each term of } f(x) \text{ using standard rules]}$$</p>
+    <div class="why"><strong>Why this matters:</strong> $f'(x)$ is the backbone of Newton-Raphson. The formula $x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$ divides by the derivative at each step. If you get $f'(x)$ wrong, every subsequent iteration is wrong. Double-check your differentiation before moving on.</div>
+    <div class="step-result">$f'(x) = $ [derivative of the given function]</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+<!-- Part (b) -->
+<div class="part">
+  <h2 class="part-h">Part (b) — Why $x_0 = 0.25$ fails <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="steps" style="grid-template-columns: 1fr;">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">Show $f'(0.25) = 0$</span></span>
+    <span class="step-marks">B1 B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> The Newton-Raphson formula is $x_{n+1} = x_n - \dfrac{f(x_n)}{f'(x_n)}$. This formula requires <em>division by $f'(x_n)$</em>. If the derivative equals zero at the starting point, the formula involves division by zero, which is undefined — the method cannot proceed. So the task here is to (i) evaluate $f'(0.25)$ and show it equals zero, then (ii) explain why this makes $x_0 = 0.25$ unusable.</p>
+    <p><strong>Compute:</strong> Substitute $x = 0.25$ into the derivative found in part (a):</p>
+    <p>$$f'(0.25) = \ldots = 0$$</p>
+    <p><strong>Explanation (exam language):</strong> "The Newton-Raphson formula requires division by $f'(x_0)$. Since $f'(0.25) = 0$, using $x_0 = 0.25$ would result in division by zero, so the method cannot be applied with this starting value."</p>
+    <p>Geometrically, $f'(0.25) = 0$ means the tangent line to the curve at $x = 0.25$ is <strong>horizontal</strong>. A horizontal tangent never intersects the $x$-axis (unless it lies on it), so the Newton-Raphson procedure — which finds the $x$-intercept of the tangent — cannot produce a next approximation. The diagram above illustrates this: the red tangent at $x_0 = 0.25$ runs parallel to the $x$-axis and never crosses it.</p>
+    <div class="why"><strong>Phuc's own explanation (Slack, verbatim):</strong> "Because the way Newton-Raphson works, it has to divide by the first derivative at the initial point. Suppose that if we pick an initial point that results in the first derivative equaling 0, then that means that initial point cannot work. We have to pick another one." This is exactly the exam-standard explanation — state that $f'(x_0) = 0$ causes division by zero in the formula.</div>
+    <div class="step-result">$f'(0.25) = 0$ → division by zero in Newton-Raphson formula → $x_0 = 0.25$ cannot be used.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+<!-- Part (c) -->
+<div class="part">
+  <h2 class="part-h">Part (c) — Two Newton-Raphson iterations from $x_0 = 0.15$ <span class="pmarks">[4 marks] · 2 steps</span></h2>
   <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
     <div class="step-wrapper"><div class="step">
   <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 1/4</span></span>
-    <span class="step-marks"></span>
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">First iteration → $x_1$</span></span>
+    <span class="step-marks">M1 A1</span>
   </div>
   <div class="step-body">
-    <p><strong>Part (a) — Find $f'(x)$:</strong></p><p>Differentiate the given function $f(x)$.</p>
-    <div class="step-result">$f'(x)$ computed</div>
-  </div>
-</div></div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span>$f'(x)$ from part (a)</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 2/4</span></span>
-    <span class="step-marks"></span>
-  </div>
-  <div class="step-body">
-    <p><strong>Part (b) — Why $x_0 = 0.25$ cannot be used for Newton-Raphson:</strong></p><p>$f'(0.25) = 0$ — the derivative is zero at this point.</p><p>Newton-Raphson formula: $x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$</p><p>Division by $f'(x_0) = 0$ ⟹ <strong>division by zero</strong>.</p><div class="why"><strong>Phuc's understanding:</strong> <em>"Because the way Newton-Raphson works, it has to divide by the first derivative. If we pick an initial point that results in the first derivative equaling 0, that point cannot work."</em></div>
-    <div class="step-result"><strong>Exam answer:</strong> "$x_0 = 0.25$ is not suitable because $f'(0.25) = 0$, causing division by zero."</div>
-  </div>
-</div></div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span>$f(x)$ and $f'(x)$</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 3/4</span></span>
-    <span class="step-marks"></span>
-  </div>
-  <div class="step-body">
-    <p><strong>Part (c) — Newton-Raphson from $x_0 = 0.15$:</strong></p><p>$x_1 = x_0 - \frac{f(x_0)}{f'(x_0)} = 0.15 - \frac{f(0.15)}{f'(0.15)}$</p><p>$x_2 = x_1 - \frac{f(x_1)}{f'(x_1)}$</p><p><strong>Calculator tip:</strong> Set $x_0$ in calculator, type NR formula using ANS, press $=$ repeatedly.</p>
-    <div class="step-result">$x_2$ found after two iterations</div>
-  </div>
-</div></div>
-    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 3:</span>$f(0.15)$ and $f(0.25)$ with opposite signs</div><div class="step">
-  <div class="step-top">
-    <span class="step-tag"><span class="step-num">STEP 4/4</span></span>
-    <span class="step-marks"></span>
-  </div>
-  <div class="step-body">
-    <p><strong>Part (d) — Linear interpolation:</strong></p><p><strong>Formula (tutor-approved):</strong></p><p>$$\alpha \approx a - f(a) \cdot \frac{b - a}{f(b) - f(a)}$$</p><p>with $a = 0.15$, $b = 0.25$, $f(a)$ and $f(b)$ having opposite signs.</p><div class="why"><strong>Phuc's note:</strong> <em>"Use the formula for linear interpolation, Mr Fuat said it's fine in the exam."</em><br><strong>Neither NR nor linear interpolation is in the formula booklet — MEMORISE BOTH!</strong></div>
-    <div class="step-result">$\alpha$ approximated by linear interpolation</div>
-  </div>
-</div></div>
+    <p><strong>Strategy:</strong> The Newton-Raphson iteration formula is $x_{n+1} = x_n - \dfrac{f(x_n)}{f'(x_n)}$. For the first iteration, we substitute $x_0 = 0.15$ and compute $f(0.15)$ and $f'(0.15)$ using the expressions from parts (a) and the original function. This is a pure substitution-and-arithmetic step. The examiner wants to see the intermediate values $f(0.15)$ and $f'(0.15)$ written out before the final division, because partial credit is awarded for showing correct substitution even if the arithmetic goes wrong.</p>
+    <p><strong>Compute:</strong></p>
+    <p>$f(0.15) = \ldots$ &nbsp;(substitute $x = 0.15$ into $f(x)$)</p>
+    <p>$f'(0.15) = \ldots$ &nbsp;(substitute $x = 0.15$ into $f'(x)$)</p>
+    <p>$$x_1 = 0.15 - \frac{f(0.15)}{f'(0.15)} = \ldots$$</p>
+    <p><strong>Calculator tip (from tutor):</strong> Store $x_0$ in your calculator's ANS memory, type the Newton-Raphson formula using ANS, then press $=$ to get $x_1$ directly. Keep at least 6 decimal places of precision throughout — do NOT round intermediate values, only round the final answer if the question asks.</p>
+    <div class="why"><strong>Common error:</strong> Rounding $x_1$ too early. If you round to 3 d.p. at this stage, the error compounds in the second iteration and your $x_2$ will be wrong. Keep full calculator precision until the very end. The M1 mark is for correct substitution into the formula; A1 is for the correct numerical value of $x_1$.</div>
+    <div class="step-result">$x_1 = x_0 - \dfrac{f(x_0)}{f'(x_0)}$ (keep full precision)</div>
   </div>
 </div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span> $x_1$ computed with full calculator precision</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">Second iteration → $x_2$</span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Repeat the identical process using $x_1$ from STEP 1. Substitute $x_1$ into both $f(x)$ and $f'(x)$, then apply the Newton-Raphson formula again. The method mark (M1) is for correctly applying the iteration a second time; the accuracy mark (A1) is for the correct numerical value of $x_2$.</p>
+    <p><strong>Compute:</strong></p>
+    <p>$f(x_1) = \ldots$ &nbsp;(substitute the full-precision $x_1$ value)</p>
+    <p>$f'(x_1) = \ldots$</p>
+    <p>$$x_2 = x_1 - \frac{f(x_1)}{f'(x_1)} = \ldots$$</p>
+    <p><strong>Calculator shortcut:</strong> If you stored the Newton-Raphson formula as $\text{ANS} - f(\text{ANS})/f'(\text{ANS})$ in the first iteration, simply press $=$ again and the calculator automatically uses the previous $x_1$ as input, giving $x_2$ immediately. This is much faster than retyping everything.</p>
+    <p><strong>Presentation:</strong> Write the final answer to the precision requested (usually 4 or 5 d.p.). State: "$x_2 = \ldots$" clearly, with a box around it.</p>
+    <div class="why"><strong>Tutor's calculator tip (Loom, verbatim):</strong> "Set $x_0$ in your calculator, type the Newton-Raphson formula once using ANS, then press = repeatedly for successive iterations." This saves enormous time in the exam and reduces transcription errors.</div>
+    <div class="step-result">$\boxed{x_2 = \ldots}$ (answer to required precision)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+<!-- Part (d) -->
+<div class="part">
+  <h2 class="part-h">Part (d) — Linear interpolation <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">Verify sign change</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Linear interpolation requires that $f(a)$ and $f(b)$ have <em>opposite signs</em> — this guarantees a root lies between $a$ and $b$ by the Intermediate Value Theorem. Before applying the formula, we must confirm this sign change. We use $a = 0.15$ and $b = 0.25$ as the interval endpoints.</p>
+    <p><strong>Compute:</strong></p>
+    <p>$f(0.15) = \ldots$ &nbsp;(already computed in part (c))</p>
+    <p>$f(0.25) = \ldots$ &nbsp;(substitute into $f(x)$)</p>
+    <p><strong>Check:</strong> $f(0.15)$ and $f(0.25)$ have opposite signs ✓ — confirming a root exists in $(0.15, 0.25)$.</p>
+    <p>Even if the question doesn't explicitly ask you to verify the sign change, writing "sign change confirmed" shows the examiner you understand <em>why</em> linear interpolation works on this interval. This is the precondition for the method — without opposite signs, the straight-line approximation between the two points might not cross the $x$-axis, and the method would give a meaningless answer.</p>
+    <div class="why"><strong>Linear interpolation vs Newton-Raphson:</strong> Newton-Raphson uses one starting point and the derivative (tangent line). Linear interpolation uses two points with opposite signs and the <em>secant line</em> (straight line through $(a, f(a))$ and $(b, f(b))$). Neither formula is in the formula booklet — you must memorise both!</div>
+    <div class="step-result">$f(0.15)$ and $f(0.25)$ have opposite signs — root confirmed in $(0.15, 0.25)$.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span> $f(0.15)$ and $f(0.25)$ computed, opposite signs confirmed</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">Apply linear interpolation formula</span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Apply the linear interpolation formula. The version approved by the tutor (Mr Fuat) is:</p>
+    <p>$$\alpha \approx a - f(a) \cdot \frac{b - a}{f(b) - f(a)}$$</p>
+    <p>This formula finds where the straight line joining $(a, f(a))$ and $(b, f(b))$ crosses the $x$-axis. It is algebraically equivalent to the "similar triangles" method but much faster to apply in an exam. Note that $f(b) - f(a)$ is in the denominator — since $f(a)$ and $f(b)$ have opposite signs, this difference is never zero, so the formula is always well-defined when the sign-change condition holds.</p>
+    <p><strong>Substitute</strong> $a = 0.15$, $b = 0.25$:</p>
+    <p>$$\alpha \approx 0.15 - f(0.15) \cdot \frac{0.25 - 0.15}{f(0.25) - f(0.15)} = 0.15 - f(0.15) \cdot \frac{0.1}{f(0.25) - f(0.15)}$$</p>
+    <p>Evaluate numerically using the values of $f(0.15)$ and $f(0.25)$ from STEP 1, and give the answer to the required precision.</p>
+    <div class="why"><strong>Phuc's Slack note (verbatim):</strong> "Use the formula in third image for linear interpolation, Mr Fuat said it's fine in the exam." <strong>Tutor confirmation (Loom):</strong> "As long as you get the results, you are fine… because this is easier to apply. That one [the triangle similarity method] is quite a long way to go." So use the direct formula — it's faster and accepted for full marks.</div>
+    <div class="step-result">$\boxed{\alpha \approx \ldots}$ (to required precision)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
   </div>
 </div>
 </body>
