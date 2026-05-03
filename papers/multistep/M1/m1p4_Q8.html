@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 P4 Q8 — Robots: closest approach</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q8 · Paper 4 (May 2023) · Attempted 11 Apr 2026</div>
+  <h1>Q8 — Robots $R$ and $S$ on a square floor; find closest approach</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A robot $R$ moves with constant velocity. At $t = 0$, $R$ is at $(-2\mathbf{i} + \mathbf{j})$ m; at $t = 11$ s, $R$ is at $(9\mathbf{i} + 23\mathbf{j})$ m. A second robot $S$ moves with velocity $(-\mathbf{i} - \mathbf{j})$ m/s. At $t = 0$, $S$ is at the corner $C = (25\mathbf{i} + 25\mathbf{j})$ m of a square floor of side $50$ m centred at the origin.</p><p><strong>(a)</strong> Find $\mathbf{r}(t)$ for $R$. <strong>[3]</strong></p><p><strong>(b)</strong> Find $\mathbf{s}(t)$ for $S$. <strong>[1]</strong></p><p><strong>(c)</strong> Show $\overrightarrow{SR}(t) = (2t - 27)\mathbf{i} + (3t - 24)\mathbf{j}$ m. <strong>[2]</strong></p><p><strong>(d)</strong> Find the value of $t$ when the distance between $R$ and $S$ is minimum. <strong>[3]</strong></p>
+    
+    <p class="q-marks">[9 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — $\mathbf{r}(t)$ <span class="pmarks">[3 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $R$ has constant velocity, so $\mathbf{v}_R$ is the displacement between the two given times divided by the elapsed time. Then write $\mathbf{r}(t)$ as initial position plus $\mathbf{v}_R \cdot t$.</p><p><strong>Formula (constant velocity):</strong> $\mathbf{v} = \dfrac{\mathbf{r}(t_2) - \mathbf{r}(t_1)}{t_2 - t_1}$.</p><p>Compute the displacement vector ($t_1 = 0$, $t_2 = 11$):</p><p>$\;\;\mathbf{r}(11) - \mathbf{r}(0) = (9\mathbf{i} + 23\mathbf{j}) - (-2\mathbf{i} + \mathbf{j})$</p><p>$\;\;= 11\mathbf{i} + 22\mathbf{j}$</p><p>Divide by elapsed time $11$ s:</p><p>$\;\;\mathbf{v}_R = \dfrac{11\mathbf{i} + 22\mathbf{j}}{11} = \mathbf{i} + 2\mathbf{j}$ m/s</p><p>Apply $\mathbf{r}(t) = \mathbf{r}(0) + \mathbf{v}_R\,t$:</p><p>$\;\;\mathbf{r}(t) = (-2\mathbf{i} + \mathbf{j}) + (\mathbf{i} + 2\mathbf{j})t$</p><p>Collect components:</p><p>$$\boxed{\;\mathbf{r}(t) = (-2 + t)\mathbf{i} + (1 + 2t)\mathbf{j}\;}$$</p><div class="why"><strong>Sense check:</strong> at $t = 11$, $\mathbf{r}(11) = 9\mathbf{i} + 23\mathbf{j}$ ✓ \u2014 matches the given position, confirming the velocity is correct.</div>
+    
+    <div class="step-result">$\mathbf{r}(t) = (-2+t)\mathbf{i} + (1+2t)\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — $\mathbf{s}(t)$ <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given"><strong>From question:</strong> $S$ starts at $C = 25\mathbf{i} + 25\mathbf{j}$ m at $t=0$, with constant velocity $\mathbf{v}_S = -\mathbf{i} - \mathbf{j}$ m/s.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $S$ also has constant velocity. Apply the same position formula: initial position + velocity × time.</p><p><strong>Formula:</strong> $\mathbf{s}(t) = \mathbf{s}(0) + \mathbf{v}_S\,t$.</p><p>Substitute $\mathbf{s}(0) = 25\mathbf{i} + 25\mathbf{j}$ and $\mathbf{v}_S = -\mathbf{i} - \mathbf{j}$:</p><p>$\;\;\mathbf{s}(t) = (25\mathbf{i} + 25\mathbf{j}) + (-\mathbf{i} - \mathbf{j})t$</p><p>Collect components:</p><p>$$\boxed{\;\mathbf{s}(t) = (25 - t)\mathbf{i} + (25 - t)\mathbf{j}\;}$$</p><div class="why"><strong>Geometric note:</strong> both components are $(25 - t)$, so $S$ moves along the line $y = x$ from $(25, 25)$ towards the origin \u2014 a $-45°$ diagonal trajectory.</div>
+    
+    <div class="step-result">$\mathbf{s}(t) = (25-t)\mathbf{i} + (25-t)\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Show $\overrightarrow{SR}$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (a):</strong> $\mathbf{r}(t) = (-2+t)\mathbf{i} + (1+2t)\mathbf{j}$. <strong>From (b):</strong> $\mathbf{s}(t) = (25-t)\mathbf{i} + (25-t)\mathbf{j}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $\overrightarrow{SR}$ is the displacement from $S$ to $R$, computed as $\mathbf{r} - \mathbf{s}$. Subtract component-wise.</p><p><strong>Formula (vector subtraction):</strong> $\overrightarrow{SR}(t) = \mathbf{r}(t) - \mathbf{s}(t)$.</p><p>$\mathbf{i}$-component: $(-2 + t) - (25 - t)$</p><p>$\;\;= -2 + t - 25 + t = 2t - 27$</p><p>$\mathbf{j}$-component: $(1 + 2t) - (25 - t)$</p><p>$\;\;= 1 + 2t - 25 + t = 3t - 24$</p><p>Combine:</p><p>$$\boxed{\;\overrightarrow{SR}(t) = (2t - 27)\mathbf{i} + (3t - 24)\mathbf{j}\;}\quad\blacksquare$$</p><div class="why"><strong>Sign trap:</strong> when subtracting $(25 - t)$, both inner terms flip sign \u2014 the $-t$ becomes $+t$. Easy slip is to write $-2 + t - 25 - t = -27$ (losing the $+2t$). Always distribute the minus sign carefully.</div>
+    
+    <div class="step-result">$\overrightarrow{SR} = (2t-27)\mathbf{i} + (3t-24)\mathbf{j}$ ✓</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — Minimum distance <span class="pmarks">[3 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (c):</strong> $\overrightarrow{SR}(t) = (2t-27)\mathbf{i} + (3t-24)\mathbf{j}$ m.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the distance $|\overrightarrow{SR}|$ is minimised when $|\overrightarrow{SR}|^2$ is minimised (squaring is monotonic for non-negative values). Differentiate $|\overrightarrow{SR}|^2$ with respect to $t$ and set to zero.</p><p><strong>Formula (chain rule):</strong> $\dfrac{d}{dt}(at + b)^2 = 2a(at + b)$.</p><p>Define:</p><p>$\;\;f(t) = |\overrightarrow{SR}|^2 = (2t - 27)^2 + (3t - 24)^2$</p><p>Differentiate term by term:</p><p>$\;\;\dfrac{d}{dt}(2t - 27)^2 = 2 \cdot 2 \cdot (2t - 27) = 4(2t - 27)$</p><p>$\;\;\dfrac{d}{dt}(3t - 24)^2 = 2 \cdot 3 \cdot (3t - 24) = 6(3t - 24)$</p><p>Sum:</p><p>$\;\;f&#x27;(t) = 4(2t - 27) + 6(3t - 24)$</p><p>Expand:</p><p>$\;\;f&#x27;(t) = 8t - 108 + 18t - 144$</p><p>$\;\;f&#x27;(t) = 26t - 252$</p><p>Set $f&#x27;(t) = 0$:</p><p>$\;\;26t = 252$</p><p>$\;\;t = \dfrac{252}{26} = \dfrac{126}{13}$</p><p>$\;\;t \approx 9.69$ s</p><p>$$\boxed{\;t = \dfrac{126}{13} \approx 9.69\ \text{s}\;}$$</p><div class="why"><strong>Phuc\u2019s slip (per redo):</strong> wrote &quot;$12t$&quot; when differentiating $(3t-24)^2$ \u2014 forgot to multiply by the inner derivative $3$ properly. The chain-rule output must be $2 \cdot 3 \cdot (3t - 24) = 6(3t - 24) = 18t - 144$, not $12t$. Always write $2a(at+b)$ in full before expanding.</div>
+    
+    <div class="step-result">$\boxed{\,t = \dfrac{126}{13} \approx 9.69\ \text{s}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
