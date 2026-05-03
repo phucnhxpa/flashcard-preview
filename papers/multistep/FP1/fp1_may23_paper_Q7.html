@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FP1 May23 Q7 — sign change, bisection, Newton-Raphson, linear interpolation</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">FP1 (WFM01/01) · Q7 · Paper 3 (May 2023) · Attempted 25 Apr 2026</div>
+  <h1>Q7 — $f(x) = x^{3/2} + x - 3$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>$f(x) = x^{3/2} + x - 3$.</p><p><strong>(a)</strong> Show $f(x)=0$ has a root $\alpha \in [1,\,2]$. <strong>[2]</strong></p><p><strong>(b)</strong> Use interval bisection <em>twice</em> on $[1,2]$ to show $\alpha\in[1.25,\,1.5]$. <strong>[3]</strong></p><p><strong>(c)(i)</strong> Find $f'(x)$. <strong>(ii)</strong> Use Newton–Raphson <em>once</em> with $x_0=1.375$ to give a 2nd approx to 3 d.p. <strong>[3]</strong></p><p><strong>(d)</strong> Use linear interpolation <em>once</em> on $[1.25,\,1.5]$ for a different approximation to 3 d.p. <strong>[3]</strong></p>
+    
+    <p class="q-marks">[11 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Sign change on $[1,2]$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Method (sign-change theorem, IVT):</strong> if $f$ continuous on $[a,b]$ and $f(a),f(b)$ have opposite signs, then $f$ has a root in $(a,b)$.</p><p><strong>Compute</strong> at the endpoints:</p><p>$$f(1) = 1^{3/2} + 1 - 3 = -1 < 0$$</p><p>$$f(2) = 2^{3/2} + 2 - 3 = 2\sqrt 2 - 1 \approx 1.828 > 0$$</p><p>$f$ continuous (sum of power and linear); sign change ⇒ root $\alpha\in(1,2)$. ■</p><div class="why"><strong>Always state continuity</strong> + the sign of each endpoint value explicitly. Examiners reward verbatim phrasing.</div>
+    
+    <div class="step-result">$f(1)<0,\,f(2)>0$ ⇒ $\alpha\in(1,2)$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Two bisection iterations <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (a):</strong> $f(x) = x^{3/2} + x - 3$ with $f(1) = -1 < 0$, $f(2) = 2\sqrt 2 - 1 \approx 1.828 > 0$, so root $\alpha \in (1,2)$. Bisect twice.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Iteration 1:</strong> midpoint of $[1,2]$ is $m_1=1.5$.</p><p>$$f(1.5) = 1.5^{1.5} + 1.5 - 3 \approx 1.837 + 1.5 - 3 = 0.337 > 0$$</p><p>$f(1)<0,\,f(1.5)>0$ ⇒ root in $[1,\,1.5]$.</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $f(1.5) = 1.5^{1.5} + 1.5 - 3 \approx 1.837 + 1.5 - 3 = 0.337 > 0$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Iteration 2:</strong> midpoint of $[1,1.5]$ is $m_2=1.25$.</p><p>$$f(1.25) = 1.25^{1.5} + 1.25 - 3 \approx 1.398 + 1.25 - 3 = -0.352 < 0$$</p><p>$f(1.25)<0,\,f(1.5)>0$ ⇒ root in $\boxed{[1.25,\,1.5]}$. ■</p><div class="why"><strong>Bookkeeping:</strong> always state which side's sign rules out which half. Phuc lost marks on earlier papers for skipping the explicit "sign change → keep this half" sentence.</div>
+    
+    <div class="step-result">$\alpha \in [1.25,\,1.5]$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Newton-Raphson <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From the question:</strong> $f(x) = x^{3/2} + x - 3$. (i) asks for $f'(x)$; (ii) applies Newton-Raphson once with $x_0 = 1.375$ (midpoint of $[1.25, 1.5]$ from (b)).</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> Newton-Raphson needs $f&#x27;(x_n)$ in the denominator, so we differentiate first. The fractional power $x^{3/2}$ is just like any other power for the power rule.</p><p><strong>Formula (power rule):</strong></p><p>$$\frac{d}{dx}\bigl(x^n\bigr) \;=\; n\,x^{n-1}$$</p><p><strong>Apply term-by-term</strong> to $f(x) = x^{3/2} + x - 3$:</p><p>$$\frac{d}{dx}\bigl(x^{3/2}\bigr) \;=\; \tfrac{3}{2}\,x^{(3/2) - 1} \;=\; \tfrac{3}{2}\,x^{1/2}$$</p><p>$$\frac{d}{dx}(x) \;=\; 1$$</p><p>$$\frac{d}{dx}(-3) \;=\; 0 \quad(\text{constant has zero slope})$$</p><p>Sum the results:</p><p>$$\boxed{\;f&#x27;(x) \;=\; \tfrac{3}{2}\,x^{1/2} + 1 \;=\; \tfrac{3}{2}\sqrt x + 1\;}$$</p><div class="why"><strong>Fractional-exponent slip:</strong> $\tfrac{3}{2} - 1 = \tfrac{1}{2}$, NOT $\tfrac{3}{2}$. Common error is to leave the exponent unchanged: $\tfrac{3}{2}x^{3/2}$. Always subtract $1$ from the exponent, even when it&#x27;s a fraction. Equivalent forms: $x^{1/2} = \sqrt{x}$ &#x2014; either is acceptable.</div>
+    
+    <div class="step-result">$f'(x) = \tfrac{3}{2}\sqrt x + 1$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $f'(x) = \tfrac{3}{2}\sqrt x + 1$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (Newton-Raphson — IN booklet):</strong></p><p>$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$</p><p><strong>Substitute</strong> $x_0 = 1.375$:</p><p>$f(1.375) = 1.375^{1.5} + 1.375 - 3 \approx 1.6125 + 1.375 - 3 = -0.01246$</p><p>$f'(1.375) = \tfrac{3}{2}\sqrt{1.375} + 1 \approx 1.5 \cdot 1.1726 + 1 = 2.7588$</p><p>$$x_1 = 1.375 - \frac{-0.01246}{2.7588} = 1.375 + 0.004516 \approx \boxed{1.380}$$ (3 d.p.)</p><div class="why"><strong>Calculator hygiene:</strong> store $x_0$ in memory, use ANS for both $f$ and $f'$ to avoid rounding propagation. Round only at the end.</div>
+    
+    <div class="step-result">$x_1 \approx 1.380$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — Linear interpolation on $[1.25,\,1.5]$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (b):</strong> $f(1.25)\approx -0.352$, $f(1.5)\approx 0.337$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (linear interpolation — NOT in booklet, MEMORIZE):</strong></p><p>$$x_1 = a - \frac{f(a)\,(b-a)}{f(b) - f(a)}$$</p><div class="why"><strong>Phuc's slip:</strong> forgot the closed form on first pass; had to derive via similar triangles. This is now the THIRD FP1 paper with linear interp — commit to memory once and for all.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $x_1 = a - \frac{f(a)\,(b-a)}{f(b) - f(a)}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Substitute</strong> $a=1.25$, $b=1.5$, $f(a)=-0.352$, $f(b)=0.337$:</p><p>$$x_1 = 1.25 - \frac{(-0.352)(1.5-1.25)}{0.337 - (-0.352)} = 1.25 - \frac{(-0.352)(0.25)}{0.689}$$</p><p>$$= 1.25 - \frac{-0.088}{0.689} = 1.25 + 0.1278 \approx \boxed{1.378}$$ (3 d.p.)</p><div class="why"><strong>Compare methods:</strong> Newton–Raphson → 1.380; linear interp → 1.378. Both close to the true root $\approx 1.378$, but NR starts from a single seed inside the bracket so converges quadratically; LI uses both endpoints linearly.</div>
+    
+    <div class="step-result">$x_1 \approx 1.378$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
