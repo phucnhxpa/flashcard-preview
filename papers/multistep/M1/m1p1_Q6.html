@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 Q6 — Angled rope + projectile on rough surface</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q6 · Paper 1 (May 2024) · Attempted 3 Apr 2026</div>
+  <h1>Q6 — Box on rough plane: rope at $\theta$ then rope removed</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A box of mass $m$ rests on a rough horizontal plane. It is pulled by a light rope inclined at angle $\theta$ above the horizontal, where $\tan\theta = 3/4$ (so $\sin\theta = 3/5$, $\cos\theta = 4/5$). The coefficient of friction between box and plane is $\mu = 1/3$.</p><p><strong>(a)</strong> The box moves at constant speed. Find the tension $T$ in the rope, in terms of $m$ and $g$. <strong>[7]</strong></p><p><strong>(b)</strong> The rope is then removed and the box is projected horizontally with initial speed $u$. Find the distance $d$ travelled when its speed has dropped to $u/2$. <strong>[5]</strong></p>
+    
+    <p class="q-marks">[12 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Constant speed: find $T$ <span class="pmarks">[7 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> friction $F = \mu R$ depends on the normal reaction $R$. But $R$ isn’t simply $mg$ — because the rope pulls upward at an angle, it lifts part of the box’s weight off the plane. So I must resolve <em>vertically</em> first to find $R$.</p><p><strong>Free-body diagram for the box:</strong></p><p>• Weight $mg$ <em>down</em>.</p><p>• Rope tension $T$ at angle $\theta$ above horizontal: split into $T\cos\theta$ <em>forward</em> (horizontal) and $T\sin\theta$ <em>up</em> (vertical).</p><p>• Normal reaction $R$ <em>up</em> from plane.</p><p>• Friction $F$ <em>backward</em> (opposing motion).</p><p><strong>Formula (vertical equilibrium — box stays on plane, no vertical motion):</strong></p><p>$$\Sigma F_y = 0$$</p><p><strong>Substitute</strong>:</p><p>$$R + T\sin\theta - mg = 0$$</p><p>$$R = mg - T\sin\theta$$</p><p>With $\sin\theta = 3/5$:</p><p>$$\boxed{\;R = mg - \tfrac{3T}{5}\;}$$</p><div class="why"><strong>Trap:</strong> using $R = mg$ here — the rope lifts <em>some</em> weight off the plane, so $R < mg$. The vertical lift reduces normal reaction, which in turn reduces friction. <strong>Why $\mu R$ not $\mu mg$?</strong> Friction depends on how hard the surfaces press together, which is $R$, not $mg$. They’re only equal if the surface is horizontal AND no vertical applied force.</div>
+    
+    <div class="step-result">$R = mg - \tfrac{3T}{5}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $R = mg - \frac{3T}{5}$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the box moves at <em>constant speed</em> — no horizontal acceleration, but it IS sliding (kinetic friction is active). At the limiting case (no acceleration), friction takes its maximum value $F = \mu R$.</p><p><strong>Formula (limiting/kinetic friction):</strong></p><p>$$F = \mu R$$</p><p>where $\mu$ is the coefficient of friction and $R$ is the normal reaction.</p><p><strong>Using $R$ from STEP 1</strong> ($R = mg - \tfrac{3T}{5}$) and $\mu = 1/3$:</p><p>$$F = \tfrac{1}{3}\left(mg - \tfrac{3T}{5}\right)$$</p><p>Distribute (kept symbolic for the next step):</p><p>$$F = \tfrac{mg}{3} - \tfrac{T}{5}$$</p><p>$$\boxed{\;F = \tfrac{mg}{3} - \tfrac{T}{5}\;}$$</p><div class="why"><strong>Why use $F = \mu R$ at constant speed?</strong> At constant speed, the box is sliding — kinetic friction is fully active. If the box were stationary, $F$ could be anything from $0$ to $\mu R$ (static friction). Here, motion guarantees we’re at the kinetic-friction value $\mu R$.</div>
+    
+    <div class="step-result">$F = \tfrac{1}{3}(mg - \tfrac{3T}{5})$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $F = \tfrac{mg}{3} - \tfrac{T}{5}$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> constant speed $\Rightarrow a = 0$ horizontally. So the horizontal forces balance: forward pull from rope ($T\cos\theta$) equals backward friction ($F$). Now substitute $F$ from STEP 2, and solve for $T$.</p><p><strong>Formula (horizontal equilibrium, $a = 0$):</strong></p><p>$$T\cos\theta - F = 0 \quad\Longleftrightarrow\quad T\cos\theta = F$$</p><p><strong>Using $F$ from STEP 2</strong> ($F = \tfrac{mg}{3} - \tfrac{T}{5}$) and $\cos\theta = 4/5$:</p><p>$$\tfrac{4T}{5} = \tfrac{mg}{3} - \tfrac{T}{5}$$</p><p>Add $\tfrac{T}{5}$ to both sides (collect $T$’s on the left):</p><p>$$\tfrac{4T}{5} + \tfrac{T}{5} = \tfrac{mg}{3}$$</p><p>$$\tfrac{5T}{5} = \tfrac{mg}{3}$$</p><p>$$T = \tfrac{mg}{3}$$</p><p>$$\boxed{\;T = \dfrac{mg}{3}\;}$$</p><div class="why"><strong>Sense check (units & magnitude):</strong> $T$ has units of force (since $mg$ does) ✓. For a $1$ kg box, $T \approx 3.3$ N — about the weight of a third of an apple. Reasonable for a lightly loaded rough plane ($\mu = 1/3$ is moderate friction).</div>
+    
+    <div class="step-result">$\boxed{\,T = \dfrac{mg}{3}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Rope removed, find $d$ <span class="pmarks">[5 marks] · 2 steps</span></h2>
+  <div class="given"><strong>Now:</strong> no rope, so $R = mg$, $F = \mu R = mg/3$. Initial speed $u$ along plane.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 0:</span><strong>From STEP 1:</strong> $a = -g/3$ (deceleration, rope removed).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> rope removed $\Rightarrow$ no upward lift on the box. $R$ resets to $mg$ (full weight presses on the plane). Friction is now the only horizontal force, decelerating the box. Apply N2L to find the deceleration.</p><p><strong>New normal reaction:</strong> with no rope, vertical equilibrium gives $R = mg$ directly.</p><p><strong>New friction:</strong> $F = \mu R = \tfrac{1}{3} \cdot mg = \tfrac{mg}{3}$.</p><p><strong>Free-body diagram (after rope removed):</strong> take direction of motion (forward) as positive.</p><p>• Friction $F = \tfrac{mg}{3}$ acts <em>backward</em> (opposing motion) $\Rightarrow -\tfrac{mg}{3}$.</p><p>• No other horizontal forces.</p><p><strong>Formula (Newton’s 2nd law):</strong></p><p>$$\Sigma F = m\, a$$</p><p><strong>Substitute</strong>:</p><p>$$-\tfrac{mg}{3} = m\, a$$</p><p>Cancel $m$ (mass $\ne 0$):</p><p>$$a = -\tfrac{g}{3}$$</p><p>$$\boxed{\;a = -\dfrac{g}{3}\;}$$</p><div class="why"><strong>Why $R = mg$ now?</strong> No vertical component from any applied force — just gravity down and contact force up. So vertical equilibrium gives $R = mg$ directly. <strong>Sign:</strong> negative $a$ means the box is decelerating; this matches expectation — friction always opposes motion.</div>
+    
+    <div class="step-result">$a = -g/3$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> I have $u$, $v = u/2$, $a$, want $s = d$. The suvat formula linking $(u, v, a, s)$ — no time needed — is $v^2 = u^2 + 2as$.</p><p><strong>List the knowns:</strong></p><p>• $u_0 = u$ (initial speed)</p><p>• $v = u/2$ (when speed has dropped to half)</p><p>• $a = -g/3$ (from STEP 1)</p><p>• Want: $s = d$.</p><p><strong>Formula (suvat):</strong></p><p>$$v^2 = u^2 + 2as$$</p><p><strong>Substitute</strong>:</p><p>$$\left(\tfrac{u}{2}\right)^2 = u^2 + 2\left(-\tfrac{g}{3}\right) d$$</p><p>$$\tfrac{u^2}{4} = u^2 - \tfrac{2gd}{3}$$</p><p>Rearrange to isolate the $d$-term:</p><p>$$\tfrac{2gd}{3} = u^2 - \tfrac{u^2}{4} = \tfrac{4u^2 - u^2}{4} = \tfrac{3u^2}{4}$$</p><p>Solve for $d$:</p><p>$$d = \tfrac{3u^2}{4} \cdot \tfrac{3}{2g} = \tfrac{9u^2}{8g}$$</p><p>$$\boxed{\;d = \dfrac{9u^2}{8g}\;}$$</p><div class="why"><strong>Sense check:</strong> $d \propto u^2$ — doubling the initial speed gives 4× the distance to halve, which makes physical sense (kinetic energy scales as $v^2$). Also $d$ has units $[u^2/g] = (\text{m/s})^2 / (\text{m/s}^2) = \text{m}$ ✓.</div>
+    
+    <div class="step-result">$\boxed{\,d = \dfrac{9u^2}{8g}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
