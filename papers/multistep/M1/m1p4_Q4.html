@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 P4 Q4 — Beam: ratio + tilting (find $p$, $q$)</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q4 · Paper 4 (May 2023) · Attempted 11 Apr 2026</div>
+  <h1>Q4 — Uniform beam $AB$, ropes at $C$/$D$; particle at $A$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A uniform beam $AB$ has length $2$ m and mass $m$ kg. It is suspended horizontally by two vertical ropes attached at $C$ and $D$, where $AC = 0.6$ m and $DB = 0.2$ m. A particle of mass $pm$ kg is attached at $A$.</p><p><strong>(a)</strong> Tension at $C$ is four times tension at $D$. Find $p$. <strong>[7]</strong></p><p>Now the particle at $A$ is replaced by one of mass $qm$ kg, and the beam is on the point of tilting about $C$.</p><p><strong>(b)</strong> Find $q$. <strong>[4]</strong></p><p><strong>(c)</strong> State how the assumption that the rod is uniform was used. <strong>[1]</strong></p>
+    
+    <p class="q-marks">[12 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Find $p$ <span class="pmarks">[7 marks] · 3 steps</span></h2>
+  <div class="given">Distances from $A$: $C$ at $0.6$, CoM at $1$ (uniform), $D$ at $1.8$, $B$ at $2$. From $C$: CoM at $0.4$ right, $D$ at $1.2$ right.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the beam is in equilibrium, so vertical forces sum to zero. Two ropes pull up; gravity (beam + particle) pulls down. Combine with the ratio $T_C = 4T_D$ to express $T_D$ in terms of known quantities.</p><p><strong>Formula (vertical equilibrium):</strong> $T_C + T_D = (\text{total weight})$.</p><p>Total downward weight = beam weight + particle weight:</p><p>$\;\;\text{Weight} = mg + pmg = mg(1 + p)$</p><p>So:</p><p>$\;\;T_C + T_D = mg(1 + p)$</p><p>Use the given ratio $T_C = 4T_D$:</p><p>$\;\;4T_D + T_D = mg(1 + p)$</p><p>$\;\;5T_D = mg(1 + p)$</p><p>$$\boxed{\;T_D = \dfrac{mg(1+p)}{5}\;}$$</p><div class="why"><strong>Why both ropes lift:</strong> with the particle hanging at $A$ (left of $C$), the system would tip ACW about $C$ if only $T_C$ held it \u2014 so both ropes must pull up. Their reactions add to balance the downward weight.</div>
+    
+    <div class="step-result">$T_D = mg(1+p)/5$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $T_D = mg(1+p)/5$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> taking moments about $C$ removes $T_C$ from the equation (zero moment arm). That leaves one equation in $T_D$ and $p$. Combine with the result from STEP 1 to solve for $p$.</p><p><strong>Formula (moments balance):</strong> $\Sigma\text{CW} = \Sigma\text{ACW}$ about the pivot.</p><p>Distances from $C$ (using midpoint = uniform beam): CoM at $0.4$ m right, $D$ at $1.2$ m right, $A$ at $0.6$ m left. Moments:</p><p>$\;\;\bullet$ Beam weight $mg$ down at $0.4$ m right \u2192 CW moment $= 0.4mg$</p><p>$\;\;\bullet$ Rope $T_D$ up at $1.2$ m right \u2192 ACW moment $= 1.2T_D$</p><p>$\;\;\bullet$ Particle $pmg$ down at $0.6$ m left \u2192 ACW moment $= 0.6pmg$</p><p>Set CW = ACW:</p><p>$\;\;0.4mg = 1.2T_D + 0.6pmg$</p><p>Substitute $T_D = mg(1+p)/5$ from STEP 1:</p><p>$\;\;0.4mg = 1.2 \cdot \dfrac{mg(1+p)}{5} + 0.6pmg$</p><p>Divide every term by $mg$:</p><p>$\;\;0.4 = 0.24(1 + p) + 0.6p$</p><p>Expand:</p><p>$\;\;0.4 = 0.24 + 0.24p + 0.6p$</p><p>$\;\;0.4 = 0.24 + 0.84p$</p><p>$\;\;0.84p = 0.16$</p><p>$\;\;p = \dfrac{0.16}{0.84} = \dfrac{4}{21}$</p><p>$$\boxed{\;p = \dfrac{4}{21}\;}$$</p><div class="why"><strong>Pivot trick:</strong> taking moments about $C$ kills the $T_C$ term (its moment arm is zero), so the unknown $T_C$ disappears \u2014 ONE equation, ONE unknown ratio.</div>
+    
+    <div class="step-result">$\boxed{\,p = 4/21\,}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $p = 4/21$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> verify the answer by back-substituting into the equilibrium equation and checking the magnitudes are physically sensible (positive, ratio $4:1$).</p><p>$p = 4/21 \approx 0.19$ \u2014 a small particle (only $\sim$19% of beam mass), which is plausible given the rope at $C$ takes 4$\times$ the load of the rope at $D$.</p><p>Check $T_D$:</p><p>$\;\;T_D = \dfrac{mg(1 + 4/21)}{5} = \dfrac{mg \cdot 25/21}{5} = \dfrac{5mg}{21}$</p><p>Then $T_C = 4T_D$:</p><p>$\;\;T_C = 4 \cdot \dfrac{5mg}{21} = \dfrac{20mg}{21}$</p><p>Total upward: $T_C + T_D = \dfrac{25mg}{21}$.</p><p>Total downward: $mg + pmg = mg(1 + 4/21) = \dfrac{25mg}{21}$ ✓</p><p>$$\boxed{\;p = \dfrac{4}{21}\;\text{ verified}\;}$$</p><div class="why"><strong>Sanity rule:</strong> equilibrium requires $\Sigma F_{\text{up}} = \Sigma F_{\text{down}}$. Always re-substitute and confirm both sums match \u2014 a strong check against arithmetic slips.</div>
+    
+    <div class="step-result">$p = 4/21$ verified</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Find $q$ <span class="pmarks">[4 marks] · 1 step</span></h2>
+  <div class="given">On point of tilting about $C$ → $T_D = 0$ (rope at $D$ goes slack).</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> on the point of tilting about $C$, the rope at $D$ goes slack ($T_D = 0$). Take moments about $C$ \u2014 with $T_D$ and $T_C$ both gone (zero arm or zero force), only beam weight and particle weight contribute.</p><p><strong>Formula (moments balance about $C$):</strong> $\Sigma\text{CW} = \Sigma\text{ACW}$.</p><p>Forces about $C$ (with $T_D = 0$):</p><p>$\;\;\bullet$ Beam weight $mg$ down at $0.4$ m right of $C$ \u2192 CW moment $= 0.4mg$</p><p>$\;\;\bullet$ Particle $qmg$ down at $0.6$ m left of $C$ \u2192 ACW moment $= 0.6qmg$</p><p>Balance:</p><p>$\;\;0.6\,qmg = 0.4\,mg$</p><p>Divide both sides by $mg$:</p><p>$\;\;0.6\,q = 0.4$</p><p>Divide by $0.6$:</p><p>$\;\;q = \dfrac{0.4}{0.6} = \dfrac{2}{3}$</p><p>$$\boxed{\;q = \dfrac{2}{3}\;}$$</p><div class="why"><strong>Tilting rule:</strong> on point of tilting about $C$ \u2192 $T_D = 0$ (rope at $D$ goes slack). The single moment equation is enough \u2014 no need for vertical equilibrium unless asked for $T_C$. Don\u2019t accidentally include $T_D$.</div>
+    
+    <div class="step-result">$\boxed{\,q = 2/3\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Use of "uniform" <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (a)/(b):</strong> beam weight $mg$ was placed at $0.4$ m right of $C$ (midpoint of beam, $1$ m from $A$) when taking moments — question asks how the “uniform” assumption was used.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>The beam being <strong>uniform</strong> means the centre of mass lies at the <em>geometric centre</em> (midpoint), i.e. $1$ m from $A$. We used this to place the weight $mg$ at $0.4$ m right of $C$.</p>
+    
+    <div class="step-result">"Uniform" → weight at midpoint of beam.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
