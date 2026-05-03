@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FP1 Q8 — Standard sums + shifted limits</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">FP1 (WFM01/01) · Q8 · Paper 1 (Jan 2024) · Attempted 19 Apr 2026</div>
+  <h1>Q8 — Show $\sum_{r=1}^n r(2r^2-3r-1) = \tfrac{1}{2}n(n+1)^2(n-2)$; shifted limits</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><strong>(a)</strong> Use standard results to show $\displaystyle\sum_{r=1}^{n} r(2r^2 - 3r - 1) = \tfrac{1}{2}n(n+1)^2(n-2)$. <strong>[4]</strong></p><p><strong>(b)</strong> Hence show $\displaystyle\sum_{r=n}^{2n} r(2r^2 - 3r - 1) = \tfrac{1}{2}n(n-1)(an+b)(cn+d)$ where $a,b,c,d$ are integers. <strong>[4]</strong></p>
+    
+    <p class="q-marks">[8 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Closed form <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Standard sums:</strong></p><p>$$\sum_{r=1}^{n} r = \tfrac{1}{2}n(n+1) \quad (\text{NOT in booklet})$$</p><p>$$\sum_{r=1}^{n} r^2 = \tfrac{1}{6}n(n+1)(2n+1), \quad \sum_{r=1}^{n} r^3 = \tfrac{1}{4}n^2(n+1)^2$$</p><div class="why"><strong>Tutor warning:</strong> <em>"They only have $r^2$ and $r^3$. We need to know the $r$ one then — always consult the formula booklet first."</em></div><p>$$r(2r^2 - 3r - 1) = 2r^3 - 3r^2 - r$$</p><p>$$\sum_{r=1}^{n} \bigl(2r^3 - 3r^2 - r\bigr) = 2\sum r^3 - 3\sum r^2 - \sum r$$</p><p><strong>Substitute</strong> the closed forms:</p><p>$$= \tfrac{1}{2}n^2(n+1)^2 - \tfrac{1}{2}n(n+1)(2n+1) - \tfrac{1}{2}n(n+1)$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $= \tfrac{1}{2}n^2(n+1)^2 - \tfrac{1}{2}n(n+1)(2n+1) - \tfrac{1}{2}n(n+1)$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$= \tfrac{1}{2}n(n+1)\Bigl[\,n(n+1) - (2n+1) - 1\,\Bigr]$$</p><p>Simplify inside:</p><p>$$n(n+1) - (2n+1) - 1 = n^2 + n - 2n - 2 = n^2 - n - 2 = (n-2)(n+1)$$</p><p>So:</p><p>$$\sum_{r=1}^{n} r(2r^2 - 3r - 1) = \tfrac{1}{2}n(n+1)(n-2)(n+1) = \boxed{\tfrac{1}{2}n(n+1)^2(n-2)}\ \blacksquare$$</p><div class="why"><strong>Tutor key technique:</strong> <em>"Before any multiplication, take this common factor. If you multiply out as it is, it will be very, very complicated. Always look at what they want, then factorise early."</em></div>
+    
+    <div class="step-result">$\tfrac{1}{2}n(n+1)^2(n-2)$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Shifted limits $r=n$ to $2n$ <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given"><strong>Closed form:</strong> $S(N) := \sum_{r=1}^{N} r(2r^2-3r-1) = \tfrac{1}{2}N(N+1)^2(N-2)$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Identity:</strong></p><p>$$\sum_{r=n}^{2n} = \sum_{r=1}^{2n} - \sum_{r=1}^{n-1} = S(2n) - S(n-1)$$</p><p>Plug into $S(N) = \tfrac{1}{2}N(N+1)^2(N-2)$:</p><p>$$S(2n) = \tfrac{1}{2}(2n)(2n+1)^2(2n-2) = \tfrac{1}{2}(2n)(2n+1)^2 \cdot 2(n-1) = 2n(n-1)(2n+1)^2$$</p><p>$$S(n-1) = \tfrac{1}{2}(n-1)(n-1+1)^2((n-1)-2) = \tfrac{1}{2}(n-1)\,n^2\,(n-3)$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $S(n-1) = \tfrac{1}{2}(n-1)(n-1+1)^2((n-1)-2) = \tfrac{1}{2}(n-1)\,n^2\,(n-3)$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$\sum_{r=n}^{2n} = 2n(n-1)(2n+1)^2 - \tfrac{1}{2}n^2(n-1)(n-3)$$</p><p>$$= \tfrac{1}{2}n(n-1)\Bigl[\,4(2n+1)^2 - n(n-3)\,\Bigr]$$</p><p>Expand bracket:</p><p>$$4(4n^2+4n+1) - (n^2-3n) = 16n^2 + 16n + 4 - n^2 + 3n = 15n^2 + 19n + 4$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $4(4n^2+4n+1) - (n^2-3n) = 16n^2 + 16n + 4 - n^2 + 3n = 15n^2 + 19n + 4$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Factorise $15n^2 + 19n + 4$. Need product $15\cdot 4 = 60$, sum $19$: $15$ and $4$.</p><p>$$15n^2 + 15n + 4n + 4 = 15n(n+1) + 4(n+1) = (15n+4)(n+1)$$</p><p>$$\sum_{r=n}^{2n} r(2r^2 - 3r - 1) = \tfrac{1}{2}n(n-1)(n+1)(15n+4)$$</p><p>Match $\tfrac{1}{2}n(n-1)(an+b)(cn+d)$:</p><p>$$\boxed{\;a=1,\ b=1,\ c=15,\ d=4\;}$$</p>
+    
+    <div class="step-result">$a=1,\ b=1,\ c=15,\ d=4$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
