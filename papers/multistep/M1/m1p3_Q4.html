@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 P3 Q4 — Vector with speed condition + bearing</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q4 · Paper 3 (Oct 2023) · Attempted 10 Apr 2026</div>
+  <h1>Q4 — Particle $P$: $\mathbf{a} = (-\lambda\mathbf{i} + 2\lambda\mathbf{j})$, find $\lambda$ and bearing</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Particle $P$ moves with constant acceleration $\mathbf{a} = (-\lambda\mathbf{i} + 2\lambda\mathbf{j})\ \text{m/s}^2$, where $\lambda > 0$. At $t = 0$, $P$ has velocity $(5\mathbf{i} - 8\mathbf{j})$ m/s. At $t = 5$ s, the speed of $P$ is $13$ m/s.</p><p><strong>(a)</strong> Find $\mathbf{v}(5)$ in terms of $\mathbf{i}, \mathbf{j}$ and $\lambda$. <strong>[2]</strong></p><p><strong>(b)</strong> Show that $25\lambda^2 - 42\lambda - 16 = 0$. <strong>[3]</strong></p><p><strong>(c)</strong> Find the bearing on which $P$ moves at $t = 4$ s. <strong>[5]</strong></p>
+    
+    <p class="q-marks">[10 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — $\mathbf{v}(5)$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (constant acceleration):</strong></p><p>$$\mathbf{v}(t) = \mathbf{v}_0 + \mathbf{a}\, t$$</p><p><strong>Substitute</strong> $t = 5$:</p><p>$$\mathbf{v}(5) = (5\mathbf{i} - 8\mathbf{j}) + 5(-\lambda\mathbf{i} + 2\lambda\mathbf{j})$$</p>
+    
+    <div class="step-result">$\mathbf{v}(5) = (5 - 5\lambda)\mathbf{i} + (-8 + 10\lambda)\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Show the quadratic <span class="pmarks">[3 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (a):</strong> $\mathbf{v}(5) = (5-5\lambda)\mathbf{i} + (-8+10\lambda)\mathbf{j}$. Speed = $13$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (speed):</strong></p><p>$$|\mathbf{v}|^2 = v_i^2 + v_j^2$$</p><p><strong>Substitute</strong>:</p><p>$$(5-5\lambda)^2 + (-8+10\lambda)^2 = 169$$</p><p>Expand each square:</p><p>$(5-5\lambda)^2 = 25 - 50\lambda + 25\lambda^2$</p><p>$(-8+10\lambda)^2 = 64 - 160\lambda + 100\lambda^2$</p><p>Sum: $125\lambda^2 - 210\lambda + 89 = 169$, so $125\lambda^2 - 210\lambda - 80 = 0$.</p><p>Divide by $5$:</p><p>$$\boxed{\,25\lambda^2 - 42\lambda - 16 = 0\,} \quad\blacksquare$$</p><div class="why"><strong>Sign check:</strong> $(-8)^2 = 64$, cross-term $2(-8)(10\lambda) = -160\lambda$. Don’t drop the negative sign.</div>
+    
+    <div class="step-result">$25\lambda^2 - 42\lambda - 16 = 0$ ✓</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Bearing at $t = 4$ <span class="pmarks">[5 marks] · 3 steps</span></h2>
+  <div class="given"><strong>From (b):</strong> $25\lambda^2 - 42\lambda - 16 = 0$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (quadratic):</strong></p><p>$$\lambda = \frac{42 \pm \sqrt{42^2 + 4 \cdot 25 \cdot 16}}{2 \cdot 25} = \frac{42 \pm \sqrt{1764 + 1600}}{50} = \frac{42 \pm \sqrt{3364}}{50} = \frac{42 \pm 58}{50}$$</p><p>$\lambda > 0$ → take $+$: $\lambda = \tfrac{100}{50} = 2$.</p>
+    
+    <div class="step-result">$\lambda = 2$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $\lambda = 2$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> apply $\mathbf{v}(t) = \mathbf{v}_0 + \mathbf{a}t$ at $t = 4$, then substitute $\lambda = 2$ from STEP 1.</p><p><strong>Formula:</strong></p><p>$$\mathbf{v}(4) = \mathbf{v}_0 + 4\, \mathbf{a}$$</p><p><strong>Substitute</strong> $\mathbf{v}_0 = 5\mathbf{i} - 8\mathbf{j}$, $\mathbf{a} = -\lambda\mathbf{i} + 2\lambda\mathbf{j}$:</p><p>$$\mathbf{v}(4) = (5\mathbf{i} - 8\mathbf{j}) + 4(-\lambda\mathbf{i} + 2\lambda\mathbf{j})$$</p><p>$$= (5 - 4\lambda)\mathbf{i} + (-8 + 8\lambda)\mathbf{j}$$</p><p><strong>Using $\lambda = 2$ from STEP 1</strong>:</p><p>$\mathbf{i}$-component: $5 - 4(2) = 5 - 8 = -3$.</p><p>$\mathbf{j}$-component: $-8 + 8(2) = -8 + 16 = +8$.</p><p>$$\boxed{\;\mathbf{v}(4) = -3\mathbf{i} + 8\mathbf{j}\;}$$</p><div class="why"><strong>Sense check:</strong> $|\mathbf{v}(4)| = \sqrt{9 + 64} = \sqrt{73} \approx 8.54$ m/s. Speed at $t=4$ is between $v_0$ ($\sqrt{89} \approx 9.43$) and $v(5) = 13$ — actually it’s decreasing then increasing as the velocity reverses sign in $\mathbf{i}$. Realistic.</div>
+    
+    <div class="step-result">$\mathbf{v}(4) = -3\mathbf{i} + 8\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $\mathbf{v}(4) = -3\mathbf{i} + 8\mathbf{j}$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> convert $\mathbf{v}(4) = -3\mathbf{i} + 8\mathbf{j}$ to a bearing (measured clockwise from N). First identify the quadrant from the signs of the components, then compute the angle from N.</p><p><strong>Quadrant:</strong> $\mathbf{i}$-component negative ($-3$, west) and $\mathbf{j}$-component positive ($+8$, north) → NW quadrant.</p><p><strong>Angle from N (going west):</strong></p><p>$$\tan\phi = \frac{|\mathbf{i}\text{-comp}|}{|\mathbf{j}\text{-comp}|} = \frac{3}{8}$$</p><p>$$\phi = \arctan\left(\tfrac{3}{8}\right) \approx 20.56°$$</p><p><strong>Bearing for NW direction</strong> (going clockwise from N to the W-side direction means going almost all the way around):</p><p>$$\text{bearing} = 360° - \phi \approx 360° - 20.56° \approx 339.44°$$</p><p>$$\boxed{\;\text{bearing} \approx 339°\;}$$</p><div class="why"><strong>Quadrant rules for bearing:</strong> NE → $\arctan(|i|/|j|)$; SE → $180° - $; SW → $180° + $; NW → $360° - $. Always sketch the arrow first — a wrong quadrant gives a wrong bearing by 90° or 180°, and that’s an A1 lost.</div>
+    
+    <div class="step-result">$\boxed{\,\text{bearing} \approx 339°\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
