@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 P2 Q7 — Ship closest approach + safety</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q7 · Paper 2 (Jan 2024) · Attempted 4 Apr 2026</div>
+  <h1>Q7 — Ship $S$ vs lighthouse: closest approach and safety check</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>At midnight, ship $S$ has position vector $(19\mathbf{i} + 22\mathbf{j})$ km, and travels with constant velocity $(12\mathbf{i} - 16\mathbf{j})$ km/h. A lighthouse $L$ is at $(26\mathbf{i} + 15\mathbf{j})$ km. If $S$ is within $1.3$ km of $L$, it is in danger.</p><p><strong>(a)</strong> Find the speed of $S$. <strong>[2]</strong></p><p><strong>(b)</strong> Position vector of $S$ at time $t$ hours after midnight. <strong>[2]</strong></p><p><strong>(c)(i)</strong> Find the value of $t$ at which $S$ is closest to $L$. <strong>(ii)</strong> Hence determine if it is safe. <strong>[7]</strong></p>
+    
+    <p class="q-marks">[11 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Speed of $S$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> speed is the magnitude of the velocity vector. Apply Pythagoras to the components of $\mathbf{v}$.</p><p><strong>Formula (speed = magnitude of velocity):</strong></p><p>$$|\mathbf{v}| = \sqrt{v_i^2 + v_j^2}$$</p><p><strong>Substitute</strong> $\mathbf{v} = 12\mathbf{i} - 16\mathbf{j}$:</p><p>$$|\mathbf{v}| = \sqrt{12^2 + (-16)^2} = \sqrt{144 + 256} = \sqrt{400}$$</p><p>$$|\mathbf{v}| = 20\ \text{km/h}$$</p><p>$$\boxed{\;|\mathbf{v}| = 20\ \text{km/h}\;}$$</p><div class="why"><strong>Sign convention:</strong> the negative $\mathbf{j}$-component doesn’t affect speed (squared away). It only affects direction (which is south-east here).</div>
+    
+    <div class="step-result">$\boxed{\,|\mathbf{v}| = 20\ \text{km/h}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Position $\mathbf{s}(t)$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Setup (from question):</strong> $\mathbf{r}_S(0) = 19\mathbf{i} + 22\mathbf{j}$, $\mathbf{v}_S = 12\mathbf{i} - 16\mathbf{j}$ km/h.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> constant velocity → position is linear in time. Plug into the standard kinematic formula and collect components.</p><p><strong>Formula (constant velocity):</strong></p><p>$$\mathbf{r}(t) = \mathbf{r}_0 + \mathbf{v}\, t$$</p><p><strong>Substitute</strong> $\mathbf{r}_0 = 19\mathbf{i} + 22\mathbf{j}$, $\mathbf{v} = 12\mathbf{i} - 16\mathbf{j}$:</p><p>$$\mathbf{s}(t) = (19\mathbf{i} + 22\mathbf{j}) + (12\mathbf{i} - 16\mathbf{j})\, t$$</p><p>Collect $\mathbf{i}$ and $\mathbf{j}$ separately:</p><p>$\;\;\mathbf{i}$-component: $19 + 12t$</p><p>$\;\;\mathbf{j}$-component: $22 - 16t$</p><p>$$\boxed{\;\mathbf{s}(t) = (19 + 12t)\mathbf{i} + (22 - 16t)\mathbf{j}\;}$$</p><div class="why"><strong>Sense check:</strong> at $t = 0$, $\mathbf{s}(0) = 19\mathbf{i} + 22\mathbf{j}$ ✓ (matches $\mathbf{r}_0$). The $\mathbf{j}$-component decreases with time (negative coefficient) — consistent with $\mathbf{v}$ having $-16\mathbf{j}$.</div>
+    
+    <div class="step-result">$\mathbf{s}(t) = (19+12t)\mathbf{i} + (22-16t)\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c)(i) — $t$ at closest approach <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  <div class="given">$\overrightarrow{LS}(t) = \mathbf{s}(t) - \mathbf{r}_L = (19+12t-26)\mathbf{i} + (22-16t-15)\mathbf{j} = (-7+12t)\mathbf{i} + (7-16t)\mathbf{j}$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (closest-approach trick):</strong> minimise the squared distance:</p><p>$$f(t) = |\overrightarrow{LS}|^2 = x(t)^2 + y(t)^2$$</p><p><strong>Substitute</strong>:</p><p>$$f(t) = (-7+12t)^2 + (7-16t)^2$$</p><div class="why"><strong>Phuc nailed this trick already.</strong> Minimising $|d|^2$ has the same minimiser as $|d|$ but avoids the awkward square-root in the derivative.</div>
+    
+    <div class="step-result">$f(t) = (-7+12t)^2 + (7-16t)^2$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $f(t) = (-7+12t)^2 + (7-16t)^2$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> minimum of $f(t)$ occurs where $f'(t) = 0$. Differentiate using the chain rule on each squared bracket, then solve for $t$. Confirm it’s a min via $f''(t) > 0$.</p><p><strong>Chain rule:</strong> $\tfrac{d}{dt}(at+b)^2 = 2a(at+b)$.</p><p>For the first bracket $(-7 + 12t)^2$: $a = 12 \Rightarrow$ derivative $= 2(12)(-7+12t) = 24(-7+12t)$.</p><p>For the second bracket $(7 - 16t)^2$: $a = -16 \Rightarrow$ derivative $= 2(-16)(7-16t) = -32(7-16t)$.</p><p>$$f'(t) = 24(-7+12t) - 32(7-16t)$$</p><p>Expand:</p><p>$$f'(t) = -168 + 288t - 224 + 512t$$</p><p>$$f'(t) = 800t - 392$$</p><p><strong>Set $f'(t) = 0$:</strong></p><p>$$800t = 392$$</p><p>$$t = \tfrac{392}{800} = 0.49\ \text{h}$$</p><p><strong>Confirm minimum:</strong> $f''(t) = 800 > 0$ ✓ (concave up).</p><p>$$\boxed{\;t = 0.49\ \text{h}\;}$$</p><div class="why"><strong>Sense check:</strong> $0.49$ h $\approx$ 29 minutes after midnight. $t > 0$ → the closest approach happens in the future (after midnight), not in the past — physically meaningful.</div>
+    
+    <div class="step-result">$\boxed{\,t = 0.49\ \text{h}\,}$ (minimum)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c)(ii) — Safety conclusion <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (i):</strong> $t = 0.49$. Plug back: $-7 + 12(0.49) = -1.12$; $7 - 16(0.49) = -0.84$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$|\overrightarrow{LS}|_{\min} = \sqrt{1.12^2 + 0.84^2} = \sqrt{1.2544 + 0.7056} = \sqrt{1.96}$$</p><p>$$|\overrightarrow{LS}|_{\min} = 1.4\ \text{km}$$</p>
+    
+    <div class="step-result">$|\overrightarrow{LS}|_{\min} = 1.4$ km</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $|\overrightarrow{LS}|_{\min} = 1.4$ km.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Compare to safety threshold $1.3$ km:</p><p>$$1.4 > 1.3 \;\therefore\; \text{ship stays \emph{outside} the } 1.3\ \text{km zone}$$</p><p>$\Rightarrow$ <strong>safe to continue</strong>. ✓</p><div class="why"><strong>Phuc's slip:</strong> wrote “$1.4 < 1.3$, safe region” — wrong inequality direction. The conclusion was right but the symbol was flipped, which would lose the final mark. <em>Always restate the threshold + comparison cleanly:</em> “$d_{\min} = 1.4 \;>\; 1.3 \Rightarrow$ safe.”</div>
+    
+    <div class="step-result">$\boxed{\,1.4 > 1.3 \Rightarrow \text{safe to continue}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
