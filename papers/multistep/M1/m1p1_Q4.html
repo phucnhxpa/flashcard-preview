@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 Q4 — Moments with tilting</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q4 · Paper 1 (May 2024) · Attempted 3 Apr 2026</div>
+  <h1>Q4 — Non-uniform rod on a step, find smallest $M$ and $R_C$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A non-uniform rod $AB$ of length $6.5$ m and mass $1.2$ kg has its centre of mass $3$ m from $A$. The rod rests horizontally on a step at point $C$ where $CB = 1.5$ m (so $AC = 5$ m). A $4$ kg particle is attached at $B$, and a particle of mass $M$ kg is attached at $D$ where $AD = 0.5$ m. ($g = 9.8\,\text{m/s}^2$.)</p><p><strong>(a)</strong> Find the smallest possible value of $M$ for the rod to remain in equilibrium. <strong>[3]</strong></p><p><strong>(b)</strong> The particles at $B$ and $D$ are removed. A new particle is placed at $E$, where $EB = 0.9$ m, and the rod is on the point of tilting about $C$. Find the magnitude of the force exerted on the rod at $C$. <strong>[3]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="90" x2="350" y2="90" stroke="#1d1d1f" stroke-width="2.2"/><circle cx="30" cy="90" r="3" fill="#1d1d1f"/><text x="22" y="80" font-size="12" font-style="italic">A</text><circle cx="56" cy="90" r="3" fill="#1d1d1f"/><text x="48" y="80" font-size="12" font-style="italic">D</text><circle cx="276" cy="90" r="3" fill="#1d1d1f"/><text x="270" y="80" font-size="12" font-style="italic">C</text><circle cx="350" cy="90" r="3" fill="#1d1d1f"/><text x="343" y="80" font-size="12" font-style="italic">B</text><polygon points="270,90 282,90 276,108" fill="none" stroke="#1d1d1f" stroke-width="1.6"/><line x1="262" y1="118" x2="290" y2="118" stroke="#1d1d1f" stroke-width="1.4"/><g stroke="#1d1d1f" stroke-width="1"><line x1="265" y1="124" x2="262" y2="118"/><line x1="271" y1="124" x2="268" y2="118"/><line x1="277" y1="124" x2="274" y2="118"/><line x1="283" y1="124" x2="280" y2="118"/></g><line x1="158" y1="90" x2="158" y2="118" stroke="#1d1d1f" stroke-width="1" stroke-dasharray="3,3"/><line x1="158" y1="118" x2="153" y2="128" stroke="#1d1d1f" stroke-width="1.2"/><line x1="158" y1="118" x2="163" y2="128" stroke="#1d1d1f" stroke-width="1.2"/><text x="138" y="142" font-size="11" font-style="italic">1.2g (CoM)</text><circle cx="350" cy="90" r="6" fill="#1d1d1f"/><text x="334" y="135" font-size="11" font-style="italic">4g (B)</text><circle cx="56" cy="90" r="6" fill="#1d1d1f"/><text x="42" y="135" font-size="11" font-style="italic">Mg (D)</text><text x="158" y="38" font-size="11" font-style="italic">3 m → CoM</text><text x="160" y="22" font-size="10" fill="#6e6e73">AC = 5, AB = 6.5, AD = 0.5</text></svg></div>
+    <p class="q-marks">[6 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Smallest $M$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">pivot rule</span></span>
+    
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> 'smallest $M$' means I'm looking for the boundary between equilibrium and the rod tipping over. At that limit, the rod is on the <em>verge of tilting</em> — the reaction at the support that’s about to lift off becomes zero.</p><p><strong>Which way does it tilt as $M$ shrinks?</strong> The mass at $D$ (very close to $A$) pulls the left end down. The mass at $B$ pulls the right end down. The pivot is $C$. If $M$ is too small, the right side wins and the rod tilts clockwise about $C$ — the $A$ end lifts up.</p><p><strong>Limiting condition:</strong> rod just about to tilt clockwise about $C$ $\Rightarrow$ no contact at $A$ $\Rightarrow$ <em>only</em> support is the step at $C$.</p><p><strong>Why pivot at $C$?</strong> Two reasons — see Phuc’s rule below.</p><p>$$\boxed{\;\text{Pivot} = C,\ R_A = 0\;}$$</p><div class="why"><strong>Phuc's rule (verbatim):</strong> “(1) The pivot point should not include the force we want to find. (2) Pick a point that eliminates a variable.” Here pivoting at $C$ kills $R_C$ (no moment arm) — leaves only $M$ as unknown in the moments equation. ✓</div>
+    
+    <div class="step-result">Pivot = $C$. Reaction at $A$ = 0 at the limit.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Pivot $= C$, $R_A = 0$ at the tilt limit.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> at the tilt limit, $R_A = 0$ and $R_C$ has zero moment arm about $C$ — so the moments equation about $C$ involves only the three weights (rod, $D$, $B$) and the single unknown $M$. Solve directly.</p><p><strong>Compute distances from $C$</strong> (which is $AC = 5$ m right of $A$):</p><p>• Centre of mass (CoM at $3$ m from $A$): $5 - 3 = 2$ m <em>left</em> of $C$. Weight $1.2g$ acts <em>down</em> on the left side $\Rightarrow$ tends to rotate rod <strong>clockwise (CW)</strong> about $C$.</p><p>• Particle at $D$ (at $0.5$ m from $A$): $5 - 0.5 = 4.5$ m <em>left</em> of $C$. Weight $Mg$ down on the left $\Rightarrow$ <strong>CW</strong>.</p><p>• Particle at $B$ (at $6.5$ m from $A$): $6.5 - 5 = 1.5$ m <em>right</em> of $C$. Weight $4g$ down on the right $\Rightarrow$ rotates <strong>anti-clockwise (ACW)</strong> about $C$.</p><p><strong>Formula (moments balance, since rod is in equilibrium):</strong></p><p>$$\Sigma(\text{CW moments}) = \Sigma(\text{ACW moments})$$</p><p>where each moment $= \text{force} \times \text{perpendicular distance}$.</p><p><strong>Substitute</strong>:</p><p>$$\underbrace{Mg \cdot 4.5}_{D,\,\text{CW}} + \underbrace{1.2g \cdot 2}_{\text{CoM},\,\text{CW}} = \underbrace{4g \cdot 1.5}_{B,\,\text{ACW}}$$</p><p>Cancel $g$ on both sides:</p><p>$$4.5M + 2.4 = 6$$</p><p>$$4.5M = 6 - 2.4 = 3.6$$</p><p>$$M = \frac{3.6}{4.5} = 0.8$$</p><p>$$\boxed{\;M = 0.8\ \text{kg}\;}$$</p><div class="why"><strong>Sense check:</strong> $D$ is far from $C$ (lever arm 4.5 m) so a small $M$ gives a big moment — making $M = 0.8$ kg believable. If we got $M$ negative or huge, that would signal a sign or distance error.</div>
+    
+    <div class="step-result">$\boxed{\,M = 0.8\ \text{kg}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Force on rod at $C$ (tilting at $E$) <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given"><strong>Setup:</strong> particles at $B$ and $D$ removed. New particle (mass $m_E$) at $E$, $EB = 0.9$ m → $AE = 5.6$ m → $E$ is $0.6$ m <em>right</em> of $C$. On point of tilting about $C$ → reaction <strong>only</strong> at $C$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> on the point of tilting about $C$ means the rod is rotating (in the limit). Balance the only two moments about $C$.</p><p><strong>Setup:</strong> particles at $B$ and $D$ are removed, so only:</p><p>• Rod’s own weight $1.2g$ at the CoM ($2$ m <em>left</em> of $C$).</p><p>• New particle (mass $m_E$) at $E$, which is $AE = 6.5 - 0.9 = 5.6$ m from $A$, so $5.6 - 5 = 0.6$ m <em>right</em> of $C$.</p><p><strong>Rotation tendency about $C$:</strong></p><p>• Rod’s weight on the left side, pulling down $\Rightarrow$ rotates <strong>CW</strong> about $C$.</p><p>• Particle on the right side, pulling down $\Rightarrow$ rotates <strong>ACW</strong> about $C$.</p><p><strong>Formula (moments balance at tilt limit):</strong></p><p>$$\Sigma(\text{CW}) = \Sigma(\text{ACW})$$</p><p><strong>Substitute</strong>:</p><p>$$1.2g \cdot 2 = m_E\, g \cdot 0.6$$</p><p>$$2.4g = 0.6\, m_E\, g$$</p><p>$$m_E = \frac{2.4}{0.6} = 4\ \text{kg}$$</p><p>$$\boxed{\;m_E = 4\ \text{kg}\;}$$</p><div class="why"><strong>Tilting rule:</strong> on the point of tilting about $X$ → reaction at <em>all other supports</em> = 0. Here $A$ has no contact at all (it’s in free space), so $C$ is the sole support — but $C$ contributes zero moment about itself. So the moments equation has only the weights.</div>
+    
+    <div class="step-result">$m_E = 4$ kg</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $m_E = 4$ kg.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> with $m_E$ found from STEP 1, the rod is now fully specified. The reaction $R_C$ at the step is the only upward force — it must support the entire weight of the rod plus particle. Use vertical equilibrium.</p><p><strong>Forces on the rod (vertical):</strong></p><p>• Rod’s weight $1.2g$ <em>down</em>.</p><p>• Particle’s weight $m_E\, g = 4g$ <em>down</em> (using $m_E = 4$ from STEP 1).</p><p>• Reaction $R_C$ at the step, <em>up</em>.</p><p>• No contact at $A$ (it’s overhanging) $\Rightarrow$ $R_A = 0$.</p><p><strong>Formula (vertical equilibrium):</strong></p><p>$$\Sigma F_y = 0 \;\Rightarrow\; R_C = (M_\text{rod} + m_E)\, g$$</p><p><strong>Substitute</strong> $M_\text{rod} = 1.2$, $m_E = 4$, $g = 9.8$:</p><p>$$R_C = (1.2 + 4) \cdot 9.8 = 5.2 \cdot 9.8 = 50.96\ \text{N}$$</p><p>$$\boxed{\;R_C = 5.2g \approx 51\ \text{N}\;}$$</p><div class="why"><strong>Sense check:</strong> $R_C$ holds up $5.2$ kg total — about the weight of a small bag of sugar plus a brick. $51$ N (≈5.2 kgf) is reasonable for a rod resting on a step.</div>
+    
+    <div class="step-result">$\boxed{\,R_C = 5.2g \approx 51\ \text{N}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
