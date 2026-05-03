@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 Q3 — Inextensible string, connected particles</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q3 · Paper 1 (May 2024) · Attempted 3 Apr 2026</div>
+  <h1>Q3 — Find tension $T_1$ in the upper string</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Particles $P$ (mass $4m$) and $Q$ (mass $2m$) are connected by a light inextensible string. A second light inextensible string is attached above $Q$, hanging from a fixed support. Both strings are taut and vertical; the system accelerates vertically downwards.</p><p>Given that the tension in the string between $P$ and $Q$ is $3mg$, find the tension $T_1$ in the upper string in terms of $m$ and $g$.</p>
+    <div class="q-diagram"><svg viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg"><line x1="100" y1="14" x2="280" y2="14" stroke="#1d1d1f" stroke-width="1.5"/><g stroke="#1d1d1f" stroke-width="1"><line x1="105" y1="14" x2="100" y2="9"/><line x1="120" y1="14" x2="115" y2="9"/><line x1="135" y1="14" x2="130" y2="9"/><line x1="150" y1="14" x2="145" y2="9"/><line x1="165" y1="14" x2="160" y2="9"/><line x1="180" y1="14" x2="175" y2="9"/><line x1="195" y1="14" x2="190" y2="9"/><line x1="210" y1="14" x2="205" y2="9"/><line x1="225" y1="14" x2="220" y2="9"/><line x1="240" y1="14" x2="235" y2="9"/><line x1="255" y1="14" x2="250" y2="9"/><line x1="270" y1="14" x2="265" y2="9"/></g><line x1="190" y1="14" x2="190" y2="80" stroke="#1d1d1f" stroke-width="1.4"/><text x="195" y="50" font-size="11" font-style="italic">T₁</text><rect x="170" y="80" width="40" height="32" fill="#fff" stroke="#1d1d1f" stroke-width="1.4"/><text x="190" y="100" text-anchor="middle" font-size="13">Q (2m)</text><line x1="190" y1="112" x2="190" y2="155" stroke="#1d1d1f" stroke-width="1.4"/><text x="195" y="135" font-size="11" font-style="italic">T = 3mg</text><rect x="170" y="155" width="40" height="32" fill="#fff" stroke="#1d1d1f" stroke-width="1.4"/><text x="190" y="175" text-anchor="middle" font-size="13">P (4m)</text><line x1="320" y1="80" x2="320" y2="180" stroke="#1d1d1f" stroke-width="1.6" marker-end="url(#a3)"/><text x="328" y="135" font-size="11" font-style="italic">a (down)</text><defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1d1d1f"/></marker></defs></svg></div>
+    <p class="q-marks">[6 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[6 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">key facts</span></span>
+    
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> before writing any equation, decode the modelling phrases. Each adjective on a string adds (or removes) an unknown.</p><p><strong>Definition (light string):</strong> mass = 0.</p><p>Consequence: applying $\Sigma F = ma$ to a small element of the string gives $\Delta T = (\Delta m) a = 0 \cdot a = 0$, so tension is the <em>same throughout</em> one continuous string. (One string → one tension.)</p><p><strong>Definition (inextensible string):</strong> length is fixed; doesn’t stretch.</p><p>Consequence: if particle $P$ moves down by $\delta$, the connected particle $Q$ must move with the same speed and acceleration along the string — they share <em>one common $a$</em>.</p><p><strong>Apply to this problem:</strong></p><p>• Two strings here (upper $T_1$ and lower $T_{PQ} = 3mg$). Each is internally uniform.</p><p>• Both strings inextensible → $P$, $Q$, and the support point all move together → <strong>same $a$</strong> for the whole system.</p><p>$$\boxed{\;a_P = a_Q = a_\text{system} = a\;}$$</p><div class="why"><strong>Phuc's gap (verbatim):</strong> “For this question, I need to be able to identify the list of forces, and I need to know what an inextensible string means. In the case of an inextensible string, that means that the acceleration throughout the string is the same.” That insight is the key — it lets us treat $P$ and $Q$ as one 6$m$ block in the system equation later.</div>
+    
+    <div class="step-result">Same $a$ for $P$, $Q$, and the whole system.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Same $a$ for $P$, $Q$, and the whole system.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> isolate $P$. The upper string ($T_1$, our unknown) doesn’t touch $P$ — only the lower string does. So $P$’s equation has <em>only one unknown</em>: $a$. Solve that first, then come back for $T_1$.</p><p><strong>Free-body diagram for $P$ (mass $4m$):</strong> taking downward as positive (system accelerates down).</p><p>• Weight $4mg$ acts <em>down</em> $\Rightarrow$ contributes $+4mg$.</p><p>• Tension $T_{PQ} = 3mg$ in the lower string pulls $P$ <em>up</em> (toward $Q$ above) $\Rightarrow$ contributes $-3mg$.</p><p>• No other forces (string is light; no friction; no air resistance).</p><p><strong>Formula (Newton’s 2nd law):</strong></p><p>$$\Sigma F = m_P\, a$$</p><p><strong>Substitute</strong>:</p><p>$$4mg - 3mg = (4m)\, a$$</p><p>$$mg = 4ma$$</p><p>Divide both sides by $4m$ (note $m \ne 0$):</p><p>$$\boxed{\;a = \tfrac{g}{4}\;}$$</p><div class="why"><strong>Why isolate P first:</strong> the upper string’s tension doesn’t act on $P$, so $P$’s equation has only one unknown ($a$). Tackling the whole system first would give one equation in two unknowns ($a$ and $T_1$). <strong>Sense check:</strong> the system is heavier on the bottom and net pulled down, so $a < g$ makes sense ($g/4 < g$ ✓). If $T_{PQ} > 4mg$, $P$ would accelerate <em>up</em>; here $T_{PQ} = 3mg < 4mg$, so $P$ accelerates down — consistent.</div>
+    
+    <div class="step-result">$a = g/4$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $a = g/4$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> now treat the whole system ($P$ + $Q$ together, mass $6m$) as one combined body. The internal tension $T_{PQ}$ between them cancels (Newton’s 3rd law: internal forces come in pairs that sum to zero). Only <strong>external</strong> forces matter.</p><p><strong>External forces on the combined system</strong> (down positive, since system accelerates down):</p><p>• Total weight: $(4m + 2m)g = 6mg$ <em>down</em> $\Rightarrow +6mg$.</p><p>• Upper-string tension $T_1$ pulls the system <em>up</em> $\Rightarrow -T_1$.</p><p>(Note: $T_{PQ}$ is internal — it pulls $Q$ down and $P$ up by the same amount, so they cancel in the combined equation.)</p><p><strong>Formula (Newton’s 2nd law for system):</strong></p><p>$$\Sigma F_\text{ext} = M_\text{total}\, a$$</p><p><strong>Using $a = g/4$ from STEP 2</strong>:</p><p>$$6mg - T_1 = 6m \cdot \tfrac{g}{4} = \tfrac{6mg}{4} = \tfrac{3mg}{2}$$</p><p>Rearrange for $T_1$:</p><p>$$T_1 = 6mg - \tfrac{3mg}{2} = \tfrac{12mg}{2} - \tfrac{3mg}{2} = \tfrac{9mg}{2}$$</p><p>$$\boxed{\;T_1 = \dfrac{9mg}{2}\;}$$</p><div class="why"><strong>Trick (internal forces cancel):</strong> internal tension $T_{PQ}=3mg$ doesn’t appear in the system equation — you don’t need to write it. <strong>Sense check:</strong> if the system were in equilibrium (no acceleration), $T_1$ would equal $6mg$. Since the system <em>accelerates down</em>, the supporting tension must be <em>less</em> than the total weight — and $\tfrac{9mg}{2} = 4.5mg < 6mg$ ✓.</div>
+    
+    <div class="step-result">$\boxed{\,T_1 = \dfrac{9mg}{2}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
