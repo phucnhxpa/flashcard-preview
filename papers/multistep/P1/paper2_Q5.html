@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P1 Q5 — Garden: sector + 2 triangles</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P1 (WMA11/01) · Q5 · Paper 2 (Thursday 9 May 2024) · Attempted 5 Apr 2026</div>
+  <h1>Q5 — Sector $BDE$ + triangles $ABE$, $BCD$ (garden $ABCDEA$)</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The garden $ABCDEA$ is made up of triangle $ABE$, sector $BDE$ (centred at $B$, radius $6$ m), and right-angled triangle $BCD$.</p><p>Given: $AB = 10.8$ m, $AE = 12.2$ m, $\angle BCD = \tfrac{\pi}{2}$, $\angle EBD = 1.3$ rad, and $A,B,C$ are collinear.</p><p><strong>(a)</strong> Area of sector $BDE$, in m². <strong>[2]</strong></p><p><strong>(b)</strong> Angle $ABE$ in radians to 2 d.p. <strong>[2]</strong></p><p><strong>(c)</strong> Total area of garden, to 3 s.f. <strong>[3]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg"><line x1="40" y1="180" x2="290" y2="180" stroke="#1d1d1f" stroke-width="1.4"/><line x1="40" y1="180" x2="115" y2="118" stroke="#1d1d1f" stroke-width="1.4"/><line x1="115" y1="118" x2="180" y2="180" stroke="#1d1d1f" stroke-width="1.4"/><line x1="180" y1="180" x2="238" y2="116" stroke="#1d1d1f" stroke-width="1.4"/><line x1="238" y1="116" x2="238" y2="180" stroke="#1d1d1f" stroke-width="1.4"/><path d="M 115 118 A 85 85 0 0 1 238 116" fill="none" stroke="#1d1d1f" stroke-width="1.4"/><polyline points="232,180 232,174 238,174" fill="none" stroke="#1d1d1f" stroke-width="1"/><text x="32" y="194" font-size="13" font-style="italic">A</text><text x="174" y="196" font-size="13" font-style="italic">B</text><text x="240" y="196" font-size="13" font-style="italic">C</text><text x="244" y="116" font-size="13" font-style="italic">D</text><text x="100" y="113" font-size="13" font-style="italic">E</text><text x="60" y="138" font-size="11">12.2 m</text><text x="146" y="160" font-size="11">10.8 m</text><text x="200" y="142" font-size="11">6 m</text><text x="124" y="170" font-size="11">6 m</text><text x="172" y="142" font-size="11" font-style="italic">1.3</text><text x="190" y="22" text-anchor="middle" font-size="11.5" font-style="italic">Garden ABCDEA = △ABE + sector BDE + △BCD (right-angled at C)</text></svg></div>
+    <p class="q-marks">[7 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Sector area <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> sector area depends only on the radius and the angle subtended at the centre. Both are given here, so plug straight into the booklet formula. Make sure the angle is in radians (it is — $1.3$ rad).</p><p><strong>Formula (sector area, in booklet):</strong></p><p>$$A = \tfrac{1}{2}\, r^2\, \theta\quad(\theta\text{ in radians})$$</p><p><strong>Substitute</strong> $r = 6$ m, $\theta = 1.3$ rad:</p><p>$\;\;A_{\text{sector}} = \tfrac{1}{2}(6)^2(1.3)$</p><p>$\;\;\phantom{A_{\text{sector}}} = \tfrac{1}{2}(36)(1.3)$</p><p>$\;\;\phantom{A_{\text{sector}}} = 18 \cdot 1.3$</p><p>$\;\;\phantom{A_{\text{sector}}} = 23.4\ \text{m}^2$</p><p>$$\boxed{\;A_{\text{sector}} = 23.4\ \text{m}^2\;}$$</p><div class="why"><strong>Critical:</strong> $\theta$ MUST be in radians for $A = \tfrac{1}{2}r^2\theta$. If your calculator is in degrees you'll get $\tfrac{1}{2}(36)(0.0227) \approx 0.408$ — clearly wrong for a 6 m radius garden. <strong>Convert if needed:</strong> $\theta_{\text{rad}} = \theta_{\text{deg}} \times \dfrac{\pi}{180}$.</div>
+    
+    <div class="step-result">$A_{\text{sector}} = \boxed{23.4\ \text{m}^2}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Angle $ABE$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (a):</strong> sector $BDE$ has $r = 4$, $\angle DBE = 1.3$ rad, area $= \tfrac{1}{2}r^2\theta = \boxed{23.4\ \text{m}^2}$. Now use the right angle at $B$ inside the rectangle $ABCD$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> there are three angles at $B$ on the upper side of the line $AC$: $\angle ABE$, $\angle EBD$, and $\angle DBC$. Because $A, B, C$ are collinear, those three angles together form a straight line at $B$ — they sum to $\pi$ rad.</p><p><strong>Angles-on-a-line equation:</strong></p><p>$\;\;\angle ABE + \angle EBD + \angle DBC = \pi$</p><p><strong>Substitute</strong> known values: $\angle EBD = 1.3$ rad (given) and $\angle DBC = \tfrac{\pi}{2}$ (from the right-angle configuration of triangle $BCD$):</p><p>$\;\;\angle ABE + 1.3 + \tfrac{\pi}{2} = \pi$</p><p>Subtract $1.3$ and $\tfrac{\pi}{2}$:</p><p>$\;\;\angle ABE = \pi - \tfrac{\pi}{2} - 1.3 = \tfrac{\pi}{2} - 1.3$</p><p>Numerically:</p><p>$\;\;\angle ABE \approx 1.5708 - 1.3 = 0.2708\ldots$ rad</p><p>$$\boxed{\;\angle ABE \approx 0.27\ \text{rad (2 d.p.)}\;}$$</p><div class="why"><strong>How to spot the trick:</strong> when a problem says "X, Y, Z collinear" with rays going up from the middle vertex, the angles at the middle vertex sum to $\pi$ rad ($180°$). Here the angles are $\angle ABE$, $\angle EBD = 1.3$, $\angle DBC = \tfrac{\pi}{2}$. <strong>Don't round early:</strong> keep the unrounded value $\tfrac{\pi}{2} - 1.3$ for use in part (c) — rounding to $0.27$ then squaring/sin-ing it introduces 3rd-significant-figure drift.</div>
+    
+    <div class="step-result">$\angle ABE \approx 0.27$ rad</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Total area <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given"><strong>From (a)/(b):</strong> sector area $= 23.4$ m²; $\angle ABE = \tfrac{\pi}{2}-1.3 \approx 0.27$ rad. Now find the two triangle areas and sum.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> in $\triangle ABE$ we know two sides ($AB = 10.8$ m and $BE = 6$ m, since $BE$ is a radius) plus the included angle $\angle ABE \approx 0.27$ rad. That's the SAS configuration ⇒ use the area formula $\tfrac{1}{2}ab\sin C$.</p><p><strong>Formula (triangle area, SAS, in booklet):</strong></p><p>$$A = \tfrac{1}{2}\, ab\, \sin C$$</p><p>where $a, b$ are two sides and $C$ is the angle BETWEEN them.</p><p><strong>Substitute</strong> $a = AB = 10.8$, $b = BE = 6$, included angle $\angle ABE = 0.27$ rad:</p><p>$\;\;A_{ABE} = \tfrac{1}{2}(10.8)(6)\sin(0.27)$</p><p>Compute $\sin(0.27) \approx 0.2667$ (RAD mode):</p><p>$\;\;A_{ABE} \approx \tfrac{1}{2}(10.8)(6)(0.2667)$</p><p>$\;\;\phantom{A_{ABE}} = \tfrac{1}{2}(64.8)(0.2667)$</p><p>$\;\;\phantom{A_{ABE}} \approx 8.64\ \text{m}^2$</p><p>$$\boxed{\;A_{ABE} \approx 8.64\ \text{m}^2\;}$$</p><div class="why"><strong>Phuc said:</strong> "I forget the cosine and sine rule." The three triangle tools to keep straight: <strong>sine rule</strong> (angle–opposite-side pair), <strong>cosine rule</strong> (two sides + included angle ⇒ third side, OR three sides ⇒ any angle), and <strong>area</strong> $= \tfrac{1}{2}ab\sin C$ (two sides + included angle ⇒ area only). Here we want AREA with two sides + included angle ⇒ pick $\tfrac{1}{2}ab\sin C$.</div>
+    
+    <div class="step-result">$A_{ABE} \approx 8.64$ m²</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $A_{ABE} \approx 8.64$ m²</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $\triangle BCD$ has a right angle at $C$ and we know the hypotenuse $BD = 6$ m (a radius). Use SOH-CAH-TOA with $\angle DBC$ to find the two legs, then use legs to compute area.</p><p><strong>SOH-CAH-TOA</strong> in a right triangle with angle $\theta$ and hypotenuse $h$:</p><p>$\;\;\text{adjacent} = h\cos\theta$ (CAH)</p><p>$\;\;\text{opposite} = h\sin\theta$ (SOH)</p><p><strong>Identify pieces:</strong> right angle at $C$ ⇒ side opposite (which is $BD$, the radius) is the hypotenuse $h = 6$. The angle is $\angle DBC = 1.3$ rad. $BC$ is adjacent to this angle; $CD$ is opposite.</p><p>$\;\;BC = 6\cos(1.3) \approx 6 \times 0.2675 \approx 1.606$ m</p><p>$\;\;CD = 6\sin(1.3) \approx 6 \times 0.9636 \approx 5.780$ m</p><p><strong>Area of right triangle</strong> ($= \tfrac{1}{2} \cdot$ leg $\cdot$ leg):</p><p>$\;\;A_{BCD} = \tfrac{1}{2}(BC)(CD)$</p><p>$\;\;\phantom{A_{BCD}} \approx \tfrac{1}{2}(1.606)(5.780)$</p><p>$\;\;\phantom{A_{BCD}} \approx 4.64\ \text{m}^2$</p><p>$$\boxed{\;A_{BCD} \approx 4.64\ \text{m}^2\;}$$</p><div class="why"><strong>Identify hypotenuse first:</strong> it's always opposite the right angle. Here the right angle is at $C$, so the side opposite $C$ is $BD$ — that's the hypotenuse. The two legs ($BC$ and $CD$) are the sides ADJACENT to the right angle. <strong>Calculator MUST be in RAD mode</strong> for $\sin(1.3)$ and $\cos(1.3)$ — otherwise you'll get $\sin(1.3°) \approx 0.0227$ and totally wrong legs.</div>
+    
+    <div class="step-result">$A_{BCD} \approx 4.64$ m²</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $A_{BCD} \approx 4.64$ m²</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the garden $ABCDEA$ is the union of three non-overlapping regions (triangle $ABE$, sector $BDE$, triangle $BCD$). Total area $=$ sum of the parts.</p><p><strong>Sum:</strong></p><p>$\;\;\text{Total} = A_{ABE} + A_{\text{sector}} + A_{BCD}$</p><p>Plug in:</p><p>$\;\;\phantom{\text{Total}} \approx 8.64 + 23.4 + 4.64$</p><p>$\;\;\phantom{\text{Total}} = 36.68\ldots\ \text{m}^2$</p><p>Round to 3 s.f.:</p><p>$$\boxed{\;\text{Total area} \approx 36.7\ \text{m}^2\;}$$</p><div class="why"><strong>Check the magnitudes:</strong> the sector dominates ($23.4$ m², large angle $1.3$ rad over the full radius squared); $\triangle ABE$ is moderate ($8.64$ m², modest sides but narrow $0.27$ rad angle); $\triangle BCD$ is smallest ($4.64$ m², small legs from a single radius split). Ratios make sense given the geometry. <strong>Final precision:</strong> the question asks for 3 s.f., so $36.7$ — keeping more digits ($36.68$) and then rounding only at the end avoids drift.</div>
+    
+    <div class="step-result">Total area $\approx 36.7$ m² (3 s.f.)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
