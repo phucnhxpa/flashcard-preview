@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>M1 Q7 — Vectors: ship collision check</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">M1 (WME01/01) · Q7 · Paper 1 (May 2024) · Attempted 3 Apr 2026</div>
+  <h1>Q7 — Ships A and B: collision check + bearing 225°</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>At noon, ship $A$ has position $\mathbf{r}_A = 20\mathbf{j}$ km and velocity $\mathbf{v}_A = 40\mathbf{i}$ km/h (due east). Ship $B$ has position $\mathbf{r}_B = (10\mathbf{i} + 5\mathbf{j})$ km and moves at $20$ km/h on a bearing $\alpha$, where $\tan\alpha = 4/3$.</p><p><strong>(a)</strong> Find $\mathbf{v}_B$ in $\mathbf{i},\mathbf{j}$ form. <strong>[2]</strong></p><p><strong>(b)</strong> Position of $B$ at time $t$ hours after noon. <strong>[2]</strong></p><p><strong>(c)</strong> Show $\overrightarrow{AB} = (10-24t)\mathbf{i} + (12t-15)\mathbf{j}$ km. <strong>[2]</strong></p><p><strong>(d)</strong> Show that the ships do not collide. <strong>[3]</strong></p><p><strong>(e)</strong> Distance between them when bearing of $B$ from $A$ is $225°$. <strong>[4]</strong></p>
+    
+    <p class="q-marks">[13 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — $\mathbf{v}_B$ in components <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> a bearing $\alpha$ tells me the direction $B$ moves (clockwise from N). I need $\sin\alpha$ and $\cos\alpha$ to split velocity into $\mathbf{i}$ (east) and $\mathbf{j}$ (north) components.</p><p><strong>Find $\sin\alpha$, $\cos\alpha$ from $\tan\alpha = 4/3$:</strong> build a right triangle with opposite $= 4$, adjacent $= 3$. Hypotenuse:</p><p>$$h = \sqrt{4^2 + 3^2} = \sqrt{25} = 5$$</p><p>So: $\sin\alpha = \tfrac{\text{opp}}{\text{hyp}} = \tfrac{4}{5}$, $\cos\alpha = \tfrac{\text{adj}}{\text{hyp}} = \tfrac{3}{5}$ (a 3–4–5 triangle).</p><p><strong>Formula (bearing → components):</strong></p><p>$$\mathbf{v} = v\sin(\text{bearing})\,\mathbf{i} + v\cos(\text{bearing})\,\mathbf{j}$$</p><p>(Bearings are measured clockwise from N → east-component uses $\sin$, north-component uses $\cos$ — opposite of standard trig.)</p><p><strong>Substitute</strong> $v = 20$, $\sin\alpha = 4/5$, $\cos\alpha = 3/5$:</p><p>$$\mathbf{v}_B = 20 \cdot \tfrac{4}{5}\,\mathbf{i} + 20 \cdot \tfrac{3}{5}\,\mathbf{j} = 16\mathbf{i} + 12\mathbf{j}$$</p><p>$$\boxed{\;\mathbf{v}_B = 16\mathbf{i} + 12\mathbf{j}\ \text{km/h}\;}$$</p><div class="why"><strong>Trap (recurs from Q2):</strong> bearings are clockwise from N, so the $\mathbf{i}$-component (east) uses $\sin$ and $\mathbf{j}$ (north) uses $\cos$ — opposite of standard trig. <strong>Sense check:</strong> $|\mathbf{v}_B| = \sqrt{16^2 + 12^2} = \sqrt{400} = 20$ km/h ✓ (matches given speed).</div>
+    
+    <div class="step-result">$\boxed{\,\mathbf{v}_B = 16\mathbf{i} + 12\mathbf{j}\ \text{km/h}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Position of $B$ at time $t$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (a):</strong> $\mathbf{v}_B = 16\mathbf{i} + 12\mathbf{j}$ km/h. Initial position (from question): $\mathbf{r}_B(0) = 10\mathbf{i} + 5\mathbf{j}$ km.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> with constant velocity, position is linear in time. Just plug into the standard kinematics formula — then collect $\mathbf{i}$ and $\mathbf{j}$ components separately.</p><p><strong>Formula (constant velocity):</strong></p><p>$$\mathbf{r}(t) = \mathbf{r}_0 + \mathbf{v}\,t$$</p><p><strong>Substitute</strong> $\mathbf{r}_0 = 10\mathbf{i} + 5\mathbf{j}$ (from question) and $\mathbf{v}_B = 16\mathbf{i} + 12\mathbf{j}$ (from STEP 1):</p><p>$$\mathbf{s}(t) = (10\mathbf{i} + 5\mathbf{j}) + (16\mathbf{i} + 12\mathbf{j})\, t$$</p><p><strong>Collect $\mathbf{i}$ and $\mathbf{j}$ components:</strong></p><p>$\;\;\mathbf{i}$-component: $10 + 16t$</p><p>$\;\;\mathbf{j}$-component: $5 + 12t$</p><p>$$\boxed{\;\mathbf{s}(t) = (10 + 16t)\mathbf{i} + (5 + 12t)\mathbf{j}\;}$$</p><div class="why"><strong>Sense check:</strong> at $t = 0$, $\mathbf{s}(0) = 10\mathbf{i} + 5\mathbf{j}$ ✓ (matches initial position). The $t$-coefficients are $\mathbf{v}_B$ ✓.</div>
+    
+    <div class="step-result">$\mathbf{s}(t) = (10 + 16t)\mathbf{i} + (5 + 12t)\mathbf{j}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Show $\overrightarrow{AB}$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given">$\mathbf{r}_A(t) = (0 + 40t)\mathbf{i} + 20\mathbf{j} = 40t\,\mathbf{i} + 20\mathbf{j}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the displacement <em>from</em> $A$ <em>to</em> $B$ is $\mathbf{r}_B - \mathbf{r}_A$ (head minus tail). Compute each ship’s position vector at time $t$, then subtract component-wise.</p><p><strong>Position of $A$ at time $t$:</strong> $\mathbf{r}_A(0) = 20\mathbf{j}$, $\mathbf{v}_A = 40\mathbf{i}$, so $\mathbf{r}_A(t) = 40t\,\mathbf{i} + 20\mathbf{j}$.</p><p><strong>Position of $B$ at time $t$ (from STEP 2 of part b):</strong> $\mathbf{r}_B(t) = (10 + 16t)\mathbf{i} + (5 + 12t)\mathbf{j}$.</p><p><strong>Formula:</strong></p><p>$$\overrightarrow{AB}(t) = \mathbf{r}_B(t) - \mathbf{r}_A(t)$$</p><p><strong>Subtract component-wise</strong>:</p><p>$\;\;\mathbf{i}$-component: $(10 + 16t) - 40t = 10 - 24t$</p><p>$\;\;\mathbf{j}$-component: $(5 + 12t) - 20 = 12t - 15$</p><p>$$\boxed{\;\overrightarrow{AB}(t) = (10 - 24t)\mathbf{i} + (12t - 15)\mathbf{j}\;} \quad\blacksquare$$</p><div class="why"><strong>Sense check:</strong> at $t = 0$, $\overrightarrow{AB}(0) = 10\mathbf{i} - 15\mathbf{j}$. That’s $B$ to the east and south of $A$ — consistent with $B$’s initial position $(10, 5)$ vs $A$’s $(0, 20)$ ✓.</div>
+    
+    <div class="step-result">$\overrightarrow{AB} = (10-24t)\mathbf{i} + (12t-15)\mathbf{j}$ ✓</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — No collision <span class="pmarks">[3 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (c):</strong> $\overrightarrow{AB}(t) = (10-24t)\mathbf{i} + (12t-15)\mathbf{j}$ km.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> at the moment of collision, $A$ and $B$ are at the same point, so $\overrightarrow{AB}(t) = \mathbf{0}$. For a 2D vector to be zero, BOTH components must vanish at the SAME $t$. Solve each component separately and check if $t$ matches.</p><p><strong>Set $\mathbf{i}$-component $= 0$:</strong></p><p>$$10 - 24t = 0 \;\Rightarrow\; t = \tfrac{10}{24} = \tfrac{5}{12}\ \text{h}$$</p><p><strong>Set $\mathbf{j}$-component $= 0$:</strong></p><p>$$12t - 15 = 0 \;\Rightarrow\; t = \tfrac{15}{12} = \tfrac{5}{4}\ \text{h}$$</p><p><strong>Compare:</strong> $\tfrac{5}{12} \ne \tfrac{5}{4}$ — no single $t$ makes both components zero simultaneously.</p><p>$$\boxed{\;\text{Ships do NOT collide.}\;} \quad\blacksquare$$</p><div class="why"><strong>Geometric interpretation:</strong> the $\mathbf{i}$ and $\mathbf{j}$ components represent the east-west and north-south separations. They both reach zero, but at <em>different times</em> — i.e. the ships cross each other’s east-west line first ($t = 5/12$) and then later cross north-south ($t = 5/4$), but never at the same instant.</div>
+    
+    <div class="step-result">No common $t$ → never collide.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (e) — Bearing $225° \Rightarrow$ distance <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (c):</strong> $\overrightarrow{AB}(t) = (10-24t)\mathbf{i} + (12t-15)\mathbf{j}$ km.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">225° = SW</span></span>
+    
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> 'bearing of $B$ from $A$ is $225°$' fixes the direction of $\overrightarrow{AB}$. Convert this bearing to a constraint on the components, then solve for $t$.</p><p><strong>Decode bearing $225°$:</strong></p><p>$\;\;225° = 180° + 45°$ → due SW (45° west of south).</p><p>SW direction: both $-\mathbf{i}$ (west) and $-\mathbf{j}$ (south), with equal magnitudes (since the angle to S equals the angle to W, both 45°).</p><p><strong>Constraint:</strong> $\mathbf{i}$-component = $\mathbf{j}$-component, both negative:</p><p>$$10 - 24t \;=\; 12t - 15$$</p><p>Solve for $t$:</p><p>$$10 + 15 = 12t + 24t$$</p><p>$$25 = 36t \;\Rightarrow\; t = \tfrac{25}{36}\ \text{h}$$</p><p>$$\boxed{\;t = \tfrac{25}{36}\ \text{h}\;}$$</p><div class="why"><strong>Quick alternative check:</strong> "bearing $\beta$" means $\tan\beta = (\mathbf{i}\text{-comp})/(\mathbf{j}\text{-comp})$ with sign care. For $\beta = 225°$, $\tan = 1$, giving $\mathbf{i}$-comp $= \mathbf{j}$-comp — same equation. And both should be negative, confirmed in the next step.</div>
+    
+    <div class="step-result">$t = 25/36$ h</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $t = 25/36$ h (bearing $225°$ constraint).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> with $t$ from STEP 1, substitute back to get the actual components of $\overrightarrow{AB}$ at that moment, then compute the magnitude (distance) via Pythagoras.</p><p><strong>Using $t = 25/36$ from STEP 1, compute $\mathbf{i}$-component:</strong></p><p>$$10 - 24 \cdot \tfrac{25}{36} = 10 - \tfrac{600}{36} = 10 - \tfrac{50}{3} = \tfrac{30 - 50}{3} = -\tfrac{20}{3}$$</p><p><strong>Compute $\mathbf{j}$-component:</strong></p><p>$$12 \cdot \tfrac{25}{36} - 15 = \tfrac{300}{36} - 15 = \tfrac{25}{3} - \tfrac{45}{3} = -\tfrac{20}{3}$$</p><p>Both components equal to $-\tfrac{20}{3}$ ✓ (matches the SW-bearing constraint, both negative and equal).</p><p><strong>Formula (magnitude):</strong></p><p>$$|\overrightarrow{AB}| = \sqrt{x^2 + y^2}$$</p><p><strong>Substitute</strong>:</p><p>$$|\overrightarrow{AB}| = \sqrt{\left(-\tfrac{20}{3}\right)^2 + \left(-\tfrac{20}{3}\right)^2} = \sqrt{2 \cdot \tfrac{400}{9}} = \tfrac{20}{3}\sqrt{2}$$</p><p>$$\boxed{\;|\overrightarrow{AB}| = \tfrac{20\sqrt{2}}{3} \approx 9.43\ \text{km}\;}$$</p><div class="why"><strong>Sense check:</strong> at $t = 25/36 \approx 0.69$ h, both ships have been moving for about 41 minutes. The distance between them is roughly 9.4 km — plausible for ships travelling at 20–40 km/h. <strong>Tip:</strong> when both components are equal, the magnitude is just $\sqrt{2}$ times one of them — saves a step.</div>
+    
+    <div class="step-result">$\boxed{\,|\overrightarrow{AB}| = \dfrac{20\sqrt{2}}{3} \approx 9.43\ \text{km}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
