@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Q6 — Geometric series: app downloads</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q6 · Paper 4 (Thursday 18 May 2023) · Attempted 19 Apr 2026</div>
+  <h1>Q6 — Three GP terms $2k-15$, $k$, $k+4$: show $k^2-7k-60=0$; find $u_4$; smallest $N$ with $S_N>3000$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The first three monthly download counts (in thousands) of an app are $2k - 15$, $k$, $k + 4$, modelled as the first three terms of a geometric series.</p><p><strong>(a)</strong> Show that $k^2 - 7k - 60 = 0$. <strong>[2]</strong></p><p><strong>(b)</strong> Predict the number of downloads in month 4 (assuming all terms are positive). <strong>[4]</strong></p><p><strong>(c)</strong> Find the smallest integer $N$ such that the cumulative total over the first $N$ months exceeds 3 million. <strong>[3]</strong></p>
+    
+    <p class="q-marks">[9 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — show $k^2 - 7k - 60 = 0$ <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> a geometric progression has a constant ratio between consecutive terms: $r = u_2/u_1 = u_3/u_2 = \ldots$. Setting these equal gives a single equation in $k$ — no need to know $r$ explicitly.</p><p><strong>Formula (GP common-ratio property):</strong></p><p>$$\dfrac{u_2}{u_1} = \dfrac{u_3}{u_2} \quad\text{(equivalently, } u_2^{\,2} = u_1 \cdot u_3 \text{)}$$</p><p><strong>Identify the three terms</strong>: $u_1 = 2k - 15$, $u_2 = k$, $u_3 = k + 4$.</p><p><strong>Substitute</strong>:</p><p>$$\dfrac{k}{2k - 15} = \dfrac{k + 4}{k}$$</p><div class="why"><strong>Why this works:</strong> the GP definition demands a constant ratio. Equating the two ratio expressions encodes &quot;these three are in GP&quot; in one tidy equation. Equivalently, $u_2$ is the <em>geometric mean</em> of $u_1$ and $u_3$: $u_2^2 = u_1 u_3$.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\dfrac{k}{2k - 15} = \dfrac{k + 4}{k}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> cross-multiply to clear fractions, expand the RHS, then collect everything on one side to match the target form $k^2 - 7k - 60 = 0$.</p><p>Cross-multiply $\dfrac{k}{2k-15} = \dfrac{k+4}{k}$:</p><p>$$k \cdot k = (k + 4)(2k - 15)$$</p><p>$$k^2 = (k + 4)(2k - 15)$$</p><p>Expand the RHS using FOIL: $(k)(2k) + (k)(-15) + (4)(2k) + (4)(-15)$:</p><p>$$k^2 = 2k^2 - 15k + 8k - 60$$</p><p>$$k^2 = 2k^2 - 7k - 60$$</p><p>Move everything to the RHS (subtract $k^2$ from both sides):</p><p>$$0 = 2k^2 - k^2 - 7k - 60 = k^2 - 7k - 60$$</p><p>$$\boxed{\;k^2 - 7k - 60 = 0\;}\quad \blacksquare$$</p><div class="why"><strong>FOIL trap:</strong> the middle terms are $-15k$ and $+8k$, sum $-7k$ (NOT $+7k$). <strong>Sign track:</strong> $(k+4)(2k-15)$ has one minus and three pluses → middle coefficient negative.</div>
+    
+    <div class="step-result">$k^2 - 7k - 60 = 0$ ∎</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — month 4 downloads <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  <div class="given"><strong>From (a):</strong> $k^2 - 7k - 60 = 0 \Rightarrow (k-12)(k+5) = 0$, so $k = 12$ (positive — downloads $> 0$). The GP has terms $2k-15 = 9$, $k = 12$, $k+4 = 16$, with first term $a = 9$ and common ratio $r = \tfrac{12}{9} = \tfrac{4}{3}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the question says &quot;assuming all terms are positive&quot; — i.e. all three of $2k-15$, $k$, $k+4$ must be $> 0$. The strictest condition is $2k - 15 > 0$, giving $k > 7.5$. Solve the quadratic; only one root will satisfy this.</p><p>Factor $k^2 - 7k - 60 = 0$: need two integers multiplying to $-60$, summing to $-7$. Try $-12$ and $+5$: $(-12)(5) = -60$ ✓ and $-12 + 5 = -7$ ✓.</p><p>$$(k - 12)(k + 5) = 0$$</p><p>$$k = 12 \quad\text{or}\quad k = -5$$</p><p><strong>Apply positivity</strong> ($k > 7.5$): $k = 12$ ✓; $k = -5$ ✗ (would give $u_1 = 2(-5) - 15 = -25 < 0$).</p><p>$$\boxed{\;k = 12\;}$$</p><p><strong>Resulting GP terms</strong>: $u_1 = 2(12) - 15 = 9$, $u_2 = 12$, $u_3 = 12 + 4 = 16$.</p><div class="why"><strong>Why &quot;positive&quot; matters:</strong> the modelling context is download counts (cannot be negative). Without that constraint, both roots are mathematically valid GP triples (with $k = -5$ giving terms $-25, -5, -1$ and $r = \tfrac{1}{5}$).</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\boxed{\;k = 12\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> with the GP fully determined ($a = u_1 = 9$, common ratio $r$), use the standard $n$th-term formula at $n = 4$.</p><p><strong>Find $r$</strong> from any two consecutive terms:</p><p>$$r = \dfrac{u_2}{u_1} = \dfrac{12}{9} = \tfrac{4}{3}$$</p><p><strong>Cross-check</strong>: $\dfrac{u_3}{u_2} = \dfrac{16}{12} = \tfrac{4}{3}$ ✓ — confirms GP.</p><p><strong>Formula (GP $n$th term — NOT in booklet, memorise):</strong></p><p>$$u_n = a\,r^{n-1}$$</p><p><strong>Substitute</strong> $a = 9$, $r = \tfrac{4}{3}$, $n = 4$ (so $n - 1 = 3$):</p><p>$$u_4 = 9 \cdot \left(\tfrac{4}{3}\right)^{\!3}$$</p><p>Compute $\left(\tfrac{4}{3}\right)^3 = \tfrac{64}{27}$:</p><p>$$u_4 = 9 \cdot \tfrac{64}{27} = \tfrac{9 \cdot 64}{27} = \tfrac{64}{3}$$</p><p><strong>Convert units</strong>: terms are in <em>thousands</em>, so</p><p>$$u_4 = \tfrac{64}{3}\text{ thousand} = \tfrac{64\,000}{3} \approx 21\,333$$</p><p>$$\boxed{\;\text{Month 4 downloads} \approx 21\,333\;}$$</p><div class="why"><strong>Indexing trap:</strong> $u_n = ar^{n-1}$ — that's $r$ to the power $n-1$, NOT $n$. Month 4 means $n = 4$, so we use $r^3$. <strong>Sense check:</strong> the GP grows ($r = \tfrac{4}{3} > 1$), so $u_4 > u_3 = 16$ thousand ✓ ($\tfrac{64}{3} \approx 21.3$ thousand).</div>
+    
+    <div class="step-result">$\boxed{\approx 21\,333\text{ downloads}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — smallest $N$ with $S_N > 3000$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">Target: <strong>3 million = 3000 thousand</strong> (units of $u_n$ are thousands).</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the cumulative total over $N$ months is $S_N$ (a GP sum). The unknown $N$ sits inside an exponent, so the plan is: write $S_N$ explicitly, set $S_N > 3000$, isolate $\left(\tfrac{4}{3}\right)^N$, then take logs in the next step.</p><p><strong>Formula (GP sum — IN booklet):</strong></p><p>$$S_n = \dfrac{a(r^n - 1)}{r - 1}, \quad r \ne 1$$</p><p><strong>Substitute</strong> $a = 9$, $r = \tfrac{4}{3}$, so $r - 1 = \tfrac{1}{3}$:</p><p>$$S_n = \dfrac{9\!\left[\left(\tfrac{4}{3}\right)^{\!n} - 1\right]}{1/3} = 9 \cdot 3 \cdot \!\left[\left(\tfrac{4}{3}\right)^{\!n} - 1\right] = 27\!\left[\left(\tfrac{4}{3}\right)^{\!n} - 1\right]$$</p><p><strong>Require $S_N > 3000$</strong> (3 million in units of thousands):</p><p>$$27\!\left[\left(\tfrac{4}{3}\right)^{\!N} - 1\right] > 3000$$</p><p>Divide by $27$:</p><p>$$\left(\tfrac{4}{3}\right)^{\!N} - 1 > \tfrac{3000}{27} = \tfrac{1000}{9}$$</p><p>Add $1$ to both sides:</p><p>$$\boxed{\;\left(\tfrac{4}{3}\right)^{\!N} > 1 + \tfrac{1000}{9} = \tfrac{1009}{9}\;}$$</p><div class="why"><strong>Trap:</strong> $\sum_{n=1}^N u_n$ uses $S_N$ formula, NOT $u_N$. They differ by accumulation — $u_N$ is just the $N$th term, $S_N$ is the running total of all $N$ terms. <strong>Unit check:</strong> &quot;3 million&quot; with terms in thousands means target $= 3000$ (NOT $3$ or $3{,}000{,}000$).</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\boxed{\;\left(\tfrac{4}{3}\right)^{\!N} > 1 + \tfrac{1000}{9} = \tfrac{1009}{9}\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> take logs of both sides to bring the unknown $N$ down from the exponent. Log is increasing for arguments $> 0$, and $\tfrac{4}{3} > 1$ so $\log(\tfrac{4}{3}) > 0$ — the inequality direction is preserved when we divide by it.</p><p><strong>Take $\log_{10}$ of both sides</strong> of $\left(\tfrac{4}{3}\right)^N > \tfrac{1009}{9}$:</p><p>$$\log\!\left(\tfrac{4}{3}\right)^{\!N} > \log\!\left(\tfrac{1009}{9}\right)$$</p><p>Apply power law $\log(a^N) = N\log a$:</p><p>$$N \cdot \log\!\left(\tfrac{4}{3}\right) > \log\!\left(\tfrac{1009}{9}\right)$$</p><p>Divide by $\log(\tfrac{4}{3}) > 0$ (inequality preserved):</p><p>$$N > \dfrac{\log(1009/9)}{\log(4/3)}$$</p><p>Compute (base-10 logs):</p><p>$\;\;\log(1009/9) = \log(112.11) \approx 2.0497$</p><p>$\;\;\log(4/3) = \log(1.3333) \approx 0.1249$</p><p>$$N > \dfrac{2.0497}{0.1249} \approx 16.41$$</p><p>$N$ must be a positive integer; smallest integer exceeding $16.41$ is $17$:</p><p>$$\boxed{\;N = 17\;}$$</p><div class="why"><strong>Why round UP, not down:</strong> we need $S_N > 3000$, so $N$ must be <em>at least</em> $17$ — $N = 16$ gives $S_{16} < 3000$ (since $16 < 16.41$). <strong>Unit check:</strong> &quot;3 million&quot; with terms in thousands means target = 3000 (NOT 3 or 3,000,000). Always reconcile units before solving.</div>
+    
+    <div class="step-result">$\boxed{N = 17}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

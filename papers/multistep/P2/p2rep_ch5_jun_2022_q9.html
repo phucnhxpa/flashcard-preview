@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Carbon-14 Exponential Decay Model</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q9 · Jun 2022</div>
+  <h1>Exponentials & Logs — Exponential Growth Model + Rates of Change</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The amount of carbon-14, $N$ grams, in an item of archaeological interest can be modelled by the equation $$N = k\lambda^t$$ where $t$ is the age in years, $k$ and $\lambda$ are positive constants with $0 < \lambda < 1$</p><p><strong>(a)</strong> Sketch the graph of $N$ against $t$ for $k = 1$ [2]</p><p>The half-life of carbon-14 is 5700 years. This means that the amount of carbon-14 in an item reduces to half its initial value in 5700 years.</p><p><strong>(b)</strong> Show that the value of the constant $\lambda$ is 0.999878 to 6 decimal places. [3]</p><p>Item A originally contained 15 grams of carbon-14 and is 3250 years old.</p><p><strong>(c)</strong> Calculate how much carbon-14 the equation predicts is currently in Item A. [1]</p><p>Item B originally contained 25 grams of carbon-14 and currently contains 18 grams of carbon-14.</p><p><strong>(d)</strong> Use algebra to calculate the age of Item B to the nearest 100 years. [3]</p>
+    
+    <p class="q-marks">[9 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Sketch graph of N against t for k = 1 <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">$N = k\lambda^t$ with $k = 1$ and $0 < \lambda < 1$</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Find key features of $N = \lambda^t$</strong></p><p>$$\text{When } t = 0: \quad N = \lambda^0 = 1$$</p><p>$$\text{As } t \to \infty: \quad N \to 0 \text{ (since } 0 < \lambda < 1\text{)}$$</p><div class='why'>Since $0 < \lambda < 1$, the function is exponential decay, not growth!</div>
+    
+    <div class="step-result">$\boxed{\text{y-intercept at } (0, 1), \text{ asymptote } N = 0}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>y-intercept at $(0, 1)$, horizontal asymptote $N = 0$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Sketch the decay curve</strong></p><p>Draw a smooth decreasing curve:</p><p>• Starting at $(0, 1)$</p><p>• Decreasing and approaching $t$-axis</p><p>• Never touching or crossing $N = 0$</p><p>• Label axes $t$ (horizontal) and $N$ (vertical)</p><div class='why'>The curve must be smooth and convex — not linear or crossing the asymptote.</div>
+    
+    <div class="step-result">$\boxed{\text{Decay curve through } (0,1) \text{ approaching } N = 0}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Show λ = 0.999878 <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">Half-life of carbon-14 is 5700 years</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Set up half-life equation</strong></p><p>$$\text{Half-life means: when } t = 5700, \quad N = \frac{k}{2}$$</p><p>$$\text{Substitute into } N = k\lambda^t:$$</p><p>$$\frac{k}{2} = k\lambda^{5700}$$</p><div class='why'>Half-life means the amount halves — so $N = \frac{k}{2}$, not $N = 2k$!</div>
+    
+    <div class="step-result">$\boxed{\frac{k}{2} = k\lambda^{5700}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$\frac{k}{2} = k\lambda^{5700}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Solve for λ</strong></p><p>$$\text{Divide both sides by } k:$$</p><p>$$\frac{1}{2} = \lambda^{5700}$$</p><p>$$\text{Raise both sides to power } \frac{1}{5700}:$$</p><p>$$\lambda = \left(\frac{1}{2}\right)^{\frac{1}{5700}} = 2^{-\frac{1}{5700}}$$</p><div class='why'>To isolate the base, use the reciprocal power: $(a^n)^{1/n} = a$</div>
+    
+    <div class="step-result">$\boxed{\lambda = \left(\frac{1}{2}\right)^{\frac{1}{5700}}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$\lambda = \left(\frac{1}{2}\right)^{\frac{1}{5700}}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Calculate to 6 decimal places</strong></p><p>$$\lambda = (0.5)^{0.0001754...} = 0.999878201...$$</p><p>$$\lambda = 0.999878 \text{ (6 d.p.)}$$</p><div class='why'>Must show the unrounded value before giving 6 d.p. to justify the rounding.</div>
+    
+    <div class="step-result">$\boxed{\lambda = 0.999878}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Calculate carbon-14 in Item A <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given">$\lambda = 0.999878$, Item A: $k = 15$ grams, $t = 3250$ years</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Substitute values into model</strong></p><p>$$N = k\lambda^t = 15 \times (0.999878)^{3250}$$</p><p>$$N = 15 \times 0.67292...$$</p><p>$$N = 10.0938...$$</p><div class='why'>Use the full value 0.999878 — rounding λ further causes significant error over large t.</div>
+    
+    <div class="step-result">$\boxed{N = 10.1 \text{ grams}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — Calculate age of Item B <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">$\lambda = 0.999878$, Item B: $k = 25$ grams, $N = 18$ grams</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Set up equation and isolate exponential</strong></p><p>$$N = k\lambda^t \implies 18 = 25 \times (0.999878)^t$$</p><p>$$\text{Divide by 25:}$$</p><p>$$(0.999878)^t = \frac{18}{25} = 0.72$$</p><div class='why'>Always isolate the exponential term before taking logarithms.</div>
+    
+    <div class="step-result">$\boxed{(0.999878)^t = 0.72}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$(0.999878)^t = 0.72$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Take logarithms of both sides</strong></p><p>$$\ln(0.999878)^t = \ln(0.72)$$</p><p>$$t \ln(0.999878) = \ln(0.72)$$</p><p>$$t = \frac{\ln(0.72)}{\ln(0.999878)}$$</p><div class='why'>Use the log law $\ln(a^t) = t\ln(a)$ to bring down the power.</div>
+    
+    <div class="step-result">$\boxed{t = \frac{\ln(0.72)}{\ln(0.999878)}}$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>$t = \frac{\ln(0.72)}{\ln(0.999878)}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Calculate and round to nearest 100 years</strong></p><p>$$t = \frac{-0.32850...}{-0.000122...} = 2692.67...$$</p><p>$$t \approx 2700 \text{ years (nearest 100)}$$</p><div class='why'>Both logarithms are negative (values < 1), so the ratio is positive — check your signs!</div>
+    
+    <div class="step-result">$\boxed{t = 2700 \text{ years}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button id="export-btn" onclick="exportCard()" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ Export PNG</button></div><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script>function exportCard(){const btn=document.getElementById('export-btn-wrap');btn.style.display='none';html2canvas(document.querySelector('.card')||document.body,{scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{const a=document.createElement('a');a.download=(document.title||'card')+'.png';a.href=canvas.toDataURL('image/png');a.click();btn.style.display='block';document.getElementById('export-btn').textContent='✓ Saved';setTimeout(()=>{document.getElementById('export-btn').textContent='⬇ Export PNG';},2000);}).catch(()=>{btn.style.display='block';});}}</script>
+</body>
+</html>

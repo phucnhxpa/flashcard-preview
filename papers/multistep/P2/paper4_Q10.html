@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Q10 — Definite integral + area between curve & line</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q10 · Paper 4 (Thursday 18 May 2023) · Attempted 19 Apr 2026</div>
+  <h1>Q10 — $C: y = (x-k)^2/\sqrt{x}$. Show $\int_1^{16}y\,dx = ak^2+bk+2046/5$; show $k=4$; area $R$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Curve $C$: $y = \dfrac{(x-k)^2}{\sqrt{x}}$ for $x > 0$, where $k > 0$.</p><p><strong>(a)</strong> Show that $\displaystyle\int_1^{16}\dfrac{(x-k)^2}{\sqrt{x}}\,dx = ak^2 + bk + \dfrac{2046}{5}$, where $a, b$ are integers to find. <strong>[5]</strong></p><p>Line $\ell$ intersects $C$ at $A(1, 9)$ and $B(16, q)$.</p><p><strong>(b)</strong> Show $k = 4$. <strong>[2]</strong></p><p><strong>(c)</strong> Find the area of region $R$ bounded by $C$ and $\ell$. <strong>[3]</strong></p>
+    
+    <p class="q-marks">[10 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — integrate, match coefficients <span class="pmarks">[5 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the integrand $\dfrac{(x-k)^2}{\sqrt{x}}$ doesn&#x27;t fit a standard rule directly. Expand the numerator $(x-k)^2$, then divide each term by $x^{1/2}$ — this gives a sum of pure powers, which the power rule handles.</p><p><strong>Expand</strong> $(x - k)^2$ using $(a-b)^2 = a^2 - 2ab + b^2$:</p><p>$$(x - k)^2 = x^2 - 2kx + k^2$$</p><p><strong>Divide each term by $x^{1/2}$</strong> (use $x^a / x^b = x^{a-b}$):</p><p>$\;\;\dfrac{x^2}{x^{1/2}} = x^{2 - 1/2} = x^{3/2}$</p><p>$\;\;\dfrac{-2kx}{x^{1/2}} = -2k\,x^{1 - 1/2} = -2k\,x^{1/2}$</p><p>$\;\;\dfrac{k^2}{x^{1/2}} = k^2 x^{-1/2}$</p><p>$$\boxed{\;\dfrac{(x-k)^2}{\sqrt{x}} = x^{3/2} - 2k\,x^{1/2} + k^2 x^{-1/2}\;}$$</p><div class="why"><strong>Why split first:</strong> $\int (\text{quotient})$ generally requires substitution or messy work, but $\int (\text{sum of powers})$ uses the power rule term-by-term — much easier.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\boxed{\;\dfrac{(x-k)^2}{\sqrt{x}} = x^{3/2} - 2k\,x^{1/2} + k^2 x^{-1/2}\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> apply the power rule to each term. Constants ($k$, $k^2$) ride along the integration as multiplicative factors.</p><p><strong>Formula (power rule for integration):</strong></p><p>$$\int x^n\,dx = \dfrac{x^{n+1}}{n+1} + C, \quad n \ne -1$$</p><p><strong>Integrate term by term</strong>:</p><p>$\;\;\int x^{3/2}\,dx = \dfrac{x^{5/2}}{5/2} = \tfrac{2}{5}x^{5/2}$</p><p>$\;\;\int -2k\,x^{1/2}\,dx = -2k \cdot \dfrac{x^{3/2}}{3/2} = -\tfrac{4k}{3}x^{3/2}$</p><p>$\;\;\int k^2 x^{-1/2}\,dx = k^2 \cdot \dfrac{x^{1/2}}{1/2} = 2k^2 x^{1/2}$</p><p>$$\boxed{\;F(x) = \tfrac{2}{5}x^{5/2} - \tfrac{4k}{3}x^{3/2} + 2k^2 x^{1/2}\;}$$</p><div class="why"><strong>Trap:</strong> dividing by a fraction. $\dfrac{1}{5/2} = \dfrac{2}{5}$ — flip and multiply. <strong>Indices for definite integrals:</strong> we omit the $+C$ since it cancels under $F(b) - F(a)$.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $\boxed{\;F(x) = \tfrac{2}{5}x^{5/2} - \tfrac{4k}{3}x^{3/2} + 2k^2 x^{1/2}\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1 A1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> apply the Fundamental Theorem of Calculus: $\int_1^{16} f\,dx = F(16) - F(1)$. Pre-compute powers of $16$: $16^{1/2} = 4$, $16^{3/2} = 16 \cdot 4 = 64$, $16^{5/2} = 16^2 \cdot 4 = 1024$. Powers of $1$ all equal $1$.</p><p><strong>Evaluate $F(16)$</strong>:</p><p>$$F(16) = \tfrac{2}{5}(1024) - \tfrac{4k}{3}(64) + 2k^2(4) = \tfrac{2048}{5} - \tfrac{256k}{3} + 8k^2$$</p><p><strong>Evaluate $F(1)$</strong>:</p><p>$$F(1) = \tfrac{2}{5}(1) - \tfrac{4k}{3}(1) + 2k^2(1) = \tfrac{2}{5} - \tfrac{4k}{3} + 2k^2$$</p><p><strong>Subtract</strong> $F(16) - F(1)$ term by term:</p><p>$\;\;$ Constant terms: $\tfrac{2048}{5} - \tfrac{2}{5} = \tfrac{2046}{5}$.</p><p>$\;\;$ $k$ terms: $-\tfrac{256k}{3} - (-\tfrac{4k}{3}) = -\tfrac{256k}{3} + \tfrac{4k}{3} = -\tfrac{252k}{3} = -84k$.</p><p>$\;\;$ $k^2$ terms: $8k^2 - 2k^2 = 6k^2$.</p><p>$$\int_1^{16}\dfrac{(x-k)^2}{\sqrt{x}}\,dx = 6k^2 - 84k + \tfrac{2046}{5}$$</p><p><strong>Match coefficients</strong> with target $ak^2 + bk + \tfrac{2046}{5}$:</p><p>$$\boxed{\;a = 6,\quad b = -84\;}\quad \blacksquare$$</p><div class="why"><strong>Phuc's critical thinking moment:</strong> tutor briefly slipped and said the integral equals zero. Phuc challenged: "the area cannot be zero." Excellent. "Show that $\int = $ expression" means <em>compute the integral and match coefficients</em> — NOT set it equal to zero. <strong>Sign trap:</strong> $-\tfrac{256k}{3} - (-\tfrac{4k}{3}) = -\tfrac{256k - 4k}{3} = -\tfrac{252k}{3}$ — careful with the double-minus.</div>
+    
+    <div class="step-result">$\boxed{a = 6,\ b = -84}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — show $k = 4$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given">Use the GIVEN POINT $A(1, 9)$ on the curve — NOT the integral.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the point $A(1, 9)$ lies ON the curve (it&#x27;s where the line meets the curve). So the coordinates must satisfy the curve equation $y = (x-k)^2/\sqrt{x}$. Substitute $x = 1$ and $y = 9$, then solve for $k$.</p><p><strong>Substitute</strong> $x = 1$, $y = 9$ into $y = \dfrac{(x - k)^2}{\sqrt{x}}$:</p><p>$$9 = \dfrac{(1 - k)^2}{\sqrt{1}} = (1 - k)^2$$</p><p>Take square roots (both signs):</p><p>$$1 - k = \pm\sqrt{9} = \pm 3$$</p><p>Two cases:</p><p>$\;\;1 - k = +3 \;\Rightarrow\; k = -2$ ✗ (need $k > 0$).</p><p>$\;\;1 - k = -3 \;\Rightarrow\; k = 4$ ✓.</p><p>$$\boxed{\;k = 4\;} \quad \blacksquare$$</p><div class="why"><strong>Why use $A$ on curve, not the integral:</strong> the integral result from (a) involves the unknown $k$ — it doesn't pin down $k$ alone. The point on the curve gives a direct equation in $k$.</div>
+    
+    
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — area of $R$ <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">With $k = 4$: at $B$, $y = (16-4)^2/4 = 144/4 = 36$, so $B(16, 36)$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the region $R$ is enclosed between the line and the curve from $x = 1$ to $x = 16$. Compute area = (area under line) − (area under curve), both measured between $x = 1$ and $x = 16$ down to the $x$-axis. Since the line is above the curve in this region, the difference is positive.</p><p><strong>Area under line $\ell$</strong>: bounded by $x = 1$, $x = 16$, $\ell$, and the $x$-axis — a trapezium.</p><p>At $x = 1$: $\ell$-height = $9$ (point $A$). At $x = 16$: $\ell$-height = $36$ (point $B$). Horizontal width = $16 - 1 = 15$.</p><p><strong>Formula (area of trapezium):</strong> $A = \tfrac{1}{2}(\text{sum of parallel sides})(\text{height})$</p><p>$$A_\ell = \tfrac{1}{2}(9 + 36)(15) = \tfrac{1}{2}(45)(15) = \tfrac{675}{2} = 337.5$$</p><div class="why"><strong>Why trapezium not triangle:</strong> the line doesn't pass through the origin — both endpoints have positive $y$. The shape under the line over $[1, 16]$ has parallel vertical sides of length $9$ and $36$, hence trapezium.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $A_\ell = \tfrac{1}{2}(9 + 36)(15) = \tfrac{1}{2}(45)(15) = \tfrac{675}{2} = 337.5$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> we already computed $\int_1^{16}\frac{(x-k)^2}{\sqrt{x}}\,dx = 6k^2 - 84k + \tfrac{2046}{5}$ in part (a). Plug in $k = 4$ from part (b).</p><p><strong>Substitute</strong> $k = 4$:</p><p>$$A_C = 6(4)^2 - 84(4) + \tfrac{2046}{5}$$</p><p>Compute term by term:</p><p>$\;\;6 \cdot 16 = 96$</p><p>$\;\;84 \cdot 4 = 336$</p><p>$\;\;\tfrac{2046}{5} = 409.2$</p><p>$$A_C = 96 - 336 + 409.2 = -240 + 409.2 = 169.2 = \tfrac{846}{5}$$</p><div class="why"><strong>Reuse trick:</strong> redoing the integral from scratch with $k = 4$ wastes time. The part (a) formula is the gift — plug and chug. <strong>Sanity:</strong> $A_C > 0$ ✓ (curve is positive on $[1, 16]$ since $(x-4)^2 \ge 0$ and $\sqrt{x} > 0$).</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $A_C = 96 - 336 + 409.2 = -240 + 409.2 = 169.2 = \tfrac{846}{5}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the region $R$ is bounded above by the line and below by the curve. Area($R$) = (area under line) − (area under curve), both over $[1, 16]$, since both regions extend down to the same $x$-axis.</p><p>$$\text{Area}(R) = A_\ell - A_C = \tfrac{675}{2} - \tfrac{846}{5}$$</p><p>Common denominator $10$:</p><p>$$= \tfrac{675 \cdot 5}{10} - \tfrac{846 \cdot 2}{10} = \tfrac{3375 - 1692}{10} = \tfrac{1683}{10}$$</p><p>$$\boxed{\;\text{Area}(R) = \tfrac{1683}{10} = 168.3\;}$$</p><div class="why"><strong>Why subtract:</strong> imagine the region under the line as a &quot;canopy&quot; — subtracting the area under the curve (the &quot;floor&quot;) leaves exactly the strip between them. <strong>Sense check:</strong> $337.5 - 169.2 = 168.3$ ✓ (in decimal, matches fraction).</div>
+    
+    <div class="step-result">$\boxed{\text{Area}(R) = 168.3}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

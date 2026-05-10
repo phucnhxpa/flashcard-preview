@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Circle Equation & Tangent</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q4 · Oct 2020</div>
+  <h1>Coordinate Geometry — Circle & Tangent</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The points P(−11, 6) and Q(−3, 12) lie on the circle C.</p><p>Given that PQ is a diameter of C,</p><p><strong>(a)</strong> (i) find the coordinates of the centre of C, [2]</p><p>(ii) find the radius of C. [2]</p><p><strong>(b)</strong> Hence find an equation of C. [2]</p><p><strong>(c)</strong> Find an equation of the tangent to C at the point Q, giving your answer in the form ax + by + c = 0, where a, b and c are integers. [3]</p>
+    
+    <p class="q-marks">[9 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a)(i) — Centre of circle <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">P(−11, 6), Q(−3, 12), PQ is diameter</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula:</strong> Centre = midpoint of diameter</p><p>$$\text{Midpoint} = \left(\frac{x_1 + x_2}{2}, \frac{y_1 + y_2}{2}\right)$$</p><p>$$= \left(\frac{-11 + (-3)}{2}, \frac{6 + 12}{2}\right)$$</p><div class='why'>Watch signs: −11 + (−3) = −14, not −8</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>\frac{-14}{2}, \frac{18}{2}</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Simplify:</strong></p><p>$$= \left(\frac{-14}{2}, \frac{18}{2}\right) = (-7, 9)$$</p><div class='why'>Centre lies at midpoint — always check it's between P and Q</div>
+    
+    <div class="step-result">$\boxed{(-7, 9)}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (a)(ii) — Radius of circle <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">Centre (−7, 9) from (a)(i)</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>Centre = (-7, 9)</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula:</strong> Radius = distance from centre to Q</p><p>$$r = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$$</p><p>$$= \sqrt{(-3 - (-7))^2 + (12 - 9)^2}$$</p><p>$$= \sqrt{(4)^2 + (3)^2}$$</p><div class='why'>Common error: using diameter length instead of radius</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>\sqrt{16 + 9}</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Evaluate:</strong></p><p>$$= \sqrt{16 + 9} = \sqrt{25} = 5$$</p><div class='why'>Recognise 3-4-5 Pythagorean triple</div>
+    
+    <div class="step-result">$\boxed{5}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Equation of circle <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">From (a): centre (−7, 9), radius 5</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>Centre = (-7, 9), r = 5</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula:</strong> Circle equation with centre (a, b) and radius r:</p><p>$$(x - a)^2 + (y - b)^2 = r^2$$</p><p>Substituting centre (−7, 9):</p><p>$$(x - (-7))^2 + (y - 9)^2 = r^2$$</p><div class='why'>Double negative: x − (−7) becomes x + 7</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>(x + 7)^2 + (y - 9)^2 = r^2</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Substitute r = 5:</strong></p><p>$$(x + 7)^2 + (y - 9)^2 = 25$$</p><div class='why'>Remember: RHS is r², not r. Here 5² = 25</div>
+    
+    <div class="step-result">$\boxed{(x + 7)^2 + (y - 9)^2 = 25}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Tangent at Q <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">From (a): centre (−7, 9), Q(−3, 12)</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>Centre = (-7, 9), Q = (-3, 12)</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Key property:</strong> Tangent ⊥ radius at point of contact</p><p>$$m_{CQ} = \frac{12 - 9}{-3 - (-7)} = \frac{3}{4}$$</p><p><strong>Perpendicular gradient:</strong></p><p>$$m_{\text{tangent}} = -\frac{1}{m_{CQ}} = -\frac{4}{3}$$</p><div class='why'>Perpendicular means negative reciprocal: flip and change sign</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>m_{\text{tangent}} = -\frac{4}{3}, Q = (-3, 12)</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Line equation:</strong> Using y − y₁ = m(x − x₁) at Q(−3, 12):</p><p>$$y - 12 = -\frac{4}{3}(x - (-3))$$</p><p>$$y - 12 = -\frac{4}{3}(x + 3)$$</p><p>Multiply by 3:</p><p>$$3y - 36 = -4(x + 3)$$</p><div class='why'>Multiply through to clear fractions before rearranging</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span>3y - 36 = -4x - 12</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Rearrange to ax + by + c = 0:</strong></p><p>$$3y - 36 = -4x - 12$$</p><p>$$4x + 3y - 36 + 12 = 0$$</p><p>$$4x + 3y - 24 = 0$$</p><div class='why'>Check: a, b, c must be integers with no common factor</div>
+    
+    <div class="step-result">$\boxed{4x + 3y - 24 = 0}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+<div id="export-btn-wrap" style="position:fixed;top:12px;right:20px;z-index:100;"><button id="export-btn" onclick="exportCard()" style="background:#fff;border:1px solid #d2d2d7;border-radius:8px;padding:7px 14px;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:#1d1d1f;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);">⬇ Export PNG</button></div><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script>function exportCard(){const btn=document.getElementById('export-btn-wrap');btn.style.display='none';html2canvas(document.querySelector('.card')||document.body,{scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{const a=document.createElement('a');a.download=(document.title||'card')+'.png';a.href=canvas.toDataURL('image/png');a.click();btn.style.display='block';document.getElementById('export-btn').textContent='✓ Saved';setTimeout(()=>{document.getElementById('export-btn').textContent='⬇ Export PNG';},2000);}).catch(()=>{btn.style.display='block';});}}</script>
+</body>
+</html>

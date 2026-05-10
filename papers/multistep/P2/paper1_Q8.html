@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Q8 — Trig equation + temperature model</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q8 · Paper 1 (Tuesday 14 May 2024) · Attempted 5 Apr 2026</div>
+  <h1>Q8 — Solve $5\sin x \tan x + 13 = \cos x$; temperature $H = 10 + 12\sin(kt+18)°$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><strong>(i)</strong> Solve, for $0 < x \leq \pi$, $5\sin x \tan x + 13 = \cos x$, to 3 s.f. radians. <strong>[5]</strong></p><p>Greenhouse temperature: $H = 10 + 12\sin(kt + 18)°$, $0 \le t < 24$. Given $H = 20$ when $t = 6$, with $0 < k < 20$.</p><p><strong>(ii)(a)</strong> Find all possible values of $k$. <strong>[4]</strong></p><p>Given also $0 < k < 10$:</p><p><strong>(ii)(b)</strong> State the maximum temperature. <strong>[1]</strong></p><p><strong>(ii)(c)</strong> Find the time of day when the maximum is reached. <strong>[2]</strong></p>
+    
+    <p class="q-marks">[12 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (i) — solve $5\sin x \tan x + 13 = \cos x$ <span class="pmarks">[5 marks] · 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the equation mixes $\sin x$, $\cos x$, and $\tan x$. Goal: rewrite everything in $\sin$ and $\cos$ only, then use $\sin^2 + \cos^2 = 1$ to get a single-variable equation.</p><p><strong>Formula:</strong> $\tan x = \dfrac{\sin x}{\cos x}$ (definition).</p><p>Substitute into the LHS:</p><p>$$5\sin x \tan x = 5\sin x \cdot \dfrac{\sin x}{\cos x} = \dfrac{5\sin^2 x}{\cos x}$$</p><p>So the equation becomes:</p><p>$$\dfrac{5\sin^2 x}{\cos x} + 13 = \cos x$$</p><p>Multiply EVERY term by $\cos x$ to clear the fraction (note $\cos x \ne 0$ in the given range — we'll check later):</p><p>$$\boxed{\;5\sin^2 x + 13\cos x = \cos^2 x\;}$$</p><div class="why"><strong>Sense check:</strong> after multiplying through, every term has degree $2$ in trig (or constant × $\cos$). That hints at converting $\sin^2$ to $\cos^2$ next via Pythagoras.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\boxed{\;5\sin^2 x + 13\cos x = \cos^2 x\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the equation has both $\sin^2 x$ and $\cos^2 x$ — a quadratic in disguise. Eliminate $\sin^2$ via the Pythagorean identity to get a pure quadratic in $\cos x$.</p><p><strong>Formula (Pythagorean identity — IN booklet):</strong></p><p>$$\sin^2 x + \cos^2 x = 1 \;\Longrightarrow\; \sin^2 x = 1 - \cos^2 x$$</p><p><strong>Substitute</strong> into $5\sin^2 x + 13\cos x = \cos^2 x$:</p><p>$$5(1 - \cos^2 x) + 13\cos x = \cos^2 x$$</p><p>Expand:</p><p>$$5 - 5\cos^2 x + 13\cos x = \cos^2 x$$</p><p>Move all terms to one side (add $5\cos^2 x$, subtract everything else):</p><p>$$0 = 6\cos^2 x - 13\cos x - 5$$</p><p>$$\boxed{\;6\cos^2 x - 13\cos x - 5 = 0\;}$$</p><div class="why"><strong>Substitution trick:</strong> let $c = \cos x$ and the equation reads $6c^2 - 13c - 5 = 0$ — a standard quadratic ready for the formula or factoring.</div>
+    
+    <div class="step-result">$6\cos^2 x - 13\cos x - 5 = 0$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $6\cos^2 x - 13\cos x - 5 = 0$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> apply the quadratic formula to $6c^2 - 13c - 5 = 0$ (where $c = \cos x$). Then filter solutions: $\cos x$ is bounded, $|\cos x| \le 1$. Finally take $\cos^{-1}$ in the given range.</p><p><strong>Formula (quadratic):</strong> $c = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ with $a = 6$, $b = -13$, $c_{\!const} = -5$.</p><p>Discriminant:</p><p>$$\Delta = (-13)^2 - 4(6)(-5) = 169 + 120 = 289 = 17^2$$</p><p>Solve:</p><p>$$\cos x = \dfrac{13 \pm 17}{12} \;\Longrightarrow\; \cos x = \dfrac{30}{12} = \tfrac{5}{2} \;\text{ or }\; \cos x = \dfrac{-4}{12} = -\tfrac{1}{3}$$</p><p><strong>Filter:</strong> $\cos x = \tfrac{5}{2} > 1$ is impossible — <strong>reject</strong>. Keep $\cos x = -\tfrac{1}{3}$.</p><p>Take $\cos^{-1}$ in $(0, \pi]$. Since $\cos x < 0$, $x$ lies in Q2 (between $\pi/2$ and $\pi$):</p><p>$$x = \cos^{-1}\!\left(-\tfrac{1}{3}\right) = 1.9106\ldots$$</p><p>$$\boxed{\;x \approx 1.91\text{ rad (3 s.f.)}\;}$$</p><div class="why"><strong>Phuc's slip:</strong> crossed out the correct answer. $\cos^{-1}(-\tfrac{1}{3})$ IS positive — calculator returns a value in $[0, \pi]$ for negative inputs (Q2). <strong>Trap:</strong> $|\cos x| \le 1$ ALWAYS — any candidate outside is automatically rejected.</div>
+    
+    <div class="step-result">$\boxed{x \approx 1.91\text{ rad}}$ (3 s.f.)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (ii)(a) — find $k$ <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given">Equation: $H = 10 + 12\sin(kt + 18)°$, with $H = 20$ at $t = 6$, $0 < k < 20$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> a single equation $H = 20$ at $t = 6$ should give a single equation in $k$. Substitute and isolate $\sin(\cdot)$.</p><p>Sub $H = 20$, $t = 6$ into $H = 10 + 12\sin(kt + 18)°$:</p><p>$$20 = 10 + 12\sin(6k + 18)°$$</p><p>Subtract $10$ from both sides, then divide by $12$:</p><p>$$12\sin(6k + 18)° = 10 \;\Longrightarrow\; \sin(6k + 18)° = \dfrac{10}{12} = \dfrac{5}{6}$$</p><p>$$\boxed{\;\sin(6k + 18)° = \tfrac{5}{6}\;}$$</p><div class="why"><strong>Radians vs degrees:</strong> the $°$ symbol INSIDE the bracket is the tell — work in degrees throughout. <strong>Sense check:</strong> $\tfrac{5}{6} < 1$ ✓ — a valid sine value, so solutions exist.</div>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $\boxed{\;\sin(6k + 18)° = \tfrac{5}{6}\;}$</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $\sin\theta = c$ has TWO solutions in $[0°, 180°]$: the principal value $\theta_0 = \sin^{-1}(c)$ and its supplement $180° - \theta_0$. Find both, then unwind to $k$.</p><p><strong>Principal value:</strong></p><p>$$\sin^{-1}\!\left(\tfrac{5}{6}\right) = 56.44°\ldots$$</p><p><strong>Symmetry of sine</strong> ($\sin\theta = \sin(180° - \theta)$):</p><p>$$180° - 56.44° = 123.56°$$</p><p>So $6k + 18 = 56.44°$ &nbsp;or&nbsp; $6k + 18 = 123.56°$.</p><p><strong>Branch 1:</strong> $6k + 18 = 56.44 \Rightarrow 6k = 38.44 \Rightarrow k = 6.41$.</p><p><strong>Branch 2:</strong> $6k + 18 = 123.56 \Rightarrow 6k = 105.56 \Rightarrow k = 17.59$.</p><div class="why"><strong>Why two solutions?</strong> $\sin$ is symmetric about $\theta = 90°$ in the first half-period. Same height ($\tfrac{5}{6}$) is achieved on both sides. <strong>Larger period?</strong> Adding $360°$ would give $k = 6.41 + 60 = 66.4$ etc., but those exceed $0 < k < 20$.</div>
+    
+    <div class="step-result">$k = 6.41$ or $k = 17.59$ (both in $0 < k < 20$)</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 2:</strong> $k = 6.41$ or $k = 17.59$ (both in $0 < k < 20$)</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the question restricts $0 < k < 20$. Verify each candidate satisfies this.</p><p><strong>Test $k = 6.41$:</strong> $0 < 6.41 < 20$ ✓ — accept.</p><p><strong>Test $k = 17.59$:</strong> $0 < 17.59 < 20$ ✓ — accept.</p><p>Both candidates lie in the range — keep both.</p><p>$$\boxed{\;k \in \{6.41,\ 17.59\}\;}$$</p><div class="why"><strong>Why both?</strong> The question asks for "all possible values". Without further info (like the time of max), we can't pick one. Part (ii)(c) later narrows to $k < 10$ to single out $k = 6.41$.</div>
+    
+    <div class="step-result">$\boxed{k \in \{6.41,\ 17.59\}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (ii)(b) — maximum $H$ <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (ii)(a):</strong> $H = 10 + 12\sin(kt + 18)°$ with $k \in \{6.41,\ 17.59\}$. Max occurs when $\sin(\cdot) = +1$ — its value doesn't depend on $k$ or $t$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the model is $H = 10 + 12\sin(\cdot)°$. Since $\sin$ ranges over $[-1, 1]$, the term $12\sin(\cdot)$ ranges over $[-12, 12]$. Max $H$ occurs when $\sin(\cdot) = +1$.</p><p><strong>Range of sine:</strong> $-1 \le \sin\theta \le 1$ for all $\theta$.</p><p>Maximise by setting $\sin(kt + 18)° = 1$:</p><p>$$H_{\max} = 10 + 12 \cdot 1 = 22$$</p><p>$$\boxed{\;H_{\max} = 22°\text{C}\;}$$</p><div class="why"><strong>Note:</strong> the maximum value doesn't depend on $k$ — that just controls WHEN the max happens, not the height. <strong>Symmetric:</strong> $H_{\min} = 10 - 12 = -2°\text{C}$ (a chilly greenhouse!).</div>
+    
+    <div class="step-result">$\boxed{H_{\max} = 22°\text{C}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (ii)(c) — time of maximum (with $0<k<10$) <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>From (ii)(a)/(ii)(b):</strong> with the extra restriction $0 < k < 10$, take $k = 6.41$ (reject $17.59$). $H$ is max when $\sin(kt + 18)° = 1$, i.e. when $kt + 18 = 90°$. Solve for $t$ and convert to a time of day.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> $\sin\theta = 1$ first occurs at $\theta = 90°$. Set $kt + 18 = 90$, plug $k = 6.41$ (only allowed value with $0 < k < 10$), and solve for $t$. Then convert decimal hours to a clock time.</p><p>With $k = 6.41$:</p><p>$$6.41\,t + 18 = 90$$</p><p>Subtract $18$:</p><p>$$6.41\,t = 72$$</p><p>Divide by $6.41$:</p><p>$$t = \dfrac{72}{6.41} \approx 11.23\text{ hours}$$</p><p><strong>Convert to clock time:</strong> $0.23 \times 60 \approx 14$ minutes, so:</p><p>$$t \approx 11\text{ h }14\text{ min} \;\Longrightarrow\; \text{11:14 am}$$</p><p>$$\boxed{\;t \approx 11.23\text{ h (≈ 11:14 am)}\;}$$</p><div class="why"><strong>Why $k = 6.41$, not $17.59$?</strong> The extra restriction $0 < k < 10$ forces the smaller value. <strong>Trap:</strong> the next sine maximum is at $\theta = 90° + 360° = 450°$, giving $t = (450 - 18)/6.41 \approx 67.4$ h — outside $0 \le t < 24$, so $11.23$ h is the only max in the day.</div>
+    
+    <div class="step-result">$\boxed{t \approx 11.23\text{ h (around 11:14 am)}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

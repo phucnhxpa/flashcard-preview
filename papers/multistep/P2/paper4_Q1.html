@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Q1 — Trapezium rule estimate</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q1 · Paper 4 (Thursday 18 May 2023) · Attempted 19 Apr 2026</div>
+  <h1>Q1 — Trapezium rule for $\int_4^5 f(x)\,dx$ from 6 ordinates (3 d.p.)</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The table below shows values of $y = f(x)$:</p><p style='font-family: monospace; font-size: 12.5px;'>$x$:&nbsp;&nbsp;&nbsp;&nbsp; 4.0 &nbsp; 4.2 &nbsp; 4.4 &nbsp; 4.6 &nbsp; 4.8 &nbsp; 5.0<br>$y$:&nbsp;&nbsp;&nbsp;&nbsp; 9.2 &nbsp; 8.4556 &nbsp; 3.8512 &nbsp; 5.0342 &nbsp; 7.8297 &nbsp; 8.6</p><p>Use the trapezium rule with all six values to estimate $\int_4^5 f(x)\,dx$, giving the answer to 3 d.p. <strong>[3]</strong></p>
+    
+    <p class="q-marks">[3 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[3 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+    <span class="step-marks">B1 M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Strategy:</strong> the trapezium rule estimates a definite integral by replacing the curve with straight-line segments between consecutive ordinates. With $n$ strips you have $n+1$ ordinates — here $6$ ordinates ⇒ $5$ strips. Steps: find the strip width $h$, identify endpoints vs interiors, plug into the booklet formula.</p><p><strong>Step A — strip width $h$.</strong> Six equally-spaced ordinates from $4.0$ to $5.0$ ⇒ $5$ strips:</p><p>$$h = \dfrac{b - a}{n} = \dfrac{5 - 4}{5} = 0.2$$</p><p><strong>Step B — endpoints.</strong> $y_0 = f(4.0) = 9.2$, $y_5 = f(5.0) = 8.6$.</p><p><strong>Step C — interior sum.</strong> $y_1, y_2, y_3, y_4$ contribute (each weighted $\times 2$):</p><p>$$\Sigma_{\text{int}} = 8.4556 + 3.8512 + 5.0342 + 7.8297 = 25.1707$$</p><p><strong>Formula (trapezium rule — IN booklet):</strong></p><p>$$\int_a^b y\,dx \approx \tfrac{h}{2}\big[y_0 + y_n + 2(y_1 + \ldots + y_{n-1})\big]$$</p><p><strong>Substitute</strong> $h = 0.2$, endpoints $9.2 + 8.6 = 17.8$, interior sum $25.1707$:</p><p>$$\approx \tfrac{0.2}{2}\big[17.8 + 2(25.1707)\big] = 0.1 \times \big[17.8 + 50.3414\big]$$</p><p>$$= 0.1 \times 68.1414 = 6.81414$$</p><p>$$\boxed{\;\int_4^5 f(x)\,dx \approx 6.814\text{ (3 d.p.)}\;}$$</p><div class="why"><strong>Phuc's slip:</strong> "I forgot the trapezium rule." Look it up in the booklet — it's there. <strong>Mr Fuat:</strong> "It's very popular… always there. Because it's the approximation one." <strong>Strip vs ordinate trap:</strong> $6$ values does NOT mean $6$ strips — it means $5$ strips. $h = (b-a)/n$ uses $n =$ number of <em>strips</em>.</div>
+    
+    <div class="step-result">$\boxed{\int_4^5 f(x)\,dx \approx 6.814}$ (3 d.p.)</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
