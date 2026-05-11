@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Jan 2023 · Q10 — Proof by exhaustion: 2n²+n+1 not divisible by 3</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q10 · Jan 2023 · Attempted 2 May 2026 · 4 marks</div>
+  <h1>Q10 — Proof by exhaustion: $2n^2 + n + 1$ is not divisible by 3 (complete the proof)</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A student was asked to prove by exhaustion that</p><p><em>if $n$ is an integer then $2n^2 + n + 1$ is not divisible by 3.</em></p><p>The start of the student's proof is shown in the box below.</p><div style='border:1px solid #aaa;border-radius:8px;padding:10px;background:#fafafa;font-size:12.5px;'><p>Consider the case when $n = 3k$:</p><p>$$2n^2 + n + 1 \;=\; 18k^2 + 3k + 1 \;=\; 3(6k^2 + k) + 1$$</p><p>which is not divisible by 3.</p></div><p><strong>Complete this proof.</strong> <strong>(4)</strong></p><p style='color:#6e6e73;font-size:12px;'><em>Phuc's slack: "redo this question, i couldnt do it" — full proof from scratch on this card.</em></p>
+    
+    <p class="q-marks">[4 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Complete the proof — handle $n = 3k+1$ and $n = 3k+2$ <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given"><strong>Strategy (proof by exhaustion):</strong> every integer $n$ falls into exactly one of three residue classes modulo 3: $n = 3k$, $n = 3k+1$, or $n = 3k+2$ for some integer $k$. The case $n = 3k$ is done. We must complete the two remaining cases.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 — case n = 3k+1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> Proof by exhaustion partitions $\mathbb{Z}$ into the three residue classes mod 3 and checks each separately. The classes $\{3k, 3k+1, 3k+2 \,:\, k \in \mathbb{Z}\}$ cover every integer with no overlap, so verifying the claim on each class proves it for all $n \in \mathbb{Z}$.</p><p><strong>Case 2: $n = 3k+1$ for some integer $k$.</strong> Substitute into $2n^2 + n + 1$ and expand.</p><p><strong>Square first:</strong></p><p>$$(3k+1)^2 \;=\; (3k)^2 + 2(3k)(1) + 1^2 \;=\; 9k^2 + 6k + 1.$$</p><p><strong>Multiply by 2:</strong></p><p>$$2(3k+1)^2 \;=\; 2(9k^2 + 6k + 1) \;=\; 18k^2 + 12k + 2.$$</p><p><strong>Add $n + 1 = (3k+1) + 1 = 3k + 2$:</strong></p><p>$$2n^2 + n + 1 \;=\; \underbrace{18k^2 + 12k + 2}_{2n^2} \;+\; \underbrace{3k + 2}_{n + 1}$$</p><p>$$\;=\; 18k^2 + 15k + 4.$$</p><p><strong>Extract a factor of 3.</strong> The first two terms are clearly divisible by 3; for the constant 4, split as $4 = 3 + 1$:</p><p>$$18k^2 + 15k + 4 \;=\; 3(6k^2 + 5k + 1) + 1.$$</p><p>Since $6k^2 + 5k + 1$ is an integer (sum/product of integers), this is in the form $3M + 1$ where $M = 6k^2 + 5k + 1 \in \mathbb{Z}$.</p><p>Therefore $2n^2 + n + 1$ leaves remainder $\mathbf{1}$ on division by 3, so is <strong>not divisible by 3</strong> in this case. ✓</p><div class="why">The structural slip is expanding $(3k+1)^2$ as $9k^2 + 1$ (forgetting the cross term) or $9k^2 + 3k + 1$ (cross term wrong factor). Always write the binomial expansion as three separate terms — $(3k)^2 + 2(3k)(1) + 1^2$ — to make the arithmetic visible. Splitting the constant $4 = 3 + 1$ at the end is the key algebraic move: you're forcing the expression into the form $3M + r$ with $0 \le r < 3$, which is precisely what "remainder modulo 3" means.</div>
+    
+    <div class="step-result">Case $n=3k+1$: $\;2n^2+n+1 = 18k^2+15k+4 = 3(6k^2+5k+1) + 1$, remainder 1. Not divisible by 3 ✓.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> Case $n=3k+1$ done. Now: $n = 3k+2$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 — case n = 3k+2</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> The third and final residue class. Same expansion procedure as STEP 1; just be careful with the cross term and constants.</p><p><strong>Case 3: $n = 3k+2$ for some integer $k$.</strong></p><p><strong>Square first:</strong></p><p>$$(3k+2)^2 \;=\; (3k)^2 + 2(3k)(2) + 2^2 \;=\; 9k^2 + 12k + 4.$$</p><p><strong>Multiply by 2:</strong></p><p>$$2(3k+2)^2 \;=\; 18k^2 + 24k + 8.$$</p><p><strong>Add $n + 1 = (3k+2) + 1 = 3k + 3$:</strong></p><p>$$2n^2 + n + 1 \;=\; \underbrace{18k^2 + 24k + 8}_{2n^2} \;+\; \underbrace{3k + 3}_{n+1}$$</p><p>$$\;=\; 18k^2 + 27k + 11.$$</p><p><strong>Extract a factor of 3.</strong> The first two terms ($18k^2$ and $27k$) are divisible by 3. For the constant 11, decompose as $11 = 9 + 2$, where $9 = 3 \cdot 3$:</p><p>$$18k^2 + 27k + 11 \;=\; (18k^2 + 27k + 9) + 2 \;=\; 3(6k^2 + 9k + 3) + 2.$$</p><p>Verify the split: $3 \cdot (6k^2 + 9k + 3) = 18k^2 + 27k + 9$, then $+ 2$ gives $18k^2 + 27k + 11$ ✓.</p><p>$6k^2 + 9k + 3$ is an integer (sum/product of integers), so $2n^2 + n + 1$ has the form $3M + 2$ where $M \in \mathbb{Z}$.</p><p>Therefore $2n^2 + n + 1$ leaves remainder $\mathbf{2}$ on division by 3, so is <strong>not divisible by 3</strong> in this case. ✓</p><div class="why">Notice the three cases give remainders $1, 1, 2$ respectively — all nonzero. That's the structural point of the proof: the function $2n^2 + n + 1 \pmod 3$ never hits 0. You can also verify numerically: $n=0$: 1; $n=1$: 4; $n=2$: 11; $n=3$: 22; $n=4$: 37; $n=5$: 56; $n=6$: 79. Mod 3: $1, 1, 2, 1, 1, 2, 1, \ldots$ — repeating period 3, matching the algebra above.</div>
+    
+    <div class="step-result">Case $n=3k+2$: $\;2n^2+n+1 = 18k^2+27k+11 = 3(6k^2+9k+3) + 2$, remainder 2. Not divisible by 3 ✓.</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>Three cases covered:</strong> $n=3k$ (given): remainder 1; $n=3k+1$: remainder 1; $n=3k+2$: remainder 2.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1 — conclusion</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> Every proof by exhaustion ends with a one-line conclusion that ties the cases together and states the conclusion.</p><p><strong>State the conclusion explicitly.</strong></p><p>Every integer $n$ is of exactly one of the three forms $3k$, $3k+1$, or $3k+2$ for some integer $k$. In each of these three cases, the expression $2n^2 + n + 1$ has been shown to leave a nonzero remainder on division by 3 (remainder 1, 1, and 2 respectively). Hence in every case $2n^2 + n + 1$ is not divisible by 3.</p><p>Therefore for all integers $n$, $\;2n^2 + n + 1\;$ is not divisible by 3. $\;\blacksquare$</p><p>$$\boxed{\,\text{Proof complete by exhaustion of the three residue classes mod 3.}\,}$$</p><div class="why">The A1 is awarded only for an explicit closing statement that (i) notes the cases are exhaustive (every integer is in one of $\{3k, 3k+1, 3k+2\}$), and (ii) draws the conclusion for all $n$. Stopping after the third case without the wrap-up loses the mark — markers want to see the proof <em>closed</em>. The phrase "by exhaustion of the three residue classes" makes the proof structure explicit and is standard practice.</div>
+    
+    <div class="step-result">$\blacksquare$  Three exhaustive cases each leave remainder ≠ 0 mod 3, so $2n^2+n+1$ is never divisible by 3.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
