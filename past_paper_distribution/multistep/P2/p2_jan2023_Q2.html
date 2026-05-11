@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P2 Jan 2023 · Q2(a) — Surface-area derivation for a cuboid brick</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">P2 (WMA12/01) · Q2(a) · Jan 2023 · Attempted 2 May 2026 · 3 marks (of 9)</div>
+  <h1>Q2(a) — Show $S = 6x^2 + \dfrac{2592}{x}$ for a cuboid brick of volume $972\,\text{cm}^3$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><em>In this question you must show all stages of your working. Solutions based entirely on calculator technology are not acceptable.</em></p><p>A brick is in the shape of a cuboid with width $x$ cm, length $3x$ cm and height $h$ cm, as shown in Figure 2.</p><p>The volume of the brick is $972\,\text{cm}^3$.</p><p><strong>(a)</strong> Show that the surface area of the brick, $S\,\text{cm}^2$, is given by</p><p>$$S \;=\; 6x^2 + \frac{2592}{x}$$</p><p><strong>(3)</strong></p><p style='color:#6e6e73;font-size:12px;'><em>Scope of this card: part (a) only — Phuc's #redo flag was "only redo part a". Parts (b)–(e) on differentiation and stationary value are standard once (a) is established.</em></p>
+    
+    <p class="q-marks">[3 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Derive $S = 6x^2 + \dfrac{2592}{x}$ <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given"><strong>Dimensions:</strong> width $x$ cm, length $3x$ cm, height $h$ cm. <strong>Volume:</strong> $V = 972\,\text{cm}^3$. <strong>Target:</strong> express $S$ in terms of $x$ alone.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 — eliminate h</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> The target $S = 6x^2 + 2592/x$ is a function of $x$ alone, but the brick has <em>two</em> independent dimensions, $x$ and $h$. The volume constraint $V = 972$ is the bridge: it ties $h$ to $x$ so that you can eliminate $h$ and end up with a single-variable expression for $S$. Whenever an exam question gives you (i) two variables in the geometry, (ii) one constraint (here $V$), and (iii) a target that uses only one of them, the move is always the same — solve the constraint for the unwanted variable and substitute.</p><p><strong>Why this method.</strong> The differentiation in parts (b)–(d) needs $S$ to be a one-variable function so that $dS/dx$ makes sense. Keeping $h$ in the expression would make $dS/dx$ ambiguous (partial vs total derivative — off-syllabus at IAL P2).</p><p><strong>State the tool.</strong> Volume of a cuboid:</p><p>$$V \;=\; \text{width} \times \text{length} \times \text{height} \;=\; x \cdot 3x \cdot h \;=\; 3x^2 h.$$</p><p><strong>Apply.</strong> Set this equal to the given volume and solve for $h$:</p><p>$$3x^2 h \;=\; 972$$</p><p>$$h \;=\; \frac{972}{3x^2} \;=\; \frac{324}{x^2}.$$</p><p><strong>Sense check.</strong> Units work: $972\,\text{cm}^3 \div (\text{cm} \cdot 3\text{cm}) = $ cm ✓. Behaviour check: as $x$ grows, $h$ shrinks like $1/x^2$ — a wider, longer brick is flatter, which matches physical intuition.</p><div class="why">The dominant slip on "show that" questions is forgetting to write down $V = x \cdot 3x \cdot h$ explicitly — students go straight to $h = 324/x^2$ and lose the M1 mark which is awarded for <em>setting up</em> the volume equation. The mark scheme wants to see the volume formula on the page <strong>before</strong> the rearrangement.</div>
+    
+    <div class="step-result">$h \;=\; \dfrac{324}{x^2}$ (from $V = 3x^2 h = 972$).</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $h = \dfrac{324}{x^2}$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">M1 — surface area in $x,h$</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> Now build the surface area $S$ from the geometry. A closed cuboid has <em>six</em> faces in three matching pairs. Naming the dimensions clearly stops you double-counting or missing a face.</p><p><strong>Why this method.</strong> Working face-by-face (rather than memorising a formula) is robust to the question changing the aspect ratio. Here the length is fixed at $3$ times the width, so two of the three face-pairs are unequal — the formula $2(\ell w + \ell h + wh)$ is the safe template.</p><p><strong>State the tool.</strong> For a cuboid with width $w$, length $\ell$, height $h$:</p><p>$$S \;=\; 2\bigl(\,\underbrace{\ell w}_{\text{top/bottom}} \;+\; \underbrace{\ell h}_{\text{front/back}} \;+\; \underbrace{w h}_{\text{left/right}}\,\bigr).$$</p><p><strong>Apply</strong> with $w = x$, $\ell = 3x$, height $h$:</p><p>$$S \;=\; 2\bigl((3x)(x) \;+\; (3x)(h) \;+\; (x)(h)\bigr)$$</p><p>$$\;=\; 2\bigl(3x^2 \;+\; 3xh \;+\; xh\bigr)$$</p><p>$$\;=\; 2\bigl(3x^2 \;+\; 4xh\bigr) \;=\; 6x^2 \;+\; 8xh.$$</p><p><strong>Sense check.</strong> Three terms, each with units cm$^2$ ✓. The $6x^2$ is the contribution from the two top/bottom rectangles (each of area $3x \cdot x = 3x^2$, doubled). The $8xh$ groups the four vertical faces (two of area $3xh$ and two of area $xh$). Total face count: $2 + 2 + 2 = 6$ ✓.</p><div class="why">A frequent error is to write $S = 2(x^2 + xh + 3xh)$ — i.e. forget that the top/bottom face is $3x \times x$, not $x \times x$. Drawing a tiny sketch in the margin with each face labelled stops this. The other classic slip is to write only 3 faces (the visible ones in the figure) and forget the back/bottom/right hidden faces.</div>
+    
+    <div class="step-result">$S \;=\; 6x^2 \;+\; 8xh$  (still in terms of $x$ and $h$).</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">Carry-in from previous step</span><strong>From STEP 1:</strong> $h = \dfrac{324}{x^2}$. <strong>From STEP 2:</strong> $S = 6x^2 + 8xh$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal"></span></span>
+    <span class="step-marks">A1 — substitute & simplify</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Recognise the trigger.</strong> You now have $S$ in two variables and $h$ as a function of $x$. Substitution closes the loop and gives $S(x)$.</p><p><strong>Apply.</strong> Replace $h$ in the surface-area expression:</p><p>$$S \;=\; 6x^2 \;+\; 8x \cdot \underbrace{\frac{324}{x^2}}_{=\,h}.$$</p><p><strong>Simplify the second term.</strong> Cancel one factor of $x$:</p><p>$$8x \cdot \frac{324}{x^2} \;=\; \frac{8 \cdot 324 \cdot x}{x^2} \;=\; \frac{8 \cdot 324}{x} \;=\; \frac{2592}{x}.$$</p><p>(Arithmetic: $8 \times 324 = 8 \times 300 + 8 \times 24 = 2400 + 192 = 2592$.)</p><p>Therefore</p><p>$$\boxed{\,S \;=\; 6x^2 \;+\; \frac{2592}{x}\,} \qquad \text{as required.} \;\blacksquare$$</p><p><strong>Sense check.</strong> Both terms are positive for $x > 0$ ✓. As $x \to 0^+$, $S \to \infty$ (the brick becomes a thin tall column with huge side area); as $x \to \infty$, $S \to \infty$ (the brick spreads out flat with huge top/bottom area). So $S$ must have a minimum somewhere in between — that's precisely what parts (c)–(e) ask you to find.</p><div class="why">For "show that" questions, the A1 is awarded only if your final line matches the printed expression <strong>exactly</strong>. If you wrote $S = 6x^2 + 2592x^{-1}$ instead, you'd still get A1 (equivalent form), but $S = 6x^2 + 2592 \div x$ would not — convention demands the fraction form when the question shows it that way. Also: do not skip arithmetic — write $8 \times 324 = 2592$ on the page. "Show that" rewards every visible step.</div>
+    
+    <div class="step-result">$\boxed{S = 6x^2 + \dfrac{2592}{x}}$ — required form. ✓</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
