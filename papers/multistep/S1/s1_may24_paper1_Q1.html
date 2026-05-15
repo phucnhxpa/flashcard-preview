@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S1 Q1 — Back-to-back stem-and-leaf, quartiles, outliers, box plot</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: #0071e3; color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error {
+  background: #fff5f5; border-left: 3px solid #c72c2c;
+  padding: 6px 10px; margin: 7px 0; font-size: 12px; color: #5b1212;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error strong { color: #a31515; }
+.step-body .tutor-error .label {
+  display: inline-block; background: #c72c2c; color: #fff;
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; margin-right: 5px;
+  font-weight: 600;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">S1 (WST01/01) · Q1 · Paper 1 (Tuesday 21 May 2024) · Attempted 23 Apr 2026</div>
+  <h1>Q1 — 35 Birch + 32 Maple seedlings: stem-and-leaf, quartiles, outlier, box plot, range of $a$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The back-to-back stem-and-leaf diagram below shows the heights, in cm, of 35 Birch and 32 Maple seedlings. The median height of the Maple seedlings is 45 cm.</p>
+    <div class="q-diagram"><pre style="font: 12px/1.5 'SF Mono',Menlo,Consolas,monospace; background:#fff; border:1px solid #d2d2d7; border-radius:6px; padding:10px 14px; margin:0; white-space:pre; text-align:left;">   Totals       Birch              Maple        Totals
+    (2)                  9 8 | 2 | 5 7 7 8 9        (5)
+    (8)        9 9 9 6 5 3 1 1 | 3 | 0 2 6 6 8 9 9  (7)
+    (9)      9 8 8 7 6 3 1 1 1 | 4 | 1 1 1 k 7 8    (6)
+    (9)      7 7 7 5 4 3 2 1 0 | 5 | 0 1 2 3 4 4 4  (7)
+    (3)                  7 6 5 | 6 | 3 4 6          (3)
+    (3)                  6 5 4 | 7 | 0 7            (2)
+    (1)                      5 | 8 | 0 0            (2)
+
+Key:  5 | 6 | 3   means 65 cm Birch / 63 cm Maple
+Median height of Maple seedlings = 45 cm.</pre></div>
+    <p class="q-marks">[13 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Find $k$ <span class="pmarks">[1 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">median position</span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (grouped/list median, even <em>n</em>):</strong></p><p>$$\text{median} = \tfrac{1}{2}\bigl(x_{(n/2)} + x_{(n/2+1)}\bigr)$$</p><p>Maple has $n = 32$ ⇒ median = avg of <strong>16th &amp; 17th</strong> values.</p><p>Cumulative Maple totals: 5, 12, 18, 25, 28, 30, 32 — so positions 13–18 lie in the row $4|\,1\,1\,1\,k\,7\,8$.</p><p>13th = 41, 14th = 41, 15th = 41, <strong>16th = $40+k$</strong>, <strong>17th = 47</strong>, 18th = 48.</p><p>$$\text{median} = \frac{(40+k) + 47}{2} = 45 \;\Longrightarrow\; 87+k = 90$$</p><div class="why"><strong>Trap:</strong> on the LEFT side (Birch) you read the leaves <em>right-to-left</em> — smallest closest to the stem. The Maple side reads left-to-right as normal.</div>
+    
+    <div class="step-result">$\boxed{\,k = 3\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Find $Q_1$ and $Q_3$ for the Birch heights <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">Edexcel quartile rule</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Edexcel rule for discrete / stem-and-leaf data</strong> (NOT $(n+1)/4$):</p><p>position $= \tfrac{n}{4}$ or $\tfrac{3n}{4}$. If integer ⇒ average that and the next; if non-integer ⇒ <strong>round UP</strong>.</p><p>$n = 35$:</p><p>$\tfrac{35}{4} = 8.75 \;\Rightarrow\; Q_1$ at position <strong>9</strong>.</p><p>$\tfrac{3\cdot 35}{4} = 26.25 \;\Rightarrow\; Q_3$ at position <strong>27</strong>.</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $Q_1$ at position 9, $Q_3$ at position 27.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">read positions</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Read Birch leaves <strong>right-to-left</strong>, smallest first.</p><p>Cumulative Birch totals (top → down): 2, 10, 19, 28, 31, 34, 35.</p><p>9th value lies in the 30s row (rows up to here total 10): leaves 31, 31, 33, 35, 36, 39, 39, 39 ⇒ <strong>9th = 39</strong>.</p><p>27th value lies in the 50s row (cumulative through 40s = 19, through 50s = 28): the 50s row read smallest-first is 50, 51, 52, 53, 54, 55, 57, 57, 57 — so 20th=50, …, 27th = <strong>57</strong>.</p>
+    
+    <div class="step-result">$Q_1 = 39 \text{ cm},\quad Q_3 = 57 \text{ cm}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Show exactly one Birch outlier (use $k = 1.5$) <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given"><strong>Definition:</strong> outlier $= $ value $&lt; Q_1 - 1.5\cdot \text{IQR}$ or $&gt; Q_3 + 1.5\cdot\text{IQR}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">fences</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>$\text{IQR} = Q_3 - Q_1 = 57 - 39 = 18$.</p><p>$1.5 \cdot \text{IQR} = 27$.</p><p>Lower fence: $Q_1 - 27 = 39 - 27 = 12$.</p><p>Upper fence: $Q_3 + 27 = 57 + 27 = 84$.</p>
+    
+    <div class="step-result">Fences: $[\,12,\;84\,]$</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Fences: $[12,\ 84]$ (lower 12, upper 84).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">count outliers</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>Min Birch = 28 (≥ 12 ✓ — none below).</p><p>Birch values $&gt;84$: scan the 80s row → only <strong>85</strong>.</p><p>So exactly <strong>one</strong> outlier: 85 cm.</p><div class="why"><strong>Phrase to memorise:</strong> "85 &gt; 84 ⇒ 85 is an outlier; all other values lie within the fences ⇒ exactly one outlier." A "show that" question wants both halves — find AND check no others.</div>
+    
+    <div class="step-result">$\boxed{\text{exactly one outlier: } 85\ \text{cm}}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — Draw a box plot for the Birch heights <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  <div class="given"><strong>5-number summary needed:</strong> min, $Q_1$, median, $Q_3$, max-non-outlier; mark outliers with $\times$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">median position</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>$n = 35$ ⇒ median at position $\tfrac{35+1}{2} = 18$ (middle value, $n$ odd).</p><p>Cumulative Birch: 2, 10, 19. Position 18 in the 40s row. Reading 40s leaves smallest-first: 41, 41, 41, 43, 46, 47, 48, 48, 49 ⇒ 11th=41, 12th=41, 13th=41, 14th=43, 15th=46, 16th=47, 17th=48, <strong>18th = 48</strong>.</p>
+    
+    <div class="step-result">median $= 48$ cm</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> median $= 48$ cm.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">5-number summary + outlier</span></span>
+    <span class="step-marks">B1 B1 B1</span>
+  </div>
+  <div class="step-body">
+    <table style="font-size:12.5px;border-collapse:collapse;margin:4px 0;"><tr><td>min</td><td>= 28 (smallest Birch leaf)</td></tr><tr><td>$Q_1$</td><td>= 39</td></tr><tr><td>median</td><td>= 48</td></tr><tr><td>$Q_3$</td><td>= 57</td></tr><tr><td>largest non-outlier</td><td>= 76 (next value below 85)</td></tr><tr><td>outlier</td><td>= 85 (mark with $\times$)</td></tr></table><p><strong>Whisker rule:</strong> right whisker stops at the largest value that is <em>not</em> an outlier (= 76), <strong>not</strong> at 85.</p><div class="why"><strong>Marks lost most often:</strong> whisker drawn to 85 (outlier) instead of 76; missing the $\times$; wrong scale on horizontal axis. Always include axis label "height (cm)".</div>
+    
+    <div class="step-result"><strong>Box plot</strong>: scale 0–90+, box from 39 to 57 with median line at 48; left whisker 28→39; right whisker 57→76; cross ($\times$) at 85.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (e) — Compare Birch vs Maple distributions <span class="pmarks">[1 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">statistic + context</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>Birch median = 48 cm $&gt;$ Maple median = 45 cm.</p><p>⇒ on average <strong>Birch seedlings are taller</strong> than Maple (or: Birch grows faster on average).</p><div class="why"><strong>Mark scheme requires BOTH:</strong> a numerical statistic (median, IQR, range, etc.) AND a context-linked statement. Just "Birch is taller" with no number = B0.</div>
+    
+    <div class="step-result">Birch median (48) $&gt;$ Maple median (45) ⇒ Birch taller on average.</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (f) — Range of $a$ if 27, $a$, 48, $2a$ added to Maple and box plot unchanged <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given"><strong>Original Maple stats:</strong> min 25, $Q_1$ 36, median 45, $Q_3$ 54, max 80. After adding the 4 new values, $n = 32+4 = 36$, and the new box plot must be identical.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">max constraint</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>Max unchanged = 80 ⇒ all new values ≤ 80.</p><p>Largest of the four = $2a$ (assuming $a&gt;0$ ⇒ $2a&gt;a$).</p><p>$$2a \leq 80 \;\Longrightarrow\; \boxed{a \leq 40}$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $a \leq 40$ (max constraint: $2a \leq 80$).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">$Q_1$ constraint</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>New $n=36$ ⇒ $Q_1$ at position $\tfrac{36}{4}=9$ (avg of 9th &amp; 10th).</p><p>Original 8th &amp; 9th values give $Q_1 = 36$. After inserting 4 values, the new 9th &amp; 10th must still both equal 36 ⇒ <strong>exactly one new value</strong> may be inserted strictly below 36.</p><p>The four new values are 27 (already $&lt;36$), $a$, 48, $2a$. We need exactly one $&lt;36$:</p><p>27 is the one. So $a \geq 36$ (and $2a \geq 72 \geq 36$ automatic).</p><p>$$\boxed{a \geq 36}$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $a \geq 36$ ($Q_1$ constraint). From STEP 1: $a \leq 40$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">median constraint + combine</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>New median = avg of <strong>18th &amp; 19th</strong> values. Originally 16th=43, 17th=47 (median (43+47)/2 = 45). After 4 inserts, the 18th &amp; 19th must average 45 — i.e. still 43 and 47 from the original Maple list ⇒ exactly 2 new values $\leq 43$ and 2 new values $\geq 47$.</p><p>27, $a$ go below; 48, $2a$ go above ⇒ $a \leq 43$ and $2a \geq 47$ (both compatible with the earlier $36 \leq a \leq 40$).</p><p>$Q_3$ unchanged check: $Q_3$ at position 27 → original 23rd = 53, 24th = 54 unchanged ⇒ auto-OK.</p><p>Combine: $a \geq 36$ AND $a \leq 40$:</p><p>$$\boxed{\;36 \leq a \leq 40\;}$$</p><div class="why"><strong>Common error:</strong> stop at the FIRST constraint ($a \leq 40$ from max) and forget that $Q_1$ and median must also be unchanged. All five summary stats must be preserved.</div>
+    
+    <div class="step-result">$\boxed{\,36 \leq a \leq 40\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
