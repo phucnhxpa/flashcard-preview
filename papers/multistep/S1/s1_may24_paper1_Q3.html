@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>S1 Q3 — Histogram (cm scaling), grouped median, coding mean &amp; SD</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* overridden by inline style per part */
+  gap: 12px;
+  align-items: start;
+}
+/* orphan last step (odd child in 2-col grid) spans full width */
+.steps > .step-wrapper:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.step-wrapper {
+  min-width: 0;  /* allow grid items to shrink below content width */
+}
+@media (max-width: 740px) { .steps { grid-template-columns: 1fr; } }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: #0071e3; color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error {
+  background: #fff5f5; border-left: 3px solid #c72c2c;
+  padding: 6px 10px; margin: 7px 0; font-size: 12px; color: #5b1212;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .tutor-error strong { color: #a31515; }
+.step-body .tutor-error .label {
+  display: inline-block; background: #c72c2c; color: #fff;
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; margin-right: 5px;
+  font-weight: 600;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.carry-in {
+  font-size: 0.78em;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.carry-label {
+  font-weight: 600;
+  color: #9ca3af;
+  margin-right: 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">S1 (WST01/01) · Q3 · Paper 1 (Tuesday 21 May 2024) · Attempted 23 Apr 2026</div>
+  <h1>Q3 — 50 pebbles: histogram bar dimensions, median, coded mean/SD, effect of new pebble</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>50 pebbles, length $x$ mm — frequency table below. Weight $w$ g is coded by $10y = w - 20$.</p><p><strong>(a)</strong> Width and height of the bar for $30 \leq x &lt; 32$. <strong>[3]</strong></p><p><strong>(b)</strong> Estimate the median length using linear interpolation. <strong>[2]</strong></p><p><strong>(c)</strong> Show that $\bar w = 40.8$. <strong>[2]</strong></p><p><strong>(d)</strong> Find $\sigma_w$ (standard deviation of weight). <strong>[4]</strong></p><p><strong>(e)</strong> A pebble of weight 40.8 g is added. State the effect on (i) the mean (ii) the standard deviation, with reason. <strong>[3]</strong></p>
+    <div class="q-diagram"><pre style="font: 12px/1.5 'SF Mono',Menlo,Consolas,monospace; background:#fff; border:1px solid #d2d2d7; border-radius:6px; padding:10px 14px; margin:0; white-space:pre; text-align:left;">Length x (mm)   20–&lt;30  30–&lt;32  32–&lt;36  36–&lt;40  40–&lt;45  45–&lt;50
+Frequency f       2       16      20       8        3        1
+
+Reference bar (32 ≤ x &lt; 36) drawn 2.5 cm wide × 7.5 cm tall.
+Weight (w g) of pebbles coded by  10y = w − 20.
+Σy = 104,   Σy² = 233.54  (over n = 50).</pre></div>
+    <p class="q-marks">[14 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — Width &amp; height of the $30 \leq x &lt; 32$ bar <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given"><strong>Reference:</strong> bar for $32 \leq x &lt; 36$ (width 4 mm, freq 20) drawn 2.5 cm × 7.5 cm.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">width</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Rule:</strong> page-width $\propto$ class-width.</p><p>Reference: 4 mm class ↔ 2.5 cm on page ⇒ $\tfrac{2.5}{4} = 0.625$ cm/mm.</p><p>Target class width = 2 mm:</p><p>$$\text{width} = 2 \times \tfrac{2.5}{4} = 1.25\ \text{cm}$$</p>
+    
+    <div class="step-result">width $= 1.25$ cm</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> width $= 1.25$ cm.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">area = freq</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Rule:</strong> area-on-page $\propto$ frequency.</p><p>Reference area $= 2.5 \times 7.5 = 18.75$ cm² ↔ 20 pebbles.</p><p>Target frequency = 16:</p><p>$$\text{target area} = \tfrac{16}{20} \times 18.75 = 15\ \text{cm}^2$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> target area $= 15$ cm$^2$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">height</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$\text{height} = \frac{\text{area}}{\text{width}} = \frac{15}{1.25} = 12\ \text{cm}$$</p><div class="why"><strong>Don't confuse</strong> "frequency density" (cm/mm units) with "cm on the printed page". The IAL question gives you cm-on-page directly via the reference bar — use area-proportional reasoning, not frequency density formulas.</div>
+    
+    <div class="step-result">$\boxed{\,\text{width} = 1.25\ \text{cm},\ \text{height} = 12\ \text{cm}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — Estimate the median length <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">median class</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Grouped median uses $n/2$</strong> (NOT $(n+1)/2$).</p><p>$n/2 = 25$. Cumulative frequencies: 2, 18, <strong>38</strong>, 46, 49, 50.</p><p>25 falls in the 32 ≤ $x$ &lt; 36 class ($F = 18$ before, $f = 20$ in class, $c = 4$).</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Median falls in class $32 \leq x < 36$ ($F=18$, $f=20$, $c=4$).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">linear interpolation</span></span>
+    <span class="step-marks">A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Formula (booklet):</strong> $L + \dfrac{n/2 - F}{f}\cdot c$.</p><p>$$\text{median} = 32 + \frac{25 - 18}{20}\cdot 4 = 32 + \frac{7}{20}\cdot 4 = 32 + 1.4$$</p>
+    
+    <div class="step-result">$\boxed{\,\text{median} = 33.4\ \text{mm}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — Show $\bar w = 40.8$ <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given">$10y = w - 20 \;\Longleftrightarrow\; w = 10y + 20$. Σ$y$ = 104.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal">$\bar y$ then decode</span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p>$$\bar y = \frac{\Sigma y}{n} = \frac{104}{50} = 2.08$$</p><p>Decode: $\bar w = 10\bar y + 20 = 10(2.08) + 20 = 20.8 + 20 = 40.8$ ✓</p>
+    
+    <div class="step-result">$\boxed{\,\bar w = 40.8\ \text{g}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — Find $\sigma_w$ <span class="pmarks">[4 marks] · 3 steps</span></h2>
+  <div class="given">$\Sigma y = 104,\ \Sigma y^2 = 233.54,\ n = 50,\ \bar y = 2.08,\ w = 10y+20$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">Var($y$)</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Computational formula:</strong> $\text{Var}(y) = \dfrac{\Sigma y^2}{n} - \bar y^{\,2}$.</p><p>$$\text{Var}(y) = \frac{233.54}{50} - (2.08)^2 = 4.6708 - 4.3264 = 0.3444$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> $\text{Var}(y) = 0.3444$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">$\sigma_y$</span></span>
+    <span class="step-marks">M1</span>
+  </div>
+  <div class="step-body">
+    <p>$$\sigma_y = \sqrt{0.3444} = 0.5869\ldots$$</p>
+    
+    
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 2:</span><strong>From STEP 2:</strong> $\sigma_y = 0.5869$.</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">decode SD (×10, NOT +20)</span></span>
+    <span class="step-marks">M1 A1</span>
+  </div>
+  <div class="step-body">
+    <p><strong>Coding rule:</strong> for $w = 10y + 20$, $\sigma_w = |10|\cdot \sigma_y$. The $+20$ shift does <strong>not</strong> affect spread.</p><p>$$\sigma_w = 10 \times 0.5869 = 5.869\ldots \approx 5.87\ \text{g}\ (3\,\text{s.f.})$$</p><div class="why"><strong>Trap:</strong> writing $\sigma_w = 10\sigma_y + 20$ — standard deviation is NEVER shifted by an additive constant. Only the multiplier matters.</div>
+    
+    <div class="step-result">$\boxed{\,\sigma_w \approx 5.87\ \text{g}\,}$</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (e) — Effect of adding a pebble of weight 40.8 g on (i) mean (ii) SD <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">The new pebble has weight equal to the current mean ($\bar w = 40.8$ g). New $n = 51$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper"><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">(i) mean</span></span>
+    <span class="step-marks">B1</span>
+  </div>
+  <div class="step-body">
+    <p>New mean $= \dfrac{\Sigma w + 40.8}{n+1} = \dfrac{50(40.8) + 40.8}{51} = \dfrac{51 \cdot 40.8}{51} = 40.8$.</p><p>⇒ <strong>Mean unchanged</strong>. Adding a value equal to the current mean preserves the mean.</p>
+    
+    <div class="step-result">(i) Mean is <strong>unchanged</strong> (still 40.8 g).</div>
+  </div>
+</div>
+</div>
+    <div class="step-wrapper"><div class="carry-in"><span class="carry-label">↳ from STEP 1:</span><strong>From STEP 1:</strong> Mean is unchanged (adding value equal to mean).</div><div class="step">
+  <div class="step-top">
+    <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">(ii) SD</span></span>
+    <span class="step-marks">B1 B1</span>
+  </div>
+  <div class="step-body">
+    <p>$\text{Var} = \dfrac{\Sigma(w_i - \bar w)^2}{n}$.</p><p>The new term contributes $(40.8 - 40.8)^2 = 0$ to the numerator, so $\Sigma(w_i - \bar w)^2$ <strong>unchanged</strong>, but $n$ grows from 50 to 51.</p><p>$$\text{Var}_\text{new} = \frac{\text{old numerator}}{51} \;&lt;\; \frac{\text{old numerator}}{50} = \text{Var}_\text{old}$$</p><p>⇒ <strong>SD decreases</strong>.</p><div class="why"><strong>Watch the textbook trap:</strong> "SD stays the same" feels right because the new value is "the average" — but the denominator $n$ <em>increases</em>, shrinking the variance and hence the SD.</div>
+    
+    <div class="step-result">(ii) SD <strong>decreases</strong> (deviation 0 added but $n$ grew).</div>
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
