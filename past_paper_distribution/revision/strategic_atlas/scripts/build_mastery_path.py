@@ -49,6 +49,10 @@ TIER_LABEL = {T_CORE:"Core", T_BUILD:"Build", T_STAR:"A★"}
 
 moves = json.load(open("/tmp/atlas_moves.json"))
 marks = json.load(open("/tmp/atlas_marks.json"))
+qmeta = json.load(open("/tmp/atlas_qmeta.json"))   # {UNIT|Session|qnum: {marks, summary}}
+
+SET_SIZE = 6          # questions per problem set ("do this set, then the next")
+MIN_PER_MARK = 1.15   # Edexcel pace; for marks-unknown questions assume an 8-mark Q
 
 def esc(t): return ih.unescape(str(t)).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 def attr(t): return esc(t).replace('"',"&quot;")
@@ -74,11 +78,28 @@ def qlabel(qlink):
     sess, qn = m.group(1), m.group(2)
     return f"{sess.replace('_',' ')} Q{qn}", sess, qn
 
+def qkey(unit, sess, qn):
+    if sess is None: return None
+    try: return f"{unit}|{sess}|{int(re.sub(r'[^0-9].*','',qn))}"
+    except Exception: return f"{unit}|{sess}|{qn}"
+
 def qmarks(unit, sess, qn):
-    if sess is None: return 0
-    try: k = f"{unit}|{sess}|{int(re.sub(r'[^0-9].*','',qn))}"
-    except Exception: k = f"{unit}|{sess}|{qn}"
-    return marks.get(k, 0)
+    k = qkey(unit, sess, qn)
+    if k is None: return 0
+    return marks.get(k, 0) or qmeta.get(k, {}).get("marks", 0)
+
+def qsummary(unit, sess, qn):
+    k = qkey(unit, sess, qn)
+    return qmeta.get(k, {}).get("summary", "") if k else ""
+
+def est_minutes(qlist, unit):
+    """exam-time estimate for a set of qlinks."""
+    tot = 0
+    for ql in qlist:
+        _, s, n = qlabel(ql)
+        mk = qmarks(unit, s, n) or 8
+        tot += mk
+    return max(5, int(round(tot * MIN_PER_MARK / 5.0)) * 5)
 
 def qid(qlink):
     # canonical id stable across pages: UNIT/chN/q-...html
@@ -189,6 +210,44 @@ color:var(--muted);cursor:pointer;font-family:inherit;transition:.13s;}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:14px 0 0;}
 .legend span{display:inline-flex;align-items:center;gap:6px;}
 .legend .d{width:9px;height:9px;border-radius:50%;}
+/* problem sets */
+.pset{border:1px solid var(--line-soft);border-radius:12px;padding:4px 12px 10px;margin:10px 0;background:#FCFCFD;}
+.pset-h{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line-soft);margin-bottom:3px;}
+.setno{font-size:12.5px;font-weight:700;letter-spacing:-.01em;}
+.setmeta{font-size:11.5px;color:var(--muted-2);}
+.setbarwrap{flex:1;max-width:180px;margin-left:auto;}
+.setcount{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:42px;text-align:right;}
+.pset.setdone{background:#F2FBF4;border-color:#CDEBD6;}
+.pset.setdone .setno::before{content:"\\2713 ";color:#34C759;}
+/* richer question rows */
+.q{align-items:flex-start;}
+.q input{margin-top:2px;}
+.q .qd{margin-top:6px;}
+.qmain{flex:1;min-width:0;}
+.qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.q .qn{flex:none;}
+.qtier{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.qsum{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.42;padding-right:8px;}
+.q.flash{background:#FFF7E6;}
+/* study-plan row */
+.planrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.plan{font-size:12px;font-weight:600;color:var(--muted);background:var(--pill-bg);border-radius:99px;padding:4px 12px;}
+.exam{font-size:12px;font-weight:600;padding:4px 12px;border-radius:99px;background:var(--pill-bg);color:var(--muted);white-space:nowrap;}
+.exam.soon{background:#FFEDEA;color:#C0341D;}.exam.past{opacity:.55;}
+.resumebtn{font-size:12.5px;font-weight:600;padding:6px 15px;border:1px solid var(--fg);border-radius:99px;background:var(--fg);color:#fff;cursor:pointer;font-family:inherit;transition:.14s;}
+.resumebtn:hover{opacity:.85;transform:translateY(-1px);}
+/* A* capstone */
+.capstone{border-color:#E7D7F5;background:linear-gradient(180deg,#FCFAFE,#FFF);}
+.capnote{font-size:13px;color:var(--muted);line-height:1.6;margin:4px 0 14px;}
+.capcount{color:#AF52DE;font-weight:700;}
+.hitlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:7px;}
+.hit{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;transition:.12s;}
+.hit:hover{border-color:#AF52DE;box-shadow:var(--shadow);transform:translateY(-1px);}
+.hit .qd{width:9px;height:9px;border-radius:50%;flex:none;}
+.hit .hn{font-size:12.5px;font-weight:600;flex:1;min-width:0;}
+.hit .hmk{font-size:11px;color:var(--muted-2);white-space:nowrap;}
+.hit .hstep{font-size:10.5px;font-weight:600;white-space:nowrap;}
+.hit.done{opacity:.42;}.hit.done .hn{text-decoration:line-through;}
 footer{color:var(--muted);font-size:13px;padding:46px 24px;text-align:center;border-top:1px solid var(--line);margin-top:64px;}
 .callout{background:#FAFAFC;border:1px solid var(--line-soft);border-radius:13px;padding:15px 18px;font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:16px;}
 .callout b{color:var(--fg);}
@@ -232,11 +291,21 @@ document.querySelectorAll('.q').forEach(function(row){row.addEventListener('clic
  if(e.target.tagName==='A'||e.target.tagName==='INPUT')return;
  var b=row.querySelector('input[data-qid]');b.checked=!b.checked;b.dispatchEvent(new Event('change'));});});
 function recompute(){
+ document.querySelectorAll('.pset').forEach(function(s){
+  var qs=s.querySelectorAll('input[data-qid]');var n=0;qs.forEach(function(b){if(b.checked)n++;});
+  var bar=s.querySelector('.setbar');if(bar)bar.style.width=pct(n,qs.length)+'%';
+  var c=s.querySelector('.setcount');if(c)c.textContent=n+' / '+qs.length;
+  if(qs.length&&n===qs.length)s.classList.add('setdone');else s.classList.remove('setdone');});
  document.querySelectorAll('details.step').forEach(function(s){
-  var qs=s.querySelectorAll('input[data-qid]');var n=0;
-  qs.forEach(function(b){if(b.checked)n++;});
+  if(s.classList.contains('capstone'))return;
+  var qs=s.querySelectorAll('input[data-qid]');var n=0;qs.forEach(function(b){if(b.checked)n++;});
   var bar=s.querySelector('.sbar');if(bar)bar.style.width=pct(n,qs.length)+'%';
   var c=s.querySelector('.scount');if(c)c.textContent=n+' / '+qs.length+' done';});
+ var capN=0,capDn=0;
+ document.querySelectorAll('.hit').forEach(function(h){capN++;
+  if(done[h.dataset.qid]){h.classList.add('done');capDn++;}else{h.classList.remove('done');}});
+ var cc=document.querySelector('.capcount');
+ if(cc)cc.textContent=(capN-capDn>0)?((capN-capDn)+' to crack'):'✓ all cracked';
  var all=document.querySelectorAll('input[data-qid]');var dn=0;
  all.forEach(function(b){if(b.checked)dn++;});
  var ub=document.getElementById('unitBar');if(ub)ub.style.width=pct(dn,all.length)+'%';
@@ -249,11 +318,23 @@ document.querySelectorAll('[data-clearall]').forEach(function(btn){btn.addEventL
  e.preventDefault();var s=btn.closest('details.step');
  s.querySelectorAll('input[data-qid]').forEach(function(b){if(b.checked){b.checked=false;b.dispatchEvent(new Event('change'));}});});});
 var today=new Date();
-document.querySelectorAll('[data-exam]').forEach(function(el){
+document.querySelectorAll('.exam[data-exam]').forEach(function(el){
  var d=new Date(el.dataset.exam+'T09:00:00');var days=Math.ceil((d-today)/86400000);
  if(days<0){el.classList.add('past');el.textContent='exam '+el.dataset.human;}
  else if(days===0){el.classList.add('soon');el.textContent='exam today';}
- else{if(days<=10)el.classList.add('soon');el.textContent=days+' days · '+el.dataset.human;}});
+ else{if(days<=10)el.classList.add('soon');el.textContent=days+(days===1?' day · ':' days · ')+el.dataset.human;}});
+var plan=document.querySelector('.plan');
+if(plan){var sets=+plan.dataset.sets;var pd=new Date(plan.dataset.exam+'T09:00:00');
+ var pdays=Math.ceil((pd-today)/86400000);
+ plan.textContent=(pdays>0)?(sets+' sets · ~'+Math.ceil(sets/pdays)+'/day to be ready'):(sets+' problem sets');}
+var rb=document.getElementById('resumeBtn');
+if(rb)rb.addEventListener('click',function(){
+ var rows=document.querySelectorAll('.q'),next=null;
+ for(var i=0;i<rows.length;i++){var b=rows[i].querySelector('input[data-qid]');if(b&&!b.checked){next=rows[i];break;}}
+ if(!next){rb.textContent='✓ unit complete!';return;}
+ var det=next.closest('details.step');if(det&&!det.open)det.open=true;
+ next.scrollIntoView({behavior:'smooth',block:'center'});
+ next.classList.add('flash');setTimeout(function(){next.classList.remove('flash');},1500);});
 })();
 """
 
@@ -347,23 +428,43 @@ def render_tech(dms):
             out.append(f'<div class="tech">{"".join(chips)}</div>')
     return "".join(out)
 
-def render_questions(M, dqs):
-    rows = []
-    for ql in dqs:
-        lab, sess, qn = qlabel(ql)
-        mk = qmarks(M["unit"], sess, qn)
-        t = M["tier_of_q"](ql)
-        ntech = len(M["q2m"][ql])
-        names = " · ".join(sorted(set(mm["name"] for mm in M["q2m"][ql])))
-        mkstr = f"{mk}m" if mk else "—"
-        rows.append(
-            f'<div class="q"><input type="checkbox" data-qid="{attr(qid(ql))}">'
-            f'<span class="qd" style="background:{TIER_DOT[t]}" title="{TIER_LABEL[t]} difficulty"></span>'
-            f'<span class="qn"><a href="{attr(ql)}">{esc(lab)}</a></span>'
-            f'<span class="qmk">{mkstr}</span>'
-            f'<span class="qtech" title="{attr(names)}">{ntech} technique{"s" if ntech!=1 else ""}</span>'
-            f'<a class="open" href="{attr(ql)}">solve →</a></div>')
-    return "".join(rows)
+def render_row(M, ql):
+    lab, sess, qn = qlabel(ql)
+    mk = qmarks(M["unit"], sess, qn)
+    t = M["tier_of_q"](ql)
+    ntech = len(M["q2m"][ql])
+    names = " · ".join(sorted(set(mm["name"] for mm in M["q2m"][ql])))
+    summ = qsummary(M["unit"], sess, qn)
+    mkstr = f'<span class="qmk">{mk} marks</span>' if mk else ""
+    sumline = f'<div class="qsum">{esc(summ)}</div>' if summ else ""
+    return (
+        f'<div class="q"><input type="checkbox" data-qid="{attr(qid(ql))}">'
+        f'<span class="qd" style="background:{TIER_DOT[t]}" title="{TIER_LABEL[t]} difficulty"></span>'
+        f'<div class="qmain"><div class="qhead">'
+        f'<a class="qn" href="{attr(ql)}">{esc(lab)}</a>'
+        f'<span class="qtier" style="color:{TIER_DOT[t]}">{TIER_LABEL[t]}</span>'
+        f'{mkstr}'
+        f'<span class="qtech" title="{attr(names)}">{ntech} technique{"s" if ntech!=1 else ""}</span>'
+        f'<a class="open" href="{attr(ql)}">solve →</a>'
+        f'</div>{sumline}</div></div>')
+
+def render_sets(M, dqs):
+    """chunk a step's questions into ordered Sets ('do this set, then the next')."""
+    if not dqs: return '<div class="qsum" style="padding:6px 2px">No past-paper questions tagged yet.</div>'
+    out = []
+    for si in range(0, len(dqs), SET_SIZE):
+        chunk = dqs[si:si+SET_SIZE]
+        n = si // SET_SIZE + 1
+        mins = est_minutes(chunk, M["unit"])
+        rows = "".join(render_row(M, ql) for ql in chunk)
+        out.append(
+            f'<div class="pset">'
+            f'<div class="pset-h"><span class="setno">Set {n}</span>'
+            f'<span class="setmeta">{len(chunk)} question{"s" if len(chunk)!=1 else ""} · ~{mins} min</span>'
+            f'<span class="setbarwrap"><div class="bar"><i class="setbar"></i></div></span>'
+            f'<span class="setcount">0 / {len(chunk)}</span></div>'
+            f'<div class="plist">{rows}</div></div>')
+    return "".join(out)
 
 def render_unit_page(U):
     M = build_unit_model(U)
@@ -395,12 +496,13 @@ def render_unit_page(U):
         slug = DOMAIN_SLUG.get(d)
         domlink = (f'<a href="../{slug}.html" class="open" style="margin-left:auto">'
                    f'open in atlas →</a>') if slug else ""
+        nsets = (nqd + SET_SIZE - 1) // SET_SIZE
         body = (f'<div class="lbl">Techniques to master — work top (Core) to bottom (A★)</div>'
                 f'{render_tech(bucket["moves"])}'
-                f'<div class="lbl">Problem set — {nqd} past-paper question{"s" if nqd!=1 else ""}, easiest first</div>'
-                f'<div class="plist" data-step="{i}">{render_questions(M, bucket["questions"])}</div>'
-                f'<div class="steptools"><button data-markall>Mark all done</button>'
-                f'<button data-clearall>Clear</button></div>')
+                f'<div class="lbl">Problem sets — {nqd} question{"s" if nqd!=1 else ""} in {nsets} set{"s" if nsets!=1 else ""}, easiest first. Do one set per sitting.</div>'
+                f'{render_sets(M, bucket["questions"])}'
+                f'<div class="steptools"><button data-markall>Mark whole step done</button>'
+                f'<button data-clearall>Clear step</button></div>')
         steps.append(
             f'<details class="step"{" open" if i==1 else ""}>'
             f'<summary>'
@@ -411,6 +513,32 @@ def render_unit_page(U):
             f'<span class="scount">0 / {nqd} done</span>'
             f'<span class="chev">▸</span>'
             f'</summary><div class="body" data-step="{i}">{body}{domlink}</div></details>')
+    # total sets across the unit (for the study plan)
+    total_sets = sum((len(M["domains"][d]["questions"]) + SET_SIZE - 1) // SET_SIZE for d in M["order"])
+    # A★ capstone hit-list — the hardest questions across every step
+    star_qs = [ql for d in M["order"] for ql in M["domains"][d]["questions"] if M["tier_of_q"](ql) == T_STAR]
+    star_qs.sort(key=lambda ql: -M["qscore"][ql])
+    capstone = ""
+    if star_qs:
+        hits = []
+        for ql in star_qs:
+            lab, s, n = qlabel(ql); mk = qmarks(U, s, n); dom = M["qdom"][ql]
+            hits.append(
+                f'<a class="hit" href="{attr(ql)}" data-qid="{attr(qid(ql))}">'
+                f'<span class="qd" style="background:{TIER_DOT[T_STAR]}"></span>'
+                f'<span class="hn">{esc(lab)}</span>'
+                f'<span class="hmk">{(str(mk)+" marks") if mk else ""}</span>'
+                f'<span class="hstep" style="color:{dcolor(dom)}">{esc(dom)}</span></a>')
+        capstone = (
+            '<details class="step capstone">'
+            '<summary><span class="sn" style="background:#AF52DE">★</span>'
+            '<span class="stitle"><h3>A★ Clinchers — the last mile</h3>'
+            f'<span class="sub">the {len(star_qs)} hardest questions in {U}, gathered from every step</span></span>'
+            f'<span class="scount capcount">{len(star_qs)} to crack</span><span class="chev">▸</span></summary>'
+            '<div class="body"><p class="capnote">Once the steps above are green, these are the questions that '
+            'decide <b>A vs A★</b> — multi-technique, low-frequency, high-mark. They already live in their steps above; '
+            'this is your final hit-list. Greyed = already done.</p>'
+            f'<div class="hitlist">{"".join(hits)}</div></div></details>')
     legend = ('<div class="legend">'
               f'<span><span class="d" style="background:{TIER_DOT[T_CORE]}"></span>Core technique / easier question</span>'
               f'<span><span class="d" style="background:{TIER_DOT[T_BUILD]}"></span>Build</span>'
@@ -422,16 +550,19 @@ def render_unit_page(U):
         f'<div class="breadcrumb"><a href="index.html">Mastery Path</a> / <strong>{U} · {esc(UNIT_NAME[U])}</strong></div>'
         f'<h1>{U} — {esc(UNIT_NAME[U])}</h1>'
         f'<p>Work through the steps in order. Each step: master the techniques (Core → A★), '
-        f'then tick off its past-paper questions (easiest first). Finish every step and you have '
-        f'covered every technique and every question this unit has ever asked.</p>'
-        f'<div style="margin-top:14px"><span class="exam" data-exam="{EXAM_ISO[U]}" data-human="{EXAM_HUMAN[U]}">{EXAM_HUMAN[U]}</span></div>'
+        f'then clear its problem <b>sets</b> one sitting at a time (easiest first). Finish every step and '
+        f'you have covered every technique and every question this unit has ever asked — then prove it on '
+        f'the A★ hit-list.</p>'
+        f'<div class="planrow"><span class="exam" data-exam="{EXAM_ISO[U]}" data-human="{EXAM_HUMAN[U]}">{EXAM_HUMAN[U]}</span>'
+        f'<span class="plan" data-sets="{total_sets}" data-exam="{EXAM_ISO[U]}">{total_sets} problem sets</span>'
+        f'<button class="resumebtn" id="resumeBtn">▶ Resume — jump to next unfinished</button></div>'
         f'<div class="bigprog"><div class="bar"><i id="unitBar"></i></div>'
         f'<span class="pc" id="unitPc">0% · 0 / {nq}</span></div>'
         f'{legend}'
         '</div></header><div class="container">' +
         weight +
-        f'<div class="sec-title">The path — {len(M["order"])} steps · {ntech} techniques · {nq} questions</div>' +
-        "".join(steps) +
+        f'<div class="sec-title">The path — {len(M["order"])} steps · {total_sets} sets · {ntech} techniques · {nq} questions</div>' +
+        "".join(steps) + capstone +
         '<div class="callout"><b>How the order works.</b> Steps run high-yield → niche '
         '(the topic asked most often comes first). Inside each step, techniques are tiered '
         '<b>Core</b> (appears in 3+ questions), <b>Build</b> (2), <b>A★</b> (a one-off that '
