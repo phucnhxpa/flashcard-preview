@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESAT 22 May — Q6 Mean age with new members</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+/* fixed 2-col desktop grid so display maths never overflows */
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">ESAT · Maths 1 · 22 May 2026 · Harry Williams</div>
+  <h1>Q6 · Mean age when two members join</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The mean age of the twenty members of a running club is exactly 28. The mean age increases by exactly 2 years when two new members join. What is the mean age of the two new members?</p><p>A. 20 years &nbsp;&nbsp; B. 22 years &nbsp;&nbsp; C. 30 years &nbsp;&nbsp; D. 40 years &nbsp;&nbsp; E. 50 years &nbsp;&nbsp; F. 52 years</p>
+    
+    <p class="q-marks">[1 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[1 marks] · 4 steps</span></h2>
+  <div class="given">algebra-only; no diagram needed. The only tool is the mean identity $\bar{x}=\dfrac{\text{sum}}{\text{count}}$, rearranged to sum $=\text{mean}\times\text{count}$. Harry&rsquo;s scaffold: read the question one sentence at a time and turn each into a total $\Sigma$. Two facts must be extracted before any arithmetic: the new mean is $28+2=30$ (it &lsquo;increases by 2&rsquo;) and the new count is $20+2=22$ (two members join).</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">original sum</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Convert the first sentence, &lsquo;mean of 20 members is 28&rsquo;, into the total age of those 20 members.</p><p class="formula-lab">Formula</p>$$\bar{x}=\dfrac{\Sigma}{n}\;\Leftrightarrow\;\Sigma=\bar{x}\times n.$$<p class="formula-lab">Substitute $\bar{x}=28,\;n=20$</p>$$\Sigma_{1}=28\times20=560.$$<div class="why"><strong>Technique (one equation per sentence).</strong> Don&rsquo;t try to handle the whole problem at once. &lsquo;Mean of 20 is 28&rsquo; becomes exactly one equation, $\Sigma_1=560$ — a single concrete number to carry forward.</div><p class="sense">Sense check. $560$ years shared by $20$ people averages $\tfrac{560}{20}=28$ — consistent with the statement.</p>
+      
+      <div class="step-result">$\Sigma_{1}=560$ years (20 members).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $\Sigma_{1}=560$. New mean $=30$, new count $=22$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">new sum</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Convert the post-join situation. The mean rises by 2 to 30, and the count rises by 2 to 22.</p><p class="formula-lab">Substitute (new mean 30, new count 22)</p>$$\Sigma_{2}=30\times22=660.$$<div class="why"><strong>Common trap (update the count).</strong> Use $n=22$, not $20$, and mean $=30$, not $28$. Writing $\Sigma/20=30$ gives $\Sigma=600$, extra $=40$, mean $=20$ (Option&nbsp;A) — a deliberate distractor that hits two mistakes at once.</div><p class="sense">Sense check. $660>560$: adding two members must increase the total age.</p>
+      
+      <div class="step-result">$\Sigma_{2}=660$ years (22 members).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 3: $\Sigma_{1}=560$, $\Sigma_{2}=660$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">new-member sum</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The combined age of just the two new members is whatever the total had to rise by, i.e. the difference of the two totals.</p><p class="formula-lab">New members&rsquo; total = rise in $\Sigma$</p>$$\Sigma_{\text{new}}=\Sigma_{2}-\Sigma_{1}=660-560=100.$$<p class="sense">Sense check. The 20 original members contribute the same $560$ years in both clubs, so the entire increase of $100$ years is due to the two newcomers — $100$ years for two people is plausible (each around $50$).</p>
+      
+      <div class="step-result">$\Sigma_{\text{new}}=100$ years (two members).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 4: $\Sigma_{\text{new}}=100$ years for two members.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">their mean</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Divide the two new members&rsquo; total by their count, $2$, to get their mean age.</p><p class="formula-lab">Mean of the two new members</p>$$\bar{x}_{\text{new}}=\dfrac{\Sigma_{\text{new}}}{2}=\dfrac{100}{2}=50.$$<div class="why"><strong>Full re-check.</strong> Recombine all 22 members: $\dfrac{\Sigma_1+\Sigma_{\text{new}}}{22}=\dfrac{560+100}{22}=\dfrac{660}{22}=30$ — exactly the stated new mean, so $50$ is consistent end-to-end.</div><div class="why"><strong>Common trap (why 50, not 30).</strong> Option&nbsp;C ($30$ years) is the new club mean, not the new members&rsquo; mean. Two people pulling the average <em>up</em> must be older than the new mean of $30$ — and they are, at $50$ each.</div><div class="why"><strong>Exam pace.</strong> Two &lsquo;sum = mean × count&rsquo; lines ($560$, $660$), a subtraction, and a halving — a $\approx30$ s question once each sentence is turned into a $\Sigma$.</div><p class="sense">Sense check. Two members averaging $50$ are well above the club mean, which is what raises a 20-person average of $28$ up to $30$. Confirms Option&nbsp;E.</p>
+      
+      <div class="step-result">$\boxed{\bar{x}_{\text{new}}=50\text{ years}}$ — Option&nbsp;E.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

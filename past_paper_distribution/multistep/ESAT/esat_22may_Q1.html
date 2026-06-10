@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESAT 22 May — Q1 Semicircle-in-square area</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+/* fixed 2-col desktop grid so display maths never overflows */
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">ESAT · Maths 1 · 22 May 2026 · Harry Williams</div>
+  <h1>Q1 · Semicircle-in-square area</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A square piece of metal has a semi-circular piece cut out of it as shown. The area of the remaining metal is 100&nbsp;cm². The semicircle&rsquo;s diameter equals the full side of the square [diagram not to scale].</p><p><strong>Which one of the following is a correct expression for the length of the side of the square in centimetres?</strong></p><p>A. $20\sqrt{\dfrac{2}{8-\pi}}$ &nbsp;&nbsp; B. $10\sqrt{\dfrac{2}{4-\pi}}$ &nbsp;&nbsp; C. $20\sqrt{\dfrac{2}{8+\pi}}$ &nbsp;&nbsp; D. $10\sqrt{\dfrac{1}{8-\pi}}$ &nbsp;&nbsp; E. $10\sqrt{\dfrac{1}{4-\pi}}$</p>
+    <div class="q-diagram">
+<svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Square with a semicircular notch cut from the right edge">
+  <!-- remaining metal: square minus semicircle, shaded -->
+  <path d="M40,30 H200 V70 A60,60 0 0 0 200,130 V170 H40 Z" fill="#ececef" stroke="#1d1d1f" stroke-width="1.6"/>
+  <!-- semicircle boundary (the cut) -->
+  <path d="M200,70 A60,60 0 0 0 200,130" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <!-- diameter line of the semicircle (along the right edge) -->
+  <line x1="200" y1="70" x2="200" y2="130" stroke="#6e6e73" stroke-width="1"/>
+  <!-- radius marker -->
+  <line x1="200" y1="100" x2="140" y2="100" stroke="#6e6e73" stroke-width="1"/>
+  <circle cx="200" cy="100" r="2" fill="#1d1d1f"/>
+  <text x="165" y="95" font-size="12" fill="#6e6e73" font-style="italic">r = m/2</text>
+  <!-- side labels m -->
+  <text x="116" y="22" font-size="13" fill="#1d1d1f" font-style="italic">m</text>
+  <text x="22" y="104" font-size="13" fill="#1d1d1f" font-style="italic">m</text>
+  <text x="116" y="190" font-size="13" fill="#1d1d1f" font-style="italic">m</text>
+  <!-- area label -->
+  <text x="78" y="105" font-size="12" fill="#6e6e73">area 100</text>
+</svg>
+</div>
+    <p class="q-marks">[1 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[1 marks] · 5 steps</span></h2>
+  <div class="given">Let the side of the square be $m$. The semicircle&rsquo;s diameter lies along one full edge, so its radius is $r=\dfrac{m}{2}$. Target form: all options are in $m$ (not $r$), so substitute $r=m/2$ from the start.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal">set up</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Remaining metal = area of square − area of the semicircle. Write the full semicircle formula first, then substitute $r=m/2$.</p><p class="formula-lab">Formula</p>$$A_{\text{square}}-A_{\text{semicircle}}=100,\qquad A_{\text{semicircle}}=\tfrac{1}{2}\pi r^{2}.$$<p class="formula-lab">Substitute $r=m/2$</p>$$m^{2}-\tfrac{1}{2}\pi\!\left(\tfrac{m}{2}\right)^{2}=100.$$<div class="why"><strong>Phuc's mistake (≈08:00).</strong> Phuc first wrote $m^{2}-\pi r^{2}=100$, using the full-circle area and dropping the $\tfrac12$. Harry red-boxed it. A semicircle is half a circle: its area is $\tfrac12\pi r^{2}$, never $\pi r^{2}$.</div><p class="sense">Sense check. The subtracted region is a half-disc, so the coefficient is $\tfrac12$; the equation balances area (cm²) on both sides.</p>
+      
+      <div class="step-result">Equation: $m^{2}-\tfrac{1}{2}\pi\left(\tfrac{m}{2}\right)^{2}=100$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $m^{2}-\tfrac{1}{2}\pi\left(\tfrac{m}{2}\right)^{2}=100$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal">expand</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Square the bracket and simplify the $\pi$ term so the equation contains a single $m^{2}$ coefficient.</p><p class="formula-lab">Expand</p>$$m^{2}-\tfrac{1}{2}\pi\cdot\dfrac{m^{2}}{4}=100$$$$m^{2}-\dfrac{\pi m^{2}}{8}=100.$$<p class="sense">Sense check. $\left(\tfrac{m}{2}\right)^{2}=\tfrac{m^2}{4}$ and $\tfrac12\cdot\tfrac14=\tfrac18$, so the $\pi$-term denominator is $8$ — this $8$ is what later appears in the answer.</p>
+      
+      <div class="step-result">$m^{2}-\dfrac{\pi m^{2}}{8}=100$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 3: $m^{2}-\dfrac{\pi m^{2}}{8}=100$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal">factor</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Factor $m^{2}$ out of the left side and combine the bracket over a common denominator of $8$.</p><p class="formula-lab">Factorise</p>$$m^{2}\!\left(1-\dfrac{\pi}{8}\right)=100$$$$m^{2}\cdot\dfrac{8-\pi}{8}=100.$$<div class="why"><strong>Technique.</strong> Factor before expanding numerically — keeps the algebra compact (Harry, technique #8). The bracket $1-\tfrac{\pi}{8}=\tfrac{8-\pi}{8}$ is the key combine.</div><p class="sense">Sense check. $8-\pi\approx4.86>0$, so $m^{2}>0$ — consistent with a real square.</p>
+      
+      <div class="step-result">$m^{2}\cdot\dfrac{8-\pi}{8}=100$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 4: $m^{2}\cdot\dfrac{8-\pi}{8}=100$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal">solve m^2</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Multiply both sides by $\dfrac{8}{8-\pi}$ to isolate $m^{2}$.</p><p class="formula-lab">Rearrange</p>$$m^{2}=\dfrac{100\times 8}{8-\pi}=\dfrac{800}{8-\pi}.$$<p class="sense">Sense check. Numerically $m^{2}\approx 800/4.86\approx165$, so $m\approx12.8$ cm — a sensible side length for a $100$ cm² remainder.</p>
+      
+      <div class="step-result">$m^{2}=\dfrac{800}{8-\pi}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 5: $m^{2}=\dfrac{800}{8-\pi}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal">surd form</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Take the positive square root and simplify $\sqrt{800}$ to match the option format.</p><p class="formula-lab">Square root + simplify</p>$$m=\sqrt{\dfrac{800}{8-\pi}}=\dfrac{\sqrt{800}}{\sqrt{8-\pi}}$$$$\sqrt{800}=\sqrt{400\times2}=20\sqrt{2}$$$$m=\dfrac{20\sqrt{2}}{\sqrt{8-\pi}}=20\sqrt{\dfrac{2}{8-\pi}}.$$<div class="why"><strong>Common trap.</strong> Options with $4-\pi$ in the denominator come from omitting the $\tfrac12$ (the full-circle slip); the coefficient $10$ comes from mis-simplifying $\sqrt{800}$. Eliminate $8+\pi$ by sign: a larger denominator would give a smaller area, contradicting &lsquo;cut out&rsquo;.</div><p class="sense">Sense check. $20\sqrt{2/(8-\pi)}\approx20\sqrt{0.412}\approx12.8$ cm — matches the Step&nbsp;4 estimate, confirming Option&nbsp;A.</p>
+      
+      <div class="step-result">$\boxed{m=20\sqrt{\dfrac{2}{8-\pi}}}$ — Option&nbsp;A.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

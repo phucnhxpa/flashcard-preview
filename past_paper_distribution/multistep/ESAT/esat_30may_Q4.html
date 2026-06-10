@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESAT 30 May — Q4 Similar-triangle quadratic</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+/* fixed 2-col desktop grid so display maths never overflows */
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">ESAT · Maths 1 · 30 May 2026 · Harry Williams</div>
+  <h1>Q4 · Similar triangles giving a quadratic in x</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A shape is formed by drawing a triangle $ABC$ inside the triangle $ADE$. $BC$ is parallel to $DE$. $AB=4$ cm, $BC=x$ cm, $DE=(x+3)$ cm, $DB=(x-4)$ cm [diagram not to scale]. What is the length of $DE$ in cm?</p><p>A. $5$ &nbsp;&nbsp; B. $7$ &nbsp;&nbsp; C. $9$ &nbsp;&nbsp; D. $4+2\sqrt7$ &nbsp;&nbsp; E. $7+2\sqrt7$</p>
+    <div class="q-diagram">
+<svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle ABC inside triangle ADE with BC parallel to DE">
+  <!-- big triangle ADE: A top, D bottom-left, E bottom-right -->
+  <polygon points="140,25 40,190 250,190" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <!-- inner triangle ABC: B on AD, C on AE, BC parallel DE -->
+  <!-- B at ~ (100,93), C at ~ (188,93) -->
+  <line x1="100" y1="93" x2="188" y2="93" stroke="#1d1d1f" stroke-width="1.5"/>
+  <!-- vertex labels -->
+  <text x="135" y="20" font-size="13" fill="#1d1d1f">A</text>
+  <text x="88" y="92" font-size="12" fill="#1d1d1f">B</text>
+  <text x="192" y="92" font-size="12" fill="#1d1d1f">C</text>
+  <text x="30" y="200" font-size="13" fill="#1d1d1f">D</text>
+  <text x="252" y="200" font-size="13" fill="#1d1d1f">E</text>
+  <!-- side labels -->
+  <text x="104" y="62" font-size="11" fill="#6e6e73">4</text>
+  <text x="138" y="88" font-size="11" fill="#6e6e73 " font-style="italic">x</text>
+  <text x="60" y="150" font-size="11" fill="#6e6e73" font-style="italic">x−4</text>
+  <text x="135" y="206" font-size="11" fill="#6e6e73" font-style="italic">x+3</text>
+  <!-- parallel marks -->
+  <polyline points="142,89 146,93 142,97" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="142,186 146,190 142,194" fill="none" stroke="#6e6e73" stroke-width="1"/>
+</svg>
+</div>
+    <p class="q-marks">[1 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[1 marks] · 4 steps</span></h2>
+  <div class="given">Because $BC\parallel DE$, triangles $ABC$ and $ADE$ share angle $A$ and have equal corresponding angles, so $\triangle ABC\sim\triangle ADE$ (AA). First express the full side $AD=AB+BD=4+(x-4)=x$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">proportion</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Set up the similar-triangle proportion of corresponding sides, using $AD=x$.</p><p class="formula-lab">Find $AD$ first</p>$$AD=AB+BD=4+(x-4)=x.$$<p class="formula-lab">Similar-triangle ratio (AA)</p>$$\dfrac{AB}{AD}=\dfrac{BC}{DE}\;\Rightarrow\;\dfrac{4}{x}=\dfrac{x}{x+3}.$$<div class="why"><strong>Common trap (compute AD).</strong> $AD$ is the <em>whole</em> side, $AB+BD=x$, not just $4$. Pairing $AB$ with $AD$ and $BC$ with $DE$ keeps small-with-large consistent.</div><p class="sense">Sense check. Both ratios are &lsquo;small side over large side&rsquo;, so the proportion is set up consistently.</p>
+      <div class="step-diagram">
+<svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle ABC inside triangle ADE with BC parallel to DE">
+  <!-- big triangle ADE: A top, D bottom-left, E bottom-right -->
+  <polygon points="140,25 40,190 250,190" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <!-- inner triangle ABC: B on AD, C on AE, BC parallel DE -->
+  <!-- B at ~ (100,93), C at ~ (188,93) -->
+  <line x1="100" y1="93" x2="188" y2="93" stroke="#1d1d1f" stroke-width="1.5"/>
+  <!-- vertex labels -->
+  <text x="135" y="20" font-size="13" fill="#1d1d1f">A</text>
+  <text x="88" y="92" font-size="12" fill="#1d1d1f">B</text>
+  <text x="192" y="92" font-size="12" fill="#1d1d1f">C</text>
+  <text x="30" y="200" font-size="13" fill="#1d1d1f">D</text>
+  <text x="252" y="200" font-size="13" fill="#1d1d1f">E</text>
+  <!-- side labels -->
+  <text x="104" y="62" font-size="11" fill="#6e6e73">4</text>
+  <text x="138" y="88" font-size="11" fill="#6e6e73 " font-style="italic">x</text>
+  <text x="60" y="150" font-size="11" fill="#6e6e73" font-style="italic">x−4</text>
+  <text x="135" y="206" font-size="11" fill="#6e6e73" font-style="italic">x+3</text>
+  <!-- parallel marks -->
+  <polyline points="142,89 146,93 142,97" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="142,186 146,190 142,194" fill="none" stroke="#6e6e73" stroke-width="1"/>
+</svg>
+</div>
+      <div class="step-result">$\dfrac{4}{x}=\dfrac{x}{x+3}$, with $AD=x$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $\dfrac{4}{x}=\dfrac{x}{x+3}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">quadratic</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Cross-multiply to clear the fractions and rearrange into a standard quadratic.</p><p class="formula-lab">Cross-multiply</p>$$4(x+3)=x^{2}\;\Rightarrow\;x^{2}=4x+12$$$$x^{2}-4x-12=0.$$<p class="sense">Sense check. A quadratic with integer coefficients — the clean-integer answers in the options suggest it factorises.</p>
+      
+      <div class="step-result">$x^{2}-4x-12=0$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 3: $x^{2}-4x-12=0$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">factorise</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Factorise by the product–sum method: two numbers multiplying to $-12$ and summing to $-4$.</p><p class="formula-lab">Product $=-12$, sum $=-4$</p>$$2\times(-6)=-12,\quad 2+(-6)=-4\;\Rightarrow\;(x+2)(x-6)=0.$$<p class="formula-lab">Roots</p>$$x=-2\ (\text{rejected, length}>0)\quad\text{or}\quad x=6.$$<div class="why"><strong>Technique (manual factoring).</strong> For clean-integer ESAT quadratics the product–sum table is faster than the formula. Reject $x=-2$ because a length cannot be negative.</div><p class="sense">Sense check. $x=6$ is positive, so $BC=6$, $BD=2$, $AD=6$ — all valid lengths.</p>
+      
+      <div class="step-result">$x=6$ (taking the positive root).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 4: $x=6$; and $DE=x+3$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">find DE</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Substitute $x=6$ into $DE=x+3$ to answer the actual question (DE, not x).</p><p class="formula-lab">Substitute</p>$$DE=x+3=6+3=9\text{ cm}.$$<p class="sense">Sense check. Check the ratio: $\dfrac{AB}{AD}=\dfrac{4}{6}=\dfrac23$ and $\dfrac{BC}{DE}=\dfrac{6}{9}=\dfrac23$ — equal, so the similarity holds. Confirms Option&nbsp;C.</p>
+      
+      <div class="step-result">$\boxed{DE=9\text{ cm}}$ — Option&nbsp;C.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

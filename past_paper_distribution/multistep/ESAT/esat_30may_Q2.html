@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESAT 30 May — Q2 Sphere-in-cylinder volume fraction</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+/* fixed 2-col desktop grid so display maths never overflows */
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="meta">ESAT · Maths 1 · 30 May 2026 · Harry Williams</div>
+  <h1>Q2 · Fraction of a cylinder filled by an inscribed sphere</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A solid sphere of radius $r$ fits inside a hollow cylinder. The cylinder has the same internal diameter and length as the diameter of the sphere. The volume of a sphere is $\tfrac{4}{3}\pi r^{3}$, where $r$ is the radius of the sphere. What fraction of the space inside the cylinder is taken up by the sphere?</p><p>A. $\dfrac14$ &nbsp;&nbsp; B. $\dfrac13$ &nbsp;&nbsp; C. $\dfrac12$ &nbsp;&nbsp; D. $\dfrac23$ &nbsp;&nbsp; E. $\dfrac34$</p>
+    <div class="q-diagram">
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sphere fitting snugly inside a cylinder of height 2r">
+  <!-- cylinder body -->
+  <line x1="55" y1="45" x2="55" y2="195" stroke="#1d1d1f" stroke-width="1.6"/>
+  <line x1="145" y1="45" x2="145" y2="195" stroke="#1d1d1f" stroke-width="1.6"/>
+  <ellipse cx="100" cy="45" rx="45" ry="15" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <path d="M55,195 A45,15 0 0 0 145,195" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <path d="M55,195 A45,15 0 0 1 145,195" fill="none" stroke="#6e6e73" stroke-width="1" stroke-dasharray="3 3"/>
+  <!-- inscribed sphere -->
+  <circle cx="100" cy="120" r="45" fill="#ececef" stroke="#1d1d1f" stroke-width="1.4"/>
+  <ellipse cx="100" cy="120" rx="45" ry="14" fill="none" stroke="#6e6e73" stroke-width="0.9" stroke-dasharray="3 3"/>
+  <!-- radius marker on sphere -->
+  <line x1="100" y1="120" x2="145" y2="120" stroke="#6e6e73" stroke-width="1"/>
+  <text x="116" y="115" font-size="12" fill="#6e6e73" font-style="italic">r</text>
+  <!-- height label 2r -->
+  <line x1="170" y1="45" x2="170" y2="195" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="167,52 170,45 173,52" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="167,188 170,195 173,188" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <text x="176" y="124" font-size="12" fill="#1d1d1f" font-style="italic">2r</text>
+  <!-- diameter label 2r -->
+  <text x="84" y="30" font-size="12" fill="#1d1d1f" font-style="italic">2r</text>
+</svg>
+</div>
+    <p class="q-marks">[1 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[1 marks] · 3 steps</span></h2>
+  <div class="given">The sphere has radius $r$, so its diameter is $2r$. The cylinder shares that diameter and length, so the cylinder has radius $r$ and height $h=2r$. Given $V_{\text{sphere}}=\tfrac43\pi r^{3}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">cylinder volume</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Compute the cylinder volume using $h=2r$ — the height equals the sphere&rsquo;s diameter, not its radius.</p><p class="formula-lab">Formula</p>$$V_{\text{cyl}}=\pi r^{2}h.$$<p class="formula-lab">Substitute $h=2r$</p>$$V_{\text{cyl}}=\pi r^{2}\times2r=2\pi r^{3}.$$<div class="why"><strong>Common trap (height is 2r).</strong> The cylinder length equals the sphere&rsquo;s <em>diameter</em> $2r$, not its radius. Using $h=r$ gives $V_{\text{cyl}}=\pi r^{3}$ and a fraction of $\tfrac43>1$ — impossible, which is the tell-tale of this slip.</div><p class="sense">Sense check. $2\pi r^{3}>\tfrac43\pi r^{3}$, so the cylinder is larger than the sphere — the fraction must be below 1.</p>
+      <div class="step-diagram">
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sphere fitting snugly inside a cylinder of height 2r">
+  <!-- cylinder body -->
+  <line x1="55" y1="45" x2="55" y2="195" stroke="#1d1d1f" stroke-width="1.6"/>
+  <line x1="145" y1="45" x2="145" y2="195" stroke="#1d1d1f" stroke-width="1.6"/>
+  <ellipse cx="100" cy="45" rx="45" ry="15" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <path d="M55,195 A45,15 0 0 0 145,195" fill="none" stroke="#1d1d1f" stroke-width="1.6"/>
+  <path d="M55,195 A45,15 0 0 1 145,195" fill="none" stroke="#6e6e73" stroke-width="1" stroke-dasharray="3 3"/>
+  <!-- inscribed sphere -->
+  <circle cx="100" cy="120" r="45" fill="#ececef" stroke="#1d1d1f" stroke-width="1.4"/>
+  <ellipse cx="100" cy="120" rx="45" ry="14" fill="none" stroke="#6e6e73" stroke-width="0.9" stroke-dasharray="3 3"/>
+  <!-- radius marker on sphere -->
+  <line x1="100" y1="120" x2="145" y2="120" stroke="#6e6e73" stroke-width="1"/>
+  <text x="116" y="115" font-size="12" fill="#6e6e73" font-style="italic">r</text>
+  <!-- height label 2r -->
+  <line x1="170" y1="45" x2="170" y2="195" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="167,52 170,45 173,52" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <polyline points="167,188 170,195 173,188" fill="none" stroke="#6e6e73" stroke-width="1"/>
+  <text x="176" y="124" font-size="12" fill="#1d1d1f" font-style="italic">2r</text>
+  <!-- diameter label 2r -->
+  <text x="84" y="30" font-size="12" fill="#1d1d1f" font-style="italic">2r</text>
+</svg>
+</div>
+      <div class="step-result">$V_{\text{cyl}}=2\pi r^{3}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $V_{\text{cyl}}=2\pi r^{3}$; given $V_{\text{sphere}}=\tfrac43\pi r^{3}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">form fraction</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Form the ratio of sphere volume to cylinder volume and cancel the common factor $\pi r^{3}$ before any arithmetic.</p><p class="formula-lab">Set up</p>$$\text{fraction}=\dfrac{V_{\text{sphere}}}{V_{\text{cyl}}}=\dfrac{\tfrac43\pi r^{3}}{2\pi r^{3}}.$$<p class="formula-lab">Cancel $\pi r^{3}$</p>$$=\dfrac{4/3}{2}.$$<div class="why"><strong>Technique (cancel early).</strong> Cancel the common $\pi r^{3}$ immediately — the answer is independent of $r$, so carrying it is wasted effort and a rounding risk.</div><p class="sense">Sense check. Cancelling leaves a pure number, confirming the fraction does not depend on $r$.</p>
+      
+      <div class="step-result">$\text{fraction}=\dfrac{4/3}{2}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 3: $\text{fraction}=\dfrac{4/3}{2}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">divide</span></span>
+      
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Divide the fractions with the &lsquo;burger method&rsquo; (multiply by the reciprocal).</p><p class="formula-lab">Burger method: $\dfrac{a/b}{c}=\dfrac{a}{bc}$</p>$$\dfrac{4/3}{2}=\dfrac43\times\dfrac12=\dfrac46=\dfrac23.$$<p class="sense">Sense check. $\tfrac23\approx0.67<1$ — the sphere fills two-thirds of the cylinder, Archimedes&rsquo; classical result. Confirms Option&nbsp;D.</p>
+      
+      <div class="step-result">$\boxed{\text{fraction}=\dfrac23}$ — Option&nbsp;D (Archimedes).</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
