@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reading Resistance off a Non-Ohmic Graph (Tutor Q5a)</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL Physics · Unit 2 (WPH12) · I–V Characteristics · Topic 2.4 · Worked Example 1 (tutor lesson, Q5a)</div>
+  <h1>Tutor Q — Resistance of a non-ohmic component at a point</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A non-ohmic component has the curved I–V characteristic shown. Using the graph, find the resistance of the component when the current through it is $I = 40\ \text{mA}$.</p><p><strong>(a)</strong> Read the corresponding p.d. from the graph and state the correct defining relation for resistance. <strong>[2 marks]</strong><br><strong>(b)</strong> Hence calculate the resistance at this point. <strong>[2 marks]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" font-size="12"><defs><marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#1d1d1f"/></marker></defs><line x1="50" y1="200" x2="320" y2="200" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><line x1="50" y1="200" x2="50" y2="25" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><text x="320" y="222" text-anchor="middle" font-style="italic">V / V</text><text x="28" y="30" text-anchor="middle" font-style="italic">I / mA</text><path d="M 50 200 Q 150 198 210 150 T 300 50" fill="none" stroke="#1d1d1f" stroke-width="2"/><circle cx="228" cy="120" r="4" fill="#1d1d1f"/><line x1="50" y1="120" x2="228" y2="120" stroke="#8e8e93" stroke-width="1" stroke-dasharray="4,3"/><line x1="228" y1="200" x2="228" y2="120" stroke="#8e8e93" stroke-width="1" stroke-dasharray="4,3"/><text x="44" y="124" text-anchor="end" fill="#6e6e73">40</text><text x="228" y="214" text-anchor="middle" fill="#6e6e73">0.70</text><text x="240" y="112" fill="#6e6e73">(0.70 V, 40 mA)</text></svg></div>
+    <p class="q-marks">[4 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — read the point & state R = V/I <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">B1 B1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Read the operating point</strong> from the graph at $I = 40\ \text{mA}$:</p><p>$$V = 0.70\ \text{V}, \qquad I = 40\ \text{mA}$$</p><p><strong>Defining relation (true for ANY component, ohmic or not):</strong></p><p>$$R = \dfrac{V}{I}$$</p><div class="why"><strong>Common trap (gradient):</strong> the graph is <em>curved</em> (non-ohmic), so you must NOT use the gradient of the curve to get $R$. Read $V$ and $I$ at the actual point and divide.</div>
+      
+      <div class="step-result">$V = 0.70\ \text{V}$ at $I = 40\ \text{mA}$; use $R = V/I$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — compute R <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in from (a):</strong> at the operating point $V = 0.70\ \text{V}$ and $I = 40\ \text{mA} = 40\times10^{-3}\ \text{A}$; use $R = V/I$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $V = 0.70\ \text{V}$, $I = 40\ \text{mA} = 0.040\ \text{A}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Convert the current to base SI units first:</strong></p><p>$$I = 40\ \text{mA} = 40\times10^{-3}\ \text{A} = 0.040\ \text{A}$$</p><p><strong>Substitute into</strong> $R = V/I$:</p><p>$$R = \dfrac{0.70}{0.040} = 17.5\ \Omega$$</p><div class="why"><strong>Phuc's slip (lesson video 1, 44:01):</strong> he wrote $R = I\times V = 0.040\times0.70 = 0.028\ \Omega$ — the wrong formula. Marta corrected it: resistance is the <em>quotient</em> $V\div I$, never the product $IV$.</div><div class="why"><strong>Unit check:</strong> $\text{V}/\text{A} = \Omega$ ✓</div>
+      
+      <div class="step-result">$R = 17.5\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
