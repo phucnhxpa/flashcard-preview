@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thermistor — Resistance from I–V Data</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL Physics · Unit 2 (WPH12) · Thermistors, LDRs & Semiconductor Conduction · Worked Example 1</div>
+  <h1>Q — Resistance of a thermistor at two operating points</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A thermistor carries a current of $3.00\ \text{mA}$ when a p.d. of $3.00\ \text{V}$ is applied, and a current of $16.25\ \text{mA}$ when $7.00\ \text{V}$ is applied.</p><p><strong>(a)</strong> Calculate the resistance at $V = 3.00\ \text{V}$. <strong>[2 marks]</strong><br><strong>(b)</strong> Calculate the resistance at $V = 7.00\ \text{V}$. <strong>[2 marks]</strong><br><strong>(c)</strong> Explain, using $I = nqvA$, why the resistance changed. <strong>[3 marks]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 360 250" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" font-size="12"><defs><marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#1d1d1f"/></marker></defs><line x1="30" y1="125" x2="345" y2="125" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><line x1="187" y1="225" x2="187" y2="20" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><text x="338" y="145" font-style="italic">V / V</text><text x="197" y="28" font-style="italic">I / mA</text><line x1="70" y1="195" x2="305" y2="55" stroke="#8e8e93" stroke-width="1.2" stroke-dasharray="5,4"/><text x="300" y="70" text-anchor="end" fill="#6e6e73" font-size="11">ohmic (dashed)</text><path d="M 70 175 C 140 150, 175 132, 187 125 C 200 118, 235 90, 305 40" fill="none" stroke="#1d1d1f" stroke-width="2"/><text x="95" y="205" fill="#6e6e73" font-size="11">solid: thermistor</text></svg></div>
+    <p class="q-marks">[7 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — resistance at 3.00 V <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (definition of resistance):</strong></p><p>$$R = \dfrac{V}{I}$$</p><p><strong>Convert</strong> $I = 3.00\ \text{mA} = 3.00\times10^{-3}\ \text{A}$, then <strong>substitute</strong> $V = 3.00\ \text{V}$:</p><p>$$R = \dfrac{3.00}{3.00\times10^{-3}} = 1000\ \Omega$$</p><div class="why"><strong>Trap:</strong> it is $R = V/I$, never $R = IV$. And convert mA to A first &mdash; $R = 3.00/3.00 = 1\ \Omega$ (forgetting the $10^{-3}$) is a factor-of-1000 error.</div>
+      
+      <div class="step-result">$R = 1000\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — resistance at 7.00 V <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in:</strong> at the higher operating point $V = 7.00\ \text{V}$, $I = 16.25\ \text{mA} = 16.25\times10^{-3}\ \text{A}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $V = 7.00\ \text{V}$, $I = 16.25\times10^{-3}\ \text{A}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula:</strong></p><p>$$R = \dfrac{V}{I}$$</p><p><strong>Substitute</strong> $V = 7.00\ \text{V}$, $I = 16.25\times10^{-3}\ \text{A}$:</p><p>$$R = \dfrac{7.00}{16.25\times10^{-3}} = 431\ \Omega\ (3\ \text{s.f.})$$</p><div class="why"><strong>Note:</strong> the resistance has <em>fallen</em> from $1000\ \Omega$ to $431\ \Omega$ as the voltage (and current, and power) increased.</div>
+      
+      <div class="step-result">$R = 431\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — explain the change (I = nqvA) <span class="pmarks">[3 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in from (a) & (b):</strong> resistance fell from $1000\ \Omega$ to $431\ \Omega$ as the applied p.d. rose from $3.00\ \text{V}$ to $7.00\ \text{V}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $R$ fell $1000 \to 431\ \Omega$ as $V$ (hence power) rose</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">B1 B1 B1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Mark-scheme chain:</strong></p><p>1. Higher p.d. dissipates more power $P = IV$, which <strong>heats</strong> the thermistor.</p><p>2. Thermal energy frees more electrons from the lattice, so the number density $n$ <strong>increases</strong> (approximately exponentially).</p><p>3. In $I = nqvA$, the rise in $n$ <strong>outweighs</strong> the small fall in drift velocity $v$, so $I$ increases for a given $V$ &mdash; hence $R = V/I$ decreases.</p><div class="why"><strong>Mark-scheme keyword:</strong> state explicitly that <em>the increase in $n$ dominates over the decrease in $v$</em>. Missing this comparison is the most common reason for losing the third mark.</div>
+      
+      <div class="step-result">More power &rarr; hotter &rarr; $n\uparrow$ &rarr; $I\uparrow$ &rarr; $R = V/I \downarrow$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
