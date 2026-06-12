@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EMF & Internal Resistance — Lesson Worked Example</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL Physics · Unit 2 (WPH12) · EMF & Internal Resistance · incl. CP8 · Worked Example 1 (lesson, 7 Jun)</div>
+  <h1>Lesson Q — Find lost volts, current and internal resistance</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>A battery has e.m.f. $\varepsilon = 12.5\ \text{V}$ and is connected to a single external resistor $R = 20.0\ \Omega$. The terminal p.d. across the battery is measured as $V = 12.0\ \text{V}$.</p><p><strong>(a)</strong> Find the lost volts $V_r$. <strong>[1 mark]</strong><br><strong>(b)</strong> Find the current $I$ in the circuit. <strong>[2 marks]</strong><br><strong>(c)</strong> Hence find the internal resistance $r$. <strong>[2 marks]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 380 250" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" font-size="13"><defs><marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#1d1d1f"/></marker></defs><rect x="20" y="30" width="170" height="70" fill="none" stroke="#8e8e93" stroke-dasharray="5,4" rx="6"/><text x="105" y="24" text-anchor="middle" font-style="italic" fill="#6e6e73">battery</text><line x1="55" y1="55" x2="55" y2="75" stroke="#1d1d1f" stroke-width="2.5"/><line x1="65" y1="48" x2="65" y2="82" stroke="#1d1d1f" stroke-width="1.5"/><text x="60" y="115" text-anchor="middle" font-style="italic">&#949;</text><rect x="110" y="55" width="48" height="20" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><text x="134" y="48" text-anchor="middle" font-style="italic">r</text><line x1="65" y1="65" x2="110" y2="65" stroke="#1d1d1f" stroke-width="1.5"/><line x1="158" y1="65" x2="190" y2="65" stroke="#1d1d1f" stroke-width="1.5"/><line x1="190" y1="65" x2="190" y2="30" stroke="#1d1d1f" stroke-width="1.5"/><line x1="190" y1="30" x2="250" y2="30" stroke="#1d1d1f" stroke-width="1.5"/><circle cx="270" cy="30" r="14" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><text x="270" y="35" text-anchor="middle">A</text><line x1="284" y1="30" x2="340" y2="30" stroke="#1d1d1f" stroke-width="1.5"/><line x1="340" y1="30" x2="340" y2="95" stroke="#1d1d1f" stroke-width="1.5"/><rect x="325" y="95" width="30" height="60" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><text x="368" y="128" text-anchor="middle" font-style="italic">R</text><line x1="340" y1="155" x2="340" y2="210" stroke="#1d1d1f" stroke-width="1.5"/><line x1="340" y1="210" x2="55" y2="210" stroke="#1d1d1f" stroke-width="1.5"/><line x1="55" y1="210" x2="55" y2="75" stroke="#1d1d1f" stroke-width="1.5"/><line x1="300" y1="125" x2="300" y2="180" stroke="#8e8e93" stroke-width="1.2"/><line x1="300" y1="125" x2="340" y2="125" stroke="#8e8e93" stroke-width="1.2"/><line x1="300" y1="180" x2="340" y2="180" stroke="#8e8e93" stroke-width="1.2"/><circle cx="300" cy="152" r="13" fill="#fff" stroke="#8e8e93" stroke-width="1.2"/><text x="300" y="157" text-anchor="middle" fill="#6e6e73">V</text><line x1="210" y1="30" x2="234" y2="30" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><text x="222" y="20" text-anchor="middle" font-style="italic">I</text></svg></div>
+    <p class="q-marks">[5 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — lost volts <span class="pmarks">[1 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">B1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (Kirchhoff's voltage law for the loop):</strong></p><p>$$\varepsilon = V + V_r \quad\Rightarrow\quad V_r = \varepsilon - V$$</p><p><strong>Substitute</strong> $\varepsilon = 12.5\ \text{V}$, $V = 12.0\ \text{V}$:</p><p>$$V_r = 12.5 - 12.0 = 0.5\ \text{V}$$</p><div class="why"><strong>Sign trap:</strong> lost volts are <em>subtracted</em> ($V = \varepsilon - Ir$). Writing $V = \varepsilon + Ir$ is a classic error — internal resistance can only <em>reduce</em> the terminal p.d.</div>
+      
+      <div class="step-result">$V_r = 0.5\ \text{V}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — current <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in from (a):</strong> $\varepsilon = 12.5\ \text{V}$, $V = 12.0\ \text{V}$, lost volts $V_r = 0.5\ \text{V}$. The terminal p.d. $V = 12.0\ \text{V}$ is across the only external component, $R = 20.0\ \Omega$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $V = 12.0\ \text{V}$ is the p.d. across $R = 20.0\ \Omega$ (the only external load)</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (Ohm's law for the load):</strong></p><p>$$V = IR \quad\Rightarrow\quad I = \dfrac{V}{R}$$</p><p><strong>Substitute</strong> $V = 12.0\ \text{V}$, $R = 20.0\ \Omega$:</p><p>$$I = \dfrac{12.0}{20.0} = 0.60\ \text{A}$$</p><div class="why"><strong>Phuc's slip (lesson 52:19):</strong> he stated “resistance equals $V$ divided by $I$” before rearranging. Use the “Very Itchy Rash” order $V=IR$: cover what you want, so $I = V/R$ (not $R = IV$). The terminal p.d. sits across $R$ because $R$ is the only external component (lesson 50:04).</div>
+      
+      <div class="step-result">$I = 0.60\ \text{A}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — internal resistance <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in from (a) & (b):</strong> $\varepsilon = 12.5\ \text{V}$, $R = 20.0\ \Omega$, current $I = 0.60\ \text{A}$, lost volts $V_r = 0.5\ \text{V}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $I = 0.60\ \text{A}$, $V_r = \varepsilon - V = 0.5\ \text{V}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (e.m.f. in current form):</strong></p><p>$$\varepsilon = IR + Ir \quad\Rightarrow\quad Ir = \varepsilon - IR$$</p><p><strong>Substitute</strong> $\varepsilon = 12.5$, $I = 0.60$, $R = 20.0$:</p><p>$$Ir = 12.5 - (0.60)(20.0) = 12.5 - 12.0 = 0.5\ \text{V}$$</p><p>$$r = \dfrac{Ir}{I} = \dfrac{0.5}{0.60} = 0.83\ \Omega\ (2\ \text{s.f.})$$</p><div class="why"><strong>Phuc's confusion (lesson 53:33):</strong> he asked “is the large $R$ the resistance of the battery?”. Capital $R$ is the <em>external</em> $20\ \Omega$ load; lower-case $r$ is the <em>internal</em> resistance. Never swap them.</div><div class="why"><strong>Sense-check:</strong> $V = \varepsilon - Ir = 12.5 - (0.60)(0.83) = 12.0\ \text{V}$ ✓ matches the given terminal p.d.</div>
+      
+      <div class="step-result">$r = 0.83\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
