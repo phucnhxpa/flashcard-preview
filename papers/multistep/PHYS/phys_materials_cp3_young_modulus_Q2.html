@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Micrometer reading, area & percentage uncertainty</title>
+<script>
+window.MathJax = { tex: { inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']], processEscapes:true }, svg:{ fontCache:'global' } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root { --bg:#fff; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --soft:#f5f5f7;
+  --work-bg:#fafafa; --work-line:#c7c7cc; }
+html, body { margin:0; padding:0; background:#f0f0f2; }
+body { font:14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color:var(--ink); -webkit-font-smoothing:antialiased; padding:28px 24px 36px; }
+.card { max-width:1180px; margin:0 auto; background:#fff; border:1px solid var(--line);
+  border-radius:18px; padding:26px 30px 28px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.meta { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+h1 { font:600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif; margin:0 0 16px; letter-spacing:-0.01em; }
+.q-header { background:var(--soft); border-radius:12px; padding:14px 18px; margin-bottom:18px; font-size:13.5px; line-height:1.55; }
+.q-header .label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.q-header p { margin:4px 0; }
+.q-diagram { display:flex; justify-content:center; margin:10px 0 4px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px; }
+.q-diagram svg { width:100%; max-width:360px; height:auto; display:block; }
+.q-marks { font-weight:600; color:var(--ink); margin-top:8px; font-size:12.5px; }
+.part { margin-bottom:18px; }
+.part-h { font:600 14.5px/1.3 -apple-system, system-ui, sans-serif; margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line); }
+.part-h .pmarks { float:right; font-weight:500; color:var(--muted); font-size:12.5px; }
+.given { background:#fff; border-left:2.5px solid var(--ink); padding:6px 10px; margin:0 0 10px; font-size:12.5px; border-radius:0 6px 6px 0; }
+.carry-in { font-size:12px; color:var(--muted); margin:0 0 4px; padding-left:2px; }
+.steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-items:start; }
+@media(max-width:980px){ .steps{ grid-template-columns:1fr; } }
+.step-wrapper { display:flex; flex-direction:column; min-width:0; }
+.step { border:1px solid var(--work-line); background:var(--work-bg); border-radius:10px; padding:12px 14px 11px; margin:0; min-width:0; }
+.step-top { display:flex; align-items:flex-start; justify-content:space-between; gap:6px; margin-bottom:8px; padding-bottom:7px; border-bottom:1px solid var(--line); }
+.step-tag { font:600 12.5px/1.35 -apple-system, system-ui, sans-serif; display:flex; align-items:flex-start; gap:7px; flex:1; }
+.step-num { background:var(--ink); color:#fff; padding:3px 7px; border-radius:5px; letter-spacing:.04em; font-size:10.5px; flex-shrink:0; line-height:1.2; margin-top:1px; }
+.step-marks { font-size:10.5px; color:var(--muted); font-weight:500; flex-shrink:0; letter-spacing:.04em; margin-top:3px; }
+.step-body { font-size:13px; line-height:1.55; min-width:0; }
+.step-body p { margin:5px 0; }
+.step-body .lbl { font-weight:600; }
+.step-body .why { background:#fff; border-left:2px solid var(--ink); padding:5px 9px; margin:7px 0; font-size:12px; color:#3a3a3e; border-radius:0 5px 5px 0; }
+.step-math { margin:7px 0; font-size:13px; }
+.step-diagram { display:flex; justify-content:center; margin:8px 0 6px; }
+.step-diagram svg { max-width:100%; height:auto; }
+.step-result { margin-top:8px; padding:6px 10px; background:#fff; border:1px dashed var(--work-line); border-radius:6px; font-size:12.5px; font-weight:500; }
+.step-result strong { font-weight:600; }
+.step-body mjx-container[display="true"] svg, .q-header mjx-container[display="true"] svg { max-width:100%!important; height:auto!important; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style></head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">IAL Physics · Materials · CP3 · Measurement (Extension Q14)</div>
+  <h1>Micrometer: diameter, cross-sectional area and its percentage uncertainty</h1>
+  <div class="q-header"><span class="label">Question</span>
+    <p>A micrometer of resolution 0.01&nbsp;mm is used on a wire. The sleeve shows the 4.5&nbsp;mm mark (last full millimetre 4, with the half-millimetre mark visible) and the thimble reads 38 divisions. (a) State the diameter. (b) Calculate the cross-sectional area. (c) Estimate the percentage uncertainty in the area from the instrument resolution.</p>
+    
+    <p class="q-marks">[5 marks]</p>
+  </div>
+  <div class="parts"><div class="part">
+  <h2 class="part-h">Part (a) — read the diameter <span class="pmarks">[1 marks] · 1 step</span></h2>
+  
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/1</span></span><span class="step-marks">combine scales</span></div>
+    <div class="step-body"><p><span class='lbl'>Combine sleeve and thimble.</span> Sleeve $= 4.5\,\mathrm{mm}$; thimble $= 38 \times 0.01\,\mathrm{mm}$.</p>$$d = 4.5 + 38(0.01) = 4.88\,\mathrm{mm} = 4.88\times10^{-3}\,\mathrm{m}$$<div class="step-result">$d = 4.88\,\mathrm{mm}$</div></div>
+  </div>
+</div></div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (b) — cross-sectional area <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given"><span class='lbl'>Carry-in:</span> $d = 4.88\times10^{-3}\,\mathrm{m}$, so $r = d/2 = 2.44\times10^{-3}\,\mathrm{m}$.</div>
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/2</span></span><span class="step-marks">radius first</span></div>
+    <div class="step-body"><p><span class='lbl'>Radius first.</span> Halve the diameter before using the area formula.</p>$$r = \tfrac{d}{2} = 2.44\times10^{-3}\,\mathrm{m}$$<div class="step-result">$r = 2.44\times10^{-3}\,\mathrm{m}$</div></div>
+  </div>
+</div>
+<div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $r = 2.44\times10^{-3}\,\mathrm{m}$</div>
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2/2</span></span><span class="step-marks">area</span></div>
+    <div class="step-body"><p><span class='lbl'>Area.</span></p>$$A = \pi r^2 = \pi(2.44\times10^{-3})^2 = 1.87\times10^{-5}\,\mathrm{m^2}$$<div class="step-result">$A = 1.87\times10^{-5}\,\mathrm{m^2}$</div></div>
+  </div>
+</div></div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (c) — percentage uncertainty in the area <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given"><span class='lbl'>Carry-in:</span> resolution $= 0.01\,\mathrm{mm}$ on $d = 4.88\,\mathrm{mm}$; area depends on $d^2$.</div>
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/2</span></span><span class="step-marks">% in d</span></div>
+    <div class="step-body"><p><span class='lbl'>Percentage uncertainty in the diameter.</span> One resolution step on the measured diameter:</p>$$\frac{0.01}{4.88}\times100\% = 0.20\%$$<div class="step-result">$\pm 0.20\%$ in $d$</div></div>
+  </div>
+</div>
+<div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $d$ uncertainty $= 0.20\%$; $A = \pi(d/2)^2 \propto d^2$</div>
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2/2</span></span><span class="step-marks">% in A</span></div>
+    <div class="step-body"><p><span class='lbl'>Propagate to the area.</span> A quantity raised to a power multiplies its percentage uncertainty by that power; $A \propto d^2$, so double it.</p>$$\%\,\text{in } A = 2 \times 0.20\% = 0.41\%$$<div class="step-result">$\pm 0.41\%$ in $A$ (about $0.4\%$)</div></div>
+  </div>
+</div></div>
+</div></div>
+</div></body></html>

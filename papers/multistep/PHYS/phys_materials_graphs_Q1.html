@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Force-extension graph — extensions, shape & gradient</title>
+<script>
+window.MathJax = { tex: { inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']], processEscapes:true }, svg:{ fontCache:'global' } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root { --bg:#fff; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --soft:#f5f5f7;
+  --work-bg:#fafafa; --work-line:#c7c7cc; }
+html, body { margin:0; padding:0; background:#f0f0f2; }
+body { font:14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color:var(--ink); -webkit-font-smoothing:antialiased; padding:28px 24px 36px; }
+.card { max-width:1180px; margin:0 auto; background:#fff; border:1px solid var(--line);
+  border-radius:18px; padding:26px 30px 28px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.meta { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+h1 { font:600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif; margin:0 0 16px; letter-spacing:-0.01em; }
+.q-header { background:var(--soft); border-radius:12px; padding:14px 18px; margin-bottom:18px; font-size:13.5px; line-height:1.55; }
+.q-header .label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:5px; font-weight:600; }
+.q-header p { margin:4px 0; }
+.q-diagram { display:flex; justify-content:center; margin:10px 0 4px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px; }
+.q-diagram svg { width:100%; max-width:360px; height:auto; display:block; }
+.q-marks { font-weight:600; color:var(--ink); margin-top:8px; font-size:12.5px; }
+.part { margin-bottom:18px; }
+.part-h { font:600 14.5px/1.3 -apple-system, system-ui, sans-serif; margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line); }
+.part-h .pmarks { float:right; font-weight:500; color:var(--muted); font-size:12.5px; }
+.given { background:#fff; border-left:2.5px solid var(--ink); padding:6px 10px; margin:0 0 10px; font-size:12.5px; border-radius:0 6px 6px 0; }
+.carry-in { font-size:12px; color:var(--muted); margin:0 0 4px; padding-left:2px; }
+.steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-items:start; }
+@media(max-width:980px){ .steps{ grid-template-columns:1fr; } }
+.step-wrapper { display:flex; flex-direction:column; min-width:0; }
+.step { border:1px solid var(--work-line); background:var(--work-bg); border-radius:10px; padding:12px 14px 11px; margin:0; min-width:0; }
+.step-top { display:flex; align-items:flex-start; justify-content:space-between; gap:6px; margin-bottom:8px; padding-bottom:7px; border-bottom:1px solid var(--line); }
+.step-tag { font:600 12.5px/1.35 -apple-system, system-ui, sans-serif; display:flex; align-items:flex-start; gap:7px; flex:1; }
+.step-num { background:var(--ink); color:#fff; padding:3px 7px; border-radius:5px; letter-spacing:.04em; font-size:10.5px; flex-shrink:0; line-height:1.2; margin-top:1px; }
+.step-marks { font-size:10.5px; color:var(--muted); font-weight:500; flex-shrink:0; letter-spacing:.04em; margin-top:3px; }
+.step-body { font-size:13px; line-height:1.55; min-width:0; }
+.step-body p { margin:5px 0; }
+.step-body .lbl { font-weight:600; }
+.step-body .why { background:#fff; border-left:2px solid var(--ink); padding:5px 9px; margin:7px 0; font-size:12px; color:#3a3a3e; border-radius:0 5px 5px 0; }
+.step-math { margin:7px 0; font-size:13px; }
+.step-diagram { display:flex; justify-content:center; margin:8px 0 6px; }
+.step-diagram svg { max-width:100%; height:auto; }
+.step-result { margin-top:8px; padding:6px 10px; background:#fff; border:1px dashed var(--work-line); border-radius:6px; font-size:12.5px; font-weight:500; }
+.step-result strong { font-weight:600; }
+.step-body mjx-container[display="true"] svg, .q-header mjx-container[display="true"] svg { max-width:100%!important; height:auto!important; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style></head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">IAL Physics · Materials · Graphs · Further Q5</div>
+  <h1>Force-extension graph: building extensions and reading the gradient</h1>
+  <div class="q-header"><span class="label">Question</span>
+    <p>A spring of natural length 2.6&nbsp;cm is loaded. The force / N and total length / cm are: $F = 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0$ and length $= 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.9, 4.3$. (a) Convert the data to extensions. (b) Describe the shape of the force-extension graph. (c) Calculate the spring constant and give it in $\mathrm{N\,m^{-1}}$.</p>
+    <div class="q-diagram"><svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,system-ui" font-size="11" fill="#1d1d1f">
+<line x1="40" y1="170" x2="240" y2="170" stroke="#1d1d1f" stroke-width="1.4"/>
+<line x1="40" y1="170" x2="40" y2="20" stroke="#1d1d1f" stroke-width="1.4"/>
+<path d="M40 170 L170 60 Q200 40 230 36" stroke="#1d1d1f" fill="none" stroke-width="1.8"/>
+<line x1="170" y1="60" x2="170" y2="170" stroke="#6e6e73" stroke-width="1" stroke-dasharray="3 3"/>
+<circle cx="170" cy="60" r="3" fill="#1d1d1f"/>
+<text x="174" y="55">limit of proportionality</text>
+<text x="245" y="174" text-anchor="end">extension x</text>
+<text x="34" y="26" text-anchor="end">F</text>
+<text x="95" y="120" transform="rotate(-38 95 120)">gradient = k</text>
+</svg></div>
+    <p class="q-marks">[5 marks]</p>
+  </div>
+  <div class="parts"><div class="part">
+  <h2 class="part-h">Part (a) — convert lengths to extensions <span class="pmarks">[1 marks] · 1 step</span></h2>
+  
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/1</span></span><span class="step-marks">subtract L₀</span></div>
+    <div class="step-body"><p><span class='lbl'>Idea.</span> Plot extension, not raw length. The natural length is the zero-force length, $L_0 = 2.6\,\mathrm{cm}$; subtract it from each length.</p>$$x/\mathrm{cm} = 0.0,\,0.2,\,0.4,\,0.6,\,0.8,\,1.0,\,1.3,\,1.7$$<div class="step-result">Extensions: $0.0$–$1.7\,\mathrm{cm}$.</div></div>
+  </div>
+</div></div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (b) — describe the shape <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given"><span class='lbl'>Carry-in:</span> extensions $0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.7\,\mathrm{cm}$ for $F = 0$–$7.0\,\mathrm{N}$.</div>
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/2</span></span><span class="step-marks">straight part</span></div>
+    <div class="step-body"><p><span class='lbl'>Low loads.</span> Equal force steps give equal extension steps ($0.2\,\mathrm{cm}$ per newton), so the early part of the graph is a straight line through the origin — Hooke's law holds.</p><div class="step-result">Straight through the origin at low force.</div></div>
+  </div>
+</div>
+<div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2/2</span></span><span class="step-marks">curve</span></div>
+    <div class="step-body"><p><span class='lbl'>High loads.</span> The last steps grow ($0.3$ then $0.4\,\mathrm{cm}$), so the line curves upward: the spring has passed its limit of proportionality and extends more for each added newton.</p><div class="step-diagram"><svg viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,system-ui" font-size="11" fill="#1d1d1f">
+<line x1="40" y1="170" x2="240" y2="170" stroke="#1d1d1f" stroke-width="1.4"/>
+<line x1="40" y1="170" x2="40" y2="20" stroke="#1d1d1f" stroke-width="1.4"/>
+<path d="M40 170 L170 60 Q200 40 230 36" stroke="#1d1d1f" fill="none" stroke-width="1.8"/>
+<line x1="170" y1="60" x2="170" y2="170" stroke="#6e6e73" stroke-width="1" stroke-dasharray="3 3"/>
+<circle cx="170" cy="60" r="3" fill="#1d1d1f"/>
+<text x="174" y="55">limit of proportionality</text>
+<text x="245" y="174" text-anchor="end">extension x</text>
+<text x="34" y="26" text-anchor="end">F</text>
+<text x="95" y="120" transform="rotate(-38 95 120)">gradient = k</text>
+</svg></div><div class="step-result">Curves beyond the limit of proportionality.</div></div>
+  </div>
+</div></div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (c) — spring constant from the gradient <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given"><span class='lbl'>Carry-in:</span> use the straight (Hooke) part; over the working range $\Delta F = 7.0\,\mathrm{N}$, $\Delta x = 1.7\,\mathrm{cm}$.</div>
+  <div class="steps"><div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 1/2</span></span><span class="step-marks">gradient</span></div>
+    <div class="step-body"><p><span class='lbl'>Formula.</span> The spring constant is the gradient of the force-extension line, $k = \Delta F / \Delta x$.</p>$$k = \frac{7.0}{1.7\,\mathrm{cm}} = 4.12\,\mathrm{N\,cm^{-1}}$$<div class="step-result">$k = 4.12\,\mathrm{N\,cm^{-1}}$</div></div>
+  </div>
+</div>
+<div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 2: $k = 4.12\,\mathrm{N\,cm^{-1}}$</div>
+  <div class="step">
+    <div class="step-top"><span class="step-tag"><span class="step-num">STEP 2/2</span></span><span class="step-marks">convert units</span></div>
+    <div class="step-body"><p><span class='lbl'>Convert.</span> $1\,\mathrm{cm^{-1}} = 100\,\mathrm{m^{-1}}$, so</p>$$k = 4.12 \times 100 = 412\,\mathrm{N\,m^{-1}}$$<div class='why'>Revision-guide trap: leaving the gradient in $\mathrm{N\,cm^{-1}}$ loses the unit mark — always convert to $\mathrm{N\,m^{-1}}$.</div><div class="step-result">$k \approx 4.1\times10^{2}\,\mathrm{N\,m^{-1}}$</div></div>
+  </div>
+</div></div>
+</div></div>
+</div></body></html>
