@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Self-Test — Series share, parallel split, KVL on a combination</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL Physics · Unit 2 (WPH12) · Circuit Rules — Kirchhoff's Laws, Series & Parallel · Quick Self-Test Q3, Q4, Q7, Q8</div>
+  <h1>Q — Mixed circuit-rules self-test (series, parallel, KVL, unknown branch)</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><strong>(a)</strong> Resistors $4.0\ \Omega$ and $12\ \Omega$ are in parallel. Find the combined resistance. <strong>[2 marks]</strong><br><strong>(b)</strong> The same $4.0\ \Omega$ and $12\ \Omega$ are in series across a $6.0\ \text{V}$ supply. Find the current and the p.d. across each resistor. <strong>[2 marks]</strong><br><strong>(c)</strong> In a combination circuit the p.d. across the parallel section is $5.0\ \text{V}$ and the total e.m.f. is $9.0\ \text{V}$. Find the p.d. across the series element. <strong>[1 mark]</strong><br><strong>(d)</strong> A $3.0\ \Omega$ branch and an unknown branch are in parallel with $4.8\ \text{V}$ across them; the total supply current is $2.4\ \text{A}$. Find the unknown branch's resistance. <strong>[2 marks]</strong></p>
+    <div class="q-diagram"><svg viewBox="0 0 360 210" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,serif" font-size="13"><defs><marker id="arr" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#1d1d1f"/></marker><marker id="arrg" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#8e8e93"/></marker></defs><line x1="40" y1="90" x2="40" y2="115" stroke="#1d1d1f" stroke-width="2.5"/><line x1="50" y1="82" x2="50" y2="123" stroke="#1d1d1f" stroke-width="1.5"/><text x="32" y="145" text-anchor="middle" font-style="italic">&#949;</text><line x1="45" y1="82" x2="45" y2="40" stroke="#1d1d1f" stroke-width="1.5"/><line x1="45" y1="40" x2="200" y2="40" stroke="#1d1d1f" stroke-width="1.5"/><line x1="90" y1="40" x2="114" y2="40" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arr)"/><text x="102" y="32" text-anchor="middle" font-style="italic">I&#8348;</text><circle cx="200" cy="40" r="2.5" fill="#1d1d1f"/><line x1="200" y1="40" x2="200" y2="70" stroke="#1d1d1f" stroke-width="1.5"/><line x1="200" y1="70" x2="240" y2="70" stroke="#1d1d1f" stroke-width="1.5"/><rect x="240" y="60" width="48" height="20" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><text x="264" y="54" text-anchor="middle" font-style="italic">R&#8321;</text><text x="180" y="62" text-anchor="middle" fill="#6e6e73" font-size="11" font-style="italic">I&#8321;</text><line x1="288" y1="70" x2="310" y2="70" stroke="#1d1d1f" stroke-width="1.5"/><line x1="310" y1="70" x2="310" y2="130" stroke="#1d1d1f" stroke-width="1.5"/><line x1="200" y1="40" x2="200" y2="130" stroke="#1d1d1f" stroke-width="1.5"/><line x1="200" y1="130" x2="240" y2="130" stroke="#1d1d1f" stroke-width="1.5"/><rect x="240" y="120" width="48" height="20" fill="none" stroke="#1d1d1f" stroke-width="1.5"/><text x="264" y="156" text-anchor="middle" font-style="italic">R&#8322;</text><text x="180" y="128" text-anchor="middle" fill="#6e6e73" font-size="11" font-style="italic">I&#8322;</text><line x1="288" y1="130" x2="310" y2="130" stroke="#1d1d1f" stroke-width="1.5"/><circle cx="310" cy="130" r="2.5" fill="#1d1d1f"/><line x1="310" y1="130" x2="310" y2="175" stroke="#1d1d1f" stroke-width="1.5"/><line x1="310" y1="175" x2="45" y2="175" stroke="#1d1d1f" stroke-width="1.5"/><line x1="45" y1="175" x2="45" y2="123" stroke="#1d1d1f" stroke-width="1.5"/></svg></div>
+    <p class="q-marks">[7 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — parallel combination <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (resistors in parallel):</strong></p><p>$$\dfrac{1}{R_T} = \dfrac{1}{R_1} + \dfrac{1}{R_2}$$</p><p><strong>Substitute</strong> $R_1 = 4.0\ \Omega$, $R_2 = 12\ \Omega$:</p><p>$$\dfrac{1}{R_T} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{3}{12} + \dfrac{1}{12} = \dfrac{4}{12} = \dfrac{1}{3.0}$$</p><p>$$R_T = 3.0\ \Omega$$</p><div class="why"><strong>Check:</strong> $3.0\ \Omega < 4.0\ \Omega$ (smallest branch) &#10003;. Parallel resistance is always less than the smallest branch.</div>
+      
+      <div class="step-result">$R_T = 3.0\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — series current and shared p.d. <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in:</strong> now the same two resistors are in <em>series</em> ($R_T = 4.0 + 12 = 16\ \Omega$) across $6.0\ \text{V}$. Series &#8594; same current.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: series: $R_T = 4.0 + 12 = 16\ \Omega$ across $6.0\ \text{V}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (Ohm's law, then series p.d. share):</strong></p><p>$$I = \dfrac{\varepsilon}{R_T}, \qquad V = IR\ \text{per resistor}$$</p><p><strong>Substitute</strong> $\varepsilon = 6.0\ \text{V}$, $R_T = 16\ \Omega$:</p><p>$$I = \dfrac{6.0}{16} = 0.375\ \text{A}$$</p><p>$$V_1 = 0.375 \times 4.0 = 1.5\ \text{V}, \qquad V_2 = 0.375 \times 12 = 4.5\ \text{V}$$</p><div class="why"><strong>Common trap (V same in series):</strong> the p.d. is <em>not</em> the same across each series resistor — $V = IR$, same $I$ but different $R$ gives different $V$. (Phuc reasoned 'I is same so V is same' at 13:49 — wrong.) Check: $1.5 + 4.5 = 6.0\ \text{V} = \varepsilon$ &#10003;.</div>
+      
+      <div class="step-result">$I = 0.375\ \text{A};\ V_1 = 1.5\ \text{V},\ V_2 = 4.5\ \text{V}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (c) — p.d. across the series element (KVL) <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in:</strong> total e.m.f. $\varepsilon = 9.0\ \text{V}$; p.d. across the parallel section $V_{\text{parallel}} = 5.0\ \text{V}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $\varepsilon = 9.0\ \text{V}$, $V_{\text{parallel}} = 5.0\ \text{V}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (Kirchhoff's second law / KVL on one loop):</strong></p><p>$$\varepsilon = V_{\text{series}} + V_{\text{parallel}} \quad\Rightarrow\quad V_{\text{series}} = \varepsilon - V_{\text{parallel}}$$</p><p><strong>Substitute</strong> $\varepsilon = 9.0\ \text{V}$, $V_{\text{parallel}} = 5.0\ \text{V}$:</p><p>$$V_{\text{series}} = 9.0 - 5.0 = 4.0\ \text{V}$$</p><div class="why"><strong>Common trap (double-count):</strong> one loop is series element + parallel section, not both parallel branches added. The series drop plus the single parallel-section drop equals the e.m.f.</div>
+      
+      <div class="step-result">$V_{\text{series}} = 4.0\ \text{V}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (d) — unknown parallel branch <span class="pmarks">[2 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in:</strong> the two parallel branches share $V = 4.8\ \text{V}$; known branch $R_1 = 3.0\ \Omega$; total supply current $I_T = 2.4\ \text{A}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $V = 4.8\ \text{V}$ across both branches; $R_1 = 3.0\ \Omega$; $I_T = 2.4\ \text{A}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Step 1 — known branch current</strong> ($I = V/R$):</p><p>$$I_1 = \dfrac{V}{R_1} = \dfrac{4.8}{3.0} = 1.6\ \text{A}$$</p><p><strong>Step 2 — KCL for the unknown branch:</strong></p><p>$$I_2 = I_T - I_1 = 2.4 - 1.6 = 0.8\ \text{A}$$</p><p><strong>Step 3 — resistance of the unknown branch</strong> ($R = V/I$):</p><p>$$R_2 = \dfrac{V}{I_2} = \dfrac{4.8}{0.8} = 6.0\ \Omega$$</p><div class="why"><strong>Method:</strong> both branches share $V = 4.8\ \text{V}$ (parallel rule); KCL splits the total current; then $R = V/I$ (never $R = IV$).</div>
+      
+      <div class="step-result">$R_2 = 6.0\ \Omega$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>

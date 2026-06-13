@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Self-Test — Electron-Beam Charge and Electron Count</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+/* multi-column flow for steps */
+.parts { /* container for one or more parts */ }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+/* grid-template-columns set per-part via inline style */
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">⬇ Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL Physics · Unit 2 (WPH12) · Topic 2.4 · Charge, Current & P.D. · Quick Self-Test Q3</div>
+  <h1>Self-Test Q3 — Electron-beam current for 10 minutes</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>An electron-beam experiment runs a current of $I = 1.0\ \mu\text{A}$ for $10\ \text{min}$. Calculate <strong>(a)</strong> the total charge and <strong>(b)</strong> the number of electrons. $\;[\,e = 1.60\times10^{-19}\ \text{C}\,]$</p><p><strong>(a)</strong> <strong>[2 marks]</strong> &nbsp; <strong>(b)</strong> <strong>[1 mark]</strong></p>
+    
+    <p class="q-marks">[3 marks]</p>
+  </div>
+  <div class="parts">
+    
+<div class="part">
+  <h2 class="part-h">Part (a) — total charge <span class="pmarks">[2 marks] · 1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">M1 A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Strategy:</strong> convert the micro-prefix and the minutes to SI units, then apply $\Delta Q = I\,\Delta t$.</p><p><strong>Convert:</strong> $\mu = 10^{-6}$, so $I = 1.0\ \mu\text{A} = 1.0\times10^{-6}\ \text{A}$; and $\Delta t = 10 \times 60 = 600\ \text{s}$.</p><p><strong>Formula:</strong> $\;\Delta Q = I\,\Delta t$</p><p><strong>Substitute:</strong></p><p>$$\Delta Q = 1.0\times10^{-6} \times 600 = 6.0\times10^{-4}\ \text{C}$$</p><div class="why"><strong>Trap:</strong> $\mu = 10^{-6}$, not $10^{-3}$. Confusing micro and milli costs a factor of $1000$. Write the power of ten before substituting.</div><div class="why"><strong>Sense-check:</strong> a microamp is a very small current, so a sub-millicoulomb result is expected.</div>
+      
+      <div class="step-result">$\Delta Q = 6.0\times10^{-4}\ \text{C}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Part (b) — number of electrons <span class="pmarks">[1 marks] · 1 step</span></h2>
+  <div class="given"><strong>Carry-in from (a):</strong> total charge $\Delta Q = 6.0\times10^{-4}\ \text{C}$; $e = 1.60\times10^{-19}\ \text{C}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  <div class="carry-in">↳ from STEP 1: $\Delta Q = 6.0\times10^{-4}\ \text{C}$, $e = 1.60\times10^{-19}\ \text{C}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Formula (charge quantisation, rearranged):</strong></p><p>$$Q = N e \quad\Rightarrow\quad N = \dfrac{Q}{e}$$</p><p><strong>Substitute</strong> $Q = 6.0\times10^{-4}\ \text{C}$ from part (a), $e = 1.60\times10^{-19}\ \text{C}$:</p><p>$$N = \dfrac{6.0\times10^{-4}}{1.60\times10^{-19}} = 3.75\times10^{15}\ \text{electrons}$$</p><div class="why"><strong>Check $e$:</strong> the exponent is $-19$. Using $10^{-13}$ would make $N$ wrong by $10^{6}$ &mdash; a recorded slip. Use the magnitude of $e$ since you are counting particles.</div><div class="why"><strong>Cross-check:</strong> $1\ \text{C}$ holds about $6.25\times10^{18}$ electrons, so a charge of $6.0\times10^{-4}\ \text{C}$ giving $\sim 10^{15}$ electrons is consistent.</div><div class="why"><strong>Recall anchor:</strong> this two-step pattern (find $Q = I\,\Delta t$, then $N = Q/e$) is the standard route for any &lsquo;how many electrons&rsquo; question. The micro-prefix and the wrong-exponent errors for $e$ are the two recorded ways to lose the marks here.</div><div class="why"><strong>Definition to state:</strong> if the same paper asks to <em>define current</em>, the mark-scheme answer is &lsquo;the rate of flow of charge&rsquo; &mdash; not &lsquo;flow of electrons&rsquo;, because charge carriers can also be ions.</div>
+      
+      <div class="step-result">$N = 3.75\times10^{15}$ electrons</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  
+<div class="part">
+  <h2 class="part-h">Recall — definitions this question tests <span class="pmarks">1 step</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="step-wrapper">
+  
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/1</span><span class="step-goal"></span></span>
+      
+    </div>
+    <div class="step-body">
+      <p><strong>Electric current</strong> &mdash; the rate of flow of charge (mark-scheme phrasing).</p><p><strong>The coulomb</strong> &mdash; SI unit of charge; $1\ \text{C} = 1\ \text{A}\cdot\text{s}$.</p><p><strong>Charge quantisation</strong> &mdash; $Q = Ne$, $N$ an integer, $e = 1.60\times10^{-19}\ \text{C}$ (memorise the exponent $-19$).</p><p><strong>The ampere</strong> &mdash; SI base unit of current; $1\ \text{A} = 1\ \text{C}\,\text{s}^{-1}$.</p><div class="why"><strong>Prefix reference:</strong> $\text{m}=10^{-3}$, $\mu=10^{-6}$, $\text{n}=10^{-9}$. The micro/milli mix-up is wrong by $\times1000$ &mdash; always write the power of ten before substituting.</div>
+      
+      
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
