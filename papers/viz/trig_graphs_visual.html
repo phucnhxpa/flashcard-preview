@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trig Graphs — sin, cos &amp; tan · Visual Comparison</title>
+<style>
+  :root{
+    --ink:#1d1d1f; --muted:#6e6e73; --line:#e3e3e8; --soft:#f6f6f8;
+    --sin:#2563eb; --cos:#e11d48; --tan:#059669;
+    --sin-bg:#eff4ff; --cos-bg:#fff0f3; --tan-bg:#ecfdf5;
+    --grid:#ececf1; --axis:#9a9aa2; --asy:#d4356a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#f0f0f3;color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:34px 20px 60px}
+  h1{font:700 30px/1.2 -apple-system,"SF Pro Display",system-ui;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 26px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 26px}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:6px 13px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+  .dot{width:13px;height:13px;border-radius:50%}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 24px 18px;margin:0 0 22px;box-shadow:0 1px 3px rgba(0,0,0,.045)}
+  .card h2{display:flex;align-items:center;gap:11px;font:700 21px/1.2 -apple-system,"SF Pro Display";margin:0 0 4px;letter-spacing:-.01em}
+  .tag{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;padding:3px 9px;border-radius:7px}
+  .facts{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 4px}
+  .fact{font-size:12.5px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:5px 10px}
+  .fact b{font-weight:700}
+  svg{display:block;width:100%;height:auto;border-radius:12px;background:#fff}
+  .gridline{stroke:var(--grid);stroke-width:1}
+  .axis{stroke:var(--axis);stroke-width:1.5}
+  .asymptote{stroke:var(--asy);stroke-width:1.6;stroke-dasharray:5 5;opacity:.85}
+  .curve{fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}
+  .ptmax{fill:#16a34a} .ptmin{fill:#dc2626} .ptzero{fill:#111}
+  .tick{fill:var(--muted);font-size:12px;font-weight:600}
+  .tickdeg{fill:#b0b0b8;font-size:10.5px}
+  .ann{font-size:12.5px;font-weight:700}
+  .annbox{fill:#fff;opacity:.82}
+  .leader{stroke-width:1.3;stroke-dasharray:2 2}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;margin-top:6px;overflow:hidden;border-radius:14px;border:1px solid var(--line)}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-size:13px;letter-spacing:.02em}
+  th:first-child,td:first-child{font-weight:600;background:var(--soft);position:sticky;left:0}
+  .h-sin{background:var(--sin-bg);color:var(--sin)} .h-cos{background:var(--cos-bg);color:var(--cos)} .h-tan{background:var(--tan-bg);color:var(--tan)}
+  tbody tr:last-child td{border-bottom:none}
+  td.c-sin{background:rgba(37,99,235,.045)} td.c-cos{background:rgba(225,29,72,.045)} td.c-tan{background:rgba(5,150,105,.05)}
+  .note{font-size:13.5px;color:#3a3a3e;background:var(--soft);border-left:3px solid var(--ink);border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0}
+  .hooks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  @media(max-width:720px){.hooks{grid-template-columns:1fr}.wrap{padding:22px 12px 50px}h1{font-size:25px}}
+  .mono{font-family:"SF Mono",ui-monospace,Menlo,monospace}
+  .scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trig Graphs — sin, cos &amp; tan</h1>
+  <p class="sub">Colour-coded, annotated comparison of the three trigonometric graphs. Domain shown: <span class="mono">−2π → 2π</span> (−360° → 360°). Built for screenshot → flashcards.</p>
+
+  <div class="legend">
+    <span class="chip"><span class="dot" style="background:var(--sin)"></span> y = sin x</span>
+    <span class="chip"><span class="dot" style="background:var(--cos)"></span> y = cos x</span>
+    <span class="chip"><span class="dot" style="background:var(--tan)"></span> y = tan x</span>
+    <span class="chip"><span class="dot" style="background:var(--asy)"></span> asymptote (tan only)</span>
+    <span class="chip"><span class="dot" style="background:#16a34a"></span> max +1</span>
+    <span class="chip"><span class="dot" style="background:#dc2626"></span> min −1</span>
+    <span class="chip"><span class="dot" style="background:#111"></span> crosses x-axis</span>
+  </div>
+
+  <!-- individual graphs injected here -->
+  <div id="g-sin" class="card"></div>
+  <div id="g-cos" class="card"></div>
+  <div id="g-tan" class="card"></div>
+
+  <!-- overlay -->
+  <div id="g-all" class="card"></div>
+
+  <!-- comparison table -->
+  <div class="card">
+    <h2>Side-by-side comparison table</h2>
+    <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th class="h-sin">y = sin x</th>
+          <th class="h-cos">y = cos x</th>
+          <th class="h-tan">y = tan x</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Period</td><td class="c-sin">360° (2π)</td><td class="c-cos">360° (2π)</td><td class="c-tan"><b>180° (π)</b> — half!</td></tr>
+        <tr><td>Range (y-values)</td><td class="c-sin">−1 ≤ y ≤ 1</td><td class="c-cos">−1 ≤ y ≤ 1</td><td class="c-tan">all real numbers</td></tr>
+        <tr><td>Maximum = +1 at</td><td class="c-sin">90° + 360°n<br><span class="mono">π/2 + 2πn</span></td><td class="c-cos">0° + 360°n<br><span class="mono">2πn</span></td><td class="c-tan">none (→ +∞)</td></tr>
+        <tr><td>Minimum = −1 at</td><td class="c-sin">270° + 360°n<br><span class="mono">3π/2 + 2πn</span></td><td class="c-cos">180° + 360°n<br><span class="mono">π + 2πn</span></td><td class="c-tan">none (→ −∞)</td></tr>
+        <tr><td>Value at x = 0</td><td class="c-sin">0</td><td class="c-cos"><b>1</b> (starts at top)</td><td class="c-tan">0</td></tr>
+        <tr><td>Value at 90° (π/2)</td><td class="c-sin">1</td><td class="c-cos">0</td><td class="c-tan"><b>undefined</b> — asymptote</td></tr>
+        <tr><td>Value at 180° (π)</td><td class="c-sin">0</td><td class="c-cos">−1</td><td class="c-tan">0</td></tr>
+        <tr><td>Value at 270° (3π/2)</td><td class="c-sin">−1</td><td class="c-cos">0</td><td class="c-tan"><b>undefined</b> — asymptote</td></tr>
+        <tr><td>Crosses x-axis at</td><td class="c-sin">180°n &nbsp;(0,180,360…)<br><span class="mono">nπ</span></td><td class="c-cos">90° + 180°n &nbsp;(90,270…)<br><span class="mono">π/2 + nπ</span></td><td class="c-tan">180°n &nbsp;(0,180,360…)<br><span class="mono">nπ</span></td></tr>
+        <tr><td># x-axis crossings per 360°</td><td class="c-sin">3 (incl. both ends) — 2 per period</td><td class="c-cos">2</td><td class="c-tan">2 (period is only 180°, so 1 per branch)</td></tr>
+        <tr><td>Asymptotes</td><td class="c-sin">none</td><td class="c-cos">none</td><td class="c-tan"><b>x = 90° + 180°n</b><br><span class="mono">(2n+1)·π/2</span></td></tr>
+        <tr><td>Symmetry</td><td class="c-sin">odd — origin<br><span class="mono">sin(−x) = −sin x</span></td><td class="c-cos">even — y-axis<br><span class="mono">cos(−x) = cos x</span></td><td class="c-tan">odd — origin<br><span class="mono">tan(−x) = −tan x</span></td></tr>
+        <tr><td>Shape at the start</td><td class="c-sin">through 0, rising</td><td class="c-cos">at the max (1)</td><td class="c-tan">rising branch through 0</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note"><b>How to count solutions / extrapolate:</b> # solutions of f(x)=g(x) = # times the two graphs cross. Count crossings in <b>one repeating unit</b> (one period, or one π-branch for tan vs a flat line), then × number of whole units, then adjust the leftover end piece. Watch the branch that dips <b>below the axis</b> near a tan asymptote — that extra crossing is the classic trap.</div>
+  </div>
+
+  <!-- memory hooks -->
+  <div class="card">
+    <h2>Memory hooks</h2>
+    <div class="hooks">
+      <div class="note">sin &amp; cos are the <b>same wave 90° apart</b>: cos x = sin(x + 90°). tan is the odd one out.</div>
+      <div class="note">sin &amp; tan pass through the <b>origin (0,0)</b>; cos starts at the <b>top (0,1)</b>.</div>
+      <div class="note">Only <b>tan</b> has asymptotes, infinite range, and period <b>180°</b> not 360°.</div>
+      <div class="note">Zeros of tan = zeros of <b>sin</b> (need sin x = 0). Asymptotes of tan = zeros of <b>cos</b>. <span class="mono">"Where cos is 0, tan blows up."</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TAU = Math.PI*2;
+// ---- plot config ----
+const X0 = -TAU, X1 = TAU;            // domain -2π..2π
+const W = 1080, H = 300, PADL = 46, PADR = 22, PADT = 30, PADB = 40;
+const PW = W-PADL-PADR, PH = H-PADT-PADB;
+
+// x ticks at multiples of π/2
+const xticks = [];
+for(let k=-4;k<=4;k++) xticks.push(k*Math.PI/2);
+const piLabel = {"-4":"−2π","-3":"−3π/2","-2":"−π","-1":"−π/2","0":"0","1":"π/2","2":"π","3":"3π/2","4":"2π"};
+const degLabel = {"-4":"−360°","-3":"−270°","-2":"−180°","-1":"−90°","0":"","1":"90°","2":"180°","3":"270°","4":"360°"};
+
+function sx(x){ return PADL + (x-X0)/(X1-X0)*PW; }
+function sy(y, ymin, ymax){ return PADT + (ymax-y)/(ymax-ymin)*PH; }
+
+function svgEl(tag, attrs){
+  const e=document.createElementNS("http://www.w3.org/2000/svg",tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// build one graph; opts.breaks = asymptote x-positions (for tan)
+function makeGraph(cfg){
+  const {fn, color, ymin, ymax, breaks=[]} = cfg;
+  const svg = svgEl("svg",{viewBox:`0 0 ${W} ${H}`, role:"img"});
+
+  // horizontal gridlines (y = -1,0,1 etc.)
+  const ygrid = (ymax<=1.6)?[-1,0,1]:[-4,-2,0,2,4];
+  ygrid.forEach(gy=>{
+    if(gy<ymin||gy>ymax) return;
+    const yy=sy(gy,ymin,ymax);
+    svg.appendChild(svgEl("line",{x1:PADL,y1:yy,x2:W-PADR,y2:yy,class:gy===0?"axis":"gridline"}));
+    svg.appendChild(svgEl("text",{x:PADL-8,y:yy+4,"text-anchor":"end",class:"tick"})).textContent = gy;
+  });
+
+  // vertical gridlines + x ticks
+  xticks.forEach((xt,i)=>{
+    const xx=sx(xt), key=String(i-4);
+    svg.appendChild(svgEl("line",{x1:xx,y1:PADT,x2:xx,y2:H-PADB,class:xt===0?"axis":"gridline"}));
+    const t1=svgEl("text",{x:xx,y:H-PADB+16,"text-anchor":"middle",class:"tick"}); t1.textContent=piLabel[key]; svg.appendChild(t1);
+    const t2=svgEl("text",{x:xx,y:H-PADB+30,"text-anchor":"middle",class:"tickdeg"}); t2.textContent=degLabel[key]; svg.appendChild(t2);
+  });
+
+  // asymptotes
+  breaks.forEach(bx=>{
+    if(bx<=X0||bx>=X1) return;
+    const xx=sx(bx);
+    svg.appendChild(svgEl("line",{x1:xx,y1:PADT,x2:xx,y2:H-PADB,class:"asymptote"}));
+  });
+
+  // curve (split at breaks)
+  const segs=[[X0,X1]];
+  if(breaks.length){
+    segs.length=0; let prev=X0;
+    const bs=breaks.filter(b=>b>X0&&b<X1).sort((a,b)=>a-b);
+    bs.forEach(b=>{segs.push([prev,b]); prev=b;}); segs.push([prev,X1]);
+  }
+  const eps=0.001;
+  segs.forEach(([a,b])=>{
+    let d="", started=false;
+    const N=600;
+    for(let i=0;i<=N;i++){
+      const x=a+(b-a)*i/N;
+      if(breaks.length && (Math.abs(((x%Math.PI)+Math.PI)%Math.PI - Math.PI/2)<0.01)) continue;
+      let y=fn(x);
+      if(!isFinite(y)||y>ymax+5||y<ymin-5){ started=false; continue; }
+      const X=sx(x), Y=sy(Math.max(ymin-1,Math.min(ymax+1,y)),ymin,ymax);
+      if(y>ymax||y<ymin){ // went off top/bottom -> lift pen but keep heading to edge
+        const Yc=sy(Math.max(ymin,Math.min(ymax,y)),ymin,ymax);
+        d+=(started?"L":"M")+X.toFixed(1)+" "+Yc.toFixed(1)+" "; started=true; continue;
+      }
+      d+=(started?"L":"M")+X.toFixed(1)+" "+Y.toFixed(1)+" "; started=true;
+    }
+    svg.appendChild(svgEl("path",{d, class:"curve", stroke:color}));
+  });
+
+  // feature points
+  (cfg.points||[]).forEach(p=>{
+    const X=sx(p.x), Y=sy(p.y,ymin,ymax);
+    svg.appendChild(svgEl("circle",{cx:X,cy:Y,r:4.5,class:p.cls}));
+  });
+
+  // annotations {x,y,text,color,dy}
+  (cfg.anns||[]).forEach(a=>{
+    const X=sx(a.x), Y=sy(a.y,ymin,ymax);
+    const lx=X+(a.lx||0), ly=Y+(a.ly||-18);
+    svg.appendChild(svgEl("line",{x1:X,y1:Y,x2:lx,y2:ly+4,class:"leader",stroke:a.color||color}));
+    const tw=a.text.length*6.6+8;
+    svg.appendChild(svgEl("rect",{x:lx-(a.anchor==="end"?tw:0)-(a.anchor==="mid"?tw/2:0)-2,y:ly-12,width:tw,height:16,rx:4,class:"annbox"}));
+    const t=svgEl("text",{x:lx,y:ly,"text-anchor":a.anchor==="end"?"end":(a.anchor==="mid"?"middle":"start"),class:"ann",fill:a.color||color});
+    t.textContent=a.text; svg.appendChild(t);
+  });
+
+  return svg;
+}
+
+function card(elId, tagText, tagColor, title, factsHtml, graph){
+  const el=document.getElementById(elId);
+  el.innerHTML = `<h2><span class="tag" style="background:${tagColor}">${tagText}</span>${title}</h2>`;
+  el.appendChild(graph);
+  const f=document.createElement("div"); f.className="facts"; f.innerHTML=factsHtml; el.appendChild(f);
+}
+
+// ===== SIN =====
+card("g-sin","sin","var(--sin)","y = sin x",
+  `<span class="fact"><b>Period</b> 360° (2π)</span><span class="fact"><b>Range</b> −1 to 1</span>
+   <span class="fact"><b>Max +1</b> at 90°, 450°…</span><span class="fact"><b>Min −1</b> at 270°…</span>
+   <span class="fact"><b>Zeros</b> at 0°,180°,360° (nπ)</span><span class="fact"><b>Odd</b> (origin symmetry)</span>`,
+  makeGraph({
+    fn:Math.sin, color:"var(--sin)", ymin:-1.45, ymax:1.45,
+    points:[
+      {x:Math.PI/2,y:1,cls:"ptmax"},{x:-3*Math.PI/2,y:1,cls:"ptmax"},
+      {x:-Math.PI/2,y:-1,cls:"ptmin"},{x:3*Math.PI/2,y:-1,cls:"ptmin"},
+      {x:0,y:0,cls:"ptzero"},{x:Math.PI,y:0,cls:"ptzero"},{x:-Math.PI,y:0,cls:"ptzero"},{x:TAU,y:0,cls:"ptzero"},{x:-TAU,y:0,cls:"ptzero"}
+    ],
+    anns:[
+      {x:Math.PI/2,y:1,text:"max +1 (at 90°)",ly:-16,lx:6,color:"#16a34a"},
+      {x:3*Math.PI/2,y:-1,text:"min −1 (at 270°)",ly:20,lx:6,color:"#dc2626"},
+      {x:Math.PI,y:0,text:"crosses x-axis",ly:-16,lx:6,color:"#111"}
+    ]
+  })
+);
+
+// ===== COS =====
+card("g-cos","cos","var(--cos)","y = cos x",
+  `<span class="fact"><b>Period</b> 360° (2π)</span><span class="fact"><b>Range</b> −1 to 1</span>
+   <span class="fact"><b>Max +1</b> at 0°,360°</span><span class="fact"><b>Min −1</b> at 180°</span>
+   <span class="fact"><b>Zeros</b> at 90°,270° (π/2+nπ)</span><span class="fact"><b>Even</b> (y-axis symmetry)</span>`,
+  makeGraph({
+    fn:Math.cos, color:"var(--cos)", ymin:-1.45, ymax:1.45,
+    points:[
+      {x:0,y:1,cls:"ptmax"},{x:TAU,y:1,cls:"ptmax"},{x:-TAU,y:1,cls:"ptmax"},
+      {x:Math.PI,y:-1,cls:"ptmin"},{x:-Math.PI,y:-1,cls:"ptmin"},
+      {x:Math.PI/2,y:0,cls:"ptzero"},{x:-Math.PI/2,y:0,cls:"ptzero"},{x:3*Math.PI/2,y:0,cls:"ptzero"},{x:-3*Math.PI/2,y:0,cls:"ptzero"}
+    ],
+    anns:[
+      {x:0,y:1,text:"starts at top: max +1 (at 0°)",ly:-16,lx:6,color:"#16a34a"},
+      {x:Math.PI,y:-1,text:"min −1 (at 180°)",ly:20,lx:6,color:"#dc2626"},
+      {x:Math.PI/2,y:0,text:"crosses x-axis (90°)",ly:-16,lx:6,color:"#111"}
+    ]
+  })
+);
+
+// ===== TAN =====
+const tanBreaks=[-3*Math.PI/2,-Math.PI/2,Math.PI/2,3*Math.PI/2];
+card("g-tan","tan","var(--tan)","y = tan x",
+  `<span class="fact"><b>Period</b> 180° (π)</span><span class="fact"><b>Range</b> all reals</span>
+   <span class="fact"><b>No</b> max/min</span><span class="fact"><b>Zeros</b> at 0°,180° (nπ)</span>
+   <span class="fact"><b>Asymptotes</b> at 90°,270° ((2n+1)π/2)</span><span class="fact"><b>Odd</b> (origin)</span>`,
+  makeGraph({
+    fn:Math.tan, color:"var(--tan)", ymin:-4.3, ymax:4.3, breaks:tanBreaks,
+    points:[
+      {x:0,y:0,cls:"ptzero"},{x:Math.PI,y:0,cls:"ptzero"},{x:-Math.PI,y:0,cls:"ptzero"},{x:TAU,y:0,cls:"ptzero"},{x:-TAU,y:0,cls:"ptzero"}
+    ],
+    anns:[
+      {x:Math.PI/2,y:3.4,text:"asymptote x = π/2 (90°)",ly:-2,lx:8,color:"#d4356a",anchor:"start"},
+      {x:Math.PI,y:0,text:"crosses x-axis (180°)",ly:22,lx:6,color:"#111"},
+      {x:Math.PI/4,y:1,text:"each branch: −∞ → +∞",ly:-14,lx:8,color:"var(--tan)",anchor:"start"}
+    ]
+  })
+);
+
+// ===== OVERLAY =====
+(function(){
+  const ymin=-1.6,ymax=1.6;
+  const svg=svgEl("svg",{viewBox:`0 0 ${W} ${H}`});
+  // grids
+  [-1,0,1].forEach(gy=>{const yy=sy(gy,ymin,ymax);svg.appendChild(svgEl("line",{x1:PADL,y1:yy,x2:W-PADR,y2:yy,class:gy===0?"axis":"gridline"}));svg.appendChild(svgEl("text",{x:PADL-8,y:yy+4,"text-anchor":"end",class:"tick"})).textContent=gy;});
+  xticks.forEach((xt,i)=>{const xx=sx(xt),key=String(i-4);svg.appendChild(svgEl("line",{x1:xx,y1:PADT,x2:xx,y2:H-PADB,class:xt===0?"axis":"gridline"}));const t1=svgEl("text",{x:xx,y:H-PADB+16,"text-anchor":"middle",class:"tick"});t1.textContent=piLabel[key];svg.appendChild(t1);const t2=svgEl("text",{x:xx,y:H-PADB+30,"text-anchor":"middle",class:"tickdeg"});t2.textContent=degLabel[key];svg.appendChild(t2);});
+  // asymptotes for tan
+  tanBreaks.forEach(bx=>{if(bx>X0&&bx<X1)svg.appendChild(svgEl("line",{x1:sx(bx),y1:PADT,x2:sx(bx),y2:H-PADB,class:"asymptote"}));});
+  // sin & cos full
+  [["var(--sin)",Math.sin],["var(--cos)",Math.cos]].forEach(([c,fn])=>{
+    let d="";const N=900;for(let i=0;i<=N;i++){const x=X0+(X1-X0)*i/N;const y=fn(x);d+=(i?"L":"M")+sx(x).toFixed(1)+" "+sy(y,ymin,ymax).toFixed(1)+" ";}
+    svg.appendChild(svgEl("path",{d,class:"curve",stroke:c}));
+  });
+  // tan in segments, clipped
+  const segs=[];let prev=X0;tanBreaks.filter(b=>b>X0&&b<X1).sort((a,b)=>a-b).forEach(b=>{segs.push([prev,b]);prev=b;});segs.push([prev,X1]);
+  segs.forEach(([a,b])=>{let d="",started=false;const N=400;for(let i=0;i<=N;i++){const x=a+(b-a)*i/N;const y=Math.tan(x);if(y>ymax||y<ymin){started=false;continue;}d+=(started?"L":"M")+sx(x).toFixed(1)+" "+sy(y,ymin,ymax).toFixed(1)+" ";started=true;}svg.appendChild(svgEl("path",{d,class:"curve",stroke:"var(--tan)","stroke-width":2.6,"opacity":.92}));});
+
+  const el=document.getElementById("g-all");
+  el.innerHTML=`<h2><span class="tag" style="background:linear-gradient(90deg,var(--sin),var(--cos),var(--tan))">all 3</span>All three together</h2>`;
+  el.appendChild(svg);
+  const f=document.createElement("div");f.className="facts";
+  f.innerHTML=`<span class="fact">cos is sin shifted <b>left 90°</b></span><span class="fact">tan = sin/cos → <b>0 where sin=0</b>, <b>∞ where cos=0</b></span><span class="fact">y-window clipped to ±1.6 so tan's spikes stay readable</span>`;
+  el.appendChild(f);
+})();
+</script>
+</body>
+</html>
