@@ -300,9 +300,31 @@ card("g-tan","tan","var(--tan)","y = tan x",
   const segs=[];let prev=X0;tanBreaks.filter(b=>b>X0&&b<X1).sort((a,b)=>a-b).forEach(b=>{segs.push([prev,b]);prev=b;});segs.push([prev,X1]);
   segs.forEach(([a,b])=>{let d="",started=false;const N=400;for(let i=0;i<=N;i++){const x=a+(b-a)*i/N;const y=Math.tan(x);if(y>ymax||y<ymin){started=false;continue;}d+=(started?"L":"M")+sx(x).toFixed(1)+" "+sy(y,ymin,ymax).toFixed(1)+" ";started=true;}svg.appendChild(svgEl("path",{d,class:"curve",stroke:"var(--tan)","stroke-width":2.6,"opacity":.92}));});
 
+  // inline colour annotations directly on each curve
+  function tagOn(x,y,text,color,dy){
+    const X=sx(x),Y=sy(y,ymin,ymax), tw=text.length*7.4+14;
+    const g=svgEl("g",{});
+    g.appendChild(svgEl("rect",{x:X-tw/2,y:Y+dy-13,width:tw,height:19,rx:6,fill:color}));
+    const t=svgEl("text",{x:X,y:Y+dy,"text-anchor":"middle",fill:"#fff","font-size":12.5,"font-weight":700});
+    t.textContent=text; g.appendChild(t);
+    svg.appendChild(g);
+  }
+  tagOn(Math.PI/2, 1, "y = sin x", "var(--sin)", -10);     // on the blue peak (90°)
+  tagOn(Math.PI,  -1, "y = cos x", "var(--cos)",  22);     // on the red trough (180°)
+  tagOn(5*Math.PI/4, 1.05, "y = tan x", "var(--tan)", -8); // on a steep green branch (225°)
+
   const el=document.getElementById("g-all");
   el.innerHTML=`<h2><span class="tag" style="background:linear-gradient(90deg,var(--sin),var(--cos),var(--tan))">all 3</span>All three together</h2>`;
   el.appendChild(svg);
+
+  // NEW: colour-key row annotating which colour is which curve
+  const key=document.createElement("div"); key.className="facts"; key.style.margin="14px 0 2px";
+  key.innerHTML=`
+    <span class="fact" style="border-color:var(--sin);background:var(--sin-bg)"><span class="dot" style="display:inline-block;width:22px;height:4px;border-radius:3px;background:var(--sin);vertical-align:middle;margin-right:7px"></span><b style="color:var(--sin)">Blue</b> = y = sin x</span>
+    <span class="fact" style="border-color:var(--cos);background:var(--cos-bg)"><span class="dot" style="display:inline-block;width:22px;height:4px;border-radius:3px;background:var(--cos);vertical-align:middle;margin-right:7px"></span><b style="color:var(--cos)">Red</b> = y = cos x</span>
+    <span class="fact" style="border-color:var(--tan);background:var(--tan-bg)"><span class="dot" style="display:inline-block;width:22px;height:4px;border-radius:3px;background:var(--tan);vertical-align:middle;margin-right:7px"></span><b style="color:var(--tan)">Green</b> = y = tan x</span>`;
+  el.appendChild(key);
+
   const f=document.createElement("div");f.className="facts";
   f.innerHTML=`<span class="fact">cos is sin shifted <b>left 90°</b></span><span class="fact">tan = sin/cos → <b>0 where sin=0</b>, <b>∞ where cos=0</b></span><span class="fact">y-window clipped to ±1.6 so tan's spikes stay readable</span>`;
   el.appendChild(f);
