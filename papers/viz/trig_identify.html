@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identify the Trig Graph — blind quiz</title>
+<style>
+  :root{
+    --ink:#1d1d1f; --muted:#6e6e73; --line:#e3e3e8; --soft:#f6f6f8;
+    --sin:#2563eb; --cos:#e11d48; --tan:#059669;
+    --grid:#ececf1; --axis:#9a9aa2; --asy:#d4356a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#f0f0f3;color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:30px 20px 60px}
+  h1{font:700 28px/1.2 -apple-system,"SF Pro Display",system-ui;letter-spacing:-.02em;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14.5px;margin:0 0 20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 24px 22px;margin:0 0 22px;box-shadow:0 1px 3px rgba(0,0,0,.045)}
+  .prompt{font:700 19px/1.3 -apple-system,"SF Pro Display";margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .qbadge{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:#fff;padding:4px 10px;border-radius:8px}
+  svg{display:block;width:100%;height:auto;border-radius:12px;background:#fff}
+  .gridline{stroke:var(--grid);stroke-width:1}
+  .axis{stroke:var(--axis);stroke-width:1.5}
+  .asymptote{stroke:var(--asy);stroke-width:1.6;stroke-dasharray:5 5;opacity:.8}
+  .curve{fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+  .tick{fill:var(--muted);font-size:12px;font-weight:600}
+  .tickdeg{fill:#b0b0b8;font-size:10.5px}
+  .badge{font:800 15px/1 -apple-system,system-ui;}
+  .badgebg{stroke:#fff;stroke-width:2.5}
+
+  /* answer legend + masking */
+  .toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 6px;flex-wrap:wrap}
+  .btn{cursor:pointer;border:0;border-radius:10px;padding:9px 16px;font:700 14px -apple-system,system-ui;color:#fff;background:var(--ink)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .hint{color:var(--muted);font-size:13px}
+  .answers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  @media(max-width:760px){.answers{grid-template-columns:1fr}.wrap{padding:20px 12px 50px}h1{font-size:23px}}
+  .ans{border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;background:#fff}
+  .ans .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .lett{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0}
+  .swatch{height:8px;border-radius:6px;flex:1}
+  /* the maskable name + clue */
+  .mask{position:relative;border-radius:9px;overflow:hidden}
+  .mask .reveal{padding:10px 12px;font-weight:700;font-size:16px}
+  .mask .reveal .nm{font-size:18px}
+  .clue{margin-top:9px}
+  .clue .reveal{padding:9px 12px;font-size:13px;line-height:1.45;color:#3a3a3e}
+  .cover{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#d6d6db,#d6d6db 9px,#cfcfd5 9px,#cfcfd5 18px);
+    display:grid;place-items:center;color:#5b5b62;font-weight:800;font-size:13px;letter-spacing:.04em;border-radius:9px}
+  .cover span{background:rgba(255,255,255,.78);padding:3px 10px;border-radius:7px}
+  body.revealed .cover{display:none}
+  .reveal{background:var(--soft);border-radius:9px}
+
+  .legendnote{margin-top:16px;font-size:13px;color:var(--muted);display:none}
+  body.revealed .legendnote{display:block}
+  .pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-weight:600;font-size:13px;margin:2px}
+  .dot{width:12px;height:12px;border-radius:50%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Identify the Trig Graph</h1>
+  <p class="sub">Blind quiz: three curves, names hidden. Name each from its colour &amp; shape, then reveal. <b>Screenshot with names masked = flashcard front; revealed = back.</b></p>
+
+  <div class="card">
+    <div class="prompt"><span class="qbadge">Q</span> Which curve is which? Name each function (and state its period).</div>
+    <div id="plot"></div>
+
+    <div class="toolbar">
+      <button class="btn" id="toggle" onclick="document.body.classList.toggle('revealed');this.textContent=document.body.classList.contains('revealed')?'Hide names':'Reveal names'">Reveal names</button>
+      <span class="hint">Each answer keeps its <b>colour swatch</b> visible — only the name &amp; clue are masked.</span>
+    </div>
+
+    <div class="answers">
+      <div class="ans">
+        <div class="top"><span class="lett" style="background:var(--sin)">A</span><span class="swatch" style="background:var(--sin)"></span></div>
+        <div class="mask"><div class="reveal"><span class="nm" style="color:var(--sin)">y = sin x</span> &nbsp;·&nbsp; period 360° (2π)</div><div class="cover"><span>NAME? — blue curve</span></div></div>
+        <div class="mask clue"><div class="reveal"><b>How to tell:</b> starts at <b>0</b> rising, wave between −1 and 1, peak at 90°, trough at 270°.</div><div class="cover"><span>clue</span></div></div>
+      </div>
+      <div class="ans">
+        <div class="top"><span class="lett" style="background:var(--cos)">B</span><span class="swatch" style="background:var(--cos)"></span></div>
+        <div class="mask"><div class="reveal"><span class="nm" style="color:var(--cos)">y = cos x</span> &nbsp;·&nbsp; period 360° (2π)</div><div class="cover"><span>NAME? — red curve</span></div></div>
+        <div class="mask clue"><div class="reveal"><b>How to tell:</b> starts at the <b>top (1)</b>, wave between −1 and 1, = sin shifted left 90°, trough at 180°.</div><div class="cover"><span>clue</span></div></div>
+      </div>
+      <div class="ans">
+        <div class="top"><span class="lett" style="background:var(--tan)">C</span><span class="swatch" style="background:var(--tan)"></span></div>
+        <div class="mask"><div class="reveal"><span class="nm" style="color:var(--tan)">y = tan x</span> &nbsp;·&nbsp; period <b>180° (π)</b></div><div class="cover"><span>NAME? — green curve</span></div></div>
+        <div class="mask clue"><div class="reveal"><b>How to tell:</b> the only one with <b>asymptotes</b> (dashed, at 90°,270°), infinite range, each branch −∞→+∞.</div><div class="cover"><span>clue</span></div></div>
+      </div>
+    </div>
+
+    <div class="legendnote">
+      Quick discriminators:
+      <span class="pill"><span class="dot" style="background:var(--sin)"></span>through origin, rising → sin</span>
+      <span class="pill"><span class="dot" style="background:var(--cos)"></span>starts at top → cos</span>
+      <span class="pill"><span class="dot" style="background:var(--tan)"></span>has asymptotes → tan</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const TAU=Math.PI*2, X0=-TAU, X1=TAU;
+const W=1080,H=360,PADL=46,PADR=22,PADT=30,PADB=42, PW=W-PADL-PADR, PH=H-PADT-PADB;
+const xticks=[];for(let k=-4;k<=4;k++)xticks.push(k*Math.PI/2);
+const piLabel={"-4":"−2π","-3":"−3π/2","-2":"−π","-1":"−π/2","0":"0","1":"π/2","2":"π","3":"3π/2","4":"2π"};
+const degLabel={"-4":"−360°","-3":"−270°","-2":"−180°","-1":"−90°","0":"","1":"90°","2":"180°","3":"270°","4":"360°"};
+const ymin=-1.7,ymax=1.7;
+const sx=x=>PADL+(x-X0)/(X1-X0)*PW;
+const sy=y=>PADT+(ymax-y)/(ymax-ymin)*PH;
+const el=(t,a)=>{const e=document.createElementNS("http://www.w3.org/2000/svg",t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const tanBreaks=[-3*Math.PI/2,-Math.PI/2,Math.PI/2,3*Math.PI/2];
+const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img"});
+
+// grid
+[-1,0,1].forEach(gy=>{const yy=sy(gy);svg.appendChild(el("line",{x1:PADL,y1:yy,x2:W-PADR,y2:yy,class:gy===0?"axis":"gridline"}));const t=el("text",{x:PADL-8,y:yy+4,"text-anchor":"end",class:"tick"});t.textContent=gy;svg.appendChild(t);});
+xticks.forEach((xt,i)=>{const xx=sx(xt),key=String(i-4);svg.appendChild(el("line",{x1:xx,y1:PADT,x2:xx,y2:H-PADB,class:xt===0?"axis":"gridline"}));const t1=el("text",{x:xx,y:H-PADB+16,"text-anchor":"middle",class:"tick"});t1.textContent=piLabel[key];svg.appendChild(t1);const t2=el("text",{x:xx,y:H-PADB+30,"text-anchor":"middle",class:"tickdeg"});t2.textContent=degLabel[key];svg.appendChild(t2);});
+// asymptotes
+tanBreaks.forEach(bx=>{if(bx>X0&&bx<X1)svg.appendChild(el("line",{x1:sx(bx),y1:PADT,x2:sx(bx),y2:H-PADB,class:"asymptote"}));});
+// sin & cos
+[["var(--sin)",Math.sin],["var(--cos)",Math.cos]].forEach(([c,fn])=>{let d="";const N=900;for(let i=0;i<=N;i++){const x=X0+(X1-X0)*i/N;d+=(i?"L":"M")+sx(x).toFixed(1)+" "+sy(fn(x)).toFixed(1)+" ";}svg.appendChild(el("path",{d,class:"curve",stroke:c}));});
+// tan segments clipped
+let prev=X0;const segs=[];tanBreaks.filter(b=>b>X0&&b<X1).sort((a,b)=>a-b).forEach(b=>{segs.push([prev,b]);prev=b;});segs.push([prev,X1]);
+segs.forEach(([a,b])=>{let d="",st=false;const N=400;for(let i=0;i<=N;i++){const x=a+(b-a)*i/N;const y=Math.tan(x);if(y>ymax||y<ymin){st=false;continue;}d+=(st?"L":"M")+sx(x).toFixed(1)+" "+sy(y).toFixed(1)+" ";st=true;}svg.appendChild(el("path",{d,class:"curve",stroke:"var(--tan)","stroke-width":3.0}));});
+
+// letter badges on each curve (colour only — blind)
+function badge(x,y,letter,color){
+  const X=sx(x),Y=sy(y);
+  svg.appendChild(el("circle",{cx:X,cy:Y,r:14,fill:color,class:"badgebg"}));
+  const t=el("text",{x:X,y:Y+5,"text-anchor":"middle",class:"badge",fill:"#fff"});t.textContent=letter;svg.appendChild(t);
+}
+badge(Math.PI/2,1,"A","var(--sin)");      // sin peak at 90°
+badge(Math.PI,-1,"B","var(--cos)");        // cos trough at 180°
+badge(5*Math.PI/4,1.0,"C","var(--tan)");   // tan steep branch at 225°
+
+document.getElementById("plot").appendChild(svg);
+</script>
+</body>
+</html>
