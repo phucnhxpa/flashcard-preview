@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P4 26 Jun — Q5 Vector lines intersection in 3D</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.parts { }
+.part { margin-bottom: 18px; }
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps { display: grid; gap: 12px; align-items: start; }
+.step-wrapper { display: flex; flex-direction: column; min-width: 0; }
+.carry-in { font-size: 12px; color: var(--muted); margin: 0 0 4px; padding-left: 2px; }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P4 &middot; 26 June 2026 &middot; Harry Williams</div>
+  <h1>Q5 &middot; Vector lines intersection in 3D</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The lines $L_1$ and $L_2$ are given by</p>
+    <p>$L_1:\; \mathbf{r}_1 = (2,\, -1,\, 3) + \lambda(1,\, 4,\, 2)$</p>
+    <p>$L_2:\; \mathbf{r}_2 = (-1,\, \beta,\, 6) + \mu(2,\, -1,\, 7)$</p>
+    <p>where $\beta$ is a constant.</p>
+    <p>Given that $L_1$ and $L_2$ intersect at the point $P$, <strong>(a)</strong> find the value of $\beta$, and <strong>(b)</strong> find the coordinates of $P$.</p>
+    <p class="q-marks">[8 marks total: (a) 5 marks, (b) 3 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">(a) Find the value of $\beta$ <span class="pmarks">[5 marks] &middot; 5 steps</span></h2>
+  <div class="given">At the intersection $P$, $\mathbf{r}_1 = \mathbf{r}_2$. Equating the three components gives three scalar equations in $\lambda$, $\mu$, and $\beta$. Pick any two to solve for $\lambda$ and $\mu$; use the third to find $\beta$ and as a consistency check.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal">equate components</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Set $\mathbf{r}_1 = \mathbf{r}_2$ and equate the $x$-, $y$-, $z$-components. Number each equation &mdash; Edexcel awards a mark for the setup.</p>
+      <p class="formula-lab">Three scalar equations</p>
+      $$(1)\quad 2 + \lambda = -1 + 2\mu$$
+      $$(2)\quad -1 + 4\lambda = \beta - \mu$$
+      $$(3)\quad 3 + 2\lambda = 6 + 7\mu$$
+      <div class="why"><strong>Trap (exam technique).</strong> Not numbering simultaneous equations when asked to "solve" loses a method mark. Always label equations (1), (2), (3) on the page.</div>
+      <p class="sense">Sense check. Equation (1) links $\lambda$ and $\mu$ (no $\beta$). Equation (3) also links $\lambda$ and $\mu$ (no $\beta$). Equation (2) contains $\beta$ &mdash; so solve $\lambda, \mu$ from (1) and (3), then find $\beta$ from (2).</p>
+      <div class="step-result">Three equations: (1) $\lambda - 2\mu = -3$; (2) $4\lambda + \mu = \beta + 1$; (3) $2\lambda - 7\mu = 3$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: (1) $\lambda - 2\mu = -3$; (3) $2\lambda - 7\mu = 3$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal">rearrange for solver</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Rearrange equations (1) and (3) into the standard form for the calculator's simultaneous-equation solver: unknown-coefficient, unknown-coefficient, constant.</p>
+      <p class="formula-lab">Rearrange</p>
+      $$(1):\quad \lambda - 2\mu = -3.$$
+      $$(3):\quad 2\lambda - 7\mu = 3.$$
+      <div class="why"><strong>Calculator layout (lesson tip).</strong> Memorise the layout the calculator demands: $\lambda$-coefficient, $\mu$-coefficient, constant. Rearrange into that order BEFORE entering &mdash; this is where most sign errors happen. Even when calculator-solving is allowed, write the equations out and number them.</div>
+      <p class="sense">Sense check. (1): $\lambda - 2\mu = -3$ &mdash; coefficient of $\lambda$ is $+1$, $\mu$ is $-2$, constant $-3$. (3): $2\lambda - 7\mu = 3$ &mdash; coefficients $+2, -7$, constant $+3$.</p>
+      <div class="step-result">Solver input: (1) $1, -2, -3$; (3) $2, -7, 3$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: solver input ready.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal">solve for &lambda; and &mu;</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. From (1): $\lambda = 2\mu - 3$. Substitute into (3) and solve for $\mu$, then back-substitute to get $\lambda$.</p>
+      <p class="formula-lab">From (1): $\lambda = 2\mu - 3$</p>
+      $$\text{Sub into (3):}\quad 2(2\mu - 3) - 7\mu = 3.$$
+      $$4\mu - 6 - 7\mu = 3 \quad\Longrightarrow\quad -3\mu = 9 \quad\Longrightarrow\quad \mu = -3.$$
+      <p class="formula-lab">Back-substitute</p>
+      $$\lambda = 2(-3) - 3 = -9.$$
+      <p class="sense">Sense check. Plug $\lambda = -9, \mu = -3$ into (1): $-9 - 2(-3) = -9 + 6 = -3$. &#10003; Into (3): $2(-9) - 7(-3) = -18 + 21 = 3$. &#10003;</p>
+      <div class="step-result">$\lambda = -9$, $\mu = -3$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 3: $\lambda = -9$, $\mu = -3$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal">find &beta; from equation (2)</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Use the second equation $-1 + 4\lambda = \beta - \mu$ with the now-known $\lambda$ and $\mu$ to solve for $\beta$.</p>
+      <p class="formula-lab">Substitute into (2)</p>
+      $$-1 + 4(-9) = \beta - (-3).$$
+      $$-1 - 36 = \beta + 3 \quad\Longrightarrow\quad -37 = \beta + 3.$$
+      $$\beta = -40.$$
+      <p class="sense">Sense check. $4 \times (-9) = -36$; $-1 - 36 = -37$; $-37 - 3 = -40$. $\beta = -40$.</p>
+      <div class="step-result">$\beta = -40$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 4: $\beta = -40$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal">verify consistency</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The third equation was used to find $\lambda$ and $\mu$, so verify that equation (2) with $\beta = -40$ is consistent. All three equations should agree.</p>
+      <p class="formula-lab">Verify (2) with $\beta = -40$</p>
+      $$-1 + 4(-9) = -40 - (-3) \;\Rightarrow\; -37 = -37.\;\checkmark$$
+      <div class="why"><strong>Consistency check.</strong> In 3-D, three component equations overdetermine the two parameters $\lambda, \mu$. If the third equation were NOT consistent, the lines would be skew (no intersection). The fact that all three agree confirms the lines do meet at a single point.</div>
+      <p class="sense">Sense check. If the lines were skew, we would get contradictory values of $\beta$ from different pairs of equations. Here $\beta = -40$ is unique and consistent.</p>
+      <div class="step-result">$\boxed{\beta = -40}$ &mdash; confirmed by all three equations.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">(b) Find the coordinates of $P$ <span class="pmarks">[3 marks] &middot; 3 steps</span></h2>
+  <div class="given">Substitute $\lambda = -9$ into $\mathbf{r}_1$ (or $\mu = -3$ into $\mathbf{r}_2$ &mdash; both give the same point). Write the final answer as coordinates $(x, y, z)$, NOT as a column vector.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">substitute &lambda; = -9 into r&#8321;</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Use $L_1$: $\mathbf{r}_1 = (2, -1, 3) + \lambda(1, 4, 2)$ with $\lambda = -9$.</p>
+      <p class="formula-lab">Component-wise</p>
+      $$x = 2 + (-9)(1) = 2 - 9 = -7.$$
+      $$y = -1 + (-9)(4) = -1 - 36 = -37.$$
+      $$z = 3 + (-9)(2) = 3 - 18 = -15.$$
+      <p class="sense">Sense check. Each component is "base point + $\lambda \times$ direction". $x$: $2 + (-9) = -7$. $y$: $-1 + (-36) = -37$. $z$: $3 + (-18) = -15$.</p>
+      <div class="step-result">$\mathbf{r}_1 = (-7,\, -37,\, -15)$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $\mathbf{r}_1 = (-7, -37, -15)$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">verify with r&#8322;</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Cross-check by substituting $\mu = -3$ into $L_2$: $\mathbf{r}_2 = (-1, \beta, 6) + \mu(2, -1, 7)$ with $\beta = -40$.</p>
+      <p class="formula-lab">Component-wise</p>
+      $$x = -1 + (-3)(2) = -1 - 6 = -7.\;\checkmark$$
+      $$y = -40 + (-3)(-1) = -40 + 3 = -37.\;\checkmark$$
+      $$z = 6 + (-3)(7) = 6 - 21 = -15.\;\checkmark$$
+      <p class="sense">Sense check. Both parametrisations give the same point $(-7, -37, -15)$. &#10003; This confirms $\lambda = -9$ and $\mu = -3$ are correct.</p>
+      <div class="step-result">$\mathbf{r}_2 = (-7, -37, -15)$ &mdash; matches $\mathbf{r}_1$. &#10003;</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: both lines give $(-7, -37, -15)$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">write as coordinates</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Write the final answer as coordinates $(x, y, z)$ &mdash; a row in parentheses with commas. Do NOT write it as a column vector.</p>
+      <p class="formula-lab">Final answer</p>
+      $$\boxed{P = (-7,\, -37,\, -15)}.$$
+      <div class="why"><strong>Trap 7 (watch-list) &mdash; coordinates vs column vectors.</strong> Edexcel's "coordinates" command means row form $(x, y, z)$ with commas. A column vector $\begin{pmatrix} -7 \\ -37 \\ -15 \end{pmatrix}$ loses the mark. After computing $\mathbf{r}_1$, always transcribe to row form on the answer line.</div>
+      <p class="sense">Sense check. $P = (-7, -37, -15)$: three numbers in parentheses, separated by commas &mdash; the coordinate format the mark scheme demands.</p>
+      <div class="step-result">$\boxed{P = (-7,\, -37,\, -15)}$ &mdash; coordinates, not a column vector.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
