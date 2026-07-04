@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P4 26 Jun — Q7 Long division &amp; inverse function with restricted domain</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.parts { }
+.part { margin-bottom: 18px; }
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps { display: grid; gap: 12px; align-items: start; }
+.step-wrapper { display: flex; flex-direction: column; min-width: 0; }
+.carry-in { font-size: 12px; color: var(--muted); margin: 0 0 4px; padding-left: 2px; }
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P4 &middot; 26 June 2026 &middot; Harry Williams</div>
+  <h1>Q7 &middot; Long division &amp; inverse function with restricted domain</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The function $g$ is defined by $g(x) = \dfrac{5x + 3}{x + 2}$, with domain $x &gt; -2$.</p>
+    <p><strong>(a)</strong> Find the range of $g$.</p>
+    <p><strong>(b)</strong> Find $g^{-1}(x)$ and state its domain.</p>
+    <p class="q-marks">[7 marks total: (a) 3 marks, (b) 4 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">(a) Find the range of $g$ <span class="pmarks">[3 marks] &middot; 4 steps</span></h2>
+  <div class="given">$g(x) = \frac{5x+3}{x+2}$, domain $x &gt; -2$. The degree of numerator equals the degree of denominator, so do long division first. The quotient + remainder/divisor form reveals the graph as a transformation of $h(x) = -\frac{1}{x}$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">long division</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Divide $5x + 3$ by $x + 2$: how many times does $x$ go into $5x$? Answer: $5$. Then multiply $5(x + 2) = 5x + 10$ and subtract to find the remainder.</p>
+      <p class="formula-lab">Divide</p>
+      $$5x + 3 = 5(x + 2) - 7.$$
+      <p class="formula-lab">Quotient + remainder/divisor form</p>
+      $$\frac{5x + 3}{x + 2} = 5 + \frac{-7}{x + 2} = 5 - \frac{7}{x + 2}.$$
+      <div class="why"><strong>Trap 1 (watch-list).</strong> The output of long division must be written as quotient + remainder/divisor, i.e. $5 + \frac{-7}{x+2}$, NOT as the multiplied form $5(x+2) - 7$. The multiplied form is just an identity check; only the quotient+remainder form lets you read off the graph transformations (asymptotes, stretches, translations).</div>
+      <p class="sense">Sense check. Verify: $5 + \frac{-7}{x+2} = \frac{5(x+2) - 7}{x+2} = \frac{5x + 10 - 7}{x+2} = \frac{5x + 3}{x+2}$. &#10003;</p>
+      <div class="step-result">$g(x) = 5 - \dfrac{7}{x + 2}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $g(x) = 5 - \dfrac{7}{x + 2}$, domain $x &gt; -2$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">identify asymptotes</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Read the asymptotes from the quotient+remainder form. $g(x) = 5 - \frac{7}{x+2}$ is the parent $h(x) = -\frac{1}{x}$ stretched vertically by $7$, shifted left by $2$, and shifted up by $5$.</p>
+      <p class="formula-lab">Vertical asymptote</p>
+      $$x + 2 = 0 \;\Rightarrow\; x = -2 \quad\text{(denominator zero)}.$$
+      <p class="formula-lab">Horizontal asymptote</p>
+      $$g(x) \to 5 \quad\text{as } x \to \pm\infty \;\Rightarrow\; y = 5.$$
+      <div class="why"><strong>Graph transformations from $h(x) = -1/x$.</strong> (1) Vertical stretch by $7$: $-7/x$. (2) Replace $x$ with $x + 2$ (horizontal shift left by $2$): $-7/(x+2)$. (3) Add $5$ (vertical shift up by $5$): $5 - 7/(x+2)$. The vertical asymptote $x = 0$ shifts to $x = -2$; the horizontal asymptote $y = 0$ shifts to $y = 5$.</div>
+      <p class="sense">Sense check. The domain restriction $x &gt; -2$ means we are on the RIGHT branch only (to the right of the vertical asymptote $x = -2$). On this branch, $x + 2 &gt; 0$, so $\frac{7}{x+2} &gt; 0$, hence $g(x) = 5 - \frac{7}{x+2} &lt; 5$.</p>
+      <div class="step-result">Asymptotes: $x = -2$ (vertical), $y = 5$ (horizontal).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: asymptotes $x = -2$, $y = 5$; domain $x &gt; -2$ (right branch only).</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">determine range on x &gt; -2</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. On the right branch ($x &gt; -2$): as $x \to -2^+$, $x + 2 \to 0^+$, so $\frac{7}{x+2} \to +\infty$ and $g(x) = 5 - \frac{7}{x+2} \to -\infty$. As $x \to +\infty$, $\frac{7}{x+2} \to 0^+$, so $g(x) \to 5^-$ (approaches $5$ from below). So $g$ takes all values below $5$.</p>
+      <p class="formula-lab">Behaviour at the boundaries of the domain</p>
+      $$x \to -2^+:\quad g(x) \to -\infty.$$
+      $$x \to +\infty:\quad g(x) \to 5^-.$$
+      <p class="formula-lab">Range</p>
+      $$g(x) &lt; 5.$$
+      <div class="why"><strong>Trap 4 (watch-list) &mdash; x vs y in range.</strong> State the range as "$y &lt; 5$" or "$g(x) &lt; 5$" &mdash; NEVER "$x &lt; 5$". Edexcel marks "range: $x &lt; 5$" as wrong even though the inequality value is correct. Ranges use $y$ (or $f(x)$, $g(x)$); domains use $x$.</div>
+      <p class="sense">Sense check. On $x &gt; -2$, $g$ is continuous and strictly increasing (the $-\frac{7}{x+2}$ term increases toward $0$ as $x$ grows). So $g$ sweeps from $-\infty$ up to (but not reaching) $5$. Every value $&lt; 5$ is attained exactly once &mdash; confirming $g$ is one-to-one on this domain.</p>
+      <div class="step-result">Range: $g(x) &lt; 5$, i.e. $\boxed{y &lt; 5}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 3: range $y &lt; 5$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">state the range</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Box the range in the correct wording. Since $g$ is one-to-one on $x &gt; -2$ (strictly increasing), the inverse exists and its domain will be this range.</p>
+      <p class="formula-lab">Range</p>
+      $$\boxed{\text{Range of } g: \quad y &lt; 5}.$$
+      <div class="why"><strong>Why the range matters.</strong> The domain of $g^{-1}$ equals the range of $g$ (the inverse undoes $g$, so its inputs must be exactly the outputs $g$ can produce). We will use $y &lt; 5$ as the domain of $g^{-1}$ in part (b).</div>
+      <p class="sense">Sense check. $g$ never reaches $5$ (horizontal asymptote), so $y = 5$ is excluded. $g$ goes to $-\infty$ near $x = -2$, so all values below $5$ are covered.</p>
+      <div class="step-result">$\boxed{\text{Range: } y &lt; 5}$ &mdash; this becomes the domain of $g^{-1}$.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">(b) Find $g^{-1}(x)$ and state its domain <span class="pmarks">[4 marks] &middot; 5 steps</span></h2>
+  <div class="given">To find $g^{-1}$: set $y = \frac{5x+3}{x+2}$ and solve for $x$ in terms of $y$. Then swap $x \leftrightarrow y$ to get $g^{-1}(x)$. The domain of $g^{-1}$ = range of $g$ = $y &lt; 5$ (from part (a)).</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal">set y = g(x) and cross-multiply</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Write $y = \frac{5x+3}{x+2}$ and multiply both sides by $(x + 2)$ to clear the denominator.</p>
+      <p class="formula-lab">Cross-multiply</p>
+      $$y(x + 2) = 5x + 3.$$
+      $$xy + 2y = 5x + 3.$$
+      <p class="sense">Sense check. The denominator $x + 2 \neq 0$ on the domain $x &gt; -2$, so multiplying is safe (no division by zero).</p>
+      <div class="step-result">$xy + 2y = 5x + 3$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $xy + 2y = 5x + 3$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal">collect x-terms</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Move all $x$-terms to one side, all non-$x$ terms to the other. $xy - 5x = 3 - 2y$.</p>
+      <p class="formula-lab">Rearrange</p>
+      $$xy - 5x = 3 - 2y.$$
+      <p class="formula-lab">Factor out $x$</p>
+      $$x(y - 5) = 3 - 2y.$$
+      <p class="sense">Sense check. $xy - 5x = x(y - 5)$. The factor $(y - 5)$ is the key &mdash; it is non-zero because $y &lt; 5$ (the range), so we can divide.</p>
+      <div class="step-result">$x(y - 5) = 3 - 2y$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: $x(y - 5) = 3 - 2y$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal">solve for x</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Divide both sides by $(y - 5)$ to isolate $x$. The condition $y \neq 5$ is guaranteed by the range $y &lt; 5$.</p>
+      <p class="formula-lab">Divide</p>
+      $$x = \frac{3 - 2y}{y - 5}.$$
+      <p class="sense">Sense check. Numerator $3 - 2y$; denominator $y - 5$. At $y = 0$: $x = \frac{3}{-5} = -\frac{3}{5}$. Check: $g(-\frac{3}{5}) = \frac{5(-\frac{3}{5}) + 3}{-\frac{3}{5} + 2} = \frac{-3 + 3}{\frac{7}{5}} = 0$. &#10003;</p>
+      <div class="step-result">$x = \dfrac{3 - 2y}{y - 5}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 3: $x = \dfrac{3 - 2y}{y - 5}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal">swap to get g&#8315;&sup1;(x)</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Swap $x$ and $y$ to write the inverse function in standard notation $g^{-1}(x)$. This gives $g^{-1}(x) = \frac{3 - 2x}{x - 5}$.</p>
+      <p class="formula-lab">Swap $x \leftrightarrow y$</p>
+      $$g^{-1}(x) = \frac{3 - 2x}{x - 5}.$$
+      <div class="why"><strong>Trap 2 (watch-list) &mdash; composite $fg$ vs $gf$.</strong> Last week on Q3d Phuc ended up with $\ln$ on both sides because $f$ and $g$ were swapped. Read $fg(x)$ as "$f$ of $g$ of $x$": the rightmost function acts first. When finding an inverse, there is no composition &mdash; just solve and swap &mdash; but the same "which function acts first" discipline applies.</div>
+      <p class="sense">Sense check. Verify $g(g^{-1}(x)) = x$: $g\!\left(\frac{3-2x}{x-5}\right) = \frac{5\cdot\frac{3-2x}{x-5} + 3}{\frac{3-2x}{x-5} + 2}$. Multiply top and bottom by $(x - 5)$: $\frac{5(3-2x) + 3(x-5)}{(3-2x) + 2(x-5)} = \frac{15 - 10x + 3x - 15}{3 - 2x + 2x - 10} = \frac{-7x}{-7} = x$. &#10003;</p>
+      <div class="step-result">$g^{-1}(x) = \dfrac{3 - 2x}{x - 5}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 4: $g^{-1}(x) = \dfrac{3 - 2x}{x - 5}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal">state the domain of g&#8315;&sup1;</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The domain of $g^{-1}$ = the range of $g$ = $y &lt; 5$ (from part a). Restate using $x$: domain of $g^{-1}$ is $x &lt; 5$. This is worth one mark &mdash; do not forget to state it.</p>
+      <p class="formula-lab">Domain of $g^{-1}$</p>
+      $$\text{Domain of } g^{-1}: \quad x &lt; 5.$$
+      <div class="why"><strong>Trap 3 (watch-list) &mdash; forgetting the domain of $g^{-1}$.</strong> Question phrasing is sneaky; the domain is marked anyway. Whenever you write an inverse function, the very next line is its domain (= range of the original). Phuc lost this mark before &mdash; always write it.</div>
+      <div class="why"><strong>Trap 4 (watch-list) &mdash; x vs y wording.</strong> Domains use $x$: "domain: $x &lt; 5$". Ranges use $y$: "range: $y &lt; 5$". Mixing them loses the mark even if the number $5$ is correct.</div>
+      <p class="sense">Sense check. The denominator of $g^{-1}(x) = \frac{3-2x}{x-5}$ is zero at $x = 5$, which is excluded by $x &lt; 5$. &#10003; The range of $g$ ($y &lt; 5$) becomes the domain of $g^{-1}$ ($x &lt; 5$) &mdash; the swap is consistent.</p>
+      <div class="step-result">$\boxed{g^{-1}(x) = \dfrac{3 - 2x}{x - 5},\;\;\text{domain } x &lt; 5}$.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
