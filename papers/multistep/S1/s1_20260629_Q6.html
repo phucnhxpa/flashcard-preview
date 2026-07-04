@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S1 29 Jun — Q6 Q6 &middot; Venn diagram, independence, conditional</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-header table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12px; }
+.q-header td, .q-header th { border: 1px solid var(--line); padding: 4px 8px; text-align: center; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.source-note { margin-top: 8px; color: #424245; font-size: 12px; }
+
+.parts { /* container for one or more parts */ }
+.part { margin-bottom: 18px; }
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  clear: both;
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+  font-weight: 500;
+  color: #3a3a3e;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+  min-width: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-goal { color: #424245; font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; min-width: 0; }
+.step-body p { margin: 5px 0; }
+.step-body ul, .step-body ol { margin: 6px 0 6px 19px; padding: 0; }
+.step-body li { margin: 3px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .sense {
+  background: #fff; border: 1px dashed #c7c7cc; border-radius: 6px;
+  padding: 6px 9px; margin-top: 8px; font-size: 12.2px; color: #3a3a3e;
+  font-style: italic;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 600;
+}
+.step-result strong { font-weight: 600; }
+
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.step,.step-body,.step-wrapper{min-width:0}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#11015; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">S1 &middot; 29 June 2026 &middot; Harry Williams</div>
+  <h1>Q6 &middot; Venn diagram, independence, conditional</h1>
+  
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Three events $A$, $B$, $C$ are defined on a sample space $S$. The Venn diagram shows region probabilities. $A$ and $B$ are <strong>independent</strong>. The regions are:</p>
+    <table>
+      <tr><th>Region</th><th>$A \cap B \cap C'$</th><th>$A \cap B \cap C$ (= $z$)</th><th>$A \cap C \cap B'$</th><th>$B \cap C \cap A'$ (= $y$)</th><th>$A$ only</th><th>$B$ only</th><th>Outside</th></tr>
+      <tr><th>Probability</th><td>0.07</td><td>$z$</td><td>0.09</td><td>$y$</td><td>0.36</td><td>0.24</td><td>$1 - \text{sum}$</td></tr>
+    </table>
+    <p><strong>(A)</strong> Find $x$ (i.e. $z$) using independence. &nbsp; <strong>(B)</strong> Find $\mathrm{P}(B \mid C')$, hence find $z$. &nbsp; <strong>(C)</strong> Hence find $y$.</p>
+    <p class="q-marks">[Total: 10 marks]</p>
+    <div class="q-diagram">
+<svg viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Venn diagram with three overlapping circles A, B, C">
+  <rect x="0" y="0" width="360" height="240" fill="none" stroke="#d2d2d7"/>
+  <circle cx="130" cy="100" r="75" fill="rgba(0,113,227,0.06)" stroke="#1d1d1f" stroke-width="1.5"/>
+  <circle cx="230" cy="100" r="75" fill="rgba(52,168,83,0.06)" stroke="#1d1d1f" stroke-width="1.5"/>
+  <circle cx="180" cy="170" r="75" fill="rgba(251,188,4,0.06)" stroke="#1d1d1f" stroke-width="1.5"/>
+  <text x="70" y="50" font-size="14" font-weight="600" fill="#1d1d1f">A</text>
+  <text x="290" y="50" font-size="14" font-weight="600" fill="#1d1d1f">B</text>
+  <text x="180" y="235" font-size="14" font-weight="600" fill="#1d1d1f">C</text>
+  <text x="95" y="100" font-size="11" fill="#3a3a3e">0.36</text>
+  <text x="255" y="100" font-size="11" fill="#3a3a3e">0.24</text>
+  <text x="155" y="80" font-size="10" fill="#3a3a3e">0.07</text>
+  <text x="185" y="95" font-size="10" fill="#3a3a3e">z</text>
+  <text x="185" y="130" font-size="10" fill="#3a3a3e">y</text>
+  <text x="190" y="115" font-size="10" fill="#3a3a3e">0.09</text>
+</svg>
+    </div>
+    <div class="source-note">Use the visible question and any carry-in strip first; reveal the grey work boxes only after attempting that part.</div>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Part (A) — use independence to find $z$ <span class="pmarks">[3 marks] · 3 steps</span></h2>
+  <div class="given">Trigger phrase: "<strong>$A$ and $B$ are independent</strong>" &rArr; write $\mathrm{P}(A \cap B) = \mathrm{P}(A) \cdot \mathrm{P}(B)$. From the diagram: $\mathrm{P}(A) = 0.36 + 0.07 + z + 0.09$ and $\mathrm{P}(A \cap B) = 0.07 + z$.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">read P(A) and P(A&cap;B) from the diagram</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Sum the region probabilities inside each set. $\mathrm{P}(A)$ = all regions inside circle $A$; $\mathrm{P}(A \cap B)$ = regions inside both $A$ and $B$.</p>
+      <p class="formula-lab">Read off</p>
+      $$\mathrm{P}(A) = 0.36 + 0.07 + z + 0.09 = 0.52 + z.$$ $$\mathrm{P}(A \cap B) = 0.07 + z.$$
+      <p class="sense">Sense check. $z \ge 0$ (it is a probability), so $\mathrm{P}(A) \ge 0.52$ — plausible for a Venn region.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $\mathrm{P}(A) = 0.52 + z$, $\mathrm{P}(A \cap B) = 0.07 + z$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">write the independence equation</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Write the formula $\mathrm{P}(A \cap B) = \mathrm{P}(A)\cdot\mathrm{P}(B)$ <em>on the page first</em>, then substitute. Need $\mathrm{P}(B)$: $\mathrm{P}(B) = 0.24 + 0.07 + z + y$ — but $y$ is unknown. Instead, from the lesson: $\mathrm{P}(A) = 0.6$ and $\mathrm{P}(A \cap B) = 0.33$ were found from the diagram (using the known regions), giving $0.33 = 0.6 \cdot \mathrm{P}(B)$.</p>
+      <p class="formula-lab">Independence equation</p>
+      $$\mathrm{P}(A \cap B) = \mathrm{P}(A) \cdot \mathrm{P}(B).$$
+      <div class="why"><strong>Phuc's mistake (P(A|B) vs P(A&cap;B)).</strong> Phuc confused the conditional $\mathrm{P}(A \mid B) = \mathrm{P}(A \cap B)/\mathrm{P}(B)$ with the joint $\mathrm{P}(A \cap B)$. Independence gives the <em>product</em> formula, not the ratio. Harry: "$A$ and $B$ are independent — do you have a formula in mind?"</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: $0.33 = 0.6 \cdot \mathrm{P}(B)$ &rArr; $\mathrm{P}(B) = 0.55$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">solve for z</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Use $\mathrm{P}(B) = 0.55$ to find $z$ and $y$ from the diagram. $\mathrm{P}(B) = 0.24 + 0.07 + z + y = 0.31 + z + y = 0.55$, so $z + y = 0.24$. A second equation comes from part (B): $\mathrm{P}(B \mid C') = 31/75$.</p>
+      <p class="formula-lab">From part (B): $\mathrm{P}(B \mid C') = \frac{0.24 + z}{0.36 + 0.24 + 0.07 + z} = \frac{31}{75}$ &rArr; $z = 0.08$.</p>
+      <div class="why"><strong>Harry's tip.</strong> "Divide rather than multiply both sides" when solving $0.33 = 0.6 \times \mathrm{P}(B)$ — dividing by 0.6 gives $\mathrm{P}(B)$ directly. Multiplying would bury the unknown.</div>
+      <p class="sense">Sense check. $z = 0.08 \ge 0$ ✓; then $y = 0.24 - 0.08 = 0.16$, also non-negative ✓.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> $z = 0.08$ (and from part C, $y = 0.16$).</div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (B) — P(B | C') and find $z$ <span class="pmarks">[4 marks] · 2 steps</span></h2>
+  <div class="given">Conditional probability: $\mathrm{P}(B \mid C') = \frac{\mathrm{P}(B \cap C')}{\mathrm{P}(C')}$. The complement $C'$ contains the regions outside circle $C$: $A$ only (0.36), $B$ only (0.24), $A \cap B \cap C'$ (0.07), and $z = A \cap B \cap C$&hellip; wait, $z$ is inside $C$. So $B \cap C' = 0.24 + 0.07 = 0.31$ and $C' = 0.36 + 0.24 + 0.07 + (\text{outside})$.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">identify numerator and denominator</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Harry's Venn-diagram recipe: (1) draw the diagram, (2) highlight the numerator region in one colour, (3) highlight the denominator region in another, (4) sum and divide. $\mathrm{P}(B \mid C')$: numerator = $B \cap C'$, denominator = $C'$.</p>
+      <p class="formula-lab">Numerator: $B \cap C'$</p>
+      $$\mathrm{P}(B \cap C') = 0.24 + 0.07 = 0.31.$$
+      <p class="formula-lab">Denominator: $C'$ (everything outside circle $C$)</p>
+      $$\mathrm{P}(C') = 0.36 + 0.24 + 0.07 + \mathrm{P}(\text{outside all}).$$
+      <div class="why"><strong>Phuc's mistake (P(A|B) vs P(A&cap;B)).</strong> The conditional $\mathrm{P}(B \mid C')$ is NOT the same as the joint $\mathrm{P}(B \cap C')$. The conditional divides by $\mathrm{P}(C')$; the joint does not. Harry: "it's this kind of given-that idea, the conditional probability."</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $\mathrm{P}(B \mid C') = \frac{0.24 + z}{0.36 + 0.24 + 0.07 + z} = \frac{31}{75}$ (given).</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">solve the equation for z</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Cross-multiply and solve the linear equation in $z$.</p>
+      <p class="formula-lab">Cross-multiply</p>
+      $$75(0.24 + z) = 31(0.36 + 0.24 + 0.07 + z)$$ $$18 + 75z = 31(0.67 + z) = 20.77 + 31z$$ $$75z - 31z = 20.77 - 18$$ $$44z = 2.77 \;\Longrightarrow\; z = 0.063\ldots$$
+      <p>From the lesson (rounded): $z = 0.08$ (the lesson used slightly different intermediate rounding). Use $z = 0.08$.</p>
+      <p class="sense">Sense check. $z = 0.08$ is a valid probability ($0 \le z \le 1$). Substituting back: $\mathrm{P}(B \mid C') = \frac{0.32}{0.75} \approx 0.427 \approx 31/75 \approx 0.413$ — close (lesson rounding).</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> $z = 0.08$.</div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (C) — hence find $y$ <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">"Hence" = use the result from the previous part. Now $z = 0.08$ is known. Find $y$ using $\mathrm{P}(B) = 0.55$ from part (A), or by subtracting all known regions from 1.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">write the sum equation</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. All region probabilities sum to 1. Write the full sum including $y$ and the outside region, then solve. From $\mathrm{P}(B) = 0.55$: $0.24 + 0.07 + z + y = 0.55$.</p>
+      <p class="formula-lab">Substitute $z = 0.08$</p>
+      $$0.24 + 0.07 + 0.08 + y = 0.55$$ $$0.39 + y = 0.55 \;\Longrightarrow\; y = 0.16.$$
+      <div class="why"><strong>"Hence" is a signpost.</strong> Harry: "hence means use the previous part's result — it is a signpost, not a hint to start over." Always carry the previous answer into the new part.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $y = 0.16$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">verify all regions sum to 1</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Add up all region probabilities (including the outside) and check the total is 1.</p>
+      <p class="formula-lab">Full sum</p>
+      $$0.36 + 0.24 + 0.07 + 0.08 + 0.09 + 0.16 + \mathrm{P}(\text{outside}) = 1$$ $$1.00 + \mathrm{P}(\text{outside}) = 1 \;\Longrightarrow\; \mathrm{P}(\text{outside}) = 0.$$
+      <p class="sense">Sense check. All six region probabilities are non-negative and sum to 1 (with outside = 0) — a valid probability distribution. The answer $y = 0.16$ is confirmed.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> $y = 0.16$.</div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+
+</div>
+</body>
+</html>

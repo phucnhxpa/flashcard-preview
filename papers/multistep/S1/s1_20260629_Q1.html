@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S1 29 Jun — Q1 Q1 &middot; Regression line interpretation (horses)</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-header table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12px; }
+.q-header td, .q-header th { border: 1px solid var(--line); padding: 4px 8px; text-align: center; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.source-note { margin-top: 8px; color: #424245; font-size: 12px; }
+
+.parts { /* container for one or more parts */ }
+.part { margin-bottom: 18px; }
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  clear: both;
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+  font-weight: 500;
+  color: #3a3a3e;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+  min-width: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-goal { color: #424245; font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; min-width: 0; }
+.step-body p { margin: 5px 0; }
+.step-body ul, .step-body ol { margin: 6px 0 6px 19px; padding: 0; }
+.step-body li { margin: 3px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .sense {
+  background: #fff; border: 1px dashed #c7c7cc; border-radius: 6px;
+  padding: 6px 9px; margin-top: 8px; font-size: 12.2px; color: #3a3a3e;
+  font-style: italic;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 600;
+}
+.step-result strong { font-weight: 600; }
+
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.step,.step-body,.step-wrapper{min-width:0}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#11015; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">S1 &middot; 29 June 2026 &middot; Harry Williams</div>
+  <h1>Q1 &middot; Regression line interpretation (horses)</h1>
+  
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The table shows the height $h$ (cm) and weight $w$ (kg) of 8 horses. The regression line of $w$ on $h$ is $w = a + 3.27\,h$.</p>
+    <p><strong>(A)</strong> Find the value of $a$. &nbsp; <strong>(B)</strong> Use the regression line to estimate $w$ when $h = 186$ cm. &nbsp; <strong>(D)</strong> Interpret the gradient of the regression line in context. &nbsp; <strong>(F)</strong> State, giving a reason, which of the two estimates from part (E) is more reliable.</p>
+    <p class="q-marks">[Total: 11 marks]</p>
+    <div class="source-note">Use the visible question and any carry-in strip first; reveal the grey work boxes only after attempting that part.</div>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Part (B) — careful copying &amp; 3 s.f. <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">Regression line: $w = a + 3.27\,h$. Part (A) was correct ($a$ found from the means). Part (B) asks for the estimate at $h = 286$ — wait, the question says <strong>$h = 286$</strong>, and the front of the paper requires <strong>at least 3 significant figures</strong> for decimal answers.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">substitute carefully</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Read the value of $h$ from the question — underline it first. Substitute into $w = a + 3.27\,h$ and compute.</p>
+      <p class="formula-lab">Substitute $h = 286$</p>
+      $$w = a + 3.27 \times 286.$$
+      <div class="why"><strong>Phuc's mistake (copy error 6&rarr;9).</strong> Phuc wrote $h = 289$ instead of $h = 286$ — the 6 became a 9. Fix: <em>underline each number in the question before starting</em>. Harry: "you miscopied one of the digits here&hellip; so make sure you copy carefully."</div>
+      <p class="sense">Sense check. $3.27 \times 286 = 935.22$; $3.27 \times 289 = 945.03$ — a 10 kg difference from one digit, enough to lose both the method and accuracy marks.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $w = a + 3.27 \times 286$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">3 significant figures</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Compute the final decimal and round to <strong>at least 3 significant figures</strong>. The front of every Edexcel IAL paper states: "Inexact answers should be given to three significant figures unless otherwise stated."</p>
+      <p class="formula-lab">Round to 3 s.f.</p>
+      $$w = a + 935.22 \quad\text{(use the correct $a$)}.$$
+      <div class="why"><strong>Phuc's mistake (2 s.f.).</strong> Quoting $w = 940$ (2 s.f.) loses the accuracy mark. Round to $935$ (3 s.f.) or carry 4–5 s.f. through and round only at the end. Harry: "make sure you always give your final answers at least to three significant figures if it's a decimal."</div>
+      <p class="sense">Sense check. A horse weighing ~935 kg is plausible (heavy draft horse); 940 kg is the same answer but loses a mark for premature rounding.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (D) — interpret the gradient in context <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">The gradient of $w = a + 3.27\,h$ is $b = 3.27$. The word <strong>"interpret"</strong> means write a sentence a non-mathematician would understand, naming the actual variables (height, weight, kg, cm) and the actual number (3.27).</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">identify the four ingredients</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The interpretation sentence needs four ingredients: (1) the numerical value 3.27, (2) the rate "for each 1 cm increase in height", (3) the real-world variable names "height" and "weight", (4) the units "kg" and "cm". Also include "on average" because the line is a best fit, not an exact law.</p>
+      <p class="formula-lab">Template (memorise this)</p>
+      <p>"On average, for each 1 [unit of x] increase in [name of x], [name of y] increases by [gradient] [unit of y]."</p>
+      <div class="why"><strong>Phuc's mistake.</strong> Phuc wrote: "Positive correlation; as height increases, weight increases." This has no rate, no "on average", no number 3.27, no units. Harry: "it's not quite specific enough&hellip; they actually want you to say what the gradient is."</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: template = "On average, for each 1 [unit x] increase in [name x], [name y] increases by [b] [unit y]."</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">write the sentence</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Fill in the template with: x = height (cm), y = weight (kg), b = 3.27.</p>
+      <p class="formula-lab">Mark-scheme answer</p>
+      <p>"On average, for each 1 cm increase in height, the weight increases by 3.27 kg."</p>
+      <div class="why"><strong>Why "on average" matters.</strong> The regression line is a best fit — the data scatter around it. "On average" signals this; omitting it treats the line as an exact physical law, which it is not.</div>
+      <p class="sense">Sense check. A horse 1 cm taller is ~3.27 kg heavier on average — a small but sensible rate for a large animal.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> "On average, for each 1 cm increase in height, the weight increases by 3.27 kg."</div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (F) — interpolation vs extrapolation <span class="pmarks">[2 marks] · 2 steps</span></h2>
+  <div class="given">Part (E) produced two estimates of $w$: one for $h$ <em>inside</em> the data range and one for $h$ <em>outside</em> the data range. Part (F) asks which is more reliable, giving a reason.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">identify the data range</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Let $[h_{\min}, h_{\max}]$ be the range of heights in the original data set. Compare each estimate's $h$-value against this range.</p>
+      <ul>
+        <li>$h^*$ inside $[h_{\min}, h_{\max}]$ &rArr; <strong>interpolation</strong> &rArr; generally reliable.</li>
+        <li>$h^*$ outside $[h_{\min}, h_{\max}]$ &rArr; <strong>extrapolation</strong> &rArr; unreliable.</li>
+      </ul>
+      <div class="why"><strong>Phuc's mistake.</strong> Phuc did not use the keywords "interpolation" and "extrapolation" by name. Harry: "the key words they're looking for you to use&hellip; are interpolation versus extrapolation." The words <em>are</em> the marking points.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: inside range = interpolation (reliable); outside = extrapolation (unreliable).</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">write the answer using keywords</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. State which estimate is which, using the exact words "interpolation" and "extrapolation", then say which is more reliable.</p>
+      <p class="formula-lab">Mark-scheme answer</p>
+      <p>"The first estimate is an interpolation (within the data range), so it is more reliable. The second is an extrapolation (outside the data range), so it is less reliable."</p>
+      <div class="why"><strong>Why extrapolation is unreliable.</strong> The regression model was fitted to data within a specific range of $h$-values. Outside that range there is no evidence the linear relationship holds — the true relationship could curve, flatten, or reverse.</div>
+      <p class="sense">Sense check. The sentence uses both keywords by name and states a clear reason — earns both marks.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> "The first estimate is interpolation (reliable); the second is extrapolation (unreliable)."</div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+
+</div>
+</body>
+</html>

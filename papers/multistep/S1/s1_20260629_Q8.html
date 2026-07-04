@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S1 29 Jun — Q8 Q8 &middot; Tree diagram, P(late), reversed tree</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-header table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12px; }
+.q-header td, .q-header th { border: 1px solid var(--line); padding: 4px 8px; text-align: center; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.source-note { margin-top: 8px; color: #424245; font-size: 12px; }
+
+.parts { /* container for one or more parts */ }
+.part { margin-bottom: 18px; }
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  clear: both;
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+  font-weight: 500;
+  color: #3a3a3e;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+  min-width: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-goal { color: #424245; font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; min-width: 0; }
+.step-body p { margin: 5px 0; }
+.step-body ul, .step-body ol { margin: 6px 0 6px 19px; padding: 0; }
+.step-body li { margin: 3px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-body .sense {
+  background: #fff; border: 1px dashed #c7c7cc; border-radius: 6px;
+  padding: 6px 9px; margin-top: 8px; font-size: 12.2px; color: #3a3a3e;
+  font-style: italic;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 600;
+}
+.step-result strong { font-weight: 600; }
+
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.step,.step-body,.step-wrapper{min-width:0}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#11015; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">S1 &middot; 29 June 2026 &middot; Harry Williams</div>
+  <h1>Q8 &middot; Tree diagram, P(late), reversed tree</h1>
+  
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>When Paul goes to work he travels by car, by bicycle, or he walks. $\mathrm{P}(\text{car}) = \frac{1}{2}$, $\mathrm{P}(\text{bike}) = \frac{1}{6}$, $\mathrm{P}(\text{walk}) = \frac{1}{3}$. Given he travels by car, $\mathrm{P}(\text{late} \mid \text{car}) = \frac{1}{5}$; by bike, $\mathrm{P}(\text{late} \mid \text{bike}) = \frac{1}{10}$; on foot, $\mathrm{P}(\text{late} \mid \text{walk}) = \frac{1}{20}$.</p>
+    <p><strong>(A)</strong> Find $\mathrm{P}(\text{late})$. &nbsp; <strong>(B)</strong> Find $\mathrm{P}(\text{car} \mid \text{late})$. &nbsp; <strong>(C)</strong> Hence draw the reversed tree (late / not late first) and find the remaining probabilities.</p>
+    <p class="q-marks">[Total: 12 marks]</p>
+    <div class="q-diagram">
+<svg viewBox="0 0 440 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tree diagram: transport then late">
+  <circle cx="40" cy="140" r="4" fill="#1d1d1f"/>
+  <text x="18" y="145" font-size="11" fill="#6e6e73">Start</text>
+  <line x1="44" y1="140" x2="140" y2="60" stroke="#1d1d1f" stroke-width="1.2"/>
+  <line x1="44" y1="140" x2="140" y2="140" stroke="#1d1d1f" stroke-width="1.2"/>
+  <line x1="44" y1="140" x2="140" y2="220" stroke="#1d1d1f" stroke-width="1.2"/>
+  <text x="80" y="90" font-size="11" fill="#3a3a3e">1/2</text>
+  <text x="80" y="135" font-size="11" fill="#3a3a3e">1/6</text>
+  <text x="80" y="195" font-size="11" fill="#3a3a3e">1/3</text>
+  <circle cx="145" cy="60" r="3" fill="#1d1d1f"/><text x="150" y="55" font-size="11" fill="#1d1d1f">Car</text>
+  <circle cx="145" cy="140" r="3" fill="#1d1d1f"/><text x="150" y="135" font-size="11" fill="#1d1d1f">Bike</text>
+  <circle cx="145" cy="220" r="3" fill="#1d1d1f"/><text x="150" y="225" font-size="11" fill="#1d1d1f">Walk</text>
+  <line x1="155" y1="60" x2="260" y2="35" stroke="#1d1d1f" stroke-width="1"/><line x1="155" y1="60" x2="260" y2="85" stroke="#1d1d1f" stroke-width="1"/>
+  <text x="195" y="38" font-size="10" fill="#3a3a3e">1/5 late</text><text x="195" y="82" font-size="10" fill="#3a3a3e">4/5</text>
+  <line x1="155" y1="140" x2="260" y2="115" stroke="#1d1d1f" stroke-width="1"/><line x1="155" y1="140" x2="260" y2="165" stroke="#1d1d1f" stroke-width="1"/>
+  <text x="195" y="118" font-size="10" fill="#3a3a3e">1/10</text><text x="195" y="162" font-size="10" fill="#3a3a3e">9/10</text>
+  <line x1="155" y1="220" x2="260" y2="195" stroke="#1d1d1f" stroke-width="1"/><line x1="155" y1="220" x2="260" y2="245" stroke="#1d1d1f" stroke-width="1"/>
+  <text x="195" y="198" font-size="10" fill="#3a3a3e">1/20</text><text x="195" y="242" font-size="10" fill="#3a3a3e">19/20</text>
+  <text x="270" y="38" font-size="10" fill="#1d1d1f">Late</text><text x="270" y="85" font-size="10" fill="#6e6e73">Not</text>
+  <text x="270" y="118" font-size="10" fill="#1d1d1f">Late</text><text x="270" y="165" font-size="10" fill="#6e6e73">Not</text>
+  <text x="270" y="198" font-size="10" fill="#1d1d1f">Late</text><text x="270" y="245" font-size="10" fill="#6e6e73">Not</text>
+</svg>
+    </div>
+    <div class="source-note">Use the visible question and any carry-in strip first; reveal the grey work boxes only after attempting that part.</div>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Part (A) — P(late) by path multiplication <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">Tree sanity check: top level $\frac{1}{2} + \frac{1}{6} + \frac{1}{3} = \frac{3+1+2}{6} = 1$ ✓. Each second-level pair sums to 1 (e.g. $\frac{1}{5} + \frac{4}{5} = 1$) ✓. "Late" appears on three paths; $\mathrm{P}(\text{late})$ = sum of the three path probabilities.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">multiply along each path</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Path probability = $\mathrm{P}(\text{transport}) \times \mathrm{P}(\text{late} \mid \text{transport})$. Use $\mathrm{P}(\text{late} \mid \text{transport})$, NOT $\mathrm{P}(\text{late})$ — independence is not stated.</p>
+      <p class="formula-lab">Three paths to "late"</p>
+      $$\mathrm{P}(\text{car} \cap \text{late}) = \tfrac{1}{2} \times \tfrac{1}{5} = \tfrac{1}{10} = \tfrac{6}{60}.$$ $$\mathrm{P}(\text{bike} \cap \text{late}) = \tfrac{1}{6} \times \tfrac{1}{10} = \tfrac{1}{60}.$$ $$\mathrm{P}(\text{walk} \cap \text{late}) = \tfrac{1}{3} \times \tfrac{1}{20} = \tfrac{1}{60}.$$
+      <div class="why"><strong>Phuc's mistake (tree branch error).</strong> Writing $\mathrm{P}(\text{car}) \times \mathrm{P}(\text{late})$ in the numerator — this assumes independence, which is NOT stated. The correct factor is $\mathrm{P}(\text{late} \mid \text{car})$. Harry: "we know that it's from here&hellip; given that Paul travels by car."</div>
+      <p class="sense">Sense check. At every branch point, the children's probabilities sum to 1. Top: $1/2+1/6+1/3=1$ ✓. Car subtree: $1/5+4/5=1$ ✓.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: path probs $\frac{6}{60}, \frac{1}{60}, \frac{1}{60}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">add across paths</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. "Late" = union of three disjoint paths, so $\mathrm{P}(\text{late})$ = sum of path probabilities.</p>
+      <p class="formula-lab">Sum</p>
+      $$\mathrm{P}(\text{late}) = \frac{6}{60} + \frac{1}{60} + \frac{1}{60} = \frac{8}{60} = \frac{2}{15}.$$
+      <p class="sense">Sense check. $\frac{2}{15} \approx 0.133$ — Paul is late ~13% of the time. Plausible given the low conditional probabilities.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> $\mathrm{P}(\text{late}) = \frac{2}{15}$.</div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (B) — P(car | late) by reversing <span class="pmarks">[3 marks] · 2 steps</span></h2>
+  <div class="given">The tree is drawn "transport then late", but the question asks $\mathrm{P}(\text{car} \mid \text{late})$ — reverse the tree using the conditional formula: $\mathrm{P}(\text{car} \mid \text{late}) = \frac{\mathrm{P}(\text{car} \cap \text{late})}{\mathrm{P}(\text{late})}$.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">write the formula first</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Write $\mathrm{P}(\text{car} \mid \text{late}) = \frac{\mathrm{P}(\text{car} \cap \text{late})}{\mathrm{P}(\text{late})}$ on the page <em>before</em> substituting. This earns the method mark and prevents the P(A|B) vs P(A&cap;B) confusion.</p>
+      <p class="formula-lab">Conditional probability formula</p>
+      $$\mathrm{P}(\text{car} \mid \text{late}) = \frac{\mathrm{P}(\text{car} \cap \text{late})}{\mathrm{P}(\text{late})}.$$
+      <div class="why"><strong>Phuc's mistake (P(A|B) vs P(A&cap;B)).</strong> Phuc wrote the numerator as $\mathrm{P}(\text{car}) \times \mathrm{P}(\text{late})$ — the product, not the joint. The numerator is $\mathrm{P}(\text{car} \cap \text{late}) = \mathrm{P}(\text{car}) \times \mathrm{P}(\text{late} \mid \text{car})$, computed in part (A).</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: formula = $\frac{\mathrm{P}(\text{car} \cap \text{late})}{\mathrm{P}(\text{late})}$; from part (A): numerator $= \frac{1}{10}$, denominator $= \frac{2}{15}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">substitute and simplify</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Substitute the values from part (A) and simplify the fraction.</p>
+      <p class="formula-lab">Substitute</p>
+      $$\mathrm{P}(\text{car} \mid \text{late}) = \frac{1/10}{2/15} = \frac{1}{10} \times \frac{15}{2} = \frac{15}{20} = \frac{3}{4}.$$
+      <p class="sense">Sense check. $\frac{3}{4} = 0.75$ — given Paul is late, there's a 75% chance he took the car. This is the largest share because car has both the highest prior ($1/2$) and the highest conditional ($1/5$). Makes sense.</p>
+    </div>
+    <div class="step-result"><strong>Target:</strong> $\mathrm{P}(\text{car} \mid \text{late}) = \frac{3}{4}$.</div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">Part (C) — reversed tree (hence) <span class="pmarks">[6 marks] · 4 steps</span></h2>
+  <div class="given">"Hence" = use $\mathrm{P}(\text{late}) = \frac{2}{15}$ and $\mathrm{P}(\text{car} \mid \text{late}) = \frac{3}{4}$ from parts (A) and (B). The reversed tree has "late / not late" as the first split, then "car / bike / walk" as the second level.</div>
+  <div class="steps">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">first level of reversed tree</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The first split is late / not late. $\mathrm{P}(\text{late}) = \frac{2}{15}$ (from part A), so $\mathrm{P}(\text{not late}) = 1 - \frac{2}{15} = \frac{13}{15}$.</p>
+      <p class="formula-lab">First level</p>
+      $$\mathrm{P}(\text{late}) = \frac{2}{15}, \qquad \mathrm{P}(\text{not late}) = \frac{13}{15}.$$
+      <p class="sense">Sense check. $\frac{2}{15} + \frac{13}{15} = 1$ ✓ — the first-level children sum to 1.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $\mathrm{P}(\text{late}) = \frac{2}{15}$, $\mathrm{P}(\text{not late}) = \frac{13}{15}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">second level given late</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Under "late", the three children are car/bike/walk with conditional probabilities. $\mathrm{P}(\text{car} \mid \text{late}) = \frac{3}{4}$ (from part B). Compute $\mathrm{P}(\text{bike} \mid \text{late})$ and $\mathrm{P}(\text{walk} \mid \text{late})$ using the same reversal formula.</p>
+      <p class="formula-lab">Bike and walk given late</p>
+      $$\mathrm{P}(\text{bike} \mid \text{late}) = \frac{1/60}{2/15} = \frac{1}{60} \times \frac{15}{2} = \frac{1}{8}.$$ $$\mathrm{P}(\text{walk} \mid \text{late}) = \frac{1/60}{2/15} = \frac{1}{8}.$$ <p>Check: $\frac{3}{4} + \frac{1}{8} + \frac{1}{8} = \frac{6+1+1}{8} = 1$ ✓.</p>
+      <p class="sense">Sense check. The three children under "late" sum to 1 ✓ — the tree is valid at this node.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: given late, P(car)=3/4, P(bike)=1/8, P(walk)=1/8.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">second level given not late</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Under "not late", reverse using $\mathrm{P}(\text{transport} \mid \text{not late}) = \frac{\mathrm{P}(\text{transport} \cap \text{not late})}{\mathrm{P}(\text{not late})}$. Need the three "not late" path probabilities from the original tree.</p>
+      <p class="formula-lab">Not-late path probabilities</p>
+      $$\mathrm{P}(\text{car} \cap \text{not late}) = \tfrac{1}{2} \times \tfrac{4}{5} = \tfrac{2}{5}.$$ $$\mathrm{P}(\text{bike} \cap \text{not late}) = \tfrac{1}{6} \times \tfrac{9}{10} = \tfrac{3}{20}.$$ $$\mathrm{P}(\text{walk} \cap \text{not late}) = \tfrac{1}{3} \times \tfrac{19}{20} = \tfrac{19}{60}.$$
+      <p class="formula-lab">Conditionals given not late</p>
+      $$\mathrm{P}(\text{car} \mid \text{not late}) = \frac{2/5}{13/15} = \frac{2}{5} \times \frac{15}{13} = \frac{6}{13}.$$ $$\mathrm{P}(\text{bike} \mid \text{not late}) = \frac{3/20}{13/15} = \frac{3}{20} \times \frac{15}{13} = \frac{9}{52}.$$ $$\mathrm{P}(\text{walk} \mid \text{not late}) = \frac{19/60}{13/15} = \frac{19}{60} \times \frac{15}{13} = \frac{19}{52}.$$
+      <p class="sense">Sense check. $\frac{6}{13} + \frac{9}{52} + \frac{19}{52} = \frac{24+9+19}{52} = \frac{52}{52} = 1$ ✓.</p>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 3: given not late, P(car)=6/13, P(bike)=9/52, P(walk)=19/52.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">draw and verify the reversed tree</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Draw the reversed tree with late/not late at the first level and car/bike/walk at the second. Verify every node's children sum to 1.</p>
+      <p class="formula-lab">Reversed tree summary</p>
+      <ul>
+        <li><strong>Late</strong> ($\frac{2}{15}$): car $\frac{3}{4}$, bike $\frac{1}{8}$, walk $\frac{1}{8}$.</li>
+        <li><strong>Not late</strong> ($\frac{13}{15}$): car $\frac{6}{13}$, bike $\frac{9}{52}$, walk $\frac{19}{52}$.</li>
+      </ul>
+      <div class="why"><strong>Tree-diagram sanity check.</strong> At <em>every</em> branch point, the children's probabilities sum to 1. Late node: $\frac{3}{4}+\frac{1}{8}+\frac{1}{8}=1$ ✓. Not-late node: $\frac{6}{13}+\frac{9}{52}+\frac{19}{52}=1$ ✓. Top level: $\frac{2}{15}+\frac{13}{15}=1$ ✓. Harry: "in probability, certainty is represented by the number one."</div>
+    </div>
+    <div class="step-result"><strong>Target:</strong> Reversed tree with late (2/15) &rarr; {car 3/4, bike 1/8, walk 1/8} and not late (13/15) &rarr; {car 6/13, bike 9/52, walk 19/52}.</div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+
+</div>
+</body>
+</html>
