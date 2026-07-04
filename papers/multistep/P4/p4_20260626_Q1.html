@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P4 26 Jun — Q1 Binomial series, negative power & range of validity</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.parts { }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P4 &middot; 26 June 2026 &middot; Harry Williams</div>
+  <h1>Q1 &middot; Binomial series, negative power &amp; range of validity</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Expand $(2 + 5x)^{-2}$ in ascending powers of $x$, up to and including the term in $x^3$, simplifying each coefficient as far as possible.</p>
+    <p><strong>(b)</strong> State the range of values of $x$ for which the expansion is valid.</p>
+    <p class="q-marks">[5 marks total: (a) 4 marks, (b) 1 mark]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">(a) Expand $(2 + 5x)^{-2}$ up to $x^3$ <span class="pmarks">[4 marks] &middot; 5 steps</span></h2>
+  <div class="given">The index is $n = -2$ (negative, non-integer-power territory). The general binomial series for any real $n$ applies: $(1 + X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \cdots$, valid for $|X| &lt; 1$. The bracket must start with $1$, so factor out the leading constant $2$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal">factor out 2</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Rewrite $(2 + 5x)^{-2}$ so the bracket starts with $1$. Factor $2$ out of the bracket: $2 + 5x = 2\!\left(1 + \dfrac{5x}{2}\right)$.</p>
+      <p class="formula-lab">Factor out</p>
+      $$(2 + 5x)^{-2} = \left[2\!\left(1 + \tfrac{5x}{2}\right)\right]^{-2} = 2^{-2}\!\left(1 + \tfrac{5x}{2}\right)^{-2} = \tfrac{1}{4}\!\left(1 + \tfrac{5x}{2}\right)^{-2}.$$
+      <div class="why"><strong>Phuc's gap (self-assessed, Q1b).</strong> Phuc knew the binomial series formula but forgot the factor-out step on this lesson's warm-up. Without factoring out $2$, the bracket does not start with $1$ and the general formula does not apply directly &mdash; you would get wrong coefficients. Always pull the leading constant out first.</div>
+      <p class="sense">Sense check. $2^{-2} = 1/4$; the bracket is now in the form $(1 + X)^n$ with $X = 5x/2$ and $n = -2$.</p>
+      <div class="step-result">$(2 + 5x)^{-2} = \dfrac{1}{4}\!\left(1 + \dfrac{5x}{2}\right)^{-2}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $(2 + 5x)^{-2} = \tfrac{1}{4}(1 + \tfrac{5x}{2})^{-2}$, with $X = \tfrac{5x}{2}$, $n = -2$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal">apply binomial</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Apply the general binomial series $(1 + X)^n = 1 + nX + \frac{n(n-1)}{2!}X^2 + \frac{n(n-1)(n-2)}{3!}X^3 + \cdots$ with $n = -2$ and $X = \frac{5x}{2}$. Compute each binomial coefficient carefully &mdash; the signs alternate for negative $n$.</p>
+      <p class="formula-lab">Coefficients for $n = -2$</p>
+      $$\binom{-2}{0} = 1,\quad \binom{-2}{1} = -2,\quad \binom{-2}{2} = \frac{(-2)(-3)}{2!} = 3,\quad \binom{-2}{3} = \frac{(-2)(-3)(-4)}{3!} = -4.$$
+      <p class="formula-lab">Series in $X$</p>
+      $$(1 + X)^{-2} = 1 - 2X + 3X^2 - 4X^3 + \cdots$$
+      <div class="why"><strong>Trap 11 (watch-list).</strong> Do NOT use the positive-integer binomial formula $\sum \binom{n}{k} a^{n-k} b^k$ here &mdash; that terminates and is only for $n \in \mathbb{N}$. For $n = -2$ the series is infinite and uses the general formula with falling factorial-style coefficients.</div>
+      <p class="sense">Sense check. Signs alternate: $+$, $-$, $+$, $-$, &hellip; because each extra factor in the numerator contributes one more negative sign. The magnitudes $1, 2, 3, 4$ come from $|n|, |n|+1, |n|+2, |n|+3$.</p>
+      <div class="step-result">$(1 + X)^{-2} = 1 - 2X + 3X^2 - 4X^3 + \cdots$</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 2: $(1 + X)^{-2} = 1 - 2X + 3X^2 - 4X^3 + \cdots$, $X = \tfrac{5x}{2}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal">substitute X = 5x/2</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Replace $X$ with $\frac{5x}{2}$ in each term. Keep fractions unsimplified for now &mdash; you will multiply through by $\frac{1}{4}$ next, which simplifies denominators.</p>
+      <p class="formula-lab">Substitute</p>
+      $$1 - 2\!\left(\tfrac{5x}{2}\right) + 3\!\left(\tfrac{5x}{2}\right)^{\!2} - 4\!\left(\tfrac{5x}{2}\right)^{\!3}$$
+      $$= 1 - 5x + 3 \cdot \tfrac{25x^2}{4} - 4 \cdot \tfrac{125x^3}{8}$$
+      $$= 1 - 5x + \tfrac{75}{4}x^2 - \tfrac{125}{2}x^3 + \cdots$$
+      <p class="sense">Sense check. The $x^1$ term: $-2 \times \frac{5}{2} = -5$ &mdash; clean integer. The $x^2$ term: $3 \times \frac{25}{4} = \frac{75}{4}$. The $x^3$ term: $-4 \times \frac{125}{8} = -\frac{125}{2}$.</p>
+      <div class="step-result">$(1 + \tfrac{5x}{2})^{-2} = 1 - 5x + \tfrac{75}{4}x^2 - \tfrac{125}{2}x^3 + \cdots$</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 3: $(1 + \tfrac{5x}{2})^{-2} = 1 - 5x + \tfrac{75}{4}x^2 - \tfrac{125}{2}x^3 + \cdots$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal">multiply by 1/4</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Multiply every term by the prefactor $\frac{1}{4}$ that came from $2^{-2}$. Simplify each coefficient to lowest terms.</p>
+      <p class="formula-lab">Multiply by $\frac{1}{4}$</p>
+      $$\tfrac{1}{4}\!\left(1 - 5x + \tfrac{75}{4}x^2 - \tfrac{125}{2}x^3\right) = \tfrac{1}{4} - \tfrac{5}{4}x + \tfrac{75}{16}x^2 - \tfrac{125}{8}x^3.$$
+      <p class="sense">Sense check. $\frac{1}{4} \times 1 = \frac{1}{4}$; $\frac{1}{4} \times (-5) = -\frac{5}{4}$; $\frac{1}{4} \times \frac{75}{4} = \frac{75}{16}$; $\frac{1}{4} \times (-\frac{125}{2}) = -\frac{125}{8}$. Denominators double each step, as expected.</p>
+      <div class="step-result">$(2+5x)^{-2} = \tfrac{1}{4} - \tfrac{5}{4}x + \tfrac{75}{16}x^2 - \tfrac{125}{8}x^3 + \cdots$</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 4: $(2+5x)^{-2} = \tfrac{1}{4} - \tfrac{5}{4}x + \tfrac{75}{16}x^2 - \tfrac{125}{8}x^3 + \cdots$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal">write final answer</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Box the full expansion with the $+\cdots$ to signal it is an infinite series. The question asked "up to and including $x^3$", so $x^3$ is the last explicit term.</p>
+      <p class="formula-lab">Final expansion</p>
+      $$(2 + 5x)^{-2} = \tfrac{1}{4} - \tfrac{5}{4}x + \tfrac{75}{16}x^2 - \tfrac{125}{8}x^3 + \cdots$$
+      <div class="why"><strong>Trap (watch-list).</strong> Omitting the range of validity in part (b) is the single most common mark lost on binomial questions. Always end the expansion with "$+\cdots$, valid for $|x| &lt; \cdots$".</div>
+      <p class="sense">Sense check. Plug in $x = 0$: LHS = $2^{-2} = 1/4$, RHS = $1/4$. &#10003; First coefficient of each term alternates in sign: $+, -, +, -$ &mdash; consistent with $n = -2$.</p>
+      <div class="step-result">$\boxed{(2+5x)^{-2} = \tfrac{1}{4} - \tfrac{5}{4}x + \tfrac{75}{16}x^2 - \tfrac{125}{8}x^3 + \cdots}$</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="part">
+  <h2 class="part-h">(b) State the range of validity <span class="pmarks">[1 mark] &middot; 2 steps</span></h2>
+  <div class="given">The general binomial series $(1 + X)^n$ converges only when $|X| &lt; 1$. Here $X = \frac{5x}{2}$. Solve the inequality for $x$.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/2</span><span class="step-goal">apply |X| &lt; 1</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The convergence condition is $|X| &lt; 1$. With $X = \frac{5x}{2}$, write the inequality and solve for $|x|$.</p>
+      <p class="formula-lab">Convergence condition</p>
+      $$\left|\tfrac{5x}{2}\right| &lt; 1 \quad\Longrightarrow\quad \tfrac{5}{2}|x| &lt; 1 \quad\Longrightarrow\quad |x| &lt; \tfrac{2}{5}.$$
+      <div class="why"><strong>Phuc's self-assessed gap (Q1b).</strong> Phuc's email flagged "binomial range" as a gap. The pattern: identify $X$ from the bracket $1 + X$, then solve $|X| &lt; 1$ for $x$. The factor inside $X$ (here $\frac{5}{2}$) flips to the RHS: $|x| &lt; \frac{1}{5/2} = \frac{2}{5}$.</div>
+      <p class="sense">Sense check. $2/5 = 0.4$. At $x = 0.4$, the bracket $2 + 5(0.4) = 4$ and $(1 + X) = (1 + 1) = 2$, so $|X| = 1$ &mdash; the boundary, where the series diverges. The strict inequality $|x| &lt; 2/5$ correctly excludes the boundary.</p>
+      <div class="step-result">$|x| &lt; \dfrac{2}{5}$.</div>
+    </div>
+  </div>
+</div>
+    <div class="step-wrapper">
+  <div class="carry-in">&#8627; from STEP 1: $|x| &lt; \tfrac{2}{5}$.</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/2</span><span class="step-goal">state answer</span></span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Write the final answer in the form Edexcel expects: "$|x| &lt; \frac{2}{5}$" or equivalently "$-\frac{2}{5} &lt; x &lt; \frac{2}{5}$". Either is accepted.</p>
+      <p class="formula-lab">Final answer</p>
+      $$\boxed{|x| &lt; \tfrac{2}{5}} \qquad\text{or equivalently}\qquad -\tfrac{2}{5} &lt; x &lt; \tfrac{2}{5}.$$
+      <div class="why"><strong>Trap (watch-list).</strong> A very common error is to state $|x| &lt; 1$ (forgetting the $\frac{5}{2}$ scaling inside $X$). The validity range is determined by the $X$ in the bracket $1 + X$, not by $x$ directly. Always solve $|X| &lt; 1$ for $x$.</div>
+      <p class="sense">Sense check. The expansion is centred at $x = 0$; the radius of convergence is $2/5$. Outside this interval the series diverges from the true value of $(2 + 5x)^{-2}$.</p>
+      <div class="step-result">Valid for $\boxed{|x| &lt; \tfrac{2}{5}}$.</div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+  </div>
+</div>
+</body>
+</html>
