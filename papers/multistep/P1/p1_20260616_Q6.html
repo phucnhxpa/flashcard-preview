@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P1 16 Jun — Q6 Hidden quadratic, reject negative root</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+.parts { }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P1 &middot; 16 June 2026 &middot; Harry Williams</div>
+  <h1>P1 Q6 &middot; Hidden quadratic &mdash; $2x^4 - 15x^2 - 50 = 0$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Solve the equation $$2x^4 - 15x^2 - 50 = 0$$ giving real solutions in surd form. <strong>You must show all stages of your working; solutions relying on calculator technology are not acceptable.</strong></p>
+    <p class="q-marks">[5 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Solution — Hidden quadratic via u = x² <span class="pmarks">[5 marks] &middot; 5 steps</span></h2>
+  <div class="given">Solve $2x^4 - 15x^2 - 50 = 0$, giving real solutions in surd form. Use the substitution $u = x^2$.</div>
+  <div class="steps" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/5</span><span class="step-goal">spot the even-power pattern</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The equation $2x^4 - 15x^2 - 50 = 0$ contains only <em>even</em> powers of $x$. Let $u = x^2$, so $x^4 = (x^2)^2 = u^2$. The quartic becomes a standard quadratic in $u$.</p><p class="formula-lab">Substitution</p>$$\text{Let } u = x^2. \qquad 2u^2 - 15u - 50 = 0.$$<div class="why"><strong>Why this works.</strong> A quartic of the form $ax^4 + bx^2 + c = 0$ is a &ldquo;quadratic in disguise.&rdquo; The substitution $u = x^2$ reduces it to a quadratic, which factorises or uses the formula. Always check for even powers first.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: $u = x^2$, $\;2u^2 - 15u - 50 = 0$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/5</span><span class="step-goal">factorise the quadratic in u</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Factorise $2u^2 - 15u - 50$ by the split-middle method: find two numbers that multiply to $2 \times (-50) = -100$ and add to $-15$. The pair is $-20$ and $+5$.</p><p class="formula-lab">Split and factor</p>$$2u^2 - 20u + 5u - 50 = 0$$$$2u(u - 10) + 5(u - 10) = 0$$$$(2u + 5)(u - 10) = 0.$$<p class="formula-lab">Solve for $u$</p>$$u = -\frac{5}{2} \quad\text{or}\quad u = 10.$$<div class="why"><strong>Phuc's trap: monic-style shortcut.</strong> Attempting $(u - r_1)(u - r_2)$ directly without the split-middle step loses method marks on a non-monic quadratic. Always show the split: $2u^2 - 15u - 50 \to 2u^2 - 20u + 5u - 50$.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: $u = -\tfrac52$ or $u = 10$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/5</span><span class="step-goal">back-substitute u = x²</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Replace $u$ with $x^2$ in each candidate root and solve for $x$.</p><p class="formula-lab">From $u = 10$</p>$$x^2 = 10 \;\Longrightarrow\; x = \pm\sqrt{10}.$$<p class="formula-lab">From $u = -\tfrac{5}{2}$</p>$$x^2 = -\frac{5}{2}.$$<div class="why"><strong>Do NOT stop at $u$.</strong> The question asks for $x$, not $u$. A common error is to box $u = 10$ and $u = -5/2$ as the final answer &mdash; that loses the back-substitution marks. Always return to the original variable.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 3: $x^2 = 10$ or $x^2 = -\tfrac52$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/5</span><span class="step-goal">reject with reason</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Check each candidate against the substitution $u = x^2$. A real square is always non-negative: $x^2 \geq 0$ for all real $x$. So $u = x^2 = -5/2 < 0$ has no real solution.</p><p class="formula-lab">Reject $u = -\tfrac{5}{2}$</p>$$\text{Reject } u = -\frac{5}{2} \text{ since } x^2 \geq 0 \text{ for all real } x.$$<div class="why"><strong>Phuc's mistake.</strong> Just crossed out $u = -5/2$ without a reason. Examiners award a mark for the <em>rejection with justification</em>, not just the rejection itself. Always write: &ldquo;reject $u = -5/2$ since $x^2 \geq 0$&rdquo; or &ldquo;reject since a square cannot be negative.&rdquo; The reason is part of the answer.</div><p class="sense">Sense check. The other root $u = 10 > 0$ is admissible: $x^2 = 10$ gives two real solutions $x = \pm\sqrt{10}$.</p>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 4: reject $u=-\tfrac52$; keep $x^2=10$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 5/5</span><span class="step-goal">state the real solutions</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Collect the admissible real solutions and box them.</p><p class="formula-lab">Final answer</p>$$\boxed{x = \sqrt{10} \quad\text{and}\quad x = -\sqrt{10}.}$$<p class="sense">Sense check. Back-substitute $x = \sqrt{10}$: $2(\sqrt{10})^4 - 15(\sqrt{10})^2 - 50 = 2(100) - 15(10) - 50 = 200 - 150 - 50 = 0$ &mdash; satisfies. Two real roots, as expected for a quartic with two real and two complex roots.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+  </div>
+</div>
+</body>
+</html>
