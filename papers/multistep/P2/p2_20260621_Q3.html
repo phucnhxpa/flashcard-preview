@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2 21 Jun &mdash; Q3 Trapezium rule, $\int_0^4 \sqrt{x}\,dx$</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink); -webkit-font-smoothing: antialiased; padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px; margin: 0 auto; background: #ffffff;
+  border: 1px solid var(--line); border-radius: 18px;
+  padding: 26px 30px 28px; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+h1 { font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif; margin: 0 0 16px; letter-spacing: -0.01em; }
+.q-header { background: var(--soft); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55; }
+.q-header .label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600; }
+.q-header p { margin: 4px 0; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+.part { margin-bottom: 18px; }
+.part-h { font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given { background: #fff; border-left: 2.5px solid var(--ink); padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0; }
+.steps { display: grid; gap: 12px; align-items: start; }
+.step-wrapper { display: flex; flex-direction: column; min-width: 0; }
+.carry-in { font-size: 12px; color: var(--muted); margin: 0 0 4px; padding-left: 2px; }
+.step { border: 1px solid var(--work-line); background: var(--work-bg); border-radius: 10px; padding: 12px 14px 11px; margin: 0; }
+.step-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+.step-tag { font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif; display: flex; align-items: flex-start; gap: 7px; flex: 1; }
+.step-num { background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px; letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2; margin-top: 1px; }
+.step-marks { font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0; letter-spacing: .04em; margin-top: 3px; }
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why { background: #fff; border-left: 2px solid var(--ink); padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e; border-radius: 0 5px 5px 0; }
+.step-result { margin-top: 8px; padding: 6px 10px; background: #fff; border: 1px dashed var(--work-line); border-radius: 6px; font-size: 12.5px; font-weight: 500; }
+.step-result strong { font-weight: 600; }
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">P2 &middot; Edexcel IAL (WMA14) &middot; Oct 2025 review &middot; Harry Williams &middot; 21 June 2026</div>
+  <h1>Q3 &middot; Trapezium rule &mdash; 8 strips, $n$ vs $n+1$ trap</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>Estimate $\displaystyle\int_0^4 \sqrt{x}\,dx$ using 8 strips.</p><p>How many y-values do you need? Verify your count before computing.</p>
+    <p class="q-marks">[4 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Solution <span class="pmarks">[4 marks] &middot; 4 steps</span></h2>
+  <div class="given">$\displaystyle\int_0^4 \sqrt{x}\,dx$ using 8 strips. State the number of y-values needed before computing.</div>
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">count strips vs y-values</span></span>
+      <span class="step-marks">B1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. 8 strips means 8+1 = 9 y-values: $y_0, y_1, \ldots, y_8$. <strong>Never</strong> confuse the strip count with the y-value count.</p><p class="formula-lab">Strip / y-value count</p>$$n = 8 \text{ strips} \;\Rightarrow\; 9 \text{ y-values } (y_0 \text{ to } y_8), \quad h = \frac{4-0}{8} = 0.5.$$<div class="why"><strong>Phuc&#39;s mistake (Harry&#39;s red flag).</strong> Counted $n=8$ and wrote $y_0,\ldots,y_7$ (only 8 values). $n$ strips need $n+1$ y-values &mdash; the last value $y_n$ is easy to forget.</div><p class="sense">Sense check. Count the fence-posts: $0, 0.5, 1.0, \ldots, 4.0$ gives $9$ $x$-values and $9$ $y$-values &check;</p>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: $h=0.5$, 9 y-values $y_0\ldots y_8$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">tabulate y_i</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Compute $y_i = \sqrt{x_i}$ at each $x_i = 0, 0.5, 1, \ldots, 4$. Keep exact surd forms where possible.</p><p class="formula-lab">Table of values</p><p>$y_0=\sqrt0=0$, $y_1=\sqrt{0.5}=\tfrac{\sqrt2}{2}\approx0.7071$, $y_2=\sqrt1=1$, $y_3=\sqrt{1.5}\approx1.2247$, $y_4=\sqrt2\approx1.4142$, $y_5=\sqrt{2.5}\approx1.5811$, $y_6=\sqrt3\approx1.7321$, $y_7=\sqrt{3.5}\approx1.8708$, $y_8=\sqrt4=2$.</p>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: table of $y_i$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">apply trapezium rule</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. $\displaystyle\int_0^4 \sqrt{x}\,dx \approx \frac{h}{2}\bigl[y_0 + y_8 + 2(y_1+\cdots+y_7)\bigr]$. Sum the interior $y$-values twice.</p><p class="formula-lab">Trapezium rule</p>$$\int_0^4 \sqrt{x}\,dx \approx \frac{0.5}{2}\bigl[0 + 2 + 2(0.7071+1+1.2247+1.4142+1.5811+1.7321+1.8708)\bigr].$$<p class="formula-lab">Sum interior</p>$$\sum_{i=1}^{7} y_i \approx 9.5300, \quad \text{so } 2\sum \approx 19.0600.$$
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 3: $\tfrac{0.5}{2}[y_0+y_8+2\sum y_i]$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">evaluate and compare</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Combine: $\tfrac{0.5}{2}[0+2+19.0600] = 0.25 \times 21.0600 \approx 5.265$. Compare with the exact value $\tfrac23 x^{3/2}\big|_0^4 = \tfrac23\cdot 8 = \tfrac{16}{3}\approx 5.333$.</p><p class="formula-lab">Final estimate</p>$$\int_0^4 \sqrt{x}\,dx \approx 5.265 \quad (\text{exact} = \tfrac{16}{3} \approx 5.333).$$<div class="why"><strong>Phuc&#39;s mistake.</strong> Wrote $n=8$ trapeziums but used only $y_0,\ldots,y_7$, dropping $y_8=2$. That under-counts the top strip and shrinks the answer by $\approx 0.25$.</div><p class="sense">Sense check. The trapezium rule <em>under</em>-estimates $\sqrt{x}$ because the curve is concave-down; our $5.265 < 5.333$ matches the expected sign &check;</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+  </div>
+</div>
+</body>
+</html>
