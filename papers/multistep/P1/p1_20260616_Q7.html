@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P1 16 Jun — Q7 Normal to a curve + integration drill</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+.parts { }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P1 &middot; 16 June 2026 &middot; Harry Williams</div>
+  <h1>P1 Q7 &middot; Normal to a curve &mdash; tangent vs normal gradient</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p><strong>(a)</strong> The curve $C$ has equation $y = f(x)$ and passes through $P(x_0, y_0)$. Find the equation of the <em>normal</em> to $C$ at $P$, giving your answer in the form $ax + by + c = 0$, where $a, b, c$ are integers. <strong>[3]</strong></p><p><strong>(b)</strong> (Integration drill) Evaluate $\displaystyle\int\!\left(6x^2 + \frac{5}{x^3}\right)\!dx$, giving each term in its simplest form. <strong>[4]</strong></p>
+    <p class="q-marks">[7 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Part (a) — Gradient of the normal <span class="pmarks">[3 marks] &middot; 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">differentiate to find tangent gradient</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The gradient of the tangent at a point $P(x_0, y_0)$ on $y = f(x)$ is $m_t = f'(x_0)$. Differentiate, then substitute $x = x_0$.</p><p class="formula-lab">Tangent gradient</p>$$m_t = \left.\frac{dy}{dx}\right|_{x=x_0} = f'(x_0).$$<div class="why"><strong>Phuc's recurring slip.</strong> A wrong derivative in the first line (wrong power, wrong sign) propagates through the entire question: the tangent feeds the normal, the normal feeds the intersection, the intersection feeds the area. <em>Fix:</em> verify the first derivative line before proceeding &mdash; it is the #1 source of early-line slips on P1.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: $m_t = f'(x_0)$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">negative reciprocal for the normal</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The normal is <em>perpendicular</em> to the tangent. For two perpendicular lines with gradients $m_1$ and $m_2$, $m_1 \cdot m_2 = -1$ &mdash; one is the <strong>negative reciprocal</strong> of the other.</p><p class="formula-lab">Normal gradient</p>$$m_n = -\frac{1}{m_t} = -\frac{1}{f'(x_0)}.$$<div class="why"><strong>Phuc's pattern to watch.</strong> The negative-reciprocal <em>formula</em> was applied correctly ($m_n = -6/23$ from $m_t = 23/6$), but the upstream $m_t$ was wrong, so the normal was numerically wrong despite the formula being right. The harder failure mode is a wrong tangent gradient feeding a &ldquo;formula-correct&rdquo; but numerically-wrong normal. Always check $m_t$ first.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: $m_n = -1/m_t$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">equation of the normal</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Use the point-slope form $y - y_0 = m_n(x - x_0)$ with the point $P(x_0, y_0)$ and the normal gradient $m_n$. If the question asks for $ax + by + c = 0$ with integer coefficients, clear fractions by multiplying through by the LCD.</p><p class="formula-lab">Point-slope form</p>$$y - y_0 = m_n(x - x_0).$$<p class="formula-lab">Integer form (if required)</p>$$\text{Multiply by LCD: } ax + by + c = 0, \quad a, b, c \in \mathbb{Z}.$$<div class="why"><strong>Trap: underline &ldquo;integers&rdquo;.</strong> If the stem says &ldquo;in the form $ax + by + c = 0$, where $a, b, c$ are integers,&rdquo; leaving a fractional form loses the final A mark even if the equation is numerically correct. Clear all fractions by multiplying through by the LCD.</div><p class="sense">Sense check. Verify $m_t \cdot m_n = -1$ (perpendicularity). If the product is not $-1$, re-check the negative sign on the reciprocal.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (b) — Integration power rule (drill) <span class="pmarks">[4 marks] &middot; 4 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">integrate a positive-power term</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Integrate $6x^2$: add 1 to the power ($2+1=3$), divide by the new power ($6/3=2$). Result $2x^3$.</p><p class="formula-lab">Integrate $6x^2$</p>$$\int 6x^2\,dx = \frac{6x^3}{3} = 2x^3.$$
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: $\int 6x^2 = 2x^3$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">integrate a negative-power term</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Rewrite $\dfrac{5}{x^3} = 5x^{-3}$. Add 1 to the power ($-3+1=-2$), divide by the new power ($5/-2$). The sign flips because dividing by a negative.</p><p class="formula-lab">Integrate $5x^{-3}$</p>$$\int 5x^{-3}\,dx = 5\cdot\frac{x^{-2}}{-2} = -\frac{5}{2}x^{-2} = -\frac{5}{2x^2}.$$<div class="why"><strong>Sign flip from dividing by a negative power.</strong> Dividing $+5$ by $-2$ gives $-5/2$. The sign flip is mechanical &mdash; it comes from the division, not from any external rule. <em>Trap:</em> writing $+\tfrac{5}{2x^2}$ (forgetting the sign) loses the A mark.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: $\int 5x^{-3} = -\tfrac{5}{2x^2}$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">add +c and combine</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Combine the integrated terms and add the constant of integration $+c$. The $+c$ is mandatory on every indefinite integral.</p><p class="formula-lab">Combine</p>$$\int\!\left(6x^2 + \frac{5}{x^3}\right)\!dx = 2x^3 - \frac{5}{2x^2} + c.$$<div class="why"><strong>Why $+c$?</strong> Differentiation destroys constants ($\tfrac{d}{dx}[c]=0$), so $x^2$, $x^2+5$, $x^2-10$ all differentiate to $2x$. Integration cannot recover which constant was lost &mdash; we represent the lost family with $+c$. Forgetting $+c$ loses a mark even if the rest is perfect.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 3: $2x^3 - \tfrac{5}{2x^2} + c$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">verify by differentiation</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Check your integration by differentiating the answer &mdash; you should recover the original integrand. This is the &ldquo;differentiate-your-integration&rdquo; verification strategy.</p><p class="formula-lab">Verify</p>$$\frac{d}{dx}\!\left[2x^3 - \frac{5}{2}x^{-2} + c\right] = 6x^2 + 5x^{-3} = 6x^2 + \frac{5}{x^3} \quad\checkmark.$$<p class="sense">Sense check. The derivative of $2x^3$ is $6x^2$ (matches the first term); the derivative of $-\tfrac{5}{2}x^{-2}$ is $-\tfrac{5}{2}(-2)x^{-3} = 5x^{-3}$ (matches the second term); the derivative of $c$ is $0$. Integration confirmed.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+  </div>
+</div>
+</body>
+</html>
