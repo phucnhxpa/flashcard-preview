@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P1 16 Jun — Q2 Graph transformations, asymptotes</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #ffffff; --ink: #1d1d1f; --muted: #6e6e73;
+  --line: #d2d2d7; --soft: #f5f5f7;
+  --work-bg: #fafafa; --work-line: #c7c7cc;
+}
+html, body { margin: 0; padding: 0; background: #f0f0f2; }
+body {
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 36px;
+}
+.card {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px 30px 28px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.meta {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+h1 {
+  font: 600 21px/1.3 -apple-system, "SF Pro Display", system-ui, sans-serif;
+  margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.q-header {
+  background: var(--soft); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.55;
+}
+.q-header .label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600;
+}
+.q-header p { margin: 4px 0; }
+.q-diagram {
+  display: flex; justify-content: center; margin: 10px 0 4px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px;
+}
+.q-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; }
+.q-marks { font-weight: 600; color: var(--ink); margin-top: 8px; font-size: 12.5px; }
+
+.parts { }
+.part {
+  margin-bottom: 18px;
+}
+.part-h {
+  font: 600 14.5px/1.3 -apple-system, system-ui, sans-serif;
+  margin: 0 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.part-h .pmarks { float: right; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.given {
+  background: #fff; border-left: 2.5px solid var(--ink);
+  padding: 6px 10px; margin: 0 0 10px; font-size: 12.5px; border-radius: 0 6px 6px 0;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.carry-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+  padding-left: 2px;
+}
+.step {
+  border: 1px solid var(--work-line);
+  background: var(--work-bg);
+  border-radius: 10px;
+  padding: 12px 14px 11px;
+  margin: 0;
+}
+.step-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 6px; margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.step-tag {
+  font: 600 12.5px/1.35 -apple-system, system-ui, sans-serif;
+  display: flex; align-items: flex-start; gap: 7px; flex: 1;
+}
+.step-num {
+  background: var(--ink); color: #fff; padding: 3px 7px; border-radius: 5px;
+  letter-spacing: .04em; font-size: 10.5px; flex-shrink: 0; line-height: 1.2;
+  margin-top: 1px;
+}
+.step-marks {
+  font-size: 10.5px; color: var(--muted); font-weight: 500; flex-shrink: 0;
+  letter-spacing: .04em; margin-top: 3px;
+}
+.step-body { font-size: 13px; line-height: 1.55; }
+.step-body p { margin: 5px 0; }
+.step-body .why {
+  background: #fff; border-left: 2px solid var(--ink);
+  padding: 5px 9px; margin: 7px 0; font-size: 12px; color: #3a3a3e;
+  border-radius: 0 5px 5px 0;
+}
+.step-math { margin: 7px 0; font-size: 13px; }
+.step-math .math { display: block; }
+.step-diagram { display: flex; justify-content: center; margin: 8px 0 6px; }
+.step-diagram svg { max-width: 100%; height: auto; }
+.step-result {
+  margin-top: 8px; padding: 6px 10px; background: #fff;
+  border: 1px dashed var(--work-line); border-radius: 6px;
+  font-size: 12.5px; font-weight: 500;
+}
+.step-result strong { font-weight: 600; }
+
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:980px){.steps{grid-template-columns:1fr}}
+.step,.step-body,.step-wrapper{min-width:0}
+.step-body mjx-container[display="true"] svg,
+.q-header mjx-container[display="true"] svg{max-width:100%!important;height:auto!important}
+mjx-container{max-width:100%}
+.step-body mjx-container{overflow-x:auto;overflow-y:hidden}
+.q-diagram svg{max-width:300px}
+.step-diagram svg{max-width:260px}
+.strat{font-weight:600;color:#1d1d1f;margin:2px 0 4px}
+.sense{color:#3a3a3e;font-style:italic;margin-top:6px}
+.given{font-size:12.5px}
+.carry-in{font-weight:500;color:#3a3a3e}
+.formula-lab{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;font-weight:600;margin-top:6px}
+.export-btn{position:fixed;top:16px;right:16px;z-index:100;background:#000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;font-family:-apple-system,'SF Pro',Helvetica,Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.export-btn:hover{background:#222}
+</style>
+</head>
+<body>
+<button class="export-btn" id="expBtn" onclick="exportPNG()">&#x2B07; Export PNG</button>
+<script>
+function exportPNG(){var p=location.pathname.split('/').pop().replace(/\.html$/,'.png');window.open(p,'_blank');}
+if(navigator.webdriver){var _b=document.getElementById('expBtn');if(_b)_b.style.display='none';}
+</script>
+<div class="card">
+  <div class="meta">Edexcel IAL &middot; Pure Mathematics P1 &middot; 16 June 2026 &middot; Harry Williams</div>
+  <h1>P1 Q2 &middot; Graph transformations &mdash; $y=f(-x)$ and $y=f(x)-2$</h1>
+  <div class="q-header">
+    <span class="label">Question</span>
+    <p>The curve $C$ has equation $y = f(x)$, where $f(x)$ has a minimum at $P(-1, 0)$, a maximum at $Q\!\left(\tfrac{2}{3}, 2\right)$, and a horizontal asymptote $y = 1$.</p><p><strong>(a)</strong> Sketch $y = f(-x)$, stating the new coordinates of the turning points and the equation of the asymptote. <strong>[3]</strong></p><p><strong>(b)</strong> Sketch $y = f(x) - 2$, stating the new coordinates of the turning points and the equation of the asymptote. <strong>[3]</strong></p>
+    <p class="q-marks">[6 marks]</p>
+  </div>
+  <div class="parts">
+
+<div class="part">
+  <h2 class="part-h">Part (a) — y = f(-x): reflection in y-axis <span class="pmarks">[3 marks] &middot; 4 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/4</span><span class="step-goal">identify the transformation</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. The transformation $y = f(-x)$ replaces every $x$ in the function with $-x$. This is a <strong>reflection in the $y$-axis</strong> (a horizontal reflection): every point $(x, y)$ moves to $(-x, y)$.</p><div class="why"><strong>Phuc's mistake.</strong> Treated $f(-x)$ as if it multiplied the <em>output</em> $y$ by $-1$, writing $y = 1 \Rightarrow y = -1$ for the asymptote. But $f(-x)$ negates the <em>input</em>, not the output. Confusing $f(-x)$ with $-f(x)$ is the single most common transformation error.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: reflection in $y$-axis: $(x,y)\to(-x,y)$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/4</span><span class="step-goal">transform the turning points</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Under $y = f(-x)$, each point $(x, y) \to (-x, y)$ &mdash; the $x$-coordinate flips sign, the $y$-coordinate is unchanged.</p><p class="formula-lab">New turning points</p>$$P(-1, 0) \to P'(1, 0), \qquad Q\!\left(\tfrac{2}{3}, 2\right) \to Q'\!\left(-\tfrac{2}{3}, 2\right).$$<p class="sense">Sense check. The $y$-values ($0$ and $2$) are unchanged &mdash; consistent with a horizontal reflection. Only the $x$-signs flip.</p>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: $P'(1,0),\; Q'(-\tfrac{2}{3},2)$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/4</span><span class="step-goal">transform the asymptote</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. A horizontal asymptote $y = k$ describes a $y$-value the curve approaches as $x \to \pm\infty$. Under $y = f(-x)$, $y$-values are unchanged, so $y = k$ stays $y = k$.</p><p class="formula-lab">Horizontal asymptote</p>$$y = 1 \;\longrightarrow\; y = 1 \quad(\text{unchanged}).$$<div class="why"><strong>Phuc's mistake (lost all 3 marks here).</strong> Wrote $y = 1 \to y = -1$, as if applying $-f(x)$. The horizontal asymptote does NOT move under $f(-x)$ because $f(-x)$ is a horizontal transformation &mdash; it changes the direction you travel to infinity, not the $y$-value you approach. Only <em>vertical</em> transformations ($-f(x)$, $f(x)+a$) move a horizontal asymptote.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 3: $y=1$ unchanged</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 4/4</span><span class="step-goal">contrast with -f(x)</span></span>
+      <span class="step-marks">B1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Contrast: $y = -f(x)$ reflects in the $x$-axis &mdash; every $y$ is negated, so $y = k \to y = -k$. Only <em>this</em> transformation moves a horizontal asymptote.</p><p class="formula-lab">Six standard transformations and horizontal asymptotes</p><p>+ $y=f(x)+a$: shifts up, asymptote $\to y=k+a$ (moves)<br>+ $y=f(x)-a$: shifts down, asymptote $\to y=k-a$ (moves)<br>+ $y=f(x-a)$: shifts right, asymptote unchanged<br>+ $y=f(x+a)$: shifts left, asymptote unchanged<br>+ $y=-f(x)$: $x$-axis reflection, asymptote $\to y=-k$ (moves)<br>+ $y=f(-x)$: $y$-axis reflection, asymptote <strong>unchanged</strong></p><p class="sense">Sense check. Horizontal transformations (changes to $x$ inside $f$) leave horizontal asymptotes alone; vertical transformations (changes outside $f$) move them.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+<div class="part">
+  <h2 class="part-h">Part (b) — y = f(x) − 2: translation down 2 <span class="pmarks">[3 marks] &middot; 3 steps</span></h2>
+  
+  <div class="steps" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="step-wrapper">
+
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 1/3</span><span class="step-goal">identify the translation</span></span>
+      <span class="step-marks">M1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. $y = f(x) - 2$ subtracts $2$ from every output &mdash; a vertical translation <strong>down by 2</strong>. Each point $(x, y) \to (x, y - 2)$.</p>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 1: translation down 2: $(x,y)\to(x,y-2)$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 2/3</span><span class="step-goal">transform points and asymptote</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. Subtract $2$ from every $y$-coordinate. The $x$-coordinates are unchanged (vertical translation).</p><p class="formula-lab">New turning points</p>$$P(-1, 0) \to P'(-1, -2), \qquad Q\!\left(\tfrac{2}{3}, 2\right) \to Q'\!\left(\tfrac{2}{3}, 0\right).$$<p class="formula-lab">New asymptote</p>$$y = 1 \to y = 1 - 2 = y = -1.$$<div class="why"><strong>Order of min/max is preserved.</strong> A translation moves every point by the same amount, so the point that was the minimum remains the minimum (just lower); the maximum remains the maximum. Relative positions are unchanged.</div>
+    </div>
+  </div>
+</div>    <div class="step-wrapper">
+<div class="carry-in">&#8627; from STEP 2: $P'(-1,-2),\; Q'(\tfrac{2}{3},0),\; y=-1$</div>
+  <div class="step">
+    <div class="step-top">
+      <span class="step-tag"><span class="step-num">STEP 3/3</span><span class="step-goal">write the complete answer</span></span>
+      <span class="step-marks">A1</span>
+    </div>
+    <div class="step-body">
+      <p class="strat">Strategy. State all transformed features clearly: both turning points and the asymptote.</p><p class="formula-lab">Final answer</p>$$P'(-1, -2), \quad Q'\!\left(\tfrac{2}{3}, 0\right), \quad \text{asymptote } y = -1.$$<p class="sense">Sense check. The minimum moved from $y=0$ to $y=-2$ (down 2) and the maximum from $y=2$ to $y=0$ (down 2) &mdash; consistent shift. The asymptote $y=1 \to y=-1$ also moved down 2.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+  </div>
+</div>
+</body>
+</html>
