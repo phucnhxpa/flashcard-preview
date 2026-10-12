@@ -72,8 +72,8 @@ footer{text-align:center;padding:1.4rem 0 2.4rem;font-size:.66rem;letter-spacing
   <h1>Phuc's wardrobe</h1>
   <div class="sub">Paris · one closet, two views</div>
   <hr class="rule">
-  <nav class="appnav" aria-label="Main sections"><a class="current" href="index.html" aria-current="page">Wardrobe</a><a href="looks.html">Parisian looks</a><a href="orders.html">Orders to review</a></nav>
-  <p class="disclaimer">Categorised inventory; only the looks tab makes Parisian/French styling recommendations. A purchase record does not prove an item is still in your closet.</p>
+  <nav class="appnav" aria-label="Main sections"><a class="current" href="index.html" aria-current="page">Wardrobe</a><a href="looks.html">Sets &amp; looks</a><a href="orders.html">Orders to review</a></nav>
+  <p class="disclaimer">Categorised inventory with at least one proposed set per recorded item. Only sets labelled Parisian are French-style recommendations; gym and off-duty outfits are separated. Purchase records do not prove an item remains in your closet.</p>
 </header>
 
 <div class="stats" id="stats"></div>
@@ -98,7 +98,7 @@ footer{text-align:center;padding:1.4rem 0 2.4rem;font-size:.66rem;letter-spacing
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Garment details"><button class="close" type="button" onclick="closeModal()" aria-label="Close details">×</button><div class="box" id="mbox"></div></div>
 
 <script>
-let ITEMS=[], STATS=null, LOOKS=[]; const PARIS=()=>LOOKS.filter(x=>x.register==='Parisian');
+let ITEMS=[], STATS=null, LOOKS=[]; const PARIS=()=>LOOKS.filter(x=>x.style==='Parisian');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorCss=c=>({black:'#1a1a1a',white:'#ffffff',ecru:'#e8ddc8',grey:'#9a9a9a',charcoal:'#4a4a4a',navy:'#2b3a55','royal blue':'#2b52c8',brown:'#6b4a2f',olive:'#6b6b3f',silver:'#c0c0c0',beige:'#d9c7a7',blue:'#3a5fa0',green:'#3f6b45',red:'#a03030',burgundy:'#6b2a35',camel:'#b9915f',cream:'#f2e8d5','light blue':'#a8c0d8','light grey':'#c8c8c8',pink:'#d8a0a8',gold:'#b8963f',tan:'#c8a06b','dark blue':'#22314f',orange:'#c07030',yellow:'#c8b040',purple:'#6a4a8a',grey:'#9a9a9a'}[String(c||'').toLowerCase()]||'#bbb');
@@ -107,7 +107,7 @@ async function boot(){
   const [w,s,l]=await Promise.all([
     fetch('./data/wardrobe.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
     fetch('./data/stats.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
-    fetch('./data/looks.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
+    fetch('./data/sets.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
   ]);
   ITEMS=w.filter(x=>x.active!==0); STATS=s; LOOKS=l;
   renderStats(); buildFilters(); render();
@@ -159,19 +159,20 @@ function card(x){
   const image=x.zara_model_image||x._img;
   const img=image?`<img decoding="async" loading="lazy" src="${esc(image)}" alt="${esc(x.name)}">`:'Photo not verified';
   const worn=(x.times_worn||0);
-  const matches=PARIS().filter(L=>L.items.some(i=>i.id===x.id)).length;
+  const matches=LOOKS.filter(L=>L.items.some(i=>i.id===x.id)).length;
+  const paris=PARIS().filter(L=>L.items.some(i=>i.id===x.id)).length;
   return `<div class="card" onclick="openModal(${x.id})">
     <div class="ph">${img}</div>
     <div class="info">
       <div class="cat">${esc(x.category)}${x.subcategory?' · '+esc(x.subcategory):''}</div>
       <div class="nm">${esc(x.name)}</div>
-      <div class="meta"><span><span class="dot" style="background:${colorCss(x.color)}"></span>${esc(x.color||'—')}</span><span class="wear ${worn?'worn':''}">${worn?worn+'× worn':'unworn'}</span></div><div class="match">${matches?matches+' Parisian looks':'No Parisian looks yet'}</div>
+      <div class="meta"><span><span class="dot" style="background:${colorCss(x.color)}"></span>${esc(x.color||'—')}</span><span class="wear ${worn?'worn':''}">${worn?worn+'× worn':'unworn'}</span></div><div class="match">${matches} ${matches===1?'set':'sets'}${paris?' · '+paris+' Parisian':''}</div>
     </div></div>`;
 }
 function openModal(id){
   const x=ITEMS.find(i=>i.id===id); if(!x)return;
   const row=(k,v)=>v?`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`:'';
-  const looksFor=PARIS().filter(L=>L.items.some(i=>i.id===x.id));
+  const looksFor=LOOKS.filter(L=>L.items.some(i=>i.id===x.id));
   const photo=x.zara_model_image||x._img;
   const comparison=x.zara_model_image&&x._img&&x.zara_model_image!==x._img;
   const visual=comparison?`<div class="model-compare"><figure><img src="${esc(x.zara_model_image)}" alt="Official Zara model photo"><figcaption>Original Zara model</figcaption></figure><figure><img src="${esc(x._img)}" alt="Existing catalog photo"><figcaption>Wardrobe catalog</figcaption></figure></div>`:photo?`<img src="${esc(photo)}" alt="${esc(x.name)}">`:'Photo not verified';
@@ -191,7 +192,7 @@ function openModal(id){
       </table>
       <div class="source-links">${x.purchase_url?`<a target="_blank" rel="noopener noreferrer" href="${esc(x.purchase_url)}">Original Zara product ↗</a>`:''}${x.zara_model_image_source?`<a target="_blank" rel="noopener noreferrer" href="${esc(x.zara_model_image_source)}">Official model image ↗</a>`:''}</div>
       ${x.brand==='Zara'&&!x.purchase_url?'<p class="source-note">Original Zara page not verified for this exact model; no lookalike link substituted.</p>':''}
-      <div class="match">${looksFor.length?`<a href="looks.html?item=${x.id}">See ${looksFor.length} Parisian ${looksFor.length===1?'look':'looks'} →</a>`:'Not styled in the Parisian capsule — photo, fit, season or French dress-code compatibility may be unverified.'}</div>
+      <div class="match">${looksFor.length?`<a href="looks.html?item=${x.id}">See ${looksFor.length} ${looksFor.length===1?'set':'sets'} (${looksFor.filter(L=>L.style==='Parisian').length} Parisian) →</a>`:'Set not available; check item identity and styling.'}</div>
     </div>`;
   $('#modal').classList.add('open');
 }
