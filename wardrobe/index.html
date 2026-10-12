@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Phuc — Wardrobe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf8f5; --ink:#2b2825; --soft:#6f6962; --faint:#a39b91;
+  --line:#e3ddd4; --accent:#8a6d4f; --card:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Jost',sans-serif;font-weight:300;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:0 1.4rem}
+
+header{text-align:center;padding:3.4rem 0 1.6rem}
+header h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:2.4rem;letter-spacing:.28em;text-transform:uppercase;text-indent:.28em}
+header .sub{margin-top:.5rem;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+.rule{width:44px;height:1px;background:var(--accent);margin:1.3rem auto 0;border:none}
+
+.stats{display:flex;justify-content:center;gap:2.6rem;flex-wrap:wrap;padding:1.2rem 0 .4rem;font-size:.8rem;color:var(--soft)}
+.stats b{display:block;font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--ink);font-weight:500;text-align:center}
+.stats span{text-align:center;display:block}
+
+.controls{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;padding:1.4rem 0 2rem;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.controls input{font-family:inherit;font-size:.85rem;padding:.5rem .9rem;border:1px solid var(--line);border-radius:20px;background:#fff;min-width:220px;outline:none}
+.controls input:focus{border-color:var(--accent)}
+.chip{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;padding:.42rem .95rem;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--soft);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+select{font-family:inherit;font-size:.8rem;padding:.45rem .7rem;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--soft);outline:none}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;padding-bottom:3rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:transform .15s, box-shadow .15s;cursor:pointer}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(60,45,30,.09)}
+.card .ph{aspect-ratio:3/4;background:#f2ede5;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:.7rem;font-style:italic;overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.card .info{padding:.6rem .75rem .75rem}
+.card .cat{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.card .nm{font-size:.83rem;font-weight:400;margin-top:.15rem;line-height:1.25}
+.card .meta{font-size:.68rem;color:var(--faint);margin-top:.25rem;display:flex;justify-content:space-between;gap:.4rem}
+.card .dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.15);vertical-align:-1px;margin-right:4px}
+.card .wear{font-size:.62rem;color:var(--faint)}
+.card .wear.worn{color:#3d6f45}
+
+/* detail modal */
+.modal{position:fixed;inset:0;background:rgba(43,40,37,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:1rem}
+.modal.open{display:flex}
+.modal .box{background:var(--bg);border-radius:14px;max-width:780px;width:100%;max-height:88vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.modal .box .img{background:#f2ede5;min-height:340px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-style:italic;font-size:.8rem}
+.modal .box .img img{width:100%;height:100%;object-fit:cover}
+.modal .box .d{padding:1.6rem 1.5rem}
+.modal h2{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.5rem;line-height:1.15}
+.modal .kicker{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem}
+.modal table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.82rem}
+.modal td{padding:.42rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+.modal td:first-child{color:var(--faint);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;width:38%;padding-right:1rem}
+.modal .close{position:absolute;top:1rem;right:1.4rem;font-size:1.6rem;color:#fff;cursor:pointer;background:none;border:none}
+@media(max-width:640px){.modal .box{grid-template-columns:1fr}.modal .box .img{min-height:260px}}
+.empty{grid-column:1/-1;text-align:center;color:var(--faint);font-style:italic;padding:3rem 0}
+footer{text-align:center;padding:1.4rem 0 2.4rem;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Wardrobe</h1>
+  <div class="sub">Paris · smart closet</div>
+  <hr class="rule">
+</header>
+
+<div class="stats" id="stats"></div>
+
+<div class="controls">
+  <input id="q" type="text" placeholder="search name, brand, color…">
+  <select id="cat"><option value="">all categories</option></select>
+  <select id="occ"><option value="">all occasions</option></select>
+  <select id="sort">
+    <option value="cat">category</option>
+    <option value="new">newest first</option>
+    <option value="worn">most worn</option>
+    <option value="az">A–Z</option>
+  </select>
+  <button class="chip" id="unworn">unworn only</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<footer id="foot">✦</footer>
+</div>
+
+<div class="modal" id="modal"><div class="box" id="mbox"></div></div>
+
+<script>
+let ITEMS=[], STATS=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const colorCss=c=>({black:'#1a1a1a',white:'#ffffff',ecru:'#e8ddc8',grey:'#9a9a9a',charcoal:'#4a4a4a',navy:'#2b3a55','royal blue':'#2b52c8',brown:'#6b4a2f',olive:'#6b6b3f',silver:'#c0c0c0',beige:'#d9c7a7',blue:'#3a5fa0',green:'#3f6b45',red:'#a03030',burgundy:'#6b2a35',camel:'#b9915f',cream:'#f2e8d5','light blue':'#a8c0d8','light grey':'#c8c8c8',pink:'#d8a0a8',gold:'#b8963f',tan:'#c8a06b','dark blue':'#22314f',orange:'#c07030',yellow:'#c8b040',purple:'#6a4a8a',grey:'#9a9a9a'}[String(c||'').toLowerCase()]||'#bbb');
+
+async function boot(){
+  const [w,s]=await Promise.all([
+    fetch('./data/wardrobe.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
+    fetch('./data/stats.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
+  ]);
+  ITEMS=w.filter(x=>x.active!==0); STATS=s;
+  renderStats(); buildFilters(); render();
+  $('#q').addEventListener('input',render);
+  $('#cat').addEventListener('change',render);
+  $('#occ').addEventListener('change',render);
+  $('#sort').addEventListener('change',render);
+  $('#unworn').addEventListener('click',e=>{e.target.classList.toggle('on');render();});
+  $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+}
+function renderStats(){
+  const c=STATS.categories;
+  $('#stats').innerHTML =
+    `<span><b>${STATS.total}</b>items</span>`+
+    `<span><b>${Object.keys(c).length}</b>categories</span>`+
+    `<span><b>${STATS.with_image}</b>with photos</span>`+
+    `<span><b>${STATS.never_worn}</b>never worn</span>`+
+    `<span><b>${STATS.updated}</b>updated</span>`;
+}
+function buildFilters(){
+  const cats=[...new Set(ITEMS.map(x=>x.category).filter(Boolean))].sort();
+  const occs=[...new Set(ITEMS.flatMap(x=>(x.occasion||'').split(',')).map(s=>s.trim()).filter(Boolean))].sort();
+  $('#cat').innerHTML='<option value="">all categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  $('#occ').innerHTML='<option value="">all occasions</option>'+occs.map(c=>`<option>${esc(c)}</option>`).join('');
+}
+function render(){
+  const q=$('#q').value.toLowerCase(), cat=$('#cat').value, occ=$('#occ').value;
+  const sort=$('#sort').value, unwornOnly=$('#unworn').classList.contains('on');
+  let list=ITEMS.filter(x=>{
+    if(cat&&x.category!==cat)return false;
+    if(occ&&!(x.occasion||'').toLowerCase().includes(occ.toLowerCase()))return false;
+    if(unwornOnly&&(x.times_worn||0)>0)return false;
+    if(q){const hay=[x.name,x.brand,x.color,x.subcategory,x.notes,x.size].join(' ').toLowerCase();if(!hay.includes(q))return false;}
+    return true;
+  });
+  if(sort==='new')list.sort((a,b)=>(b.purchased_date||b.created_at||'').localeCompare(a.purchased_date||a.created_at||''));
+  else if(sort==='worn')list.sort((a,b)=>(b.times_worn||0)-(a.times_worn||0));
+  else if(sort==='az')list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else list.sort((a,b)=>(a.category||'').localeCompare(b.category||'')||(a.name||'').localeCompare(b.name||''));
+
+  $('#grid').innerHTML=list.length?list.map(card).join(''):'<div class="empty">nothing matches</div>';
+  $('#foot').textContent=`${list.length} of ${ITEMS.length} items`;
+}
+function card(x){
+  const img=x._img?`<img loading="lazy" src="${esc(x._img)}" alt="">`:'no photo';
+  const worn=(x.times_worn||0);
+  return `<div class="card" onclick="openModal(${x.id})">
+    <div class="ph">${img}</div>
+    <div class="info">
+      <div class="cat">${esc(x.category)}${x.subcategory?' · '+esc(x.subcategory):''}</div>
+      <div class="nm">${esc(x.name)}</div>
+      <div class="meta"><span><span class="dot" style="background:${colorCss(x.color)}"></span>${esc(x.color||'—')}</span><span class="wear ${worn?'worn':''}">${worn?worn+'× worn':'unworn'}</span></div>
+    </div></div>`;
+}
+function openModal(id){
+  const x=ITEMS.find(i=>i.id===id); if(!x)return;
+  const row=(k,v)=>v?`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`:'';
+  $('#mbox').innerHTML=`
+    <div class="img">${x._img?`<img src="${esc(x._img)}">`:'no photo'}</div>
+    <div class="d">
+      <div class="kicker">${esc(x.category||'')}${x.subcategory?' · '+esc(x.subcategory):''}</div>
+      <h2>${esc(x.name)}</h2>
+      <table>
+        ${row('Brand',x.brand)}${row('Color',x.color)}${row('Pattern',x.pattern)}
+        ${row('Material',x.material)}${row('Size',x.size)}${row('Fit',x.fit)}
+        ${row('Formality',x.formality)}/10${row('Warmth',x.warmth)}
+        ${row('Seasons',x.season)}${row('Occasions',x.occasion)}
+        ${row('Store',x.purchased_store||x.store)}${row('Purchased',x.purchased_date)}
+        ${row('Times worn',x.times_worn||0)}${row('Last worn',x.last_worn)}
+        ${row('Condition',x.condition)}${row('Notes',x.notes)}
+      </table>
+    </div>`;
+  $('#modal').classList.add('open');
+}
+function closeModal(){$('#modal').classList.remove('open');}
+boot();
+</script>
+</body>
+</html>
