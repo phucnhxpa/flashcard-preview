@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Phuc — Looks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f5;--ink:#2b2825;--soft:#6f6962;--faint:#a39b91;--line:#e3ddd4;--accent:#8a6d4f;--card:#fff;--dark:#2a211b;--gold:#b58f5b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Jost',sans-serif;font-weight:300;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1150px;margin:0 auto;padding:0 1.4rem}
+header{text-align:center;padding:3.4rem 0 1.4rem}
+header h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:2.4rem;letter-spacing:.28em;text-transform:uppercase;text-indent:.28em}
+header .sub{margin-top:.5rem;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+.rule{width:44px;height:1px;background:var(--accent);margin:1.3rem auto 0;border:none}
+.controls{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;padding:1.2rem 0 1.8rem;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.chip{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;padding:.42rem 1rem;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--soft);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.look{margin:0 auto 2.6rem;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;grid-template-columns:1.35fr 1fr}
+.look .photos{background:#eee7dc;padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start}
+.look .photos .pcard{background:#fffaf3;border:1px solid #e6dccc;border-radius:10px;overflow:hidden}
+.look .photos .pcard .im{aspect-ratio:3/4;background:#fbf8f2;display:flex;align-items:center;justify-content:center;color:#b8aa99;font-size:.66rem;font-style:italic;overflow:hidden}
+.look .photos .pcard img{width:100%;height:100%;object-fit:cover;display:block}
+.look .photos .pcard .role{font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:#9b7744;padding:4px 8px 0}
+.look .photos .pcard .nm{font-size:.68rem;line-height:1.25;padding:2px 8px 8px;font-weight:400}
+.look .side{padding:26px 24px 22px;position:relative}
+.look .num{font-size:44pt;color:#e4d8c8;font-weight:200;line-height:.8;font-family:'Cormorant Garamond',serif}
+.look .occ{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:6px 0 2px}
+.look h2{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.6rem;line-height:1.1;margin-bottom:.7rem}
+.look .why{font-size:.88rem;color:#312a23;margin-bottom:.8rem}
+.look .note{background:#f2eadf;border-left:3px solid var(--gold);padding:.55rem .8rem;font-size:.76rem;color:#5b4b3d;margin-bottom:.8rem}
+.look .avoid{font-size:.76rem;color:#9d3f35;margin-bottom:1.2rem}
+.look .avoid b{letter-spacing:.14em;text-transform:uppercase;font-size:.62rem}
+.verdicts{display:flex;gap:1.4rem;border-top:1px solid #eadfce;padding-top:.7rem;font-size:.72rem;color:#7a6b5c}
+.verdicts label{cursor:pointer;display:flex;gap:.35rem;align-items:center}
+.verdicts input{accent-color:var(--accent)}
+footer{text-align:center;padding:1rem 0 2.6rem;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:var(--faint)}
+@media(max-width:760px){.look{grid-template-columns:1fr}.look .photos{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Looks</h1>
+  <div class="sub">styled by Kimi K3 · your real closet</div>
+  <hr class="rule">
+</header>
+<div class="controls" id="controls"></div>
+<div id="looks"></div>
+<footer id="foot">✦ tick keep / modify / no — tell natalie your picks</footer>
+</div>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let LOOKS=[], ITEMS={};
+const OCC=['ALL','DATE','DINNER','WORK','CLUB','WEEKEND'];
+let cur='ALL';
+const saved=JSON.parse(localStorage.getItem('lookVerdicts')||'{}');
+
+async function boot(){
+  const [l,w]=await Promise.all([
+    fetch('./data/looks.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
+    fetch('./data/wardrobe.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
+  ]);
+  LOOKS=l; w.forEach(x=>ITEMS[x.id]=x);
+  buildControls(); render();
+}
+function buildControls(){
+  document.querySelector('#controls').innerHTML=OCC.map(o=>`<button class="chip ${o===cur?'on':''}" data-o="${o}">${o}</button>`).join('');
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cur=b.dataset.o;buildControls();render();});
+}
+function render(){
+  const list=LOOKS.map((L,i)=>({L,i})).filter(({L})=>cur==='ALL'||L.occasion===cur);
+  document.querySelector('#looks').innerHTML=list.map(({L,i})=>{
+    const cards=L.item_ids.map(id=>{
+      const it=ITEMS[id]||{};
+      const ph=it._img?`<img src="${esc(it._img)}" alt="">`:'no photo';
+      const role=roleOf(it,L);
+      return `<div class="pcard"><div class="im">${ph}</div><div class="role">${esc(role)}</div><div class="nm">${esc(it.name||'')}</div></div>`;
+    }).join('');
+    const v=saved[i]||'';
+    return `<div class="look">
+      <div class="photos">${cards}</div>
+      <div class="side">
+        <div class="num">${String(i+1).padStart(2,'0')}</div>
+        <div class="occ">${esc(L.occasion)}</div>
+        <h2>${esc(L.name)}</h2>
+        <div class="why">${esc(L.why)}</div>
+        ${L.stylist_note?`<div class="note">${esc(L.stylist_note)}</div>`:''}
+        <div class="avoid"><b>Avoid</b> — ${esc(L.avoid)}</div>
+        <div class="verdicts">
+          ${['keep','modify','no'].map(x=>`<label><input type="radio" name="v${i}" ${v===x?'checked':''} onchange="setV(${i},'${x}')">${x}</label>`).join('')}
+        </div>
+      </div></div>`;
+  }).join('') || '<p style="text-align:center;color:var(--faint);padding:2rem">no looks</p>';
+}
+function roleOf(it,L){
+  const c=it.category;
+  if(c==='tops')return 'top';
+  if(c==='bottoms')return 'bottom';
+  if(c==='shoes')return 'shoes';
+  if(c==='outerwear')return 'outerwear';
+  if(c==='accessories')return it.subcategory==='belt'?'belt':'accessory';
+  return c||'';
+}
+window.setV=function(i,v){saved[i]=v;localStorage.setItem('lookVerdicts',JSON.stringify(saved));};
+boot();
+</script>
+</body>
+</html>
