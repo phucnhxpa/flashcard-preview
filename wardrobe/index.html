@@ -45,6 +45,7 @@ select{font-family:inherit;font-size:.8rem;padding:.45rem .7rem;border:1px solid
 .card .dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.15);vertical-align:-1px;margin-right:4px}
 .card .wear{font-size:.62rem;color:var(--faint)}
 .card .wear.worn{color:#3d6f45}
+.card .match{font-size:.69rem;color:#815d42;margin-top:5px}
 
 /* detail modal */
 .modal{position:fixed;inset:0;background:rgba(43,40,37,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:1rem}
@@ -95,17 +96,18 @@ footer{text-align:center;padding:1.4rem 0 2.4rem;font-size:.66rem;letter-spacing
 <div class="modal" id="modal"><div class="box" id="mbox"></div></div>
 
 <script>
-let ITEMS=[], STATS=null;
+let ITEMS=[], STATS=null, LOOKS=[];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorCss=c=>({black:'#1a1a1a',white:'#ffffff',ecru:'#e8ddc8',grey:'#9a9a9a',charcoal:'#4a4a4a',navy:'#2b3a55','royal blue':'#2b52c8',brown:'#6b4a2f',olive:'#6b6b3f',silver:'#c0c0c0',beige:'#d9c7a7',blue:'#3a5fa0',green:'#3f6b45',red:'#a03030',burgundy:'#6b2a35',camel:'#b9915f',cream:'#f2e8d5','light blue':'#a8c0d8','light grey':'#c8c8c8',pink:'#d8a0a8',gold:'#b8963f',tan:'#c8a06b','dark blue':'#22314f',orange:'#c07030',yellow:'#c8b040',purple:'#6a4a8a',grey:'#9a9a9a'}[String(c||'').toLowerCase()]||'#bbb');
 
 async function boot(){
-  const [w,s]=await Promise.all([
+  const [w,s,l]=await Promise.all([
     fetch('./data/wardrobe.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
-    fetch('./data/stats.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
+    fetch('./data/stats.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()),
+    fetch('./data/looks.json?v='+Date.now(),{cache:'no-store'}).then(r=>r.json())
   ]);
-  ITEMS=w.filter(x=>x.active!==0); STATS=s;
+  ITEMS=w.filter(x=>x.active!==0); STATS=s; LOOKS=l;
   renderStats(); buildFilters(); render();
   $('#q').addEventListener('input',render);
   $('#cat').addEventListener('change',render);
@@ -151,17 +153,19 @@ function render(){
 function card(x){
   const img=x._img?`<img decoding="async" src="${esc(x._img)}" alt="">`:'no photo';
   const worn=(x.times_worn||0);
+  const matches=LOOKS.filter(L=>L.items.some(i=>i.id===x.id)).length;
   return `<div class="card" onclick="openModal(${x.id})">
     <div class="ph">${img}</div>
     <div class="info">
       <div class="cat">${esc(x.category)}${x.subcategory?' · '+esc(x.subcategory):''}</div>
       <div class="nm">${esc(x.name)}</div>
-      <div class="meta"><span><span class="dot" style="background:${colorCss(x.color)}"></span>${esc(x.color||'—')}</span><span class="wear ${worn?'worn':''}">${worn?worn+'× worn':'unworn'}</span></div>
+      <div class="meta"><span><span class="dot" style="background:${colorCss(x.color)}"></span>${esc(x.color||'—')}</span><span class="wear ${worn?'worn':''}">${worn?worn+'× worn':'unworn'}</span></div><div class="match">${matches?matches+' matched looks':'No curated looks yet'}</div>
     </div></div>`;
 }
 function openModal(id){
   const x=ITEMS.find(i=>i.id===id); if(!x)return;
   const row=(k,v)=>v?`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`:'';
+  const looksFor=LOOKS.filter(L=>L.items.some(i=>i.id===x.id));
   $('#mbox').innerHTML=`
     <div class="img">${x._img?`<img src="${esc(x._img)}">`:'no photo'}</div>
     <div class="d">
@@ -176,6 +180,7 @@ function openModal(id){
         ${row('Times worn',x.times_worn||0)}${row('Last worn',x.last_worn)}
         ${row('Condition',x.condition)}${row('Notes',x.notes)}
       </table>
+      <div class="match">${looksFor.length?`<a href="looks.html?item=${x.id}">See ${looksFor.length} complete matched ${looksFor.length===1?'look':'looks'} →</a>`:'No curated look yet — an item may lack a verified photo, be occasion-specific, or not suit the Parisian capsule.'}</div>
     </div>`;
   $('#modal').classList.add('open');
 }
